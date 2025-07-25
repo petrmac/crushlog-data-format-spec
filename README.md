@@ -318,16 +318,57 @@ classDiagram
         +object files
     }
     
+    class LocationsJSON {
+        <<JSON File>>
+        +array locations
+    }
+    
+    class SectorsJSON {
+        <<JSON File>>
+        +array sectors
+    }
+    
+    class RoutesJSON {
+        <<JSON File>>
+        +array routes
+    }
+    
+    class SessionsJSON {
+        <<JSON File>>
+        +array sessions
+    }
+    
+    class ClimbsJSON {
+        <<JSON File>>
+        +array climbs
+    }
+    
+    class TagsJSON {
+        <<JSON File>>
+        +array tags
+    }
+    
+    class MediaMetadataJSON {
+        <<JSON File>>
+        +array media
+    }
+    
+    class MediaFolder {
+        <<Directory>>
+        +photos/
+        +videos/
+    }
+    
     CLDFArchive --> Manifest : contains
     CLDFArchive --> Checksums : contains
-    CLDFArchive --> "locations.json" : contains
-    CLDFArchive --> "sectors.json" : contains
-    CLDFArchive --> "routes.json" : contains
-    CLDFArchive --> "sessions.json" : contains
-    CLDFArchive --> "climbs.json" : contains
-    CLDFArchive --> "tags.json" : contains
-    CLDFArchive --> "media-metadata.json" : may contain
-    CLDFArchive --> "media/" : may contain
+    CLDFArchive --> LocationsJSON : contains
+    CLDFArchive --> SectorsJSON : optional
+    CLDFArchive --> RoutesJSON : optional
+    CLDFArchive --> SessionsJSON : contains
+    CLDFArchive --> ClimbsJSON : contains
+    CLDFArchive --> TagsJSON : optional
+    CLDFArchive --> MediaMetadataJSON : optional
+    CLDFArchive --> MediaFolder : optional
 ```
 
 ## Data Types and Enums
