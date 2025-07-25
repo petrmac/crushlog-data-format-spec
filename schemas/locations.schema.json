@@ -1,0 +1,108 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://cldf.io/schemas/locations.schema.json",
+  "title": "CLDF Locations",
+  "description": "Climbing locations data",
+  "type": "object",
+  "required": ["locations"],
+  "properties": {
+    "locations": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/location"
+      }
+    }
+  },
+  "definitions": {
+    "location": {
+      "type": "object",
+      "required": ["id", "name", "isIndoor"],
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "Unique identifier for the location"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Name of the climbing location"
+        },
+        "coordinates": {
+          "type": "object",
+          "properties": {
+            "latitude": {
+              "type": "number",
+              "minimum": -90,
+              "maximum": 90
+            },
+            "longitude": {
+              "type": "number",
+              "minimum": -180,
+              "maximum": 180
+            }
+          },
+          "required": ["latitude", "longitude"]
+        },
+        "country": {
+          "type": "string",
+          "description": "Country name"
+        },
+        "state": {
+          "type": "string",
+          "description": "State or province"
+        },
+        "isIndoor": {
+          "type": "boolean",
+          "description": "Whether this is an indoor climbing location"
+        },
+        "starred": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether this location is marked as favorite"
+        },
+        "rockType": {
+          "$ref": "#/definitions/rockType"
+        },
+        "terrainType": {
+          "$ref": "#/definitions/terrainType"
+        },
+        "accessInfo": {
+          "type": "string",
+          "description": "Access information and directions"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "customFields": {
+          "type": "object",
+          "description": "Additional custom fields"
+        }
+      }
+    },
+    "rockType": {
+      "type": "string",
+      "enum": [
+        "sandstone",
+        "limestone",
+        "granite",
+        "basalt",
+        "gneiss",
+        "quartzite",
+        "conglomerate",
+        "schist",
+        "dolomite",
+        "slate",
+        "rhyolite",
+        "gabbro",
+        "volcanicTuff",
+        "andesite",
+        "chalk"
+      ]
+    },
+    "terrainType": {
+      "type": "string",
+      "enum": ["natural", "artificial"]
+    }
+  }
+}

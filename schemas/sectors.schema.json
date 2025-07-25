@@ -1,0 +1,71 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://cldf.io/schemas/sectors.schema.json",
+  "title": "CLDF Sectors",
+  "description": "Sectors within climbing locations",
+  "type": "object",
+  "required": ["sectors"],
+  "properties": {
+    "sectors": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/sector"
+      }
+    }
+  },
+  "definitions": {
+    "sector": {
+      "type": "object",
+      "required": ["id", "locationId", "name"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the sector"
+        },
+        "locationId": {
+          "type": "string",
+          "description": "Reference to parent location ID"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Sector name"
+        },
+        "isDefault": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether this is the default sector for the location"
+        },
+        "description": {
+          "type": "string",
+          "description": "Sector description"
+        },
+        "approach": {
+          "type": "string",
+          "description": "Approach information"
+        },
+        "coordinates": {
+          "type": "object",
+          "properties": {
+            "latitude": {
+              "type": "number",
+              "minimum": -90,
+              "maximum": 90
+            },
+            "longitude": {
+              "type": "number",
+              "minimum": -180,
+              "maximum": 180
+            }
+          },
+          "required": ["latitude", "longitude"],
+          "description": "GPS coordinates of the sector"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    }
+  }
+}

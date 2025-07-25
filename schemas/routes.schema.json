@@ -1,0 +1,123 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://cldf.io/schemas/routes.schema.json",
+  "title": "CLDF Routes",
+  "description": "Route and problem definitions",
+  "type": "object",
+  "required": ["routes"],
+  "properties": {
+    "routes": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/route"
+      }
+    }
+  },
+  "definitions": {
+    "route": {
+      "type": "object",
+      "required": ["id", "name", "routeType"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the route"
+        },
+        "locationId": {
+          "type": "string",
+          "description": "Reference to location ID"
+        },
+        "sectorId": {
+          "type": "string",
+          "description": "Reference to sector ID"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Route or problem name"
+        },
+        "routeType": {
+          "type": "string",
+          "enum": ["boulder", "route"],
+          "description": "Type of route"
+        },
+        "routeCharacteristics": {
+          "type": "string",
+          "enum": ["trad", "bolted"],
+          "description": "Route protection characteristics"
+        },
+        "grades": {
+          "type": "object",
+          "properties": {
+            "vScale": {
+              "type": ["string", "null"],
+              "pattern": "^V(B|[0-9]{1,2})$"
+            },
+            "font": {
+              "type": ["string", "null"],
+              "pattern": "^[3-9][ABC]?[+]?$"
+            },
+            "french": {
+              "type": ["string", "null"],
+              "pattern": "^[3-9][abc][+]?$"
+            },
+            "yds": {
+              "type": ["string", "null"],
+              "pattern": "^5\\.[0-9]{1,2}[a-d]?$"
+            },
+            "uiaa": {
+              "type": ["string", "null"],
+              "pattern": "^(I{1,3}|IV|V|VI{1,3}|IX|X{1,3})[+-]?$"
+            }
+          }
+        },
+        "height": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Height in meters"
+        },
+        "firstAscent": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "date": {
+              "type": "string",
+              "format": "date"
+            },
+            "info": {
+              "type": "string"
+            }
+          }
+        },
+        "qualityRating": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 5,
+          "description": "Quality rating (0-5 stars)"
+        },
+        "color": {
+          "type": "string",
+          "pattern": "^#[0-9A-Fa-f]{6}$",
+          "description": "Hold color for indoor routes (hex format)"
+        },
+        "beta": {
+          "type": "string",
+          "description": "Beta information"
+        },
+        "protection": {
+          "type": "string",
+          "description": "Protection requirements"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    }
+  }
+}

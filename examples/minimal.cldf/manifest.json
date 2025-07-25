@@ -1,0 +1,19 @@
+{
+  "version": "1.0.0",
+  "format": "CLDF",
+  "exportDate": "2024-01-20T10:30:00Z",
+  "appVersion": "2.0.0",
+  "platform": "iOS",
+  "stats": {
+    "climbsCount": 3,
+    "sessionsCount": 1,
+    "locationsCount": 1,
+    "routesCount": 0,
+    "tagsCount": 3,
+    "mediaCount": 0
+  },
+  "exportOptions": {
+    "includeMedia": false,
+    "mediaStrategy": "reference"
+  }
+}

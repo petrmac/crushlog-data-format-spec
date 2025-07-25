@@ -1,0 +1,12 @@
+{
+  "locations": [
+    {
+      "id": 1,
+      "name": "The Climbing Gym",
+      "isIndoor": true,
+      "starred": true,
+      "terrainType": "artificial",
+      "createdAt": "2023-01-15T08:00:00Z"
+    }
+  ]
+}

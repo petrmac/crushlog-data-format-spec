@@ -1,0 +1,124 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://cldf.io/schemas/sessions.schema.json",
+  "title": "CLDF Sessions",
+  "description": "Climbing session data",
+  "type": "object",
+  "required": ["sessions"],
+  "properties": {
+    "sessions": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/session"
+      }
+    }
+  },
+  "definitions": {
+    "session": {
+      "type": "object",
+      "required": ["id", "date", "location"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the session"
+        },
+        "date": {
+          "type": "string",
+          "format": "date",
+          "description": "Date of the session (YYYY-MM-DD)"
+        },
+        "startTime": {
+          "type": "string",
+          "pattern": "^([01]\\d|2[0-3]):([0-5]\\d):([0-5]\\d)$",
+          "description": "Start time (HH:MM:SS)"
+        },
+        "endTime": {
+          "type": "string",
+          "pattern": "^([01]\\d|2[0-3]):([0-5]\\d):([0-5]\\d)$",
+          "description": "End time (HH:MM:SS)"
+        },
+        "location": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Location name"
+        },
+        "locationId": {
+          "type": "string",
+          "description": "Reference to location ID"
+        },
+        "isIndoor": {
+          "type": "boolean",
+          "description": "Whether this is an indoor session"
+        },
+        "climbType": {
+          "type": "string",
+          "enum": ["boulder", "route"],
+          "description": "Primary type of climbing for this session"
+        },
+        "sessionType": {
+          "$ref": "#/definitions/sessionType"
+        },
+        "partners": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Climbing partners for this session"
+        },
+        "weather": {
+          "type": "object",
+          "properties": {
+            "conditions": {
+              "type": "string"
+            },
+            "temperature": {
+              "type": "number",
+              "description": "Temperature in Celsius"
+            },
+            "humidity": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100,
+              "description": "Humidity percentage"
+            },
+            "wind": {
+              "type": "string"
+            }
+          }
+        },
+        "notes": {
+          "type": "string",
+          "description": "Session notes"
+        },
+        "rockType": {
+          "$ref": "locations.schema.json#/definitions/rockType"
+        },
+        "terrainType": {
+          "$ref": "locations.schema.json#/definitions/terrainType"
+        },
+        "approachTime": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Approach time in minutes"
+        },
+        "isOngoing": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether the session is currently ongoing"
+        }
+      }
+    },
+    "sessionType": {
+      "type": "string",
+      "enum": [
+        "sportClimbing",
+        "multiPitch",
+        "tradClimbing",
+        "bouldering",
+        "indoorClimbing",
+        "indoorBouldering",
+        "boardSession"
+      ]
+    }
+  }
+}

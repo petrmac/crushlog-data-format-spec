@@ -1,0 +1,91 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://cldf.io/schemas/manifest.schema.json",
+  "title": "CLDF Manifest",
+  "description": "Metadata about the CLDF export",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "format", "exportDate", "appVersion", "platform"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "description": "CLDF specification version (semantic versioning)"
+    },
+    "format": {
+      "type": "string",
+      "const": "CLDF",
+      "description": "Format identifier, must be 'CLDF'"
+    },
+    "exportDate": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp of export creation"
+    },
+    "appVersion": {
+      "type": "string",
+      "description": "Version of the exporting application"
+    },
+    "platform": {
+      "type": "string",
+      "enum": ["iOS", "Android", "Web", "Desktop"],
+      "description": "Platform identifier"
+    },
+    "stats": {
+      "type": "object",
+      "description": "Statistics about exported data",
+      "properties": {
+        "climbsCount": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "sessionsCount": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "locationsCount": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "routesCount": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "tagsCount": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "mediaCount": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "exportOptions": {
+      "type": "object",
+      "description": "Options used during export",
+      "properties": {
+        "includeMedia": {
+          "type": "boolean"
+        },
+        "mediaStrategy": {
+          "type": "string",
+          "enum": ["reference", "thumbnails", "full"]
+        },
+        "dateRange": {
+          "type": "object",
+          "properties": {
+            "start": {
+              "type": "string",
+              "format": "date"
+            },
+            "end": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        }
+      }
+    }
+  }
+}

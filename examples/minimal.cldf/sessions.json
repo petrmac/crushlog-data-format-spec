@@ -1,0 +1,16 @@
+{
+  "sessions": [
+    {
+      "id": 1,
+      "date": "2024-01-20",
+      "location": "The Climbing Gym",
+      "locationId": 1,
+      "isIndoor": true,
+      "climbType": "boulder",
+      "sessionType": "indoorBouldering",
+      "notes": "Good training session, felt strong",
+      "terrainType": "artificial",
+      "isOngoing": false
+    }
+  ]
+}

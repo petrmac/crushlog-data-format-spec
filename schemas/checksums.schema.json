@@ -1,0 +1,29 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://cldf.io/schemas/checksums.schema.json",
+  "title": "CLDF Checksums",
+  "description": "SHA-256 checksums for data integrity verification",
+  "type": "object",
+  "required": ["algorithm", "files"],
+  "properties": {
+    "algorithm": {
+      "type": "string",
+      "const": "SHA-256",
+      "description": "Hash algorithm used"
+    },
+    "files": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string",
+        "pattern": "^[a-f0-9]{64}$",
+        "description": "SHA-256 hash in hexadecimal format"
+      },
+      "description": "Map of filename to SHA-256 hash"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp when checksums were generated"
+    }
+  }
+}

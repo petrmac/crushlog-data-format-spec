@@ -1,0 +1,198 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://cldf.io/schemas/climbs.schema.json",
+  "title": "CLDF Climbs",
+  "description": "Individual climb records",
+  "type": "object",
+  "required": ["climbs"],
+  "properties": {
+    "climbs": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/climb"
+      }
+    }
+  },
+  "definitions": {
+    "climb": {
+      "type": "object",
+      "required": ["id", "date", "routeName", "type", "finishType"],
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "Unique identifier for the climb"
+        },
+        "sessionId": {
+          "type": "integer",
+          "description": "Reference to the session this climb belongs to"
+        },
+        "routeId": {
+          "type": "integer",
+          "description": "Reference to the route definition"
+        },
+        "date": {
+          "type": "string",
+          "format": "date",
+          "description": "Date of the climb (YYYY-MM-DD)"
+        },
+        "time": {
+          "type": "string",
+          "pattern": "^([01]\\d|2[0-3]):([0-5]\\d):([0-5]\\d)$",
+          "description": "Time of the climb (HH:MM:SS)"
+        },
+        "routeName": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Name of the route or problem"
+        },
+        "grades": {
+          "type": "object",
+          "properties": {
+            "system": {
+              "type": "string",
+              "enum": ["vScale", "font", "french", "yds", "uiaa"]
+            },
+            "grade": {
+              "type": "string"
+            },
+            "conversions": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "required": ["system", "grade"]
+        },
+        "type": {
+          "type": "string",
+          "enum": ["boulder", "route"],
+          "description": "Type of climb"
+        },
+        "finishType": {
+          "type": "string",
+          "description": "How the climb was completed",
+          "oneOf": [
+            {
+              "enum": ["flash", "top", "repeat", "project"],
+              "description": "Boulder finish types"
+            },
+            {
+              "enum": ["onsight", "flash", "redpoint", "repeat", "project"],
+              "description": "Route finish types"
+            }
+          ]
+        },
+        "attempts": {
+          "type": "integer",
+          "minimum": 0,
+          "default": 1,
+          "description": "Number of attempts before completion"
+        },
+        "repeats": {
+          "type": "integer",
+          "minimum": 0,
+          "default": 0,
+          "description": "Number of successful repeats"
+        },
+        "isRepeat": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether this is a repeat of a previously climbed route"
+        },
+        "belayType": {
+          "type": "string",
+          "enum": ["topRope", "lead", "autoBelay"],
+          "description": "Belay type for rope climbs"
+        },
+        "duration": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Duration in minutes"
+        },
+        "falls": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of falls"
+        },
+        "height": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Height in meters"
+        },
+        "rating": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 5,
+          "description": "Quality rating (0-5 stars)"
+        },
+        "notes": {
+          "type": "string",
+          "description": "Personal notes about the climb"
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Associated tags"
+        },
+        "beta": {
+          "type": "string",
+          "description": "Beta information for the climb"
+        },
+        "media": {
+          "type": "object",
+          "properties": {
+            "photos": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "videos": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "count": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        },
+        "color": {
+          "type": "string",
+          "pattern": "^#[0-9A-Fa-f]{6}$",
+          "description": "Hold color (hex format)"
+        },
+        "rockType": {
+          "$ref": "locations.schema.json#/definitions/rockType"
+        },
+        "terrainType": {
+          "$ref": "locations.schema.json#/definitions/terrainType"
+        },
+        "isIndoor": {
+          "type": "boolean",
+          "description": "Whether this was an indoor climb"
+        },
+        "partners": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Climbing partners"
+        },
+        "weather": {
+          "type": "string",
+          "description": "Weather conditions"
+        },
+        "customFields": {
+          "type": "object",
+          "description": "Additional custom fields"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,69 @@
+{
+  "climbs": [
+    {
+      "id": 1,
+      "sessionId": 1,
+      "date": "2024-01-20",
+      "routeName": "Blue Problem #1",
+      "grades": {
+        "system": "vScale",
+        "grade": "V4"
+      },
+      "type": "boulder",
+      "finishType": "flash",
+      "attempts": 1,
+      "repeats": 0,
+      "isRepeat": false,
+      "rating": 3,
+      "notes": "Nice warm-up",
+      "tags": ["technical"],
+      "color": "#0000FF",
+      "terrainType": "artificial",
+      "isIndoor": true
+    },
+    {
+      "id": 2,
+      "sessionId": 1,
+      "date": "2024-01-20",
+      "routeName": "The Crimpy One",
+      "grades": {
+        "system": "vScale",
+        "grade": "V6",
+        "conversions": {
+          "font": "7A"
+        }
+      },
+      "type": "boulder",
+      "finishType": "top",
+      "attempts": 4,
+      "repeats": 0,
+      "isRepeat": false,
+      "rating": 4,
+      "notes": "Hard crimps on the second move",
+      "tags": ["crimpy", "overhang"],
+      "color": "#FF0000",
+      "terrainType": "artificial",
+      "isIndoor": true
+    },
+    {
+      "id": 3,
+      "sessionId": 1,
+      "date": "2024-01-20",
+      "routeName": "Yellow Slab",
+      "grades": {
+        "system": "vScale",
+        "grade": "V3"
+      },
+      "type": "boulder",
+      "finishType": "project",
+      "attempts": 5,
+      "repeats": 0,
+      "isRepeat": false,
+      "notes": "Couldn't figure out the top section",
+      "tags": ["slab", "technical"],
+      "color": "#FFFF00",
+      "terrainType": "artificial",
+      "isIndoor": true
+    }
+  ]
+}

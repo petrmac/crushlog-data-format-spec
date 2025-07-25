@@ -1,0 +1,32 @@
+{
+  "tags": [
+    {
+      "id": 1,
+      "name": "technical",
+      "isPredefined": true,
+      "predefinedTagKey": "technical",
+      "category": "style"
+    },
+    {
+      "id": 2,
+      "name": "crimpy",
+      "isPredefined": true,
+      "predefinedTagKey": "crimpy",
+      "category": "holds"
+    },
+    {
+      "id": 3,
+      "name": "overhang",
+      "isPredefined": true,
+      "predefinedTagKey": "overhang",
+      "category": "angle"
+    },
+    {
+      "id": 4,
+      "name": "slab",
+      "isPredefined": true,
+      "predefinedTagKey": "slab",
+      "category": "angle"
+    }
+  ]
+}
