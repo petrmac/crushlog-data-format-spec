@@ -109,6 +109,13 @@
           "type": "string",
           "description": "Protection requirements"
         },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Array of tag names associated with the route"
+        },
         "createdAt": {
           "type": "string",
           "format": "date-time"

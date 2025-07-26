@@ -152,6 +152,7 @@ classDiagram
         +string color
         +string beta
         +string protection
+        +array tags
         +datetime createdAt
         +datetime updatedAt
     }
@@ -221,6 +222,7 @@ classDiagram
     Session "1" --> "0..*" Climb : includes
     Route "1" --> "0..*" Climb : climbed
     Climb "0..*" --> "0..*" Tag : tagged
+    Route "0..*" --> "0..*" Tag : tagged
 ```
 
 #### Media Model
