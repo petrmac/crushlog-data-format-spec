@@ -29,6 +29,10 @@ jobs:
         java-version: '21'
         distribution: 'temurin'
         
+    - name: Create schemas symlink
+      run: ln -s ../../../../schemas src/main/resources/schemas
+      working-directory: clients/java/cldf-java
+      
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
       working-directory: clients/java/cldf-java
@@ -72,6 +76,10 @@ jobs:
         java-version: '21'
         distribution: 'temurin'
         
+    - name: Create schemas symlink
+      run: ln -s ../../../../schemas src/main/resources/schemas
+      working-directory: clients/java/cldf-java
+      
     - name: Cache Maven packages
       uses: actions/cache@v4
       with:
