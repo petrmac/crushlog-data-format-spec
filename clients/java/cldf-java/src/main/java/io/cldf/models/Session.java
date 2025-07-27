@@ -54,7 +54,7 @@ public class Session {
 
   private Integer approachTime;
 
-  @Builder.Default private Boolean isOngoing = false;
+  @Builder.Default private boolean isOngoing = false;
 
   @Data
   @Builder
