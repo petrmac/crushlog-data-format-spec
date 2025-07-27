@@ -1,0 +1,8 @@
+micronaut:
+  application:
+    name: cldf-tool
+  
+logger:
+  levels:
+    ROOT: ERROR
+    io.cldf: INFO

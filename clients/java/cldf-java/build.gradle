@@ -3,17 +3,14 @@ plugins {
     id 'groovy'
     id 'maven-publish'
     id 'signing'
-    id 'io.github.gradle-nexus.publish-plugin' version '2.0.0'
     id 'com.diffplug.spotless' version '6.25.0'
 }
 
-group = 'io.cldf'
-version = '1.0.0'
+// Group and version inherited from root project
 description = 'Java client library for CrushLog Data Format (CLDF)'
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_21
-    targetCompatibility = JavaVersion.VERSION_21
+    // Source/target compatibility inherited from root project
     withJavadocJar()
     withSourcesJar()
 }
@@ -96,15 +93,6 @@ publishing {
                     url = 'https://github.com/cldf/cldf-java'
                 }
             }
-        }
-    }
-}
-
-nexusPublishing {
-    repositories {
-        sonatype {
-            nexusUrl.set(uri("https://s01.oss.sonatype.org/service/local/"))
-            snapshotRepositoryUrl.set(uri("https://s01.oss.sonatype.org/content/repositories/snapshots/"))
         }
     }
 }

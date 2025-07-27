@@ -1,0 +1,108 @@
+plugins {
+    id "io.micronaut.application" version "4.3.5"
+    id "io.micronaut.graalvm" version "4.3.5"
+    id 'com.diffplug.spotless' version '6.25.0'
+}
+
+// Group and version inherited from root project
+
+repositories {
+    mavenCentral()
+}
+
+micronaut {
+    version = '4.3.5'
+}
+
+dependencies {
+    // Internal dependency on cldf-java
+    implementation project(':cldf-java')
+    
+    // Micronaut
+    implementation("io.micronaut:micronaut-runtime")
+    implementation("io.micronaut:micronaut-inject")
+    implementation("io.micronaut.picocli:micronaut-picocli")
+    implementation("jakarta.annotation:jakarta.annotation-api")
+    
+    // Picocli
+    implementation("info.picocli:picocli")
+    annotationProcessor("info.picocli:picocli-codegen")
+    
+    // Jackson (for JsonUtils - these should come transitively from cldf-java but let's be explicit)
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.17.0'
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.17.0'
+    
+    // Logging
+    runtimeOnly("ch.qos.logback:logback-classic")
+    
+    // Annotation processors
+    annotationProcessor("io.micronaut:micronaut-inject-java")
+    
+    // Lombok
+    compileOnly 'org.projectlombok:lombok:1.18.32'
+    annotationProcessor 'org.projectlombok:lombok:1.18.32'
+    
+    // Testing
+    testImplementation("io.micronaut:micronaut-http-client")
+    testImplementation("io.micronaut.test:micronaut-test-junit5")
+    testImplementation("org.junit.jupiter:junit-jupiter-api")
+    testImplementation("org.mockito:mockito-core")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
+}
+
+application {
+    mainClass.set("io.cldf.tool.Application")
+}
+
+micronaut {
+    runtime("netty")
+    testRuntime("junit5")
+    processing {
+        incremental(true)
+        annotations("io.cldf.tool.*")
+    }
+}
+
+graalvmNative {
+    binaries {
+        main {
+            imageName = "cldf"
+            mainClass = "io.cldf.tool.Application"
+            buildArgs.add("--no-fallback")
+            buildArgs.add("--enable-http")
+            buildArgs.add("--enable-https")
+            buildArgs.add("-H:+ReportExceptionStackTraces")
+            buildArgs.add("--initialize-at-build-time=ch.qos.logback")
+            buildArgs.add("--initialize-at-build-time=org.slf4j")
+            buildArgs.add("--initialize-at-run-time=com.fasterxml.jackson.databind.ObjectMapper")
+            buildArgs.add("--initialize-at-run-time=com.fasterxml.jackson.databind.type.TypeFactory")
+            buildArgs.add("--initialize-at-run-time=com.fasterxml.jackson.databind.type.TypeBindings")
+            buildArgs.add("--initialize-at-run-time=com.fasterxml.jackson.databind.type.TypeBase")
+            buildArgs.add("--initialize-at-run-time=com.fasterxml.jackson.databind.type.SimpleType")
+            buildArgs.add("--initialize-at-run-time=com.fasterxml.jackson.databind.cfg.BaseSettings")
+            buildArgs.add("--initialize-at-run-time=com.fasterxml.jackson.databind.util.internal.PrivateMaxEntriesMap")
+            buildArgs.add("--initialize-at-run-time=com.fasterxml.jackson.databind.util.ClassUtil")
+            buildArgs.add("--initialize-at-run-time=com.fasterxml.jackson.core.PrettyPrinter")
+            buildArgs.add("--initialize-at-run-time=com.fasterxml.jackson.core.io.JsonStringEncoder")
+            buildArgs.add("--initialize-at-run-time=com.fasterxml.jackson.core.io.SerializedString")
+            buildArgs.add("--initialize-at-run-time=com.fasterxml.jackson.core.Base64Variants")
+            buildArgs.add("--initialize-at-run-time=com.fasterxml.jackson.core.io.CharTypes")
+            buildArgs.add("--initialize-at-run-time=com.fasterxml.jackson.annotation.JsonInclude\$Value")
+        }
+    }
+}
+
+test {
+    useJUnitPlatform()
+}
+
+spotless {
+    java {
+        target 'src/*/java/**/*.java'
+        googleJavaFormat('1.22.0')
+        removeUnusedImports()
+        trimTrailingWhitespace()
+        endWithNewline()
+        importOrder('java', 'javax', 'jakarta', '', '\\#')
+    }
+}
