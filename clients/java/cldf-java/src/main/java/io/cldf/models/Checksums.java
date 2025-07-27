@@ -1,0 +1,29 @@
+package io.cldf.models;
+
+import java.time.OffsetDateTime;
+import java.util.Map;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+/** Container for Checksums data in CLDF archive. */
+public class Checksums {
+
+  @JsonProperty(required = true)
+  @Builder.Default
+  private String algorithm = "SHA-256";
+
+  @JsonProperty(required = true)
+  private Map<String, String> files;
+
+  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
+  private OffsetDateTime generatedAt;
+}

@@ -6,6 +6,28 @@ Version 1.0.0
 
 The CrushLog Data Format (CLDF) is an open, extensible format for exchanging climbing performance data between applications. It provides a comprehensive data model that captures all aspects of climbing activities while maintaining compatibility with other climbing platforms.
 
+## Quick Start
+
+### Java
+```java
+// Read CLDF file
+CLDFArchive archive = CLDF.read(new File("climbs.cldf"));
+archive.getClimbs().forEach(climb -> 
+    System.out.println(climb.getRouteName() + " - " + climb.getGrades().getGrade())
+);
+```
+
+### Dart/Flutter
+```dart
+// Read CLDF file
+final archive = await CLDF.readFile('climbs.cldf');
+for (final climb in archive.climbs) {
+  print('${climb.routeName} - ${climb.grades?.grade}');
+}
+```
+
+See [Implementation](#implementation) section for installation instructions.
+
 ## Format Structure
 
 CLDF uses a compressed archive format (`.cldf` extension) containing multiple JSON files. This modular approach allows for:
@@ -435,11 +457,65 @@ CLDF follows semantic versioning (MAJOR.MINOR.PATCH):
 
 ## Implementation
 
-### Libraries
+### Client Libraries
 
-- **JavaScript/TypeScript**: [cldf-js](https://github.com/cldf/cldf-js)
-- **Python**: [cldf-py](https://github.com/cldf/cldf-py)
-- **Dart/Flutter**: [cldf-dart](https://github.com/cldf/cldf-dart)
+#### Java
+
+The Java client library provides full support for reading and writing CLDF archives with both Maven and Gradle support.
+
+**Installation (Maven):**
+```xml
+<dependency>
+    <groupId>io.cldf</groupId>
+    <artifactId>cldf-java</artifactId>
+    <version>1.0.0</version>
+</dependency>
+```
+
+**Installation (Gradle):**
+```gradle
+implementation 'io.cldf:cldf-java:1.0.0'
+```
+
+**Quick Example:**
+```java
+import io.cldf.api.CLDF;
+import io.cldf.api.CLDFArchive;
+
+// Read CLDF archive
+CLDFArchive archive = CLDF.read(new File("climbing-data.cldf"));
+System.out.println("Climbs: " + archive.getClimbs().size());
+
+// Write CLDF archive
+CLDF.write(archive, new File("output.cldf"));
+```
+
+See the [Java client documentation](clients/java/cldf-java/README.md) for more details.
+
+#### Dart/Flutter
+
+The Dart client library provides type-safe models and full CLDF support for Dart and Flutter applications.
+
+**Installation:**
+```yaml
+dependencies:
+  cldf_dart: ^1.0.0
+```
+
+**Quick Example:**
+```dart
+import 'package:cldf_dart/cldf_dart.dart';
+
+// Read CLDF archive
+final archive = await CLDF.readFile('climbing-data.cldf');
+print('Climbs: ${archive.climbs.length}');
+
+// Write CLDF archive
+await CLDF.writeFile(archive, 'output.cldf');
+```
+
+See the [Dart client documentation](clients/dart/cldf_dart/README.md) for more details.
+
 
 ### Tools
 

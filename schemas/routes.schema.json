@@ -16,7 +16,7 @@
   "definitions": {
     "route": {
       "type": "object",
-      "required": ["id", "name", "routeType"],
+      "required": ["id", "locationId", "name", "routeType"],
       "properties": {
         "id": {
           "type": "string",
@@ -105,9 +105,14 @@
           "type": "string",
           "description": "Beta information"
         },
-        "protection": {
+        "protectionRating": {
           "type": "string",
-          "description": "Protection requirements"
+          "enum": ["bombproof", "good", "adequate", "runout", "serious", "x"],
+          "description": "Protection rating indicating safety level"
+        },
+        "gearNotes": {
+          "type": "string",
+          "description": "Specific gear requirements or protection notes"
         },
         "tags": {
           "type": "array",

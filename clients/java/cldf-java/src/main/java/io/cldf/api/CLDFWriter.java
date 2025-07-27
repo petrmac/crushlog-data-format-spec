@@ -1,0 +1,211 @@
+package io.cldf.api;
+
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.time.OffsetDateTime;
+import java.util.HashMap;
+import java.util.Map;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import io.cldf.models.*;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
+import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
+
+/**
+ * Writes CLDF (CrushLog Data Format) archives to ZIP files. Supports pretty printing and automatic
+ * checksum generation.
+ */
+@Slf4j
+public class CLDFWriter {
+
+  private static final String MANIFEST_FILE = "manifest.json";
+  private static final String LOCATIONS_FILE = "locations.json";
+  private static final String CLIMBS_FILE = "climbs.json";
+  private static final String SESSIONS_FILE = "sessions.json";
+  private static final String CHECKSUMS_FILE = "checksums.json";
+  private static final String ROUTES_FILE = "routes.json";
+  private static final String SECTORS_FILE = "sectors.json";
+  private static final String TAGS_FILE = "tags.json";
+  private static final String MEDIA_METADATA_FILE = "media-metadata.json";
+
+  private final ObjectMapper objectMapper;
+  private final boolean prettyPrint;
+
+  /** Creates a CLDFWriter with default settings (pretty printing enabled). */
+  public CLDFWriter() {
+    this(true);
+  }
+
+  /**
+   * Creates a CLDFWriter with specified formatting settings.
+   *
+   * @param prettyPrint whether to enable pretty printing for JSON files
+   */
+  public CLDFWriter(boolean prettyPrint) {
+    this.prettyPrint = prettyPrint;
+    this.objectMapper = new ObjectMapper();
+    this.objectMapper.registerModule(new JavaTimeModule());
+    this.objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+    if (prettyPrint) {
+      this.objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
+    }
+  }
+
+  /**
+   * Writes a CLDF archive to a file.
+   *
+   * @param archive the CLDFArchive to write
+   * @param file the output file
+   * @throws IOException if an I/O error occurs
+   */
+  public void write(CLDFArchive archive, File file) throws IOException {
+    try (FileOutputStream fos = new FileOutputStream(file)) {
+      write(archive, fos);
+    }
+  }
+
+  /**
+   * Writes a CLDF archive to an output stream.
+   *
+   * @param archive the CLDFArchive to write
+   * @param outputStream the output stream
+   * @throws IOException if an I/O error occurs
+   */
+  public void write(CLDFArchive archive, OutputStream outputStream) throws IOException {
+    validateArchive(archive);
+
+    Map<String, byte[]> fileContents = new HashMap<>();
+    Map<String, String> checksums = new HashMap<>();
+
+    // Prepare manifest
+    if (archive.getManifest() == null) {
+      throw new IllegalArgumentException("Manifest is required");
+    }
+    byte[] manifestBytes = serializeToJson(archive.getManifest());
+    fileContents.put(MANIFEST_FILE, manifestBytes);
+    checksums.put(MANIFEST_FILE, calculateSHA256(manifestBytes));
+
+    // Prepare required files
+    LocationsFile locationsFile = LocationsFile.builder().locations(archive.getLocations()).build();
+    byte[] locationsBytes = serializeToJson(locationsFile);
+    fileContents.put(LOCATIONS_FILE, locationsBytes);
+    checksums.put(LOCATIONS_FILE, calculateSHA256(locationsBytes));
+
+    ClimbsFile climbsFile = ClimbsFile.builder().climbs(archive.getClimbs()).build();
+    byte[] climbsBytes = serializeToJson(climbsFile);
+    fileContents.put(CLIMBS_FILE, climbsBytes);
+    checksums.put(CLIMBS_FILE, calculateSHA256(climbsBytes));
+
+    SessionsFile sessionsFile = SessionsFile.builder().sessions(archive.getSessions()).build();
+    byte[] sessionsBytes = serializeToJson(sessionsFile);
+    fileContents.put(SESSIONS_FILE, sessionsBytes);
+    checksums.put(SESSIONS_FILE, calculateSHA256(sessionsBytes));
+
+    // Prepare optional files
+    if (archive.hasRoutes()) {
+      RoutesFile routesFile = RoutesFile.builder().routes(archive.getRoutes()).build();
+      byte[] routesBytes = serializeToJson(routesFile);
+      fileContents.put(ROUTES_FILE, routesBytes);
+      checksums.put(ROUTES_FILE, calculateSHA256(routesBytes));
+    }
+
+    if (archive.hasSectors()) {
+      SectorsFile sectorsFile = SectorsFile.builder().sectors(archive.getSectors()).build();
+      byte[] sectorsBytes = serializeToJson(sectorsFile);
+      fileContents.put(SECTORS_FILE, sectorsBytes);
+      checksums.put(SECTORS_FILE, calculateSHA256(sectorsBytes));
+    }
+
+    if (archive.hasTags()) {
+      TagsFile tagsFile = TagsFile.builder().tags(archive.getTags()).build();
+      byte[] tagsBytes = serializeToJson(tagsFile);
+      fileContents.put(TAGS_FILE, tagsBytes);
+      checksums.put(TAGS_FILE, calculateSHA256(tagsBytes));
+    }
+
+    if (archive.hasMedia()) {
+      MediaMetadataFile mediaFile =
+          MediaMetadataFile.builder().media(archive.getMediaItems()).build();
+      byte[] mediaBytes = serializeToJson(mediaFile);
+      fileContents.put(MEDIA_METADATA_FILE, mediaBytes);
+      checksums.put(MEDIA_METADATA_FILE, calculateSHA256(mediaBytes));
+    }
+
+    // Add embedded media files
+    if (archive.hasEmbeddedMedia()) {
+      for (Map.Entry<String, byte[]> entry : archive.getMediaFiles().entrySet()) {
+        fileContents.put(entry.getKey(), entry.getValue());
+        checksums.put(entry.getKey(), calculateSHA256(entry.getValue()));
+      }
+    }
+
+    // Create checksums file
+    Checksums checksumsObj =
+        Checksums.builder()
+            .algorithm("SHA-256")
+            .files(checksums)
+            .generatedAt(OffsetDateTime.now())
+            .build();
+    byte[] checksumsBytes = serializeToJson(checksumsObj);
+    fileContents.put(CHECKSUMS_FILE, checksumsBytes);
+
+    // Write ZIP archive
+    try (ZipArchiveOutputStream zos = new ZipArchiveOutputStream(outputStream)) {
+      zos.setLevel(9); // Maximum compression
+
+      for (Map.Entry<String, byte[]> entry : fileContents.entrySet()) {
+        ZipArchiveEntry zipEntry = new ZipArchiveEntry(entry.getKey());
+        zos.putArchiveEntry(zipEntry);
+        zos.write(entry.getValue());
+        zos.closeArchiveEntry();
+      }
+
+      zos.finish();
+    }
+  }
+
+  private void validateArchive(CLDFArchive archive) {
+    if (archive == null) {
+      throw new IllegalArgumentException("Archive cannot be null");
+    }
+    if (archive.getManifest() == null) {
+      throw new IllegalArgumentException("Manifest is required");
+    }
+    if (archive.getLocations() == null || archive.getLocations().isEmpty()) {
+      throw new IllegalArgumentException("At least one location is required");
+    }
+    if (archive.getClimbs() == null || archive.getClimbs().isEmpty()) {
+      throw new IllegalArgumentException("At least one climb is required");
+    }
+    if (archive.getSessions() == null || archive.getSessions().isEmpty()) {
+      throw new IllegalArgumentException("At least one session is required");
+    }
+  }
+
+  private byte[] serializeToJson(Object obj) throws IOException {
+    return objectMapper.writeValueAsString(obj).getBytes(StandardCharsets.UTF_8);
+  }
+
+  private String calculateSHA256(byte[] data) throws IOException {
+    try {
+      MessageDigest digest = MessageDigest.getInstance("SHA-256");
+      byte[] hash = digest.digest(data);
+      StringBuilder hexString = new StringBuilder();
+      for (byte b : hash) {
+        String hex = Integer.toHexString(0xff & b);
+        if (hex.length() == 1) {
+          hexString.append('0');
+        }
+        hexString.append(hex);
+      }
+      return hexString.toString();
+    } catch (NoSuchAlgorithmException e) {
+      throw new IOException("SHA-256 algorithm not available", e);
+    }
+  }
+}
