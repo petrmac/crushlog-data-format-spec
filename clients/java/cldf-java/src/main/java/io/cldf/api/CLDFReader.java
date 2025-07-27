@@ -29,6 +29,7 @@ public class CLDFReader {
   private final ObjectMapper objectMapper;
   private final boolean validateChecksums;
   private final boolean validateSchemas;
+  private final SchemaValidator schemaValidator;
 
   /** Creates a CLDFReader with default settings (checksum and schema validation enabled). */
   public CLDFReader() {
@@ -44,6 +45,7 @@ public class CLDFReader {
   public CLDFReader(boolean validateChecksums, boolean validateSchemas) {
     this.validateChecksums = validateChecksums;
     this.validateSchemas = validateSchemas;
+    this.schemaValidator = validateSchemas ? new SchemaValidator() : null;
     this.objectMapper = new ObjectMapper();
     this.objectMapper.registerModule(new JavaTimeModule());
   }
@@ -111,6 +113,24 @@ public class CLDFReader {
     }
     if (!fileContents.containsKey(CHECKSUMS_FILE)) {
       throw new IOException("Missing required file: " + CHECKSUMS_FILE);
+    }
+
+    // Validate schemas if enabled
+    if (validateSchemas) {
+      // Validate all required files first
+      schemaValidator.validateOrThrow(MANIFEST_FILE, fileContents.get(MANIFEST_FILE));
+      schemaValidator.validateOrThrow(LOCATIONS_FILE, fileContents.get(LOCATIONS_FILE));
+      schemaValidator.validateOrThrow(CLIMBS_FILE, fileContents.get(CLIMBS_FILE));
+      schemaValidator.validateOrThrow(SESSIONS_FILE, fileContents.get(SESSIONS_FILE));
+      schemaValidator.validateOrThrow(CHECKSUMS_FILE, fileContents.get(CHECKSUMS_FILE));
+
+      // Validate optional files if present
+      for (String filename :
+          new String[] {"routes.json", "sectors.json", "tags.json", "media-metadata.json"}) {
+        if (fileContents.containsKey(filename)) {
+          schemaValidator.validateOrThrow(filename, fileContents.get(filename));
+        }
+      }
     }
 
     // Parse files

@@ -35,10 +35,15 @@ public class CLDFWriter {
 
   private final ObjectMapper objectMapper;
   private final boolean prettyPrint;
+  private final boolean validateSchemas;
+  private final SchemaValidator schemaValidator;
 
-  /** Creates a CLDFWriter with default settings (pretty printing enabled). */
+  /**
+   * Creates a CLDFWriter with default settings (pretty printing enabled, schema validation
+   * enabled).
+   */
   public CLDFWriter() {
-    this(true);
+    this(true, true);
   }
 
   /**
@@ -47,10 +52,24 @@ public class CLDFWriter {
    * @param prettyPrint whether to enable pretty printing for JSON files
    */
   public CLDFWriter(boolean prettyPrint) {
+    this(prettyPrint, true);
+  }
+
+  /**
+   * Creates a CLDFWriter with specified formatting and validation settings.
+   *
+   * @param prettyPrint whether to enable pretty printing for JSON files
+   * @param validateSchemas whether to validate JSON schemas before writing
+   */
+  public CLDFWriter(boolean prettyPrint, boolean validateSchemas) {
     this.prettyPrint = prettyPrint;
+    this.validateSchemas = validateSchemas;
+    this.schemaValidator = validateSchemas ? new SchemaValidator() : null;
     this.objectMapper = new ObjectMapper();
     this.objectMapper.registerModule(new JavaTimeModule());
     this.objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+    this.objectMapper.setSerializationInclusion(
+        com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL);
     if (prettyPrint) {
       this.objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
     }
@@ -153,6 +172,16 @@ public class CLDFWriter {
             .build();
     byte[] checksumsBytes = serializeToJson(checksumsObj);
     fileContents.put(CHECKSUMS_FILE, checksumsBytes);
+
+    // Validate schemas if enabled
+    if (validateSchemas) {
+      for (Map.Entry<String, byte[]> entry : fileContents.entrySet()) {
+        // Skip media files
+        if (!entry.getKey().startsWith("media/")) {
+          schemaValidator.validateOrThrow(entry.getKey(), entry.getValue());
+        }
+      }
+    }
 
     // Write ZIP archive
     try (ZipArchiveOutputStream zos = new ZipArchiveOutputStream(outputStream)) {

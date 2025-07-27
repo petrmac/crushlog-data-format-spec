@@ -78,9 +78,20 @@ public class CLDF {
    * Create a new CLDFWriter with custom settings.
    *
    * @param prettyPrint Whether to format JSON output
-   * @return A configured CLDFWriter instance
+   * @return A configured CLDFWriter instance with schema validation enabled
    */
   public static CLDFWriter createWriter(boolean prettyPrint) {
     return new CLDFWriter(prettyPrint);
+  }
+
+  /**
+   * Create a new CLDFWriter with custom settings.
+   *
+   * @param prettyPrint Whether to format JSON output
+   * @param validateSchemas Whether to validate against JSON schemas before writing
+   * @return A configured CLDFWriter instance
+   */
+  public static CLDFWriter createWriter(boolean prettyPrint, boolean validateSchemas) {
+    return new CLDFWriter(prettyPrint, validateSchemas);
   }
 }

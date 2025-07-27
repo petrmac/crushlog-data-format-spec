@@ -24,6 +24,7 @@ class CLDFReaderSpec extends Specification {
 		reader = new CLDFReader()
 		objectMapper = new ObjectMapper()
 		objectMapper.findAndRegisterModules()
+		objectMapper.setSerializationInclusion(com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL)
 	}
 
 	def "should read valid CLDF archive"() {
