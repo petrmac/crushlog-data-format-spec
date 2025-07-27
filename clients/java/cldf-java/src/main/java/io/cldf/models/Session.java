@@ -54,7 +54,9 @@ public class Session {
 
   private Integer approachTime;
 
-  @Builder.Default private boolean isOngoing = false;
+  @JsonProperty("isOngoing")
+  @Builder.Default
+  private boolean isOngoing = false;
 
   @Data
   @Builder
