@@ -30,7 +30,9 @@ jobs:
         distribution: 'temurin'
         
     - name: Create schemas symlink
-      run: ln -s ../../../../schemas src/main/resources/schemas
+      run: |
+        mkdir -p src/main/resources
+        ln -s ../../../../schemas src/main/resources/schemas
       working-directory: clients/java/cldf-java
       
     - name: Grant execute permission for gradlew
@@ -77,7 +79,9 @@ jobs:
         distribution: 'temurin'
         
     - name: Create schemas symlink
-      run: ln -s ../../../../schemas src/main/resources/schemas
+      run: |
+        mkdir -p src/main/resources
+        ln -s ../../../../schemas src/main/resources/schemas
       working-directory: clients/java/cldf-java
       
     - name: Cache Maven packages
