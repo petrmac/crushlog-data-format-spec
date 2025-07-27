@@ -33,7 +33,7 @@ public class MediaItem {
 
   private String thumbnailPath;
 
-  @Builder.Default private Boolean embedded = false;
+  @Builder.Default private boolean embedded = false;
 
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
   private OffsetDateTime createdAt;
