@@ -13,31 +13,35 @@ on:
       - '.github/workflows/java-ci.yml'
 
 jobs:
-  gradle-build:
-    name: Build with Gradle
-    runs-on: ubuntu-latest
+  build-and-test:
+    name: Build and Test
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        java: [21]
     defaults:
       run:
-        working-directory: clients/java/cldf-java
+        working-directory: clients/java
 
     steps:
     - uses: actions/checkout@v4
     
-    - name: Set up JDK 21
+    - name: Set up JDK ${{ matrix.java }}
       uses: actions/setup-java@v4
       with:
-        java-version: '21'
+        java-version: ${{ matrix.java }}
         distribution: 'temurin'
         
     - name: Copy schemas to resources
       run: |
-        mkdir -p src/main/resources
-        cp -r ../../../schemas src/main/resources/
-      working-directory: clients/java/cldf-java
+        mkdir -p cldf-java/src/main/resources
+        cp -r ../../schemas cldf-java/src/main/resources/
+      shell: bash
       
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
-      working-directory: clients/java/cldf-java
+      shell: bash
       
     - name: Cache Gradle packages
       uses: actions/cache@v4
@@ -49,7 +53,7 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-gradle-
           
-    - name: Build with Gradle
+    - name: Build all modules
       run: ./gradlew build
       
     - name: Run tests
@@ -59,48 +63,86 @@ jobs:
       uses: actions/upload-artifact@v4
       if: always()
       with:
-        name: gradle-test-results
-        path: clients/java/cldf-java/build/test-results
-        
-  maven-build:
-    name: Build with Maven
-    runs-on: ubuntu-latest
+        name: test-results-${{ matrix.os }}-java${{ matrix.java }}
+        path: |
+          clients/java/cldf-java/build/test-results
+          clients/java/cldf-java/build/reports/tests
+          clients/java/cldf-tool/build/test-results
+          clients/java/cldf-tool/build/reports/tests
+
+    - name: Upload JARs
+      uses: actions/upload-artifact@v4
+      with:
+        name: jars-${{ matrix.os }}-java${{ matrix.java }}
+        path: |
+          clients/java/cldf-java/build/libs/*.jar
+          clients/java/cldf-tool/build/libs/*.jar
+
+  build-native:
+    name: Build Native Binary
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            graalvm: '21.0.2'
+            arch: 'amd64'
+          - os: macos-latest
+            graalvm: '21.0.2'
+            arch: 'amd64'
+          - os: windows-latest
+            graalvm: '21.0.2'
+            arch: 'amd64'
     defaults:
       run:
-        working-directory: clients/java/cldf-java
+        working-directory: clients/java
 
     steps:
     - uses: actions/checkout@v4
     
-    - name: Set up JDK 21
-      uses: actions/setup-java@v4
+    - name: Set up GraalVM
+      uses: graalvm/setup-graalvm@v1
       with:
         java-version: '21'
-        distribution: 'temurin'
+        version: ${{ matrix.graalvm }}
+        github-token: ${{ secrets.GITHUB_TOKEN }}
         
     - name: Copy schemas to resources
       run: |
-        mkdir -p src/main/resources
-        cp -r ../../../schemas src/main/resources/
-      working-directory: clients/java/cldf-java
+        mkdir -p cldf-java/src/main/resources
+        cp -r ../../schemas cldf-java/src/main/resources/
+      shell: bash
       
-    - name: Cache Maven packages
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+      shell: bash
+      
+    - name: Cache Gradle packages
       uses: actions/cache@v4
       with:
-        path: ~/.m2
-        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-native-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
         restore-keys: |
-          ${{ runner.os }}-m2-
+          ${{ runner.os }}-gradle-native-
           
-    - name: Build with Maven
-      run: mvn clean compile
+    - name: Build native binary
+      run: ./gradlew :cldf-tool:nativeCompile
       
-    - name: Run tests
-      run: mvn test
+    - name: Test native binary
+      run: |
+        if [[ "${{ runner.os }}" == "Windows" ]]; then
+          ./cldf-tool/build/native/nativeCompile/cldf.exe --version
+        else
+          ./cldf-tool/build/native/nativeCompile/cldf --version
+        fi
+      shell: bash
       
-    - name: Upload test results
+    - name: Upload native binary
       uses: actions/upload-artifact@v4
-      if: always()
       with:
-        name: maven-test-results
-        path: clients/java/cldf-java/target/surefire-reports
+        name: cldf-native-${{ matrix.os }}-${{ matrix.arch }}
+        path: |
+          clients/java/cldf-tool/build/native/nativeCompile/cldf
+          clients/java/cldf-tool/build/native/nativeCompile/cldf.exe
