@@ -25,13 +25,17 @@ public class Manifest {
 
   @JsonProperty(required = true)
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
-  private OffsetDateTime exportDate;
+  private OffsetDateTime creationDate;
 
   @JsonProperty(required = true)
   private String appVersion;
 
   @JsonProperty(required = true)
   private Platform platform;
+
+  private Author author;
+
+  private String source;
 
   private Stats stats;
 
@@ -43,6 +47,17 @@ public class Manifest {
     Android,
     Web,
     Desktop
+  }
+
+  /** Author information for the export. */
+  @Data
+  @Builder
+  @NoArgsConstructor
+  @AllArgsConstructor
+  public static class Author {
+    private String name;
+    private String email;
+    private String website;
   }
 
   /** Statistics about the archive contents. */

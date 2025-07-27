@@ -171,14 +171,14 @@ class CLDFArchiveSpec extends Specification {
 	def "should create valid archive for real-world scenario"() {
 		given: "a climbing trip data"
 		def tripDate = LocalDate.of(2024, 6, 15)
-		def exportDate = OffsetDateTime.now()
+		def creationDate = OffsetDateTime.now()
 
 		when: "creating archive for trip"
 		def archive = CLDFArchive.builder()
 				.manifest(Manifest.builder()
 				.version("1.0.0")
 				.format("CLDF")
-				.exportDate(exportDate)
+				.creationDate(creationDate)
 				.appVersion("2.5.0")
 				.platform(Manifest.Platform.iOS)
 				.stats(Manifest.Stats.builder()
@@ -290,7 +290,7 @@ class CLDFArchiveSpec extends Specification {
 		return Manifest.builder()
 				.version("1.0.0")
 				.format("CLDF")
-				.exportDate(OffsetDateTime.now())
+				.creationDate(OffsetDateTime.now())
 				.appVersion("1.0")
 				.platform(Manifest.Platform.Desktop)
 				.build()

@@ -5,7 +5,7 @@
   "description": "Metadata about the CLDF export",
   "type": "object",
   "additionalProperties": false,
-  "required": ["version", "format", "exportDate", "appVersion", "platform"],
+  "required": ["version", "format", "creationDate", "appVersion", "platform"],
   "properties": {
     "version": {
       "type": "string",
@@ -17,7 +17,7 @@
       "const": "CLDF",
       "description": "Format identifier, must be 'CLDF'"
     },
-    "exportDate": {
+    "creationDate": {
       "type": "string",
       "format": "date-time",
       "description": "ISO 8601 timestamp of export creation"
@@ -30,6 +30,30 @@
       "type": "string",
       "enum": ["iOS", "Android", "Web", "Desktop"],
       "description": "Platform identifier"
+    },
+    "author": {
+      "type": "object",
+      "description": "Information about the author of the export",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Name of the author"
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "Email address of the author"
+        },
+        "website": {
+          "type": "string",
+          "format": "uri",
+          "description": "Website URL of the author"
+        }
+      }
+    },
+    "source": {
+      "type": "string",
+      "description": "Source application or system that created the export"
     },
     "stats": {
       "type": "object",

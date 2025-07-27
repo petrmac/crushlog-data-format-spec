@@ -18,13 +18,13 @@ class ManifestSpec extends Specification {
 
 	def "should build manifest with required fields"() {
 		given: "export date"
-		def exportDate = OffsetDateTime.now()
+		def creationDate = OffsetDateTime.now()
 
 		when: "creating a manifest"
 		def manifest = Manifest.builder()
 				.version("1.0.0")
 				.format("CLDF")
-				.exportDate(exportDate)
+				.creationDate(creationDate)
 				.appVersion("1.0")
 				.platform(Manifest.Platform.Desktop)
 				.build()
@@ -32,14 +32,14 @@ class ManifestSpec extends Specification {
 		then: "required fields are set"
 		manifest.version == "1.0.0"
 		manifest.format == "CLDF"
-		manifest.exportDate == exportDate
+		manifest.creationDate == creationDate
 		manifest.appVersion == "1.0"
 		manifest.platform == Manifest.Platform.Desktop
 	}
 
 	def "should build manifest with all fields"() {
 		given: "dates and export options"
-		def exportDate = OffsetDateTime.now()
+		def creationDate = OffsetDateTime.now()
 		def startDate = LocalDate.of(2023, 1, 1)
 		def endDate = LocalDate.of(2024, 12, 31)
 
@@ -47,7 +47,7 @@ class ManifestSpec extends Specification {
 		def manifest = Manifest.builder()
 				.version("1.0.0")
 				.format("CLDF")
-				.exportDate(exportDate)
+				.creationDate(creationDate)
 				.appVersion("2.5.0")
 				.platform(Manifest.Platform.iOS)
 				.stats(Manifest.Stats.builder()
@@ -71,7 +71,7 @@ class ManifestSpec extends Specification {
 		then: "all fields are set"
 		manifest.version == "1.0.0"
 		manifest.format == "CLDF"
-		manifest.exportDate == exportDate
+		manifest.creationDate == creationDate
 		manifest.appVersion == "2.5.0"
 		manifest.platform == Manifest.Platform.iOS
 
@@ -95,7 +95,7 @@ class ManifestSpec extends Specification {
 		def manifest = Manifest.builder()
 				.version("1.0.0")
 				.format("CLDF")
-				.exportDate(OffsetDateTime.parse("2024-01-15T10:00:00Z"))
+				.creationDate(OffsetDateTime.parse("2024-01-15T10:00:00Z"))
 				.appVersion("2.0.0")
 				.platform(Manifest.Platform.Android)
 				.stats(Manifest.Stats.builder()
@@ -110,7 +110,7 @@ class ManifestSpec extends Specification {
 		then: "JSON contains expected fields"
 		json.contains('"version":"1.0.0"')
 		json.contains('"format":"CLDF"')
-		json.contains('"exportDate":"2024-01-15T10:00:00.000Z"')
+		json.contains('"creationDate":"2024-01-15T10:00:00.000Z"')
 		json.contains('"appVersion":"2.0.0"')
 		json.contains('"platform":"Android"')
 		json.contains('"climbsCount":50')
@@ -123,7 +123,7 @@ class ManifestSpec extends Specification {
             {
                 "version": "1.0.0",
                 "format": "CLDF",
-                "exportDate": "2024-01-15T10:00:00.000Z",
+                "creationDate": "2024-01-15T10:00:00.000Z",
                 "appVersion": "2.5.0",
                 "platform": "Desktop",
                 "stats": {
@@ -140,7 +140,7 @@ class ManifestSpec extends Specification {
 		then: "manifest is created correctly"
 		manifest.version == "1.0.0"
 		manifest.format == "CLDF"
-		manifest.exportDate == OffsetDateTime.parse("2024-01-15T10:00:00Z")
+		manifest.creationDate == OffsetDateTime.parse("2024-01-15T10:00:00Z")
 		manifest.appVersion == "2.5.0"
 		manifest.platform == Manifest.Platform.Desktop
 
@@ -172,6 +172,6 @@ class ManifestSpec extends Specification {
 		then: "fields are null"
 		manifest.version == null
 		manifest.format == null
-		manifest.exportDate == null
+		manifest.creationDate == null
 	}
 }

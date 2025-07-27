@@ -56,7 +56,7 @@ public class CLDFExample {
         Manifest.builder()
             .version("1.0.0")
             .format("CLDF")
-            .exportDate(OffsetDateTime.now())
+            .creationDate(OffsetDateTime.now())
             .appVersion("1.0.0")
             .platform(Manifest.Platform.Desktop)
             .stats(
