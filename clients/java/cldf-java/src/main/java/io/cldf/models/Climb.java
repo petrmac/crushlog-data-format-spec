@@ -49,7 +49,7 @@ public class Climb {
 
   @Builder.Default private int attempts = 1;
 
-  @Builder.Default private Integer repeats = 0;
+  @Builder.Default private int repeats = 0;
 
   @Builder.Default private Boolean isRepeat = false;
 
