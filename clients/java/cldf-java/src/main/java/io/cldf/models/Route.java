@@ -46,7 +46,7 @@ public class Route {
 
   private String beta;
 
-  private String protectionRating;
+  private ProtectionRating protectionRating;
 
   private String gearNotes;
   private List<String> tags;
@@ -96,5 +96,15 @@ public class Route {
   public enum RouteCharacteristics {
     trad,
     bolted
+  }
+
+  /** Protection rating for traditional routes. */
+  public enum ProtectionRating {
+    bombproof,
+    good,
+    adequate,
+    runout,
+    serious,
+    x
   }
 }
