@@ -32,7 +32,7 @@ public class Location {
 
   private String state;
 
-  @Builder.Default private Boolean starred = false;
+  @Builder.Default private boolean starred = false;
 
   private RockType rockType;
 
