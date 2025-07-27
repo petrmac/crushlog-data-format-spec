@@ -51,7 +51,7 @@ public class Climb {
 
   @Builder.Default private int repeats = 0;
 
-  @Builder.Default private Boolean isRepeat = false;
+  @Builder.Default private boolean isRepeat = false;
 
   private BelayType belayType;
 
