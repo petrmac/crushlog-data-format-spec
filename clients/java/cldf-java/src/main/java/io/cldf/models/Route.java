@@ -48,6 +48,7 @@ public class Route {
 
   private ProtectionRating protection;
 
+  private String gearNotes;
   private List<String> tags;
 
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
