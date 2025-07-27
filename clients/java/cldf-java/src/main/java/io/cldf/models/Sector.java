@@ -25,7 +25,9 @@ public class Sector {
   @JsonProperty(required = true)
   private String name;
 
-  @Builder.Default private boolean isDefault = false;
+  @JsonProperty("isDefault")
+  @Builder.Default
+  private boolean isDefault = false;
 
   private String description;
 
