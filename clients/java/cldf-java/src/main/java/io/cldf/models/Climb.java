@@ -47,7 +47,7 @@ public class Climb {
   @JsonProperty(required = true)
   private String finishType;
 
-  @Builder.Default private Integer attempts = 1;
+  @Builder.Default private int attempts = 1;
 
   @Builder.Default private Integer repeats = 0;
 
