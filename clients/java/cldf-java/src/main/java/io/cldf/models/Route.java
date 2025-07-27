@@ -46,7 +46,7 @@ public class Route {
 
   private String beta;
 
-  private String protection;
+  private ProtectionRating protection;
 
   private List<String> tags;
 
