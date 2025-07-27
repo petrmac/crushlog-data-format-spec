@@ -29,10 +29,10 @@ jobs:
         java-version: '21'
         distribution: 'temurin'
         
-    - name: Create schemas symlink
+    - name: Copy schemas to resources
       run: |
         mkdir -p src/main/resources
-        ln -s ../../../../schemas src/main/resources/schemas
+        cp -r ../../../schemas src/main/resources/
       working-directory: clients/java/cldf-java
       
     - name: Grant execute permission for gradlew
@@ -78,10 +78,10 @@ jobs:
         java-version: '21'
         distribution: 'temurin'
         
-    - name: Create schemas symlink
+    - name: Copy schemas to resources
       run: |
         mkdir -p src/main/resources
-        ln -s ../../../../schemas src/main/resources/schemas
+        cp -r ../../../schemas src/main/resources/
       working-directory: clients/java/cldf-java
       
     - name: Cache Maven packages

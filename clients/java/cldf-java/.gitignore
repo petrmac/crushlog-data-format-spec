@@ -150,3 +150,6 @@ jacoco.exec
 # Publishing
 .signing/
 secring.gpg
+
+# Copied schemas (from CI)
+src/main/resources/schemas/
