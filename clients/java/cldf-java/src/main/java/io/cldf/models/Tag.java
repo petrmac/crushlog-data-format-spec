@@ -20,7 +20,7 @@ public class Tag {
   private String name;
 
   @JsonProperty(required = true)
-  private Boolean isPredefined;
+  private boolean isPredefined;
 
   private PredefinedTagKey predefinedTagKey;
 
