@@ -117,6 +117,13 @@ jobs:
       run: chmod +x gradlew
       shell: bash
       
+    - name: Debug project structure
+      run: |
+        echo "Current directory: $(pwd)"
+        echo "Project structure:"
+        ./gradlew projects
+      shell: bash
+      
     - name: Cache Gradle packages
       uses: actions/cache@v4
       with:
@@ -131,9 +138,9 @@ jobs:
       run: |
         if [[ "${{ matrix.arch }}" == "arm64" && "${{ runner.os }}" == "macOS" ]]; then
           # Cross-compile for ARM64 on Intel Mac
-          ./gradlew :cldf-tool:nativeCompile -Dorg.graalvm.buildtools.native.architectures=${{ matrix.native-arch }}
+          ./gradlew cldf-tool:nativeCompile -Dorg.graalvm.buildtools.native.architectures=${{ matrix.native-arch }}
         else
-          ./gradlew :cldf-tool:nativeCompile
+          ./gradlew cldf-tool:nativeCompile
         fi
       shell: bash
       
