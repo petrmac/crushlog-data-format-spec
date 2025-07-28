@@ -77,6 +77,11 @@ public class ValidationService {
   }
 
   private void validateBusinessRules(CLDFArchive archive, List<String> warnings) {
+    // Skip business rules if climbs are not available
+    if (archive.getClimbs() == null || archive.getClimbs().isEmpty()) {
+      return;
+    }
+
     // Check for future dates
     long futureClimbs =
         archive.getClimbs().stream()

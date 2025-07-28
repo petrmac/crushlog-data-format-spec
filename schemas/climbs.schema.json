@@ -17,6 +17,36 @@
     "climb": {
       "type": "object",
       "required": ["id", "date", "routeName", "type", "finishType"],
+      "allOf": [
+        {
+          "if": {
+            "properties": { "type": { "const": "boulder" } }
+          },
+          "then": {
+            "properties": {
+              "finishType": {
+                "type": "string",
+                "enum": ["flash", "top", "repeat", "project"],
+                "description": "Boulder finish types"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": { "type": { "const": "route" } }
+          },
+          "then": {
+            "properties": {
+              "finishType": {
+                "type": "string",
+                "enum": ["onsight", "flash", "redpoint", "repeat", "project"],
+                "description": "Route finish types"
+              }
+            }
+          }
+        }
+      ],
       "properties": {
         "id": {
           "type": "integer",
@@ -68,20 +98,6 @@
           "type": "string",
           "enum": ["boulder", "route"],
           "description": "Type of climb"
-        },
-        "finishType": {
-          "type": "string",
-          "description": "How the climb was completed",
-          "oneOf": [
-            {
-              "enum": ["flash", "top", "repeat", "project"],
-              "description": "Boulder finish types"
-            },
-            {
-              "enum": ["onsight", "flash", "redpoint", "repeat", "project"],
-              "description": "Route finish types"
-            }
-          ]
         },
         "attempts": {
           "type": "integer",
