@@ -86,10 +86,16 @@ jobs:
         include:
           - os: ubuntu-latest
             arch: 'amd64'
+            native-arch: 'amd64'
           - os: macos-latest
             arch: 'amd64'
+            native-arch: 'amd64'
+          - os: macos-latest
+            arch: 'arm64'
+            native-arch: 'aarch64'
           - os: windows-latest
             arch: 'amd64'
+            native-arch: 'amd64'
     defaults:
       run:
         working-directory: clients/java
@@ -125,11 +131,21 @@ jobs:
           ${{ runner.os }}-gradle-native-
           
     - name: Build native binary
-      run: ./gradlew :cldf-tool:nativeCompile
+      run: |
+        if [[ "${{ matrix.arch }}" == "arm64" && "${{ runner.os }}" == "macOS" ]]; then
+          # Cross-compile for ARM64 on Intel Mac
+          ./gradlew :cldf-tool:nativeCompile -Dorg.graalvm.buildtools.native.architectures=${{ matrix.native-arch }}
+        else
+          ./gradlew :cldf-tool:nativeCompile
+        fi
+      shell: bash
       
     - name: Test native binary
       run: |
-        if [[ "${{ runner.os }}" == "Windows" ]]; then
+        if [[ "${{ matrix.arch }}" == "arm64" && "${{ runner.os }}" == "macOS" ]]; then
+          # Skip testing ARM64 binary on Intel Mac (cross-compiled)
+          echo "Skipping test for cross-compiled ARM64 binary"
+        elif [[ "${{ runner.os }}" == "Windows" ]]; then
           ./cldf-tool/build/native/nativeCompile/cldf.exe --version
         else
           ./cldf-tool/build/native/nativeCompile/cldf --version
