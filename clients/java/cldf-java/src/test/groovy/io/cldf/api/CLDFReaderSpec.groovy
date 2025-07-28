@@ -244,7 +244,7 @@ class CLDFReaderSpec extends Specification {
 					.date(LocalDate.now())
 					.routeName("Custom Route")
 					.type(Climb.ClimbType.route)
-					.finishType("redpoint")
+					.finishType(Climb.FinishType.redpoint)
 					.customFields([temperature: 72, humidity: 45])
 					.build()
 			def climbsFile = new ClimbsFile()
@@ -299,7 +299,7 @@ class CLDFReaderSpec extends Specification {
 				.date(LocalDate.now())
 				.routeName("Test Route")
 				.type(Climb.ClimbType.route)
-				.finishType("redpoint")
+				.finishType(Climb.FinishType.redpoint)
 				.build()
 		def file = new ClimbsFile()
 		file.climbs = [climb]

@@ -226,7 +226,7 @@ class CLDFArchiveSpec extends Specification {
 					.routeName("High Plains Drifter")
 					.routeId(1)
 					.type(Climb.ClimbType.boulder)
-					.finishType("flash")
+					.finishType(Climb.FinishType.flash)
 					.grades(Climb.GradeInfo.builder()
 					.system(Climb.GradeInfo.GradeSystem.vScale)
 					.grade("V7")
@@ -241,7 +241,7 @@ class CLDFArchiveSpec extends Specification {
 					.routeName("Cave Route")
 					.routeId(2)
 					.type(Climb.ClimbType.boulder)
-					.finishType("redpoint")
+					.finishType(Climb.FinishType.redpoint)
 					.grades(Climb.GradeInfo.builder()
 					.system(Climb.GradeInfo.GradeSystem.vScale)
 					.grade("V6")
@@ -281,7 +281,7 @@ class CLDFArchiveSpec extends Specification {
 		archive.locations[0].name == "Bishop - Buttermilks"
 		archive.sessions[0].weather.temperature == 68
 		archive.climbs.size() == 2
-		archive.climbs[0].finishType == "flash"
+		archive.climbs[0].finishType == Climb.FinishType.flash
 		archive.climbs[1].notes == "Tricky heel hook"
 		archive.routes.size() == 2
 	}
@@ -314,7 +314,7 @@ class CLDFArchiveSpec extends Specification {
 			.date(LocalDate.now())
 			.routeName("Test Route")
 			.type(Climb.ClimbType.route)
-			.finishType("redpoint")
+			.finishType(Climb.FinishType.redpoint)
 			.build()
 		]
 	}

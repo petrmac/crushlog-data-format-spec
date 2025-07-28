@@ -299,11 +299,15 @@ public class QueryService {
             .collect(Collectors.groupingBy(c -> c.getType().name(), Collectors.counting()));
     stats.put("byType", byType);
 
-    Map<String, Long> byFinishType =
+    Map<Climb.FinishType, Long> byFinishType =
         climbs.stream()
             .filter(c -> c.getFinishType() != null)
             .collect(Collectors.groupingBy(Climb::getFinishType, Collectors.counting()));
-    stats.put("byFinishType", byFinishType);
+    // Convert enum keys to strings for JSON serialization
+    Map<String, Long> byFinishTypeStr =
+        byFinishType.entrySet().stream()
+            .collect(Collectors.toMap(e -> e.getKey().name(), Map.Entry::getValue));
+    stats.put("byFinishType", byFinishTypeStr);
 
     double avgRating =
         climbs.stream()

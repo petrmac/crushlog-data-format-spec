@@ -45,7 +45,7 @@ public class Climb {
   private ClimbType type;
 
   @JsonProperty(required = true)
-  private String finishType;
+  private FinishType finishType;
 
   @Builder.Default private int attempts = 1;
 
@@ -141,5 +141,22 @@ public class Climb {
     lead,
     // Auto-belay device
     autoBelay
+  }
+
+  /** How the climb was completed. */
+  public enum FinishType {
+    // Boulder finish types
+    flash,
+    top,
+    repeat,
+    project,
+
+    // Route-specific finish types (onsight and redpoint are route-only)
+    onsight,
+    redpoint
+
+    // Note: flash, repeat, and project appear in both boulder and route schemas
+    // but we define them once here. The validation should be done at a higher level
+    // based on the climb type.
   }
 }

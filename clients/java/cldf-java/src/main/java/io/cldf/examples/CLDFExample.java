@@ -128,7 +128,7 @@ public class CLDFExample {
                 .date(LocalDate.now().minusDays(7))
                 .routeName("Purple Crimps")
                 .type(Climb.ClimbType.boulder)
-                .finishType("flash")
+                .finishType(Climb.FinishType.flash)
                 .grades(
                     Climb.GradeInfo.builder()
                         .system(Climb.GradeInfo.GradeSystem.vScale)
@@ -146,7 +146,7 @@ public class CLDFExample {
                 .date(LocalDate.now().minusDays(7))
                 .routeName("Yellow Overhang")
                 .type(Climb.ClimbType.boulder)
-                .finishType("top")
+                .finishType(Climb.FinishType.top)
                 .grades(
                     Climb.GradeInfo.builder()
                         .system(Climb.GradeInfo.GradeSystem.vScale)
@@ -165,7 +165,7 @@ public class CLDFExample {
                 .date(LocalDate.now().minusDays(1))
                 .routeName("Warmup Traverse")
                 .type(Climb.ClimbType.boulder)
-                .finishType("top")
+                .finishType(Climb.FinishType.top)
                 .grades(
                     Climb.GradeInfo.builder()
                         .system(Climb.GradeInfo.GradeSystem.vScale)
@@ -181,7 +181,7 @@ public class CLDFExample {
                 .date(LocalDate.now().minusDays(1))
                 .routeName("The Egg")
                 .type(Climb.ClimbType.boulder)
-                .finishType("project")
+                .finishType(Climb.FinishType.project)
                 .grades(
                     Climb.GradeInfo.builder()
                         .system(Climb.GradeInfo.GradeSystem.vScale)
@@ -201,7 +201,7 @@ public class CLDFExample {
                 .date(LocalDate.now().minusDays(1))
                 .routeName("Classic Arete")
                 .type(Climb.ClimbType.boulder)
-                .finishType("repeat")
+                .finishType(Climb.FinishType.repeat)
                 .grades(
                     Climb.GradeInfo.builder()
                         .system(Climb.GradeInfo.GradeSystem.vScale)

@@ -26,7 +26,7 @@ class ClimbSpec extends Specification {
 				.date(date)
 				.routeName("Midnight Lightning")
 				.type(Climb.ClimbType.boulder)
-				.finishType("flash")
+				.finishType(Climb.FinishType.flash)
 				.build()
 
 		then: "required fields are set"
@@ -34,7 +34,7 @@ class ClimbSpec extends Specification {
 		climb.date == date
 		climb.routeName == "Midnight Lightning"
 		climb.type == Climb.ClimbType.boulder
-		climb.finishType == "flash"
+		climb.finishType == Climb.FinishType.flash
 
 		and: "defaults are applied"
 		climb.attempts == 1
@@ -57,7 +57,7 @@ class ClimbSpec extends Specification {
 				.time(time)
 				.routeName("The Nose")
 				.type(Climb.ClimbType.route)
-				.finishType("redpoint")
+				.finishType(Climb.FinishType.redpoint)
 				.grades(Climb.GradeInfo.builder()
 				.system(Climb.GradeInfo.GradeSystem.yds)
 				.grade("5.14a")
@@ -95,7 +95,7 @@ class ClimbSpec extends Specification {
 		climb.time == time
 		climb.routeName == "The Nose"
 		climb.type == Climb.ClimbType.route
-		climb.finishType == "redpoint"
+		climb.finishType == Climb.FinishType.redpoint
 		climb.attempts == 3
 		climb.repeats == 0
 		!climb.isRepeat
@@ -132,7 +132,7 @@ class ClimbSpec extends Specification {
 				.date(LocalDate.of(2024, 1, 15))
 				.routeName("Test Route")
 				.type(Climb.ClimbType.boulder)
-				.finishType("onsight")
+				.finishType(Climb.FinishType.onsight)
 				.attempts(1)
 				.rating(4)
 				.build()
@@ -178,7 +178,7 @@ class ClimbSpec extends Specification {
 		climb.date == LocalDate.of(2024, 1, 15)
 		climb.routeName == "Test Boulder"
 		climb.type == Climb.ClimbType.boulder
-		climb.finishType == "flash"
+		climb.finishType == Climb.FinishType.flash
 		climb.attempts == 2
 		climb.rating == 4
 
@@ -232,7 +232,7 @@ class ClimbSpec extends Specification {
 				.date(LocalDate.now())
 				.routeName("Test")
 				.type(Climb.ClimbType.route)
-				.finishType("redpoint")
+				.finishType(Climb.FinishType.redpoint)
 				.build()
 
 		then: "defaults are set"
@@ -253,14 +253,14 @@ class ClimbSpec extends Specification {
 			.date(LocalDate.now())
 			.routeName("Route 1")
 			.type(Climb.ClimbType.route)
-			.finishType("redpoint")
+			.finishType(Climb.FinishType.redpoint)
 			.build(),
 			Climb.builder()
 			.id(2)
 			.date(LocalDate.now())
 			.routeName("Boulder 1")
 			.type(Climb.ClimbType.boulder)
-			.finishType("flash")
+			.finishType(Climb.FinishType.flash)
 			.build()
 		]
 

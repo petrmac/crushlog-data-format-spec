@@ -253,7 +253,13 @@ public class GraphBenchmark {
     String[] grades = {
       "5.8", "5.9", "5.10a", "5.10b", "5.10c", "5.10d", "5.11a", "5.11b", "5.11c", "5.11d", "5.12a"
     };
-    String[] finishTypes = {"redpoint", "flash", "onsight", "fall", "hang"};
+    Climb.FinishType[] finishTypes = {
+      Climb.FinishType.redpoint,
+      Climb.FinishType.flash,
+      Climb.FinishType.onsight,
+      Climb.FinishType.top,
+      Climb.FinishType.project
+    };
 
     List<Climb> climbs =
         IntStream.range(0, size * 5) // 5 climbs per session average

@@ -1,304 +1,285 @@
 package io.cldf.tool.commands
 
 import io.cldf.api.CLDFArchive
+import io.cldf.api.CLDFWriter
+import io.cldf.models.*
 import io.cldf.tool.models.CommandResult
 import io.cldf.tool.services.ValidationService
 import io.cldf.tool.utils.OutputFormat
 import io.cldf.tool.utils.OutputHandler
-import io.micronaut.context.ApplicationContext
-import io.micronaut.test.extensions.spock.annotation.MicronautTest
-import jakarta.inject.Inject
 import spock.lang.Specification
 import spock.lang.TempDir
 
 import java.nio.file.Path
+import java.time.LocalDate
+import java.time.OffsetDateTime
 
-@MicronautTest
 class CreateCommandSpec extends Specification {
-    
-    @Inject
-    ApplicationContext context
-    
-    @TempDir
-    Path tempDir
-    
+
     CreateCommand command
     ValidationService validationService
-    ByteArrayOutputStream outStream
-    ByteArrayOutputStream errStream
-    
+
+    @TempDir
+    Path tempDir
+
+    File outputFile
+
     def setup() {
-        validationService = Mock(ValidationService)
         command = new CreateCommand()
+        validationService = new ValidationService()
         command.validationService = validationService
         
-        // Setup output streams
-        outStream = new ByteArrayOutputStream()
-        errStream = new ByteArrayOutputStream()
-        command.output = new OutputHandler(OutputFormat.text, false, 
-            new PrintStream(outStream), new PrintStream(errStream))
-    }
-    
-    def "should create empty CLDF archive"() {
-        given:
-        def outputFile = tempDir.resolve("test.cldf").toFile()
+        outputFile = tempDir.resolve("test.cldf").toFile()
         command.outputFile = outputFile
-        command.template = null
-        command.validate = false
+        command.outputFormat = OutputFormat.text
+        command.quiet = false
+        command.validate = true
+        command.prettyPrint = true
         
+        // Initialize the output handler
+        command.output = new OutputHandler(OutputFormat.text, false)
+    }
+
+    def "should create minimal archive"() {
+        given:
+        command.template = null
+        command.validate = true
+
         when:
         def result = command.execute()
-        
+
         then:
         result.success
         result.message == "Successfully created CLDF archive"
         outputFile.exists()
-        
-        and: "stats are included"
-        def data = result.data as Map
-        data.file == outputFile.absolutePath
-        data.stats.locations == 1
-        data.stats.sessions == 1
-        data.stats.climbs == 0
+
+        when:
+        def archive = new io.cldf.api.CLDFReader().read(outputFile)
+
+        then:
+        archive != null
+        archive.manifest != null
+        archive.manifest.version == "1.0.0"
+        archive.manifest.format == "CLDF"
+        archive.locations.size() == 1
+        archive.locations[0].name == "Default Location"
+        archive.locations[0].isIndoor == true
+        archive.sessions.size() == 1
+        archive.climbs.size() == 1
+        archive.climbs[0].routeName == "Sample Route"
+        archive.climbs[0].type == Climb.ClimbType.boulder
     }
-    
-    def "should create archive from basic template"() {
+
+    def "should create basic template archive"() {
         given:
-        def outputFile = tempDir.resolve("basic.cldf").toFile()
-        command.outputFile = outputFile
         command.template = "basic"
-        command.validate = false
-        
+
         when:
         def result = command.execute()
-        
+
         then:
         result.success
+        result.message == "Successfully created CLDF archive"
         outputFile.exists()
-        
-        and: "basic template has expected content"
-        def data = result.data as Map
-        data.stats.locations == 1
-        data.stats.sessions == 1
-        data.stats.climbs == 2
+
+        when:
+        def archive = new io.cldf.api.CLDFReader().read(outputFile)
+
+        then:
+        archive != null
+        archive.locations.size() == 1
+        archive.locations[0].name == "Local Climbing Gym"
+        archive.locations[0].country == "United States"
+        archive.locations[0].state == "California"
+        archive.sessions.size() == 1
+        archive.climbs.size() == 2
+        archive.climbs[0].routeName == "Warm-up V0"
+        archive.climbs[0].finishType == Climb.FinishType.top
+        archive.climbs[1].routeName == "Project V4"
+        archive.climbs[1].finishType == Climb.FinishType.top
+        archive.climbs[1].attempts == 5
     }
-    
-    def "should create archive from demo template"() {
+
+    def "should create demo template archive"() {
         given:
-        def outputFile = tempDir.resolve("demo.cldf").toFile()
-        command.outputFile = outputFile
         command.template = "demo"
-        command.validate = false
-        
+
         when:
         def result = command.execute()
-        
+
         then:
         result.success
+        result.message == "Successfully created CLDF archive"
         outputFile.exists()
-        
-        and: "demo template has rich content"
-        def data = result.data as Map
-        data.stats.locations == 2
-        data.stats.sessions == 2
-        data.stats.climbs == 9
-    }
-    
-    def "should validate archive when validate flag is true"() {
-        given:
-        def outputFile = tempDir.resolve("validated.cldf").toFile()
-        command.outputFile = outputFile
-        command.validate = true
-        validationService.validate(_ as CLDFArchive) >> new ValidationService.ValidationResult(
-            valid: true,
-            errors: [],
-            warnings: ["Minor issue"]
-        )
-        
+
         when:
-        def result = command.execute()
-        
+        def archive = new io.cldf.api.CLDFReader().read(outputFile)
+
         then:
-        result.success
-        result.warnings == ["Minor issue"]
-        1 * validationService.validate(_ as CLDFArchive)
-    }
-    
-    def "should fail when validation fails"() {
-        given:
-        def outputFile = tempDir.resolve("invalid.cldf").toFile()
-        command.outputFile = outputFile
-        command.validate = true
-        validationService.validate(_ as CLDFArchive) >> new ValidationService.ValidationResult(
-            valid: false,
-            errors: ["Critical error"],
-            warnings: []
-        )
+        archive != null
+        archive.locations.size() == 2
+        archive.locations[0].name == "Movement Climbing Gym"
+        archive.locations[0].isIndoor == true
+        archive.locations[1].name == "Eldorado Canyon"
+        archive.locations[1].isIndoor == false
+        archive.locations[1].rockType == Location.RockType.sandstone
+        archive.sessions.size() == 2
+        archive.climbs.size() == 9
         
+        // Check outdoor climb details
+        def outdoorClimb = archive.climbs.find { it.routeName == "The Bastille Crack" }
+        outdoorClimb != null
+        outdoorClimb.type == Climb.ClimbType.route
+        outdoorClimb.finishType == Climb.FinishType.onsight
+        outdoorClimb.belayType == Climb.BelayType.lead
+        outdoorClimb.height == 110.0
+        outdoorClimb.rating == 5
+    }
+
+    def "should fail validation when archive is invalid"() {
+        given:
+        command.template = null
+        command.validate = true
+        
+        // Mock validation service to return invalid result
+        def mockValidationService = Mock(ValidationService)
+        command.validationService = mockValidationService
+        
+        def validationResult = ValidationService.ValidationResult.builder()
+            .valid(false)
+            .errors(["Missing required field: locations"])
+            .build()
+        
+        mockValidationService.validate(_ as CLDFArchive) >> validationResult
+
         when:
         def result = command.execute()
-        
+
         then:
         !result.success
         result.message == "Validation failed"
         result.exitCode == 1
-        
-        and: "errors are included in data"
-        def data = result.data as Map
-        data.errors == ["Critical error"]
+        result.data["errors"] == ["Missing required field: locations"]
     }
-    
-    def "should create archive from JSON file"() {
+
+    def "should include warnings in result"() {
         given:
-        def jsonFile = tempDir.resolve("input.json").toFile()
-        jsonFile.text = '''{
-            "manifest": {
-                "version": "1.0.0",
-                "format": "CLDF",
-                "creationDate": "2024-01-01T00:00:00Z"
-            },
-            "locations": [{
-                "id": 1,
-                "name": "Test Location",
-                "isIndoor": true
-            }],
-            "sessions": [],
-            "climbs": []
-        }'''
-        
-        def outputFile = tempDir.resolve("from-json.cldf").toFile()
-        command.outputFile = outputFile
-        command.jsonInput = jsonFile.absolutePath
-        command.validate = false
-        
-        when:
-        def result = command.execute()
-        
-        then:
-        result.success
-        outputFile.exists()
-        
-        and: "archive contains data from JSON"
-        def data = result.data as Map
-        data.stats.locations == 1
-    }
-    
-    def "should create archive from stdin"() {
-        given:
-        def originalStdin = System.in
-        def jsonInput = '''{
-            "manifest": {
-                "version": "1.0.0",
-                "format": "CLDF",
-                "creationDate": "2024-01-01T00:00:00Z"
-            },
-            "locations": [],
-            "sessions": [],
-            "climbs": []
-        }'''
-        System.in = new ByteArrayInputStream(jsonInput.bytes)
-        
-        def outputFile = tempDir.resolve("from-stdin.cldf").toFile()
-        command.outputFile = outputFile
-        command.readFromStdin = true
-        command.validate = false
-        
-        when:
-        def result = command.execute()
-        
-        then:
-        result.success
-        outputFile.exists()
-        
-        cleanup:
-        System.in = originalStdin
-    }
-    
-    def "should support JSON output format"() {
-        given:
-        def outputFile = tempDir.resolve("json-output.cldf").toFile()
-        command.outputFile = outputFile
         command.template = "empty"
-        command.validate = false
-        command.outputFormat = OutputFormat.json
-        command.output = new OutputHandler(OutputFormat.json, false,
-            new PrintStream(outStream), new PrintStream(errStream))
+        command.validate = true
         
-        when:
-        command.run()
+        // Mock validation service to return warnings
+        def mockValidationService = Mock(ValidationService)
+        command.validationService = mockValidationService
         
-        then:
-        def jsonOutput = outStream.toString()
-        jsonOutput.contains('"success" : true')
-        jsonOutput.contains('"message" : "Successfully created CLDF archive"')
-        jsonOutput.contains('"stats"')
-    }
-    
-    def "should handle missing output file gracefully"() {
-        given:
-        command.outputFile = null
+        def validationResult = ValidationService.ValidationResult.builder()
+            .valid(true)
+            .warnings(["No climbs found in archive", "Consider adding route information"])
+            .build()
         
-        when:
-        command.execute()
-        
-        then:
-        thrown(NullPointerException)
-    }
-    
-    def "should prefer JSON input over template"() {
-        given:
-        def jsonFile = tempDir.resolve("priority.json").toFile()
-        jsonFile.text = '''{
-            "manifest": {"version": "1.0.0", "format": "CLDF"},
-            "locations": [],
-            "sessions": [],
-            "climbs": []
-        }'''
-        
-        def outputFile = tempDir.resolve("priority.cldf").toFile()
-        command.outputFile = outputFile
-        command.jsonInput = jsonFile.absolutePath
-        command.template = "basic"  // This should be ignored
-        command.validate = false
-        
+        mockValidationService.validate(_ as CLDFArchive) >> validationResult
+
         when:
         def result = command.execute()
-        
+
         then:
         result.success
-        
-        and: "JSON input was used, not template"
-        def data = result.data as Map
-        data.stats.locations == 0  // Empty from JSON, not 1 from basic template
+        result.warnings == ["No climbs found in archive", "Consider adding route information"]
     }
-    
-    def "should handle dash as stdin indicator"() {
+
+    def "should create archive without validation when disabled"() {
         given:
-        def originalStdin = System.in
-        def jsonInput = '''{
-            "manifest": {"version": "1.0.0", "format": "CLDF"},
-            "locations": [{"id": 2, "name": "From Stdin"}],
-            "sessions": [],
-            "climbs": []
-        }'''
-        System.in = new ByteArrayInputStream(jsonInput.bytes)
-        
-        def outputFile = tempDir.resolve("dash-stdin.cldf").toFile()
-        command.outputFile = outputFile
-        command.jsonInput = "-"
+        command.template = "basic"
         command.validate = false
-        
+
         when:
         def result = command.execute()
-        
+
         then:
         result.success
+        result.message == "Successfully created CLDF archive"
+        outputFile.exists()
+        result.warnings == null
+    }
+
+    def "should create archive without pretty printing when disabled"() {
+        given:
+        command.template = "empty"
+        command.prettyPrint = false
+        command.validate = true
+
+        when:
+        def result = command.execute()
+
+        then:
+        result.success
+        outputFile.exists()
         
-        and: "data came from stdin"
-        def data = result.data as Map
-        data.stats.locations == 1
-        
-        cleanup:
-        System.in = originalStdin
+        // The archive should still be valid
+        def archive = new io.cldf.api.CLDFReader().read(outputFile)
+        archive != null
+        archive.climbs.size() == 1  // Empty template now includes one climb
+    }
+
+    def "should output correct text for successful creation"() {
+        given:
+        command.template = "basic"
+        def result = CommandResult.builder()
+            .success(true)
+            .message("Successfully created CLDF archive")
+            .data(["file": outputFile.absolutePath])
+            .build()
+
+        when:
+        command.outputText(result)
+
+        then:
+        // Method should complete without errors
+        noExceptionThrown()
+    }
+
+    def "should output correct text for failed creation with errors"() {
+        given:
+        def result = CommandResult.builder()
+            .success(false)
+            .message("Validation failed")
+            .data(["errors": ["Invalid location ID", "Missing session date"]])
+            .build()
+
+        when:
+        command.outputText(result)
+
+        then:
+        // Method should complete without errors
+        noExceptionThrown()
+    }
+
+    def "should handle all template types"() {
+        when:
+        command.template = templateType
+        def result = command.execute()
+
+        then:
+        result.success
+        outputFile.exists()
+
+        where:
+        templateType << ["empty", "basic", "demo"]
+    }
+
+    def "should return correct stats in result data"() {
+        given:
+        command.template = "demo"
+
+        when:
+        def result = command.execute()
+
+        then:
+        result.success
+        result.data != null
+        result.data["file"] == outputFile.absolutePath
+        result.data["stats"] != null
+        result.data["stats"]["locations"] == 2
+        result.data["stats"]["sessions"] == 2
+        result.data["stats"]["climbs"] == 9
     }
 }

@@ -164,7 +164,7 @@ class CLDFSpec extends Specification {
 				.date(LocalDate.now())
 				.routeName("Test Route")
 				.type(Climb.ClimbType.route)
-				.finishType("redpoint")
+				.finishType(Climb.FinishType.redpoint)
 				.build()
 	}
 

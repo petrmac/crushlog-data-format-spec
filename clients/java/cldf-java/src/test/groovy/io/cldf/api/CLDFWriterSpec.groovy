@@ -229,7 +229,7 @@ class CLDFWriterSpec extends Specification {
 				.date(LocalDate.now())
 				.routeName("Custom Route")
 				.type(Climb.ClimbType.route)
-				.finishType("redpoint")
+				.finishType(Climb.FinishType.redpoint)
 				.customFields([temperature: 72, humidity: 45])
 				.build()
 
@@ -248,7 +248,7 @@ class CLDFWriterSpec extends Specification {
 				.date(LocalDate.now())
 				.routeName("Photo Route")
 				.type(Climb.ClimbType.route)
-				.finishType("redpoint")
+				.finishType(Climb.FinishType.redpoint)
 				.media(Climb.Media.builder()
 				.photos(["photo1.jpg", "photo2.jpg"])
 				.build())
@@ -292,7 +292,7 @@ class CLDFWriterSpec extends Specification {
 					.date(LocalDate.now())
 					.routeName("Route $i")
 					.type(Climb.ClimbType.route)
-					.finishType("redpoint")
+					.finishType(Climb.FinishType.redpoint)
 					.build()
 		}
 
@@ -345,7 +345,7 @@ class CLDFWriterSpec extends Specification {
 			.date(LocalDate.now())
 			.routeName("Test Route")
 			.type(Climb.ClimbType.route)
-			.finishType("redpoint")
+			.finishType(Climb.FinishType.redpoint)
 			.build()
 		]
 	}

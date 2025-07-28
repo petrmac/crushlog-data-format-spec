@@ -293,7 +293,7 @@ public class GraphService {
     if (climb.getGrades() != null && climb.getGrades().getGrade() != null) {
       node.setProperty("grade", climb.getGrades().getGrade());
     }
-    if (climb.getFinishType() != null) node.setProperty("finishType", climb.getFinishType());
+    if (climb.getFinishType() != null) node.setProperty("finishType", climb.getFinishType().name());
     node.setProperty("attempts", climb.getAttempts());
     if (climb.getRating() != null) node.setProperty("rating", climb.getRating());
     return node;
@@ -351,7 +351,7 @@ public class GraphService {
             .id((Integer) node.getProperty("climbId"))
             .date(java.time.LocalDate.parse((String) node.getProperty("date")))
             .routeName((String) node.getProperty("routeName", null))
-            .finishType((String) node.getProperty("finishType", null))
+            .finishType(parseFinishType((String) node.getProperty("finishType", null)))
             .attempts((Integer) node.getProperty("attempts", 1));
 
     String grade = (String) node.getProperty("grade", null);
@@ -365,5 +365,17 @@ public class GraphService {
     }
 
     return builder.build();
+  }
+
+  private Climb.FinishType parseFinishType(String finishTypeStr) {
+    if (finishTypeStr == null || finishTypeStr.isEmpty()) {
+      return null;
+    }
+    try {
+      return Climb.FinishType.valueOf(finishTypeStr);
+    } catch (IllegalArgumentException e) {
+      log.warn("Unknown finish type: {}", finishTypeStr);
+      return null;
+    }
   }
 }

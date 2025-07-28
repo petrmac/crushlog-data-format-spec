@@ -164,7 +164,7 @@ class CLDFReaderWriterSpec extends Specification {
 				.date(LocalDate.now())
 				.routeName("Test Route")
 				.type(Climb.ClimbType.boulder)
-				.finishType("top")
+				.finishType(Climb.FinishType.top)
 				.grades(Climb.GradeInfo.builder()
 				.system(Climb.GradeInfo.GradeSystem.vScale)
 				.grade("V5")

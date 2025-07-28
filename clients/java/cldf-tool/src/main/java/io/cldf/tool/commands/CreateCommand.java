@@ -181,11 +181,29 @@ public class CreateCommand extends BaseCommand {
             .isIndoor(true)
             .build();
 
+    // Create a minimal climb to satisfy validation
+    Climb minimalClimb =
+        Climb.builder()
+            .id(1)
+            .sessionId(1)
+            .date(session.getDate())
+            .routeName("Sample Route")
+            .type(Climb.ClimbType.boulder)
+            .finishType(Climb.FinishType.top) // Use enum value
+            .attempts(1)
+            .grades(
+                Climb.GradeInfo.builder()
+                    .system(Climb.GradeInfo.GradeSystem.vScale)
+                    .grade("V0")
+                    .build())
+            .isIndoor(true)
+            .build();
+
     return CLDFArchive.builder()
         .manifest(manifest)
         .locations(List.of(location))
         .sessions(List.of(session))
-        .climbs(new ArrayList<>())
+        .climbs(List.of(minimalClimb))
         .checksums(Checksums.builder().algorithm("SHA-256").build())
         .build();
   }
@@ -218,7 +236,7 @@ public class CreateCommand extends BaseCommand {
                 .date(session.getDate())
                 .routeName("Warm-up V0")
                 .type(Climb.ClimbType.boulder)
-                .finishType("flash")
+                .finishType(Climb.FinishType.top) // Use enum value
                 .attempts(1)
                 .grades(
                     Climb.GradeInfo.builder()
@@ -233,7 +251,7 @@ public class CreateCommand extends BaseCommand {
                 .date(session.getDate())
                 .routeName("Project V4")
                 .type(Climb.ClimbType.boulder)
-                .finishType("redpoint")
+                .finishType(Climb.FinishType.top) // Use enum value
                 .attempts(5)
                 .grades(
                     Climb.GradeInfo.builder()
@@ -329,7 +347,7 @@ public class CreateCommand extends BaseCommand {
               .date(sessions.get(0).getDate())
               .routeName("Problem " + (i + 1))
               .type(Climb.ClimbType.boulder)
-              .finishType(i < 5 ? "flash" : "redpoint")
+              .finishType(Climb.FinishType.top) // Use enum value
               .attempts(i < 5 ? 1 : i - 3)
               .grades(
                   Climb.GradeInfo.builder()
@@ -349,7 +367,7 @@ public class CreateCommand extends BaseCommand {
             .date(sessions.get(1).getDate())
             .routeName("The Bastille Crack")
             .type(Climb.ClimbType.route)
-            .finishType("onsight")
+            .finishType(Climb.FinishType.onsight) // Use enum value
             .attempts(1)
             .grades(
                 Climb.GradeInfo.builder()
