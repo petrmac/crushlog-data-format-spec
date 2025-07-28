@@ -35,6 +35,8 @@ jobs:
         
     - name: Copy schemas to resources
       run: |
+        echo "Current working directory: $(pwd)"
+        ls -la
         mkdir -p cldf-java/src/main/resources
         cp -r ../../schemas cldf-java/src/main/resources/
       shell: bash
@@ -109,6 +111,8 @@ jobs:
         
     - name: Copy schemas to resources
       run: |
+        echo "Current working directory: $(pwd)"
+        ls -la
         mkdir -p cldf-java/src/main/resources
         cp -r ../../schemas cldf-java/src/main/resources/
       shell: bash
@@ -136,11 +140,16 @@ jobs:
           
     - name: Build native binary
       run: |
+        # First check the project structure
+        echo "Available projects:"
+        ./gradlew projects --quiet
+        echo "---"
+        
         if [[ "${{ matrix.arch }}" == "arm64" && "${{ runner.os }}" == "macOS" ]]; then
           # Cross-compile for ARM64 on Intel Mac
-          ./gradlew cldf-tool:nativeCompile -Dorg.graalvm.buildtools.native.architectures=${{ matrix.native-arch }}
+          cd cldf-tool && ../gradlew nativeCompile -Dorg.graalvm.buildtools.native.architectures=${{ matrix.native-arch }}
         else
-          ./gradlew cldf-tool:nativeCompile
+          cd cldf-tool && ../gradlew nativeCompile
         fi
       shell: bash
       
