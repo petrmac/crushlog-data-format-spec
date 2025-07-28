@@ -11,6 +11,7 @@ import jakarta.inject.Inject;
 
 import io.cldf.api.CLDF;
 import io.cldf.api.CLDFArchive;
+import io.cldf.tool.models.CommandResult;
 import io.cldf.tool.services.ValidationService;
 import io.cldf.tool.utils.ConsoleUtils;
 import lombok.Builder;
@@ -25,7 +26,7 @@ import picocli.CommandLine.Parameters;
     name = "validate",
     description = "Validate a CLDF archive",
     mixinStandardHelpOptions = true)
-public class ValidateCommand implements Runnable {
+public class ValidateCommand extends BaseCommand {
 
   @Parameters(index = "0", description = "CLDF file to validate")
   private File inputFile;
@@ -51,9 +52,6 @@ public class ValidateCommand implements Runnable {
   @Option(names = "--output", description = "Output file for report (stdout if not specified)")
   private File outputFile;
 
-  @Option(names = "--quiet", description = "Suppress console output")
-  private boolean quiet;
-
   @Inject private ValidationService validationService;
 
   enum ReportFormat {
@@ -63,39 +61,60 @@ public class ValidateCommand implements Runnable {
   }
 
   @Override
-  public void run() {
-    try {
-      if (!inputFile.exists()) {
-        log.error("File not found: {}", inputFile.getAbsolutePath());
-        System.exit(1);
+  protected CommandResult execute() throws Exception {
+    if (!inputFile.exists()) {
+      return CommandResult.builder()
+          .success(false)
+          .message("File not found: " + inputFile.getAbsolutePath())
+          .exitCode(1)
+          .build();
+    }
+
+    if (strict) {
+      validateSchema = true;
+      validateChecksums = true;
+      validateReferences = true;
+    }
+
+    logInfo("Validating: " + inputFile.getName());
+
+    // Read the archive
+    CLDFArchive archive = CLDF.read(inputFile);
+
+    // Perform validation
+    ValidationReport report = performValidation(archive);
+
+    // Build result based on report format
+    if (reportFormat == ReportFormat.json || outputFormat == io.cldf.tool.utils.OutputFormat.json) {
+      return CommandResult.builder()
+          .success(report.isValid())
+          .message(report.isValid() ? "Validation passed" : "Validation failed")
+          .data(report)
+          .exitCode(report.isValid() ? 0 : 1)
+          .build();
+    } else {
+      // For text/xml format, we'll handle output in outputText method
+      String formattedReport = formatReport(report);
+      return CommandResult.builder()
+          .success(report.isValid())
+          .message(formattedReport)
+          .exitCode(report.isValid() ? 0 : 1)
+          .build();
+    }
+  }
+
+  @Override
+  protected void outputText(CommandResult result) {
+    // For validate command, the message contains the formatted report
+    output.write(result.getMessage());
+    if (outputFile != null && !result.getMessage().isEmpty()) {
+      try {
+        Files.writeString(outputFile.toPath(), result.getMessage());
+        logInfo("Report written to: " + outputFile.getAbsolutePath());
+      } catch (IOException e) {
+        log.error("Failed to write report to file", e);
+        output.writeError("Failed to write report to file: " + e.getMessage());
       }
-
-      if (strict) {
-        validateSchema = true;
-        validateChecksums = true;
-        validateReferences = true;
-      }
-
-      if (!quiet) {
-        ConsoleUtils.printHeader("CLDF Validation");
-        ConsoleUtils.printInfo("Validating: " + inputFile.getName());
-      }
-
-      // Read the archive
-      CLDFArchive archive = CLDF.read(inputFile);
-
-      // Perform validation
-      ValidationReport report = performValidation(archive);
-
-      // Output report
-      outputReport(report);
-
-      // Exit with appropriate code
-      System.exit(report.isValid() ? 0 : 1);
-
-    } catch (Exception e) {
-      log.error("Validation failed", e);
-      System.exit(2);
     }
   }
 
@@ -140,9 +159,7 @@ public class ValidateCommand implements Runnable {
 
     // Note: In a real implementation, we would need to access the actual file contents
     // from the ZIP archive to calculate checksums. For now, we'll simulate this.
-    if (!quiet) {
-      ConsoleUtils.printWarning("Checksum validation not fully implemented");
-    }
+    logWarning("Checksum validation not fully implemented");
 
     result.setValid(true);
     return result;
@@ -160,29 +177,13 @@ public class ValidateCommand implements Runnable {
         .build();
   }
 
-  private void outputReport(ValidationReport report) throws IOException {
-    String output;
-
+  private String formatReport(ValidationReport report) throws IOException {
     switch (reportFormat) {
-      case json:
-        output = formatJsonReport(report);
-        break;
       case xml:
-        output = formatXmlReport(report);
-        break;
+        return formatXmlReport(report);
       case text:
       default:
-        output = formatTextReport(report);
-        break;
-    }
-
-    if (outputFile != null) {
-      Files.writeString(outputFile.toPath(), output);
-      if (!quiet) {
-        ConsoleUtils.printSuccess("Report written to: " + outputFile.getAbsolutePath());
-      }
-    } else {
-      System.out.println(output);
+        return formatTextReport(report);
     }
   }
 

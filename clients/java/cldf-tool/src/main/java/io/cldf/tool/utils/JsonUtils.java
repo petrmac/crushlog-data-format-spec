@@ -30,4 +30,12 @@ public class JsonUtils {
   public static <T> T fromJson(String json, Class<T> clazz) throws IOException {
     return MAPPER.readValue(json, clazz);
   }
+
+  public static ObjectMapper createPrettyMapper() {
+    return MAPPER;
+  }
+
+  public static ObjectMapper createCompactMapper() {
+    return COMPACT_MAPPER;
+  }
 }

@@ -1,6 +1,7 @@
 package io.cldf.tool.commands;
 
 import java.io.File;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.*;
@@ -10,7 +11,9 @@ import jakarta.inject.Inject;
 import io.cldf.api.CLDFArchive;
 import io.cldf.api.CLDFWriter;
 import io.cldf.models.*;
+import io.cldf.tool.models.CommandResult;
 import io.cldf.tool.services.ValidationService;
+import io.cldf.tool.utils.InputHandler;
 import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -20,7 +23,7 @@ import picocli.CommandLine.Option;
     name = "create",
     description = "Create a new CLDF archive",
     mixinStandardHelpOptions = true)
-public class CreateCommand implements Runnable {
+public class CreateCommand extends BaseCommand {
 
   @Option(
       names = {"-o", "--output"},
@@ -43,6 +46,16 @@ public class CreateCommand implements Runnable {
       defaultValue = "true")
   private boolean prettyPrint;
 
+  @Option(
+      names = {"--from-json"},
+      description = "Create from JSON input (use - for stdin)")
+  private String jsonInput;
+
+  @Option(
+      names = {"--stdin"},
+      description = "Read JSON data from stdin")
+  private boolean readFromStdin;
+
   @Inject private ValidationService validationService;
 
   static class TemplateType extends ArrayList<String> {
@@ -52,33 +65,77 @@ public class CreateCommand implements Runnable {
   }
 
   @Override
-  public void run() {
-    try {
-      CLDFArchive archive;
+  protected CommandResult execute() throws Exception {
+    CLDFArchive archive;
 
-      if (template != null) {
-        archive = createFromTemplate(template);
-      } else {
-        archive = createEmpty();
+    if (jsonInput != null || readFromStdin) {
+      logInfo("Creating archive from JSON input");
+      archive = createFromJson();
+    } else if (template != null) {
+      logInfo("Creating archive from template: " + template);
+      archive = createFromTemplate(template);
+    } else {
+      logInfo("Creating empty archive");
+      archive = createEmpty();
+    }
+
+    List<String> warnings = new ArrayList<>();
+
+    if (validate) {
+      logInfo("Validating archive...");
+      var validationResult = validationService.validate(archive);
+      if (!validationResult.isValid()) {
+        return CommandResult.builder()
+            .success(false)
+            .message("Validation failed")
+            .data(Map.of("errors", validationResult.getErrors()))
+            .exitCode(1)
+            .build();
       }
+      if (!validationResult.getWarnings().isEmpty()) {
+        warnings.addAll(validationResult.getWarnings());
+      }
+    }
 
-      if (validate) {
-        log.info("Validating archive...");
-        var validationResult = validationService.validate(archive);
-        if (!validationResult.isValid()) {
-          log.error("Validation failed: {}", validationResult.getErrors());
-          System.exit(1);
+    logInfo("Writing archive to " + outputFile.getAbsolutePath());
+    CLDFWriter writer = new CLDFWriter(prettyPrint, validate);
+    writer.write(archive, outputFile);
+
+    Map<String, Object> resultData = new HashMap<>();
+    resultData.put("file", outputFile.getAbsolutePath());
+    resultData.put(
+        "stats",
+        Map.of(
+            "locations", archive.getLocations() != null ? archive.getLocations().size() : 0,
+            "sessions", archive.getSessions() != null ? archive.getSessions().size() : 0,
+            "climbs", archive.getClimbs() != null ? archive.getClimbs().size() : 0));
+
+    return CommandResult.builder()
+        .success(true)
+        .message("Successfully created CLDF archive")
+        .data(resultData)
+        .warnings(warnings.isEmpty() ? null : warnings)
+        .build();
+  }
+
+  @Override
+  protected void outputText(CommandResult result) {
+    if (result.isSuccess()) {
+      output.write("Successfully created CLDF archive: " + outputFile.getName());
+      if (result.getWarnings() != null && !result.getWarnings().isEmpty()) {
+        output.write("\nWarnings:");
+        result.getWarnings().forEach(w -> output.write("  - " + w));
+      }
+    } else {
+      output.writeError("Failed to create CLDF archive: " + result.getMessage());
+      if (result.getData() != null && result.getData() instanceof Map) {
+        Map<?, ?> data = (Map<?, ?>) result.getData();
+        if (data.containsKey("errors")) {
+          output.writeError("\nErrors:", true);
+          List<?> errors = (List<?>) data.get("errors");
+          errors.forEach(e -> output.writeError("  - " + e, true));
         }
       }
-
-      log.info("Writing archive to {}", outputFile.getAbsolutePath());
-      CLDFWriter writer = new CLDFWriter(prettyPrint, validate);
-      writer.write(archive, outputFile);
-      log.info("Successfully created CLDF archive: {}", outputFile.getName());
-
-    } catch (Exception e) {
-      log.error("Failed to create CLDF archive", e);
-      System.exit(1);
     }
   }
 
@@ -331,5 +388,19 @@ public class CreateCommand implements Runnable {
         .climbs(climbs)
         .checksums(Checksums.builder().algorithm("SHA-256").build())
         .build();
+  }
+
+  private CLDFArchive createFromJson() throws IOException {
+    InputHandler inputHandler = new InputHandler();
+
+    if (readFromStdin || "-".equals(jsonInput)) {
+      logInfo("Reading JSON from stdin...");
+      return inputHandler.readJsonFromStdin(CLDFArchive.class);
+    } else if (jsonInput != null) {
+      logInfo("Reading JSON from file: " + jsonInput);
+      return inputHandler.readJsonFromFile(new File(jsonInput), CLDFArchive.class);
+    } else {
+      throw new IllegalStateException("No JSON input source specified");
+    }
   }
 }

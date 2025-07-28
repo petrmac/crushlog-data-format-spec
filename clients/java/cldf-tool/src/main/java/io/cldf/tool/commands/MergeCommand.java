@@ -8,7 +8,7 @@ import io.cldf.api.CLDF;
 import io.cldf.api.CLDFArchive;
 import io.cldf.api.CLDFWriter;
 import io.cldf.models.*;
-import io.cldf.tool.utils.ConsoleUtils;
+import io.cldf.tool.models.CommandResult;
 import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -19,7 +19,7 @@ import picocli.CommandLine.Parameters;
     name = "merge",
     description = "Merge multiple CLDF archives",
     mixinStandardHelpOptions = true)
-public class MergeCommand implements Runnable {
+public class MergeCommand extends BaseCommand {
 
   @Parameters(arity = "2..*", description = "CLDF files to merge")
   private List<File> inputFiles;
@@ -47,44 +47,105 @@ public class MergeCommand implements Runnable {
   }
 
   @Override
-  public void run() {
-    try {
-      ConsoleUtils.printHeader("CLDF Merge");
-
-      // Validate input files
-      for (File file : inputFiles) {
-        if (!file.exists()) {
-          log.error("File not found: {}", file.getAbsolutePath());
-          System.exit(1);
-        }
+  protected CommandResult execute() throws Exception {
+    // Validate input files
+    for (File file : inputFiles) {
+      if (!file.exists()) {
+        return CommandResult.builder()
+            .success(false)
+            .message("File not found: " + file.getAbsolutePath())
+            .exitCode(1)
+            .build();
       }
+    }
 
-      ConsoleUtils.printInfo("Merging " + inputFiles.size() + " archives");
+    logInfo("Merging " + inputFiles.size() + " archives");
 
-      // Read all archives
-      List<CLDFArchive> archives = new ArrayList<>();
-      for (int i = 0; i < inputFiles.size(); i++) {
-        ConsoleUtils.printProgress(i + 1, inputFiles.size());
-        archives.add(CLDF.read(inputFiles.get(i)));
-      }
+    // Read all archives
+    List<CLDFArchive> archives = new ArrayList<>();
+    Map<String, Object> sourceStats = new HashMap<>();
 
-      // Perform merge
-      CLDFArchive merged = mergeArchives(archives);
+    for (int i = 0; i < inputFiles.size(); i++) {
+      logInfo(
+          "Reading archive "
+              + (i + 1)
+              + " of "
+              + inputFiles.size()
+              + ": "
+              + inputFiles.get(i).getName());
+      CLDFArchive archive = CLDF.read(inputFiles.get(i));
+      archives.add(archive);
 
-      // Write result
-      ConsoleUtils.printInfo("Writing merged archive to " + outputFile.getAbsolutePath());
-      CLDFWriter writer = new CLDFWriter(prettyPrint);
-      writer.write(merged, outputFile);
+      // Collect stats from each archive
+      Map<String, Object> stats = new HashMap<>();
+      stats.put("locations", archive.getLocations() != null ? archive.getLocations().size() : 0);
+      stats.put("sessions", archive.getSessions() != null ? archive.getSessions().size() : 0);
+      stats.put("climbs", archive.getClimbs() != null ? archive.getClimbs().size() : 0);
+      sourceStats.put(inputFiles.get(i).getName(), stats);
+    }
 
-      ConsoleUtils.printSuccess("Successfully merged " + inputFiles.size() + " archives");
+    // Perform merge
+    MergeResult mergeResult = mergeArchives(archives);
 
-    } catch (Exception e) {
-      log.error("Merge failed", e);
-      System.exit(1);
+    // Write result
+    logInfo("Writing merged archive to " + outputFile.getAbsolutePath());
+    CLDFWriter writer = new CLDFWriter(prettyPrint);
+    writer.write(mergeResult.archive, outputFile);
+
+    // Build result data
+    Map<String, Object> resultData = new HashMap<>();
+    resultData.put(
+        "inputFiles",
+        inputFiles.stream().map(File::getName).collect(java.util.stream.Collectors.toList()));
+    resultData.put("outputFile", outputFile.getAbsolutePath());
+    resultData.put("strategy", strategy.name());
+    resultData.put("sourceStats", sourceStats);
+    resultData.put("mergedStats", mergeResult.stats);
+
+    return CommandResult.builder()
+        .success(true)
+        .message("Successfully merged " + inputFiles.size() + " archives")
+        .data(resultData)
+        .build();
+  }
+
+  @Override
+  protected void outputText(CommandResult result) {
+    if (!result.isSuccess()) {
+      output.writeError(result.getMessage());
+      return;
+    }
+
+    output.write(result.getMessage());
+
+    var data = (Map<String, Object>) result.getData();
+    if (!quiet && data != null) {
+      var stats = (Map<String, Object>) data.get("mergedStats");
+
+      output.write(
+          """
+
+          Merge Summary
+          =============
+          Strategy: %s
+          Output:   %s
+
+          Merged Archive
+          --------------
+          Locations: %d
+          Sessions:  %d
+          Climbs:    %d
+          """
+              .formatted(
+                  data.get("strategy"),
+                  data.get("outputFile"),
+                  stats.get("locations"),
+                  stats.get("sessions"),
+                  stats.get("climbs")));
     }
   }
 
-  private CLDFArchive mergeArchives(List<CLDFArchive> archives) {
+  private MergeResult mergeArchives(List<CLDFArchive> archives) {
     // Simple append strategy
     List<Location> allLocations = new ArrayList<>();
     List<Session> allSessions = new ArrayList<>();
@@ -118,13 +179,31 @@ public class MergeCommand implements Runnable {
                     .build())
             .build();
 
-    return CLDFArchive.builder()
-        .manifest(manifest)
-        .locations(allLocations)
-        .sessions(allSessions)
-        .climbs(allClimbs)
-        .checksums(
-            Checksums.builder().algorithm("SHA-256").generatedAt(OffsetDateTime.now()).build())
-        .build();
+    CLDFArchive mergedArchive =
+        CLDFArchive.builder()
+            .manifest(manifest)
+            .locations(allLocations)
+            .sessions(allSessions)
+            .climbs(allClimbs)
+            .checksums(
+                Checksums.builder().algorithm("SHA-256").generatedAt(OffsetDateTime.now()).build())
+            .build();
+
+    Map<String, Object> stats = new HashMap<>();
+    stats.put("locations", allLocations.size());
+    stats.put("sessions", allSessions.size());
+    stats.put("climbs", allClimbs.size());
+
+    return new MergeResult(mergedArchive, stats);
+  }
+
+  private static class MergeResult {
+    final CLDFArchive archive;
+    final Map<String, Object> stats;
+
+    MergeResult(CLDFArchive archive, Map<String, Object> stats) {
+      this.archive = archive;
+      this.stats = stats;
+    }
   }
 }

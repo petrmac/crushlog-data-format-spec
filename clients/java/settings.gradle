@@ -1,8 +1,0 @@
-rootProject.name = 'crushlog-data-format'
-
-include 'cldf-java'
-include 'cldf-tool'
-
-// Configure project names
-project(':cldf-java').name = 'cldf-java'
-project(':cldf-tool').name = 'cldf-tool'

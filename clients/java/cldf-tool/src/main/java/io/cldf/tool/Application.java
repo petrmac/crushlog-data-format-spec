@@ -17,7 +17,10 @@ import picocli.CommandLine.Command;
       io.cldf.tool.commands.ValidateCommand.class,
       io.cldf.tool.commands.ExtractCommand.class,
       io.cldf.tool.commands.MergeCommand.class,
-      io.cldf.tool.commands.ConvertCommand.class
+      io.cldf.tool.commands.ConvertCommand.class,
+      io.cldf.tool.commands.QueryCommand.class,
+      io.cldf.tool.commands.LoadCommand.class,
+      io.cldf.tool.commands.GraphQueryCommand.class
     })
 public class Application implements Runnable {
 

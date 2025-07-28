@@ -9,7 +9,7 @@ import java.time.format.DateTimeFormatter;
 import io.cldf.api.CLDF;
 import io.cldf.api.CLDFArchive;
 import io.cldf.models.*;
-import io.cldf.tool.utils.ConsoleUtils;
+import io.cldf.tool.models.CommandResult;
 import io.cldf.tool.utils.JsonUtils;
 import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine.Command;
@@ -21,7 +21,7 @@ import picocli.CommandLine.Parameters;
     name = "convert",
     description = "Convert between CLDF and other formats",
     mixinStandardHelpOptions = true)
-public class ConvertCommand implements Runnable {
+public class ConvertCommand extends BaseCommand {
 
   @Parameters(index = "0", description = "Input CLDF file")
   private File inputFile;
@@ -36,7 +36,7 @@ public class ConvertCommand implements Runnable {
       names = "--format",
       description = "Target format: ${COMPLETION-CANDIDATES}",
       required = true)
-  private OutputFormat format;
+  private ConvertFormat format;
 
   @Option(
       names = "--include-headers",
@@ -47,52 +47,100 @@ public class ConvertCommand implements Runnable {
   @Option(names = "--date-format", description = "Date format pattern", defaultValue = "yyyy-MM-dd")
   private String dateFormat;
 
-  enum OutputFormat {
+  enum ConvertFormat {
     json,
     csv
   }
 
   @Override
-  public void run() {
-    try {
-      if (!inputFile.exists()) {
-        log.error("File not found: {}", inputFile.getAbsolutePath());
-        System.exit(1);
-      }
+  protected CommandResult execute() throws Exception {
+    if (!inputFile.exists()) {
+      return CommandResult.builder()
+          .success(false)
+          .message("File not found: " + inputFile.getAbsolutePath())
+          .exitCode(1)
+          .build();
+    }
 
-      ConsoleUtils.printHeader("CLDF Convert");
-      ConsoleUtils.printInfo("Converting: " + inputFile.getName());
-      ConsoleUtils.printInfo("Format: " + format);
+    logInfo("Converting: " + inputFile.getName());
+    logInfo("Format: " + format);
 
-      // Read the archive
-      CLDFArchive archive = CLDF.read(inputFile);
+    // Read the archive
+    CLDFArchive archive = CLDF.read(inputFile);
 
-      // Perform conversion
-      switch (format) {
-        case json:
-          convertToJson(archive);
-          break;
-        case csv:
-          convertToCsv(archive);
-          break;
-      }
+    // Perform conversion
+    ConversionResult result;
+    switch (format) {
+      case json:
+        result = convertToJson(archive);
+        break;
+      case csv:
+        result = convertToCsv(archive);
+        break;
+      default:
+        throw new IllegalArgumentException("Unsupported format: " + format);
+    }
 
-      ConsoleUtils.printSuccess("Conversion complete: " + outputFile.getName());
+    // Build result data
+    java.util.Map<String, Object> resultData = new java.util.HashMap<>();
+    resultData.put("inputFile", inputFile.getName());
+    resultData.put("outputFile", outputFile.getAbsolutePath());
+    resultData.put("format", format.name());
+    resultData.put("itemsConverted", result.itemCount);
+    resultData.put("outputSize", outputFile.length());
 
-    } catch (Exception e) {
-      log.error("Conversion failed", e);
-      System.exit(1);
+    return CommandResult.builder()
+        .success(true)
+        .message("Successfully converted " + result.itemCount + " items to " + format)
+        .data(resultData)
+        .build();
+  }
+
+  @Override
+  protected void outputText(CommandResult result) {
+    if (!result.isSuccess()) {
+      output.writeError(result.getMessage());
+      return;
+    }
+
+    output.write(result.getMessage());
+
+    var data = (java.util.Map<String, Object>) result.getData();
+    if (!quiet && data != null) {
+      output.write(
+          """
+
+          Conversion Details
+          ==================
+          Output: %s
+          Format: %s
+          Items:  %d
+          Size:   %d bytes
+          """
+              .formatted(
+                  data.get("outputFile"),
+                  data.get("format"),
+                  data.get("itemsConverted"),
+                  data.get("outputSize")));
     }
   }
 
-  private void convertToJson(CLDFArchive archive) throws IOException {
+  private ConversionResult convertToJson(CLDFArchive archive) throws IOException {
     String json = JsonUtils.toJson(archive, true);
     try (PrintWriter writer = new PrintWriter(outputFile)) {
       writer.write(json);
     }
+
+    int itemCount =
+        (archive.getClimbs() != null ? archive.getClimbs().size() : 0)
+            + (archive.getSessions() != null ? archive.getSessions().size() : 0)
+            + (archive.getLocations() != null ? archive.getLocations().size() : 0);
+
+    return new ConversionResult(itemCount);
   }
 
-  private void convertToCsv(CLDFArchive archive) throws IOException {
+  private ConversionResult convertToCsv(CLDFArchive archive) throws IOException {
+    int itemCount = 0;
     try (PrintWriter writer = new PrintWriter(new FileWriter(outputFile))) {
       DateTimeFormatter formatter = DateTimeFormatter.ofPattern(dateFormat);
 
@@ -128,8 +176,11 @@ public class ConvertCommand implements Runnable {
             climb.getAttempts(),
             climb.getRating() != null ? String.valueOf(climb.getRating()) : "",
             escapeCsv(climb.getNotes() != null ? climb.getNotes() : ""));
+        itemCount++;
       }
     }
+
+    return new ConversionResult(itemCount);
   }
 
   private String escapeCsv(String value) {
@@ -138,5 +189,13 @@ public class ConvertCommand implements Runnable {
       return "\"" + value.replace("\"", "\"\"") + "\"";
     }
     return value;
+  }
+
+  private static class ConversionResult {
+    final int itemCount;
+
+    ConversionResult(int itemCount) {
+      this.itemCount = itemCount;
+    }
   }
 }
