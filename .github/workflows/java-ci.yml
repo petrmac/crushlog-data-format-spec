@@ -33,14 +33,14 @@ jobs:
         java-version: ${{ matrix.java }}
         distribution: 'temurin'
         
-    - name: Setup and copy schemas
+    - name: Copy schemas to resources
       run: |
-        cd clients/java
-        echo "Current working directory: $(pwd)"
-        ls -la
-        chmod +x gradlew
         mkdir -p cldf-java/src/main/resources
         cp -r ../../schemas cldf-java/src/main/resources/
+      shell: bash
+      
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
       shell: bash
       
     - name: Cache Gradle packages
@@ -93,6 +93,9 @@ jobs:
           - os: windows-latest
             arch: 'amd64'
             native-arch: 'amd64'
+    defaults:
+      run:
+        working-directory: clients/java
 
     steps:
     - uses: actions/checkout@v4
@@ -104,14 +107,14 @@ jobs:
         distribution: 'graalvm'
         github-token: ${{ secrets.GITHUB_TOKEN }}
         
-    - name: Setup and copy schemas
+    - name: Copy schemas to resources
       run: |
-        cd clients/java
-        echo "Current working directory: $(pwd)"
-        ls -la
-        chmod +x gradlew
         mkdir -p cldf-java/src/main/resources
         cp -r ../../schemas cldf-java/src/main/resources/
+      shell: bash
+      
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
       shell: bash
       
     - name: Cache Gradle packages
@@ -126,17 +129,6 @@ jobs:
           
     - name: Build native binary
       run: |
-        cd clients/java
-        # Debug: Check if settings.gradle.kts exists
-        echo "Checking for settings.gradle.kts:"
-        if [ -f settings.gradle.kts ]; then
-          echo "Found settings.gradle.kts"
-          cat settings.gradle.kts
-        else
-          echo "ERROR: settings.gradle.kts not found in $(pwd)"
-          ls -la
-        fi
-        
         if [[ "${{ matrix.arch }}" == "arm64" && "${{ runner.os }}" == "macOS" ]]; then
           # Cross-compile for ARM64 on Intel Mac
           ./gradlew :cldf-tool:nativeCompile -Dorg.graalvm.buildtools.native.architectures=${{ matrix.native-arch }}
@@ -147,7 +139,6 @@ jobs:
       
     - name: Test native binary
       run: |
-        cd clients/java
         if [[ "${{ matrix.arch }}" == "arm64" && "${{ runner.os }}" == "macOS" ]]; then
           # Skip testing ARM64 binary on Intel Mac (cross-compiled)
           echo "Skipping test for cross-compiled ARM64 binary"
