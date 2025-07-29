@@ -330,7 +330,6 @@ public class GraphService {
     }
   }
 
-
   // Helper methods for converting nodes back to domain objects
 
   private Location nodeToLocation(Node node) {
