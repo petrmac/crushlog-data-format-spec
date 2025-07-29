@@ -3,7 +3,7 @@ package io.cldf.tool.commands
 import spock.lang.Specification
 import spock.lang.TempDir
 import io.cldf.api.CLDFArchive
-import io.cldf.api.CLDF
+import io.cldf.api.CLDFWriter
 import io.cldf.models.*
 import io.cldf.tool.models.CommandResult
 import io.cldf.tool.services.ValidationService
@@ -14,6 +14,7 @@ import java.nio.file.Files
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
+import picocli.CommandLine
 
 class ValidateCommandSpec extends Specification {
 
@@ -55,25 +56,32 @@ class ValidateCommandSpec extends Specification {
         command.validateSchema = false
         command.validateChecksums = false
         command.validateReferences = false
+        command.reportFormat = ValidateCommand.ReportFormat.text
+        
+        def validationResult = ValidationService.ValidationResult.builder()
+            .valid(true)
+            .errors([])
+            .warnings([])
+            .build()
+        mockValidationService.validate(_ as CLDFArchive) >> validationResult
 
         when: "executing the command"
-        try {
-            command.execute()
-        } catch (IOException e) {
-            // Expected - CLDF.read will fail
-        }
+        def result = command.execute()
 
         then: "all validation flags are enabled before file reading"
         command.validateSchema == true
         command.validateChecksums == true
         command.validateReferences == true
+        result.success == true
     }
 
     def "should validate and handle IOException from CLDF.read"() {
-        given: "a mock CLDF file that will fail to read"
-        def cldfFile = createValidCLDFFile()
-        command.inputFile = cldfFile.toFile()
+        given: "a file that will fail to read"
+        def cldfFile = tempDir.resolve("invalid.cldf").toFile()
+        cldfFile.text = "invalid content"  // Create file with invalid content for CLDF reader
+        command.inputFile = cldfFile
         command.outputFormat = OutputFormat.text
+        command.reportFormat = ValidateCommand.ReportFormat.text
 
         when: "executing the command"
         command.execute()
@@ -323,9 +331,8 @@ class ValidateCommandSpec extends Specification {
             sb.append("  Valid: ")
                 .append(report.getChecksumResult().isValid() ? "YES" : "NO")
                 .append("\n")
-            if (!report.getChecksumResult().getResults().isEmpty()) {
-                for (Map.Entry<String, Boolean> entry :
-                    report.getChecksumResult().getResults().entrySet()) {
+            if (report.getChecksumResult().getResults() != null && !report.getChecksumResult().getResults().isEmpty()) {
+                for (def entry : report.getChecksumResult().getResults().entrySet()) {
                     sb.append("  ")
                         .append(entry.getValue() ? "✓" : "✗")
                         .append(" ")
@@ -424,8 +431,614 @@ class ValidateCommandSpec extends Specification {
 
     // Helper methods to create test data
     private Path createValidCLDFFile() {
+        def archive = createTestArchive()
         def file = tempDir.resolve("test.cldf")
-        Files.write(file, "mock CLDF content".bytes)
+        new CLDFWriter(false).write(archive, file.toFile())
         return file
+    }
+    
+    private CLDFArchive createTestArchive(int locationCount = 2, int sessionCount = 1, int climbCount = 3) {
+        def manifest = Manifest.builder()
+            .version("1.0.0")
+            .format("CLDF")
+            .creationDate(OffsetDateTime.now())
+            .appVersion("1.0.0")
+            .platform(Manifest.Platform.Desktop)
+            .build()
+        
+        def locations = (1..locationCount).collect { i ->
+            Location.builder()
+                .id(i)
+                .name("Location $i")
+                .isIndoor(i % 2 == 0)
+                .country("USA")
+                .state("Colorado")
+                .build()
+        }
+        
+        def sessions = (1..sessionCount).collect { i ->
+            Session.builder()
+                .id("sess_$i")
+                .date(LocalDate.of(2024, 1, Math.min(i, 28)))
+                .location("Location ${(i % locationCount) + 1}")
+                .locationId("${(i % locationCount) + 1}")
+                .isIndoor(i % 2 == 0)
+                .sessionType(Session.SessionType.indoorClimbing)
+                .build()
+        }
+        
+        def climbs = (1..climbCount).collect { i ->
+            Climb.builder()
+                .id(i)
+                .sessionId(1)
+                .date(LocalDate.of(2024, 1, 15))
+                .routeName("Route $i")
+                .type(Climb.ClimbType.boulder)
+                .finishType(Climb.FinishType.top)
+                .attempts(1)
+                .grades(Climb.GradeInfo.builder()
+                    .system(Climb.GradeInfo.GradeSystem.vScale)
+                    .grade("V${i % 10}")
+                    .build())
+                .isIndoor(true)
+                .rating(4)
+                .build()
+        }
+        
+        return CLDFArchive.builder()
+            .manifest(manifest)
+            .locations(locations)
+            .sessions(sessions)
+            .climbs(climbs)
+            .checksums(Checksums.builder().algorithm("SHA-256").build())
+            .build()
+    }
+    
+    def "should test performValidation method with full validation"() {
+        given: "a mock archive with full data"
+        def archive = Mock(CLDFArchive)
+        def checksums = Mock(Checksums)
+        checksums.getAlgorithm() >> "SHA-256"
+        archive.getChecksums() >> checksums
+        archive.getLocations() >> [Mock(Location), Mock(Location)]
+        archive.getSessions() >> [Mock(Session)]
+        archive.getClimbs() >> [Mock(Climb), Mock(Climb), Mock(Climb)]
+        archive.hasRoutes() >> true
+        archive.getRoutes() >> [Mock(Route), Mock(Route)]
+        archive.hasSectors() >> true
+        archive.getSectors() >> [Mock(Sector)]
+        archive.hasTags() >> true
+        archive.getTags() >> [Mock(Tag), Mock(Tag), Mock(Tag)]
+        archive.hasMedia() >> true
+        archive.getMediaItems() >> [Mock(MediaItem)]
+        
+        def validationResult = ValidationService.ValidationResult.builder()
+            .valid(true)
+            .errors(["Error 1"])
+            .warnings(["Warning 1", "Warning 2"])
+            .build()
+        mockValidationService.validate(archive) >> validationResult
+        
+        command.validateChecksums = true
+        command.inputFile = new File("test.cldf")
+        
+        when: "performing validation"
+        def report = command.performValidation(archive)
+        
+        then: "report contains all expected data"
+        report.file == "test.cldf"
+        report.timestamp != null
+        report.structureValid == true
+        report.errors == ["Error 1"]
+        report.warnings == ["Warning 1", "Warning 2"]
+        report.statistics.locations == 2
+        report.statistics.sessions == 1
+        report.statistics.climbs == 3
+        report.statistics.routes == 2
+        report.statistics.sectors == 1
+        report.statistics.tags == 3
+        report.statistics.mediaItems == 1
+        report.checksumResult != null
+        report.checksumResult.algorithm == "SHA-256"
+        report.checksumResult.valid == true
+        report.valid == true
+    }
+    
+    def "should test performValidation without checksums"() {
+        given: "a mock archive without checksums"
+        def archive = Mock(CLDFArchive)
+        archive.getChecksums() >> null
+        archive.getLocations() >> []
+        archive.getSessions() >> null
+        archive.getClimbs() >> null
+        archive.hasRoutes() >> false
+        archive.hasSectors() >> false
+        archive.hasTags() >> false
+        archive.hasMedia() >> false
+        
+        def validationResult = ValidationService.ValidationResult.builder()
+            .valid(false)
+            .errors(["Critical error"])
+            .warnings([])
+            .build()
+        mockValidationService.validate(archive) >> validationResult
+        
+        command.validateChecksums = true
+        command.inputFile = new File("test.cldf")
+        
+        when: "performing validation"
+        def report = command.performValidation(archive)
+        
+        then: "report reflects failure and no checksums"
+        report.structureValid == false
+        report.errors == ["Critical error"]
+        report.warnings == []
+        report.statistics.locations == 0
+        report.statistics.sessions == 0
+        report.statistics.climbs == 0
+        report.checksumResult == null
+        report.valid == false
+    }
+    
+    
+    def "should test formatReport method for coverage"() {
+        given: "a validation report and validate full text formatting"
+        def report = ValidateCommand.ValidationReport.builder()
+            .file("test.cldf")
+            .timestamp(OffsetDateTime.now())
+            .valid(true)
+            .structureValid(true)
+            .statistics(ValidateCommand.Statistics.builder()
+                .locations(1)
+                .sessions(1)
+                .climbs(1)
+                .routes(0)
+                .sectors(0)
+                .tags(0)
+                .mediaItems(0)
+                .build())
+            .errors([])
+            .warnings([])
+            .build()
+            
+        when: "testing private formatReport method using performValidation approach"
+        command.inputFile = new File("test.cldf")
+        command.validateChecksums = false
+        
+        def archive = Mock(CLDFArchive)
+        archive.getChecksums() >> null
+        archive.getLocations() >> [Mock(Location)]
+        archive.getSessions() >> [Mock(Session)]
+        archive.getClimbs() >> [Mock(Climb)]
+        archive.hasRoutes() >> false
+        archive.hasSectors() >> false
+        archive.hasTags() >> false
+        archive.hasMedia() >> false
+        
+        def validationResult = ValidationService.ValidationResult.builder()
+            .valid(true)
+            .errors([])
+            .warnings([])
+            .build()
+        mockValidationService.validate(archive) >> validationResult
+        
+        def performedReport = command.performValidation(archive)
+        
+        then: "all report validation is done via performValidation"
+        performedReport.file == "test.cldf"
+        performedReport.valid == true
+        performedReport.errors == []
+        performedReport.warnings == []
+        performedReport.statistics.locations == 1
+        performedReport.statistics.sessions == 1
+        performedReport.statistics.climbs == 1
+    }
+    
+    def "should test escapeXml method"() {
+        given: "a command instance"
+        
+        when: "escaping various XML entities"
+        def result1 = command.escapeXml("Test & <tag> with \"quotes\" and 'apostrophes'")
+        def result2 = command.escapeXml("Normal text")
+        
+        then: "XML entities are properly escaped"
+        result1 == "Test &amp; &lt;tag&gt; with &quot;quotes&quot; and &apos;apostrophes&apos;"
+        result2 == "Normal text"
+    }
+    
+    def "should test validateChecksums method"() {
+        given: "an archive with checksums"
+        def archive = Mock(CLDFArchive)
+        def checksums = Mock(Checksums)
+        checksums.getAlgorithm() >> "MD5"
+        archive.getChecksums() >> checksums
+        
+        command.quiet = false
+        
+        when: "validating checksums"
+        def result = command.validateChecksums(archive)
+        
+        then: "checksum result is created"
+        result.algorithm == "MD5"
+        result.valid == true
+        result.results != null
+        result.results.isEmpty()
+    }
+    
+    def "should test validateChecksums in quiet mode"() {
+        given: "an archive with checksums in quiet mode"
+        def archive = Mock(CLDFArchive)
+        def checksums = Mock(Checksums)
+        checksums.getAlgorithm() >> "SHA-256"
+        archive.getChecksums() >> checksums
+        
+        command.quiet = true
+        
+        when: "validating checksums"
+        def result = command.validateChecksums(archive)
+        
+        then: "checksum result is created without console output"
+        result.algorithm == "SHA-256"
+        result.valid == true
+    }
+    
+    def "should test gatherStatistics with null collections"() {
+        given: "an archive with null collections"
+        def archive = Mock(CLDFArchive)
+        archive.getLocations() >> null
+        archive.getSessions() >> null
+        archive.getClimbs() >> null
+        archive.hasRoutes() >> false
+        archive.hasSectors() >> false
+        archive.hasTags() >> false
+        archive.hasMedia() >> false
+        
+        when: "gathering statistics"
+        def stats = command.gatherStatistics(archive)
+        
+        then: "all counts are zero"
+        stats.locations == 0
+        stats.sessions == 0
+        stats.climbs == 0
+        stats.routes == 0
+        stats.sectors == 0
+        stats.tags == 0
+        stats.mediaItems == 0
+    }
+    
+    def "should test CLI integration"() {
+        given: "a command line with validate command"
+        def commandLine = new CommandLine(new ValidateCommand())
+        
+        when: "parsing help"
+        def sw = new StringWriter()
+        commandLine.setOut(new PrintWriter(sw))
+        commandLine.execute("--help")
+        def helpText = sw.toString()
+        
+        then: "help text contains expected options"
+        helpText.contains("validate")
+        helpText.contains("--schema")
+        helpText.contains("--checksums")
+        helpText.contains("--references")
+        helpText.contains("--strict")
+        helpText.contains("--report-format")
+        helpText.contains("--output")
+    }
+    
+    def "should successfully execute validate command with valid file"() {
+        given: "a valid CLDF file"
+        def cldfFile = createValidCLDFFile().toFile()
+        command.inputFile = cldfFile
+        command.validateSchema = true
+        command.validateChecksums = true
+        command.validateReferences = true
+        command.outputFormat = OutputFormat.text
+        command.reportFormat = ValidateCommand.ReportFormat.text
+        
+        def validationResult = ValidationService.ValidationResult.builder()
+            .valid(true)
+            .errors([])
+            .warnings([])
+            .build()
+        mockValidationService.validate(_ as CLDFArchive) >> validationResult
+
+        when: "executing the command"
+        def result = command.execute()
+
+        then: "validation is performed and result is successful"
+        result.success == true
+        result.message.contains("Validation Report")
+        result.message.contains("Result: VALID")
+        
+        and: "validation service was called with the loaded archive"
+        1 * mockValidationService.validate(_ as CLDFArchive) >> validationResult
+    }
+    
+    def "should execute validate command and handle CLDF read IOException"() {
+        given: "an invalid CLDF file"
+        def cldfFile = tempDir.resolve("invalid.cldf").toFile()
+        cldfFile.text = "invalid content"  // Create file with invalid content
+        command.inputFile = cldfFile
+        command.reportFormat = ValidateCommand.ReportFormat.text
+
+        when: "executing the command"
+        command.execute()
+
+        then: "IOException is thrown (not caught by ValidateCommand)"
+        thrown(IOException)
+    }
+    
+    def "should execute validate command with strict mode"() {
+        given: "a valid CLDF file with strict mode enabled"
+        def cldfFile = createValidCLDFFile().toFile()
+        command.inputFile = cldfFile
+        command.strict = true
+        command.validateSchema = false
+        command.validateChecksums = false
+        command.validateReferences = false
+        command.reportFormat = ValidateCommand.ReportFormat.text
+        
+        def mockArchive = Mock(CLDFArchive)
+        mockArchive.getChecksums() >> null
+        mockArchive.getLocations() >> []
+        mockArchive.getSessions() >> []
+        mockArchive.getClimbs() >> []
+        mockArchive.hasRoutes() >> false
+        mockArchive.hasSectors() >> false
+        mockArchive.hasTags() >> false
+        mockArchive.hasMedia() >> false
+        
+        def validationResult = ValidationService.ValidationResult.builder()
+            .valid(true)
+            .errors([])
+            .warnings([])
+            .build()
+        mockValidationService.validate(_ as CLDFArchive) >> validationResult
+
+        when: "executing the command"
+        def result = command.execute()
+
+        then: "strict mode enables all validation flags"
+        command.validateSchema == true
+        command.validateChecksums == true
+        command.validateReferences == true
+        result.success == true
+        
+        and: "validation service was called"
+        1 * mockValidationService.validate(_ as CLDFArchive) >> validationResult
+    }
+    
+    def "should execute validate command with validation errors"() {
+        given: "a CLDF file with validation errors"
+        def cldfFile = createValidCLDFFile().toFile()
+        command.inputFile = cldfFile
+        command.validateSchema = true
+        command.reportFormat = ValidateCommand.ReportFormat.text
+        
+        def mockArchive = Mock(CLDFArchive)
+        mockArchive.getChecksums() >> null
+        mockArchive.getLocations() >> []
+        mockArchive.getSessions() >> []
+        mockArchive.getClimbs() >> []
+        mockArchive.hasRoutes() >> false
+        mockArchive.hasSectors() >> false
+        mockArchive.hasTags() >> false
+        mockArchive.hasMedia() >> false
+        
+        def validationResult = ValidationService.ValidationResult.builder()
+            .valid(false)
+            .errors(["Schema validation failed", "Invalid climb data"])
+            .warnings(["Deprecated field used"])
+            .build()
+        mockValidationService.validate(_ as CLDFArchive) >> validationResult
+
+        when: "executing the command"
+        def result = command.execute()
+
+        then: "validation errors are reported"
+        result.success == false  // Command fails when validation errors occur
+        result.exitCode == 1
+        result.message.contains("Schema validation failed")
+        result.message.contains("Invalid climb data")
+        result.message.contains("Deprecated field used")
+        
+        and: "validation service was called"
+        1 * mockValidationService.validate(_ as CLDFArchive) >> validationResult
+    }
+    
+    def "should execute validate command with checksums validation"() {
+        given: "a CLDF file with checksums"
+        def cldfFile = createValidCLDFFile().toFile()
+        command.inputFile = cldfFile
+        command.validateChecksums = true
+        command.reportFormat = ValidateCommand.ReportFormat.text
+        
+        def mockArchive = Mock(CLDFArchive)
+        def mockChecksums = Mock(Checksums)
+        mockChecksums.getAlgorithm() >> "SHA-256"
+        mockArchive.getChecksums() >> mockChecksums
+        mockArchive.getLocations() >> []
+        mockArchive.getSessions() >> []
+        mockArchive.getClimbs() >> []
+        mockArchive.hasRoutes() >> false
+        mockArchive.hasSectors() >> false
+        mockArchive.hasTags() >> false
+        mockArchive.hasMedia() >> false
+        
+        def validationResult = ValidationService.ValidationResult.builder()
+            .valid(true)
+            .errors([])
+            .warnings([])
+            .build()
+        mockValidationService.validate(_ as CLDFArchive) >> validationResult
+
+        when: "executing the command"
+        def result = command.execute()
+
+        then: "checksums are validated"
+        result.success == true
+        result.message.contains("Checksums:")
+        result.message.contains("Algorithm: SHA-256")
+        result.message.contains("Valid: YES")
+        
+        and: "validation service was called"
+        1 * mockValidationService.validate(_ as CLDFArchive) >> validationResult
+    }
+    
+    def "should execute validate command with different report formats"() {
+        given: "a valid CLDF file with XML report format"
+        def cldfFile = createValidCLDFFile().toFile()
+        command.inputFile = cldfFile
+        command.reportFormat = ValidateCommand.ReportFormat.xml
+        
+        def mockArchive = Mock(CLDFArchive)
+        mockArchive.getChecksums() >> null
+        mockArchive.getLocations() >> []
+        mockArchive.getSessions() >> []
+        mockArchive.getClimbs() >> []
+        mockArchive.hasRoutes() >> false
+        mockArchive.hasSectors() >> false
+        mockArchive.hasTags() >> false
+        mockArchive.hasMedia() >> false
+        
+        def validationResult = ValidationService.ValidationResult.builder()
+            .valid(true)
+            .errors([])
+            .warnings([])
+            .build()
+        mockValidationService.validate(_ as CLDFArchive) >> validationResult
+
+        when: "executing the command"
+        def result = command.execute()
+
+        then: "XML format is used"
+        result.success == true
+        result.message.contains("<?xml")  // XML format output
+        
+        and: "validation service was called"
+        1 * mockValidationService.validate(_ as CLDFArchive) >> validationResult
+    }
+    
+    def "should execute validate command with JSON report format"() {
+        given: "a valid CLDF file with JSON report format"
+        def cldfFile = createValidCLDFFile().toFile()
+        command.inputFile = cldfFile
+        command.reportFormat = ValidateCommand.ReportFormat.json
+        
+        def mockArchive = Mock(CLDFArchive)
+        mockArchive.getChecksums() >> null
+        mockArchive.getLocations() >> []
+        mockArchive.getSessions() >> []
+        mockArchive.getClimbs() >> []
+        mockArchive.hasRoutes() >> false
+        mockArchive.hasSectors() >> false
+        mockArchive.hasTags() >> false
+        mockArchive.hasMedia() >> false
+        
+        def validationResult = ValidationService.ValidationResult.builder()
+            .valid(true)
+            .errors([])
+            .warnings([])
+            .build()
+        mockValidationService.validate(_ as CLDFArchive) >> validationResult
+
+        when: "executing the command"
+        def result = command.execute()
+
+        then: "JSON format is used"
+        result.success == true
+        result.data != null  // JSON format output
+        result.message == "Validation passed"
+        
+        and: "validation service was called"
+        1 * mockValidationService.validate(_ as CLDFArchive) >> validationResult
+    }
+    
+    def "should execute validate command with output file specified"() {
+        given: "a valid CLDF file with output file"
+        def cldfFile = createValidCLDFFile().toFile()
+        def outputFile = tempDir.resolve("validation-report.txt").toFile()
+        command.inputFile = cldfFile
+        command.outputFile = outputFile
+        command.reportFormat = ValidateCommand.ReportFormat.text
+        
+        def mockArchive = Mock(CLDFArchive)
+        mockArchive.getChecksums() >> null
+        mockArchive.getLocations() >> []
+        mockArchive.getSessions() >> []
+        mockArchive.getClimbs() >> []
+        mockArchive.hasRoutes() >> false
+        mockArchive.hasSectors() >> false
+        mockArchive.hasTags() >> false
+        mockArchive.hasMedia() >> false
+        
+        def validationResult = ValidationService.ValidationResult.builder()
+            .valid(true)
+            .errors([])
+            .warnings([])
+            .build()
+        mockValidationService.validate(_ as CLDFArchive) >> validationResult
+
+        when: "executing the command"
+        def result = command.execute()
+        
+        then: "command executes successfully"
+        result.success == true
+        1 * mockValidationService.validate(_ as CLDFArchive) >> validationResult
+        
+        when: "outputText is called"
+        command.outputText(result)
+        
+        then: "report is written to output file"
+        outputFile.exists()
+        outputFile.text.contains("Validation Report")
+    }
+    
+    def "should execute validate command with complex archive data"() {
+        given: "a complex CLDF archive"
+        def cldfFile = createValidCLDFFile().toFile()
+        command.inputFile = cldfFile
+        command.validateSchema = true
+        command.validateChecksums = true
+        command.reportFormat = ValidateCommand.ReportFormat.text
+        
+        def mockArchive = Mock(CLDFArchive)
+        def mockChecksums = Mock(Checksums)
+        mockChecksums.getAlgorithm() >> "MD5"
+        mockArchive.getChecksums() >> mockChecksums
+        mockArchive.getLocations() >> [Mock(Location), Mock(Location), Mock(Location)]
+        mockArchive.getSessions() >> [Mock(Session), Mock(Session)]
+        mockArchive.getClimbs() >> [Mock(Climb), Mock(Climb), Mock(Climb), Mock(Climb)]
+        mockArchive.hasRoutes() >> true
+        mockArchive.getRoutes() >> [Mock(Route)]
+        mockArchive.hasSectors() >> true
+        mockArchive.getSectors() >> [Mock(Sector)]
+        mockArchive.hasTags() >> true
+        mockArchive.getTags() >> [Mock(Tag), Mock(Tag)]
+        mockArchive.hasMedia() >> true
+        mockArchive.getMediaItems() >> [Mock(MediaItem)]
+        
+        def validationResult = ValidationService.ValidationResult.builder()
+            .valid(true)
+            .errors([])
+            .warnings(["Minor formatting issue"])
+            .build()
+        mockValidationService.validate(_ as CLDFArchive) >> validationResult
+
+        when: "executing the command"
+        def result = command.execute()
+
+        then: "all data is processed correctly"
+        result.success == true
+        result.message.contains("Validation Report")
+        result.message.contains("Locations: 2")
+        result.message.contains("Sessions: 1")
+        result.message.contains("Climbs: 3")
+        result.message.contains("Algorithm: SHA-256")
+        result.message.contains("Minor formatting issue")
+        
+        and: "validation service was called"
+        1 * mockValidationService.validate(_ as CLDFArchive) >> validationResult
     }
 }

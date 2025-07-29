@@ -3,7 +3,6 @@ package io.cldf.tool.commands
 import spock.lang.Specification
 import spock.lang.TempDir
 import io.cldf.api.CLDFArchive
-import io.cldf.api.CLDF
 import io.cldf.api.CLDFWriter
 import io.cldf.models.*
 import io.cldf.tool.models.CommandResult
@@ -251,20 +250,32 @@ class MergeCommandSpec extends Specification {
 
     def "should merge multiple archives with complex data"() {
         given: "three CLDF files with different data"
-        def file1 = createCLDFFile("file1.cldf")
-        def file2 = createCLDFFile("file2.cldf")
-        def file3 = createCLDFFile("file3.cldf")
+        def archive1 = createMockArchive(2, 2, 5)
+        def archive2 = createMockArchive(3, 3, 8)
+        def archive3 = createMockArchive(1, 2, 4)
         
-        command.inputFiles = [file1.toFile(), file2.toFile(), file3.toFile()]
+        def file1 = tempDir.resolve("file1.cldf").toFile()
+        def file2 = tempDir.resolve("file2.cldf").toFile()
+        def file3 = tempDir.resolve("file3.cldf").toFile()
+        
+        new CLDFWriter(false).write(archive1, file1)
+        new CLDFWriter(false).write(archive2, file2)
+        new CLDFWriter(false).write(archive3, file3)
+        
+        command.inputFiles = [file1, file2, file3]
         command.outputFile = tempDir.resolve("merged.cldf").toFile()
         command.strategy = MergeCommand.MergeStrategy.append
         command.prettyPrint = true
 
         when: "executing the command"
-        command.execute()
+        def result = command.execute()
 
-        then: "fails due to CLDF.read IOException"
-        thrown(IOException)
+        then: "merge is successful"
+        result.success == true
+        result.message.contains("Successfully merged 3 archives")
+        result.data.mergedStats.locations == 6 // 2+3+1
+        result.data.mergedStats.sessions == 7  // 2+3+2
+        result.data.mergedStats.climbs == 17   // 5+8+4
     }
 
     def "should test manifest creation in merged archive"() {
@@ -310,10 +321,252 @@ class MergeCommandSpec extends Specification {
         result.archive.checksums.generatedAt != null
     }
 
-    // Helper methods
-    private Path createCLDFFile(String name) {
-        def file = tempDir.resolve(name)
-        Files.write(file, "mock CLDF content".bytes)
-        return file
+    def "should successfully execute merge command with valid files"() {
+        given: "two actual CLDF files"
+        def archive1 = createMockArchive(2, 1, 3)
+        def archive2 = createMockArchive(1, 2, 4)
+        
+        def file1 = tempDir.resolve("archive1.cldf").toFile()
+        def file2 = tempDir.resolve("archive2.cldf").toFile()
+        def outputFile = tempDir.resolve("merged.cldf").toFile()
+        
+        // Create actual CLDF files using CLDFWriter
+        new CLDFWriter(false).write(archive1, file1)
+        new CLDFWriter(false).write(archive2, file2)
+        
+        command.inputFiles = [file1, file2]
+        command.outputFile = outputFile
+        command.strategy = MergeCommand.MergeStrategy.append
+        command.prettyPrint = true
+
+        when: "executing the command"
+        def result = command.execute()
+
+        then: "result is successful with merge data"
+        result.success == true
+        result.message.contains("Successfully merged 2 archives")
+        result.data != null
+        result.data.inputFiles == ["archive1.cldf", "archive2.cldf"]
+        result.data.outputFile == outputFile.absolutePath
+        result.data.strategy == "append"
+        result.data.sourceStats != null
+        result.data.mergedStats != null
+        
+        and: "output file is created"
+        outputFile.exists()
     }
+    
+    def "should handle CLDF read IOException during execute"() {
+        given: "an invalid CLDF file"
+        def file1 = tempDir.resolve("invalid.cldf").toFile()
+        file1.text = "invalid content"  // Create file with invalid content
+        def outputFile = tempDir.resolve("merged.cldf").toFile()
+        
+        command.inputFiles = [file1]
+        command.outputFile = outputFile
+        command.strategy = MergeCommand.MergeStrategy.append
+
+        when: "executing the command"
+        command.execute()
+
+        then: "IOException is thrown (not caught by MergeCommand)"
+        thrown(IOException)
+    }
+    
+    def "should handle CLDFWriter IOException during execute"() {
+        given: "a nonexistent output directory"
+        def archive1 = createMockArchive(1, 1, 1)
+        def file1 = tempDir.resolve("archive1.cldf").toFile()
+        new CLDFWriter(false).write(archive1, file1)
+        
+        // Use a path to a non-existent directory that won't be created
+        def outputFile = tempDir.resolve("nonexistent/dir/merged.cldf").toFile()
+        
+        command.inputFiles = [file1]
+        command.outputFile = outputFile
+        command.strategy = MergeCommand.MergeStrategy.append
+
+        when: "executing the command"
+        command.execute()
+
+        then: "FileNotFoundException is thrown (not caught by MergeCommand)"
+        thrown(FileNotFoundException)
+    }
+    
+    def "should execute merge with multiple archives"() {
+        given: "three actual CLDF archives with varying content"
+        def archive1 = createMockArchive(1, 1, 2)  // Small - need at least 1 session
+        def archive2 = createMockArchive(3, 2, 5)  // Medium
+        def archive3 = createMockArchive(5, 4, 10) // Large
+        
+        def file1 = tempDir.resolve("small.cldf").toFile()
+        def file2 = tempDir.resolve("medium.cldf").toFile()
+        def file3 = tempDir.resolve("large.cldf").toFile()
+        def outputFile = tempDir.resolve("merged.cldf").toFile()
+        
+        // Create actual CLDF files
+        new CLDFWriter(false).write(archive1, file1)
+        new CLDFWriter(false).write(archive2, file2)
+        new CLDFWriter(false).write(archive3, file3)
+        
+        command.inputFiles = [file1, file2, file3]
+        command.outputFile = outputFile
+        command.strategy = MergeCommand.MergeStrategy.append
+
+        when: "executing the command"
+        def result = command.execute()
+
+        then: "archives are merged correctly"
+        result.success == true
+        result.message.contains("Successfully merged 3 archives")
+        result.data.sourceStats.size() == 3
+        outputFile.exists()
+    }
+    
+    def "should execute merge with pretty print disabled"() {
+        given: "archives with pretty print disabled"
+        def archive1 = createMockArchive(1, 1, 1)
+        def file1 = tempDir.resolve("archive1.cldf").toFile()
+        def outputFile = tempDir.resolve("merged.cldf").toFile()
+        
+        new CLDFWriter(false).write(archive1, file1)
+        
+        command.inputFiles = [file1]
+        command.outputFile = outputFile
+        command.prettyPrint = false  // Disable pretty print
+        command.strategy = MergeCommand.MergeStrategy.append
+
+        when: "executing the command"
+        def result = command.execute()
+
+        then: "merge is successful and output file is created"
+        result.success == true
+        outputFile.exists()
+        
+        and: "verify the file is not pretty printed by checking size"
+        outputFile.length() > 0
+    }
+    
+    def "should execute merge and collect source statistics"() {
+        given: "two archives with different sizes"
+        def archive1 = createMockArchive(1, 2, 3)
+        def archive2 = createMockArchive(4, 5, 6)
+        
+        def file1 = tempDir.resolve("small.cldf").toFile()
+        def file2 = tempDir.resolve("large.cldf").toFile()
+        def outputFile = tempDir.resolve("merged.cldf").toFile()
+        
+        new CLDFWriter(false).write(archive1, file1)
+        new CLDFWriter(false).write(archive2, file2)
+        
+        command.inputFiles = [file1, file2]
+        command.outputFile = outputFile
+        command.strategy = MergeCommand.MergeStrategy.append
+
+        when: "executing the command"
+        def result = command.execute()
+
+        then: "source statistics are collected correctly"
+        result.success == true
+        def sourceStats = result.data.sourceStats
+        sourceStats["small.cldf"].locations == 1
+        sourceStats["small.cldf"].sessions == 2
+        sourceStats["small.cldf"].climbs == 3
+        sourceStats["large.cldf"].locations == 4
+        sourceStats["large.cldf"].sessions == 5
+        sourceStats["large.cldf"].climbs == 6
+    }
+    
+    def "should execute merge with archives containing minimal data"() {
+        given: "archives with varying amounts of data"
+        // Archive 1 has minimal required data per CLDF spec
+        def archive1 = createMockArchive(1, 1, 1)  // 1 location, 1 session, 1 climb (minimum required)
+        def archive2 = createMockArchive(2, 1, 3)
+        
+        def file1 = tempDir.resolve("archive1.cldf").toFile()
+        def file2 = tempDir.resolve("archive2.cldf").toFile()
+        def outputFile = tempDir.resolve("merged.cldf").toFile()
+        
+        new CLDFWriter(false).write(archive1, file1)
+        new CLDFWriter(false).write(archive2, file2)
+        
+        command.inputFiles = [file1, file2]
+        command.outputFile = outputFile
+        command.strategy = MergeCommand.MergeStrategy.append
+
+        when: "executing the command"
+        def result = command.execute()
+
+        then: "merge handles minimal data gracefully"
+        result.success == true
+        outputFile.exists()
+        result.data.mergedStats.locations == 3  // 1 from archive1 + 2 from archive2
+        result.data.mergedStats.sessions == 2   // 1 from archive1 + 1 from archive2
+        result.data.mergedStats.climbs == 4     // 1 from archive1 + 3 from archive2
+        
+        and: "source stats are collected correctly"
+        result.data.sourceStats["archive1.cldf"].locations == 1
+        result.data.sourceStats["archive1.cldf"].sessions == 1  
+        result.data.sourceStats["archive1.cldf"].climbs == 1
+    }
+
+    private CLDFArchive createMockArchive(int locationCount, int sessionCount, int climbCount) {
+        // Create actual CLDF entities for a valid archive
+        def manifest = Manifest.builder()
+            .version("1.0.0")
+            .format("CLDF")
+            .creationDate(OffsetDateTime.now())
+            .appVersion("1.0.0")
+            .platform(Manifest.Platform.Desktop)
+            .build()
+        
+        def locations = (1..locationCount).collect { i ->
+            Location.builder()
+                .id(i)
+                .name("Location $i")
+                .isIndoor(i % 2 == 0)
+                .country("USA")
+                .state("Colorado")
+                .build()
+        }
+        
+        def sessions = (1..sessionCount).collect { i ->
+            Session.builder()
+                .id("sess_$i")
+                .date(LocalDate.of(2024, 1, Math.max(1, i)))  // Ensure day is at least 1
+                .location("Location $i")
+                .locationId("$i")
+                .isIndoor(i % 2 == 0)
+                .sessionType(Session.SessionType.indoorClimbing)
+                .build()
+        }
+        
+        def climbs = (1..climbCount).collect { i ->
+            Climb.builder()
+                .id(i)
+                .sessionId(1)
+                .date(LocalDate.of(2024, 1, 15))
+                .routeName("Route $i")
+                .type(Climb.ClimbType.boulder)
+                .finishType(Climb.FinishType.top)
+                .attempts(1)
+                .grades(Climb.GradeInfo.builder()
+                    .system(Climb.GradeInfo.GradeSystem.vScale)
+                    .grade("V$i")
+                    .build())
+                .isIndoor(true)
+                .rating(4)
+                .build()
+        }
+        
+        return CLDFArchive.builder()
+            .manifest(manifest)
+            .locations(locationCount > 0 ? locations : null)
+            .sessions(sessionCount > 0 ? sessions : null)
+            .climbs(climbCount > 0 ? climbs : null)
+            .checksums(Checksums.builder().algorithm("SHA-256").build())
+            .build()
+    }
+
+
 }

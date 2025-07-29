@@ -429,4 +429,237 @@ class QueryCommandSpec extends Specification {
         // Should complete without errors
         noExceptionThrown()
     }
+    
+    def "should execute query with filter applied"() {
+        given: "a query with filter"
+        command.selectType = QueryCommand.DataType.climbs
+        command.filter = "type=boulder"
+        cldfService.read(inputFile) >> testArchive
+
+        when: "executing the command"
+        def result = command.execute()
+
+        then: "filter is applied and result is successful"
+        result.success == true
+        result.message == "Query completed"
+        result.data.query.filter == "type=boulder"
+        result.data.count >= 0
+    }
+    
+    def "should execute query with sorting applied"() {
+        given: "a query with sorting"
+        command.selectType = QueryCommand.DataType.sessions
+        command.sortBy = "date"
+        cldfService.read(inputFile) >> testArchive
+
+        when: "executing the command"
+        def result = command.execute()
+
+        then: "sort is applied and result is successful"
+        result.success == true
+        result.data.query.sort == "date"
+        result.data.count == 2
+    }
+    
+    def "should execute query with field filtering"() {
+        given: "a query with field filtering"
+        command.selectType = QueryCommand.DataType.climbs
+        command.fields = "routeName,grade,date"
+        cldfService.read(inputFile) >> testArchive
+
+        when: "executing the command"
+        def result = command.execute()
+
+        then: "field filtering is applied"
+        result.success == true
+        result.data.query.fields == "routeName,grade,date"
+        result.data.count >= 0
+    }
+    
+    def "should execute query for routes when archive has routes"() {
+        given: "an archive with routes"
+        command.selectType = QueryCommand.DataType.routes
+        def archiveWithRoutes = Mock(CLDFArchive)
+        def routes = [Mock(Route), Mock(Route)]
+        
+        archiveWithRoutes.hasRoutes() >> true
+        archiveWithRoutes.getRoutes() >> routes
+        cldfService.read(inputFile) >> archiveWithRoutes
+
+        when: "executing the command"
+        def result = command.execute()
+
+        then: "routes are returned"
+        result.success == true
+        result.data.results == routes
+        result.data.count == 2
+    }
+    
+    def "should execute query for sectors when archive has sectors"() {
+        given: "an archive with sectors"
+        command.selectType = QueryCommand.DataType.sectors
+        def archiveWithSectors = Mock(CLDFArchive)
+        def sectors = [Mock(Sector)]
+        
+        archiveWithSectors.hasSectors() >> true
+        archiveWithSectors.getSectors() >> sectors
+        cldfService.read(inputFile) >> archiveWithSectors
+
+        when: "executing the command"
+        def result = command.execute()
+
+        then: "sectors are returned"
+        result.success == true
+        result.data.results == sectors
+        result.data.count == 1
+    }
+    
+    def "should execute query for tags when archive has tags"() {
+        given: "an archive with tags"
+        command.selectType = QueryCommand.DataType.tags
+        def archiveWithTags = Mock(CLDFArchive)
+        def tags = [Mock(Tag), Mock(Tag)]
+        
+        archiveWithTags.hasTags() >> true
+        archiveWithTags.getTags() >> tags
+        cldfService.read(inputFile) >> archiveWithTags
+
+        when: "executing the command"
+        def result = command.execute()
+
+        then: "tags are returned"
+        result.success == true
+        result.data.results == tags
+        result.data.count == 2
+    }
+    
+    def "should execute query for media when archive has media"() {
+        given: "an archive with media"
+        command.selectType = QueryCommand.DataType.media
+        def archiveWithMedia = Mock(CLDFArchive)
+        def mediaItems = [Mock(MediaItem)]
+        
+        archiveWithMedia.hasMedia() >> true
+        archiveWithMedia.getMediaItems() >> mediaItems
+        cldfService.read(inputFile) >> archiveWithMedia
+
+        when: "executing the command"
+        def result = command.execute()
+
+        then: "media items are returned"
+        result.success == true
+        result.data.results == mediaItems
+        result.data.count == 1
+    }
+    
+    def "should execute query and handle null collections gracefully"() {
+        given: "an archive with null collections"
+        command.selectType = QueryCommand.DataType.climbs
+        def archiveWithNulls = Mock(CLDFArchive)
+        archiveWithNulls.getClimbs() >> null
+        cldfService.read(inputFile) >> archiveWithNulls
+
+        when: "executing the command"
+        def result = command.execute()
+
+        then: "empty results are returned gracefully"
+        result.success == true
+        result.data.results == []
+        result.data.count == 0
+    }
+    
+    def "should execute query and handle CLDFService IOException"() {
+        given: "a file that fails to read"
+        cldfService.read(inputFile) >> { throw new IOException("Invalid CLDF format") }
+
+        when: "executing the command"
+        def result = command.execute()
+
+        then: "IOException is propagated (not caught in QueryCommand)"
+        thrown(IOException)
+    }
+    
+    def "should execute query with all options combined"() {
+        given: "a query with all options"
+        command.selectType = QueryCommand.DataType.climbs
+        command.filter = "type=boulder"
+        command.sortBy = "date"
+        command.limit = 2
+        command.offset = 1
+        command.fields = "routeName,grade"
+        command.includeStats = true
+        cldfService.read(inputFile) >> testArchive
+
+        when: "executing the command"
+        def result = command.execute()
+
+        then: "all options are applied"
+        result.success == true
+        result.data.query.select == "climbs"
+        result.data.query.filter == "type=boulder"
+        result.data.query.sort == "date"
+        result.data.query.limit == 2
+        result.data.query.offset == 1
+        result.data.query.fields == "routeName,grade"
+        result.data.containsKey("stats")
+        result.data.count >= 0
+    }
+    
+    def "should execute query and build proper query info"() {
+        given: "a query with various parameters"
+        command.selectType = QueryCommand.DataType.locations
+        command.filter = "indoor=true"
+        command.sortBy = "name"
+        command.limit = 5
+        command.offset = 2
+        command.fields = "name,country"
+        cldfService.read(inputFile) >> testArchive
+
+        when: "executing the command"
+        def result = command.execute()
+
+        then: "query info is built correctly"
+        result.success == true
+        def queryInfo = result.data.query
+        queryInfo.select == "locations"
+        queryInfo.filter == "indoor=true"
+        queryInfo.sort == "name"
+        queryInfo.limit == 5
+        queryInfo.offset == 2
+        queryInfo.fields == "name,country"
+    }
+    
+    def "should execute count only query successfully"() {
+        given: "a count only query"
+        command.selectType = QueryCommand.DataType.sessions
+        command.countOnly = true
+        cldfService.read(inputFile) >> testArchive
+
+        when: "executing the command"
+        def result = command.execute()
+
+        then: "only count is returned"
+        result.success == true
+        result.data.count == 2
+        !result.data.containsKey("results")
+        !result.data.containsKey("stats")
+        result.data.containsKey("query")
+    }
+    
+    def "should execute query with statistics enabled"() {
+        given: "a query with statistics enabled"
+        command.selectType = QueryCommand.DataType.climbs
+        command.includeStats = true
+        cldfService.read(inputFile) >> testArchive
+
+        when: "executing the command"
+        def result = command.execute()
+
+        then: "statistics are included"
+        result.success == true
+        result.data.count == 3
+        result.data.containsKey("results")
+        result.data.containsKey("stats")
+        result.data.stats != null
+    }
 }
