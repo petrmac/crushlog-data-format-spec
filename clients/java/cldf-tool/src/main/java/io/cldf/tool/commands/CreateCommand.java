@@ -68,15 +68,24 @@ public class CreateCommand extends BaseCommand {
   protected CommandResult execute() throws Exception {
     CLDFArchive archive;
 
-    if (jsonInput != null || readFromStdin) {
-      logInfo("Creating archive from JSON input");
-      archive = createFromJson();
-    } else if (template != null) {
-      logInfo("Creating archive from template: " + template);
-      archive = createFromTemplate(template);
-    } else {
-      logInfo("Creating empty archive");
-      archive = createEmpty();
+    try {
+      if (jsonInput != null || readFromStdin) {
+        logInfo("Creating archive from JSON input");
+        archive = createFromJson();
+      } else if (template != null) {
+        logInfo("Creating archive from template: " + template);
+        archive = createFromTemplate(template);
+      } else {
+        logInfo("Creating empty archive");
+        archive = createEmpty();
+      }
+    } catch (IOException e) {
+      log.error("Failed to create archive", e);
+      return CommandResult.builder()
+          .success(false)
+          .message("Failed to create archive: " + e.getMessage())
+          .exitCode(1)
+          .build();
     }
 
     List<String> warnings = new ArrayList<>();

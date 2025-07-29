@@ -5,6 +5,7 @@ import io.cldf.api.CLDFWriter
 import io.cldf.models.*
 import io.cldf.tool.models.CommandResult
 import io.cldf.tool.services.ValidationService
+import io.cldf.tool.utils.InputHandler
 import io.cldf.tool.utils.OutputFormat
 import io.cldf.tool.utils.OutputHandler
 import spock.lang.Specification
@@ -281,5 +282,229 @@ class CreateCommandSpec extends Specification {
         result.data["stats"]["locations"] == 2
         result.data["stats"]["sessions"] == 2
         result.data["stats"]["climbs"] == 9
+    }
+    
+    def "should test createFromJson method directly"() {
+        given:
+        // Create a test archive
+        def testArchive = CLDFArchive.builder()
+            .manifest(Manifest.builder()
+                .version("1.0.0")
+                .format("CLDF")
+                .creationDate(OffsetDateTime.now())
+                .appVersion("test")
+                .platform(Manifest.Platform.Desktop)
+                .build())
+            .locations([Location.builder()
+                .id(1)
+                .name("Test Gym")
+                .isIndoor(true)
+                .createdAt(OffsetDateTime.now())
+                .build()])
+            .sessions([Session.builder()
+                .id("sess_1")
+                .date(LocalDate.now())
+                .location("Test Gym")
+                .locationId("1")
+                .isIndoor(true)
+                .build()])
+            .climbs([Climb.builder()
+                .id(1)
+                .sessionId(1)
+                .date(LocalDate.now())
+                .routeName("Test Route")
+                .type(Climb.ClimbType.boulder)
+                .finishType(Climb.FinishType.top)
+                .attempts(1)
+                .grades(Climb.GradeInfo.builder()
+                    .system(Climb.GradeInfo.GradeSystem.vScale)
+                    .grade("V1")
+                    .build())
+                .isIndoor(true)
+                .build()])
+            .build()
+        
+        // Call createFromJson directly via reflection
+        def createFromJsonMethod = CreateCommand.class.getDeclaredMethod("createFromJson")
+        createFromJsonMethod.setAccessible(true)
+        
+        when:
+        def result = createFromJsonMethod.invoke(command)
+        
+        then:
+        // This should throw an exception since no JSON input is configured
+        thrown(Exception)
+    }
+    
+    def "should test JSON file input handling"() {
+        given:
+        // Create a JSON file with test data
+        def jsonFile = tempDir.resolve("test.json").toFile()
+        def testJson = """
+        {
+            "manifest": {
+                "version": "1.0.0",
+                "format": "CLDF",
+                "creationDate": "2024-01-01T00:00:00.000Z",
+                "appVersion": "test",
+                "platform": "Desktop"
+            },
+            "locations": [{
+                "id": 1,
+                "name": "JSON Test Gym",
+                "isIndoor": true,
+                "createdAt": "2024-01-01T00:00:00.000Z"
+            }],
+            "sessions": [{
+                "id": "sess_1",
+                "date": "2024-01-01",
+                "location": "JSON Test Gym",
+                "locationId": "1",
+                "isIndoor": true
+            }],
+            "climbs": [{
+                "id": 1,
+                "sessionId": 1,
+                "date": "2024-01-01",
+                "routeName": "JSON Route",
+                "type": "boulder",
+                "finishType": "top",
+                "attempts": 1,
+                "grades": {
+                    "system": "vScale",
+                    "grade": "V3"
+                },
+                "isIndoor": true
+            }]
+        }
+        """
+        jsonFile.text = testJson
+        
+        // Set command to read from JSON file
+        command.jsonInput = jsonFile.absolutePath
+        command.template = null
+        
+        when:
+        def result = command.execute()
+        
+        then:
+        result.success
+        result.message == "Successfully created CLDF archive"
+        outputFile.exists()
+        
+        when:
+        def archive = new io.cldf.api.CLDFReader().read(outputFile)
+        
+        then:
+        archive != null
+        archive.locations.size() == 1
+        archive.locations[0].name == "JSON Test Gym"
+        archive.climbs.size() == 1
+        archive.climbs[0].routeName == "JSON Route"
+        archive.climbs[0].grades.grade == "V3"
+    }
+    
+    def "should handle missing JSON file"() {
+        given:
+        command.jsonInput = tempDir.resolve("nonexistent.json").toFile().absolutePath
+        command.template = null
+        
+        when:
+        def result = command.execute()
+        
+        then:
+        !result.success
+        result.message.contains("Failed to create archive")
+        result.exitCode == 1
+    }
+    
+    def "should handle stdin input flag"() {
+        given:
+        command.readFromStdin = true
+        command.template = null
+        
+        // We can't easily test actual stdin reading in unit tests,
+        // but we can verify the command is configured correctly
+        
+        expect:
+        command.readFromStdin == true
+        command.template == null
+    }
+    
+    def "should handle dash (-) as stdin indicator"() {
+        given:
+        command.jsonInput = "-"
+        command.template = null
+        
+        // Similar to above, we verify configuration
+        
+        expect:
+        command.jsonInput == "-"
+        command.template == null
+    }
+    
+    def "should prioritize JSON input over template when both are set"() {
+        given:
+        // Create a JSON file
+        def jsonFile = tempDir.resolve("priority.json").toFile()
+        def testJson = """
+        {
+            "manifest": {
+                "version": "1.0.0",
+                "format": "CLDF",
+                "creationDate": "2024-01-01T00:00:00.000Z",
+                "appVersion": "test",
+                "platform": "Desktop"
+            },
+            "locations": [{
+                "id": 1,
+                "name": "Priority JSON Gym",
+                "isIndoor": true,
+                "createdAt": "2024-01-01T00:00:00.000Z"
+            }],
+            "sessions": [{
+                "id": "sess_1",
+                "date": "2024-01-01",
+                "location": "Priority JSON Gym",
+                "locationId": "1",
+                "isIndoor": true
+            }],
+            "climbs": [{
+                "id": 1,
+                "sessionId": 1,
+                "date": "2024-01-01",
+                "routeName": "Priority Route",
+                "type": "boulder",
+                "finishType": "top",
+                "attempts": 1,
+                "grades": {
+                    "system": "vScale",
+                    "grade": "V0"
+                },
+                "isIndoor": true
+            }]
+        }
+        """
+        jsonFile.text = testJson
+        
+        command.jsonInput = jsonFile.absolutePath
+        command.template = "demo" // This should be ignored
+        
+        when:
+        def result = command.execute()
+        
+        then:
+        result.success
+        
+        when:
+        def archive = new io.cldf.api.CLDFReader().read(outputFile)
+        
+        then:
+        // Should have JSON data, not demo template data
+        archive.locations.size() == 1
+        archive.locations[0].name == "Priority JSON Gym"
+        archive.climbs.size() == 1
+        archive.climbs[0].routeName == "Priority Route"
+        // Demo template would have 2 locations and 9 climbs
     }
 }

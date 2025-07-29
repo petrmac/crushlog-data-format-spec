@@ -156,7 +156,7 @@ public class ConvertCommand extends BaseCommand {
         if (climb.getSessionId() != null) {
           Session session =
               archive.getSessions().stream()
-                  .filter(s -> s.getId().equals(climb.getSessionId()))
+                  .filter(s -> s.getId().equals(String.valueOf(climb.getSessionId())))
                   .findFirst()
                   .orElse(null);
           if (session != null) {
