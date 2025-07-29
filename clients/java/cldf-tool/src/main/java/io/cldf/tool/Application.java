@@ -25,7 +25,12 @@ import picocli.CommandLine.Command;
     })
 public class Application implements Runnable {
 
-  @Inject ApplicationContext applicationContext;
+  private final ApplicationContext applicationContext;
+
+  @Inject
+  public Application(ApplicationContext applicationContext) {
+    this.applicationContext = applicationContext;
+  }
 
   public static void main(String[] args) {
     // Set system properties to avoid logging conflicts

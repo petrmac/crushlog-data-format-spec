@@ -117,6 +117,12 @@ publishing {
     }
 }
 
+// Configure the java-library plugin's built-in tasks
+java {
+    withSourcesJar()
+    withJavadocJar()
+}
+
 signing {
     val signingKey: String? by project
     val signingPassword: String? by project

@@ -29,8 +29,7 @@ class LoadCommandSpec extends Specification {
     LoadCommand loadCommand
     
     def setup() {
-        loadCommand = new LoadCommand()
-        loadCommand.graphService = mockGraphService
+        loadCommand = new LoadCommand(mockGraphService)
         loadCommand.output = mockOutput
         loadCommand.outputFormat = OutputFormat.text
     }

@@ -56,7 +56,17 @@ public class CreateCommand extends BaseCommand {
       description = "Read JSON data from stdin")
   private boolean readFromStdin;
 
-  @Inject private ValidationService validationService;
+  private final ValidationService validationService;
+
+  @Inject
+  public CreateCommand(ValidationService validationService) {
+    this.validationService = validationService;
+  }
+
+  // For PicoCLI framework - it needs a no-arg constructor
+  public CreateCommand() {
+    this.validationService = null;
+  }
 
   static class TemplateType extends ArrayList<String> {
     TemplateType() {

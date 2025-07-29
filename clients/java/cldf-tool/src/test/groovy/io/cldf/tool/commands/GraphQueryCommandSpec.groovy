@@ -17,8 +17,7 @@ class GraphQueryCommandSpec extends Specification {
         mockGraphService = Mock(GraphService)
         mockOutput = Mock(OutputHandler)
         
-        command = new GraphQueryCommand()
-        command.graphService = mockGraphService
+        command = new GraphQueryCommand(mockGraphService)
         command.output = mockOutput
         command.outputFormat = OutputFormat.text
         command.limit = 100  // Set default limit

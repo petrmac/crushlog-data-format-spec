@@ -67,8 +67,20 @@ public class QueryCommand extends BaseCommand {
       description = "Comma-separated list of fields to include")
   private String fields;
 
-  @Inject private CLDFService cldfService;
-  @Inject private QueryService queryService;
+  private final CLDFService cldfService;
+  private final QueryService queryService;
+
+  @Inject
+  public QueryCommand(CLDFService cldfService, QueryService queryService) {
+    this.cldfService = cldfService;
+    this.queryService = queryService;
+  }
+
+  // For PicoCLI framework - it needs a no-arg constructor
+  public QueryCommand() {
+    this.cldfService = null;
+    this.queryService = null;
+  }
 
   enum DataType {
     all,

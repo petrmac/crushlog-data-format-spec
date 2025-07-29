@@ -47,7 +47,17 @@ public class GraphQueryCommand extends BaseCommand {
       defaultValue = "100")
   private int limit;
 
-  @Inject private GraphService graphService;
+  private final GraphService graphService;
+
+  @Inject
+  public GraphQueryCommand(GraphService graphService) {
+    this.graphService = graphService;
+  }
+
+  // For PicoCLI framework - it needs a no-arg constructor
+  public GraphQueryCommand() {
+    this.graphService = null;
+  }
 
   static class QueryTemplate extends ArrayList<String> {
     QueryTemplate() {

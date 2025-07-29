@@ -27,12 +27,10 @@ class QueryCommandSpec extends Specification {
     CLDFArchive testArchive
 
     def setup() {
-        command = new QueryCommand()
         cldfService = Mock(CLDFService)
         queryService = new QueryService()
         
-        command.cldfService = cldfService
-        command.queryService = queryService
+        command = new QueryCommand(cldfService, queryService)
         command.outputFormat = OutputFormat.text
         command.quiet = false
         command.output = new OutputHandler(OutputFormat.text, false)

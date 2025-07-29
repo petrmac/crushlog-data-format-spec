@@ -205,3 +205,9 @@ idea {
 configure<io.freefair.gradle.plugins.lombok.LombokExtension> {
     version.set("1.18.32")
 }
+
+// Configure the application plugin's built-in tasks
+java {
+    withSourcesJar()
+    withJavadocJar()
+}

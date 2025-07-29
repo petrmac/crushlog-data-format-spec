@@ -41,7 +41,17 @@ public class LoadCommand extends BaseCommand {
       defaultValue = "true")
   private boolean validate;
 
-  @Inject private GraphService graphService;
+  private final GraphService graphService;
+
+  @Inject
+  public LoadCommand(GraphService graphService) {
+    this.graphService = graphService;
+  }
+
+  // For PicoCLI framework - it needs a no-arg constructor
+  public LoadCommand() {
+    this.graphService = null;
+  }
 
   @Override
   protected CommandResult execute() throws Exception {

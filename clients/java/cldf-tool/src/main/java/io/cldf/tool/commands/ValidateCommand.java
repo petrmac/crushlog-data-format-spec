@@ -52,7 +52,17 @@ public class ValidateCommand extends BaseCommand {
   @Option(names = "--output", description = "Output file for report (stdout if not specified)")
   private File outputFile;
 
-  @Inject private ValidationService validationService;
+  private final ValidationService validationService;
+
+  @Inject
+  public ValidateCommand(ValidationService validationService) {
+    this.validationService = validationService;
+  }
+
+  // For tests that only need CLI parsing (e.g., help text)
+  public ValidateCommand() {
+    this.validationService = null;
+  }
 
   enum ReportFormat {
     text,

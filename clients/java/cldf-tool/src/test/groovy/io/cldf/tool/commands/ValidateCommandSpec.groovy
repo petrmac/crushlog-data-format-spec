@@ -26,12 +26,10 @@ class ValidateCommandSpec extends Specification {
     OutputHandler mockOutputHandler
 
     def setup() {
-        command = new ValidateCommand()
         mockValidationService = Mock(ValidationService)
         mockOutputHandler = Mock(OutputHandler)
         
-        // Inject mocks using reflection
-        command.validationService = mockValidationService
+        command = new ValidateCommand(mockValidationService)
         command.output = mockOutputHandler
     }
 

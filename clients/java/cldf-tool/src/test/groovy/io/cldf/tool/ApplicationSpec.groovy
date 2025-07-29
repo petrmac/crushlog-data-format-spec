@@ -131,13 +131,17 @@ class ApplicationSpec extends Specification {
     
     def "run method should display usage"() {
         given:
-        def app = new Application()
+        def context = ApplicationContext.run()
+        def app = context.getBean(Application)
         def output = captureOutput {
             app.run()
         }
         
         expect:
         output.contains("Usage: cldf")
+        
+        cleanup:
+        context.close()
     }
     
     // Helper methods for capturing output
