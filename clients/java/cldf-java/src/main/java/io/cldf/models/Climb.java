@@ -29,7 +29,7 @@ public class Climb {
 
   private Integer sessionId;
 
-  private Integer routeId;
+  private String routeId;
 
   @JsonProperty(required = true)
   @JsonDeserialize(using = FlexibleLocalDateDeserializer.class)
@@ -147,17 +147,18 @@ public class Climb {
 
   /** How the climb was completed. */
   public enum FinishType {
-    // Boulder finish types
+    // Common finish types for both boulder and route
     flash,
     top,
     repeat,
     project,
+    attempt, // Attempting the climb but falling or giving up
 
     // Route-specific finish types (onsight and redpoint are route-only)
     onsight,
     redpoint
 
-    // Note: flash, repeat, and project appear in both boulder and route schemas
+    // Note: flash, repeat, project, and attempt appear in both boulder and route schemas
     // but we define them once here. The validation should be done at a higher level
     // based on the climb type.
   }

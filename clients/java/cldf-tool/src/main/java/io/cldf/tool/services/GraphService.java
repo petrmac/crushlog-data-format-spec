@@ -82,8 +82,6 @@ public class GraphService {
 
     // Create indexes
     createIndexes();
-
-    registerShutdownHook();
   }
 
   /** Import CLDF archive into Neo4j graph */
@@ -244,7 +242,13 @@ public class GraphService {
   public void shutdown() {
     log.info("Shutting down Neo4j database");
     if (managementService != null) {
-      managementService.shutdown();
+      try {
+        managementService.shutdown();
+        managementService = null;
+        graphDb = null;
+      } catch (Exception e) {
+        log.warn("Error during Neo4j shutdown: {}", e.getMessage());
+      }
     }
 
     // Clean up temp directory
@@ -326,9 +330,6 @@ public class GraphService {
     }
   }
 
-  private void registerShutdownHook() {
-    Runtime.getRuntime().addShutdownHook(new Thread(this::shutdown));
-  }
 
   // Helper methods for converting nodes back to domain objects
 

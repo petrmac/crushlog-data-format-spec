@@ -26,7 +26,7 @@
             "properties": {
               "finishType": {
                 "type": "string",
-                "enum": ["flash", "top", "repeat", "project"],
+                "enum": ["flash", "top", "repeat", "project", "attempt"],
                 "description": "Boulder finish types"
               }
             }
@@ -40,7 +40,7 @@
             "properties": {
               "finishType": {
                 "type": "string",
-                "enum": ["onsight", "flash", "redpoint", "repeat", "project"],
+                "enum": ["onsight", "flash", "redpoint", "repeat", "project", "attempt"],
                 "description": "Route finish types"
               }
             }
@@ -57,7 +57,7 @@
           "description": "Reference to the session this climb belongs to"
         },
         "routeId": {
-          "type": "integer",
+          "type": "string",
           "description": "Reference to the route definition"
         },
         "date": {
