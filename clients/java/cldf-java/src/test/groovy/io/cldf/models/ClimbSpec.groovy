@@ -14,6 +14,7 @@ class ClimbSpec extends Specification {
 	def setup() {
 		objectMapper = new ObjectMapper()
 		objectMapper.registerModule(new JavaTimeModule())
+		objectMapper.disable(com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 	}
 
 	def "should build climb with required fields"() {
@@ -52,7 +53,7 @@ class ClimbSpec extends Specification {
 		def climb = Climb.builder()
 				.id(1)
 				.sessionId(1)
-				.routeId(123)
+				.routeId("123")
 				.date(date)
 				.time(time)
 				.routeName("The Nose")
@@ -90,7 +91,7 @@ class ClimbSpec extends Specification {
 		then: "all fields are set"
 		climb.id == 1
 		climb.sessionId == 1
-		climb.routeId == 123
+		climb.routeId == "123"
 		climb.date == date
 		climb.time == time
 		climb.routeName == "The Nose"
@@ -132,7 +133,7 @@ class ClimbSpec extends Specification {
 				.date(LocalDate.of(2024, 1, 15))
 				.routeName("Test Route")
 				.type(Climb.ClimbType.boulder)
-				.finishType(Climb.FinishType.onsight)
+				.finishType(Climb.FinishType.flash)
 				.attempts(1)
 				.rating(4)
 				.build()
@@ -145,7 +146,7 @@ class ClimbSpec extends Specification {
 		json.contains('"date":"2024-01-15"')
 		json.contains('"routeName":"Test Route"')
 		json.contains('"type":"boulder"')
-		json.contains('"finishType":"onsight"')
+		json.contains('"finishType":"flash"')
 		json.contains('"attempts":1')
 		json.contains('"rating":4')
 	}

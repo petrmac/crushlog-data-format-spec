@@ -14,6 +14,7 @@ class ManifestSpec extends Specification {
 	def setup() {
 		objectMapper = new ObjectMapper()
 		objectMapper.registerModule(new JavaTimeModule())
+		objectMapper.disable(com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 	}
 
 	def "should build manifest with required fields"() {
@@ -110,7 +111,7 @@ class ManifestSpec extends Specification {
 		then: "JSON contains expected fields"
 		json.contains('"version":"1.0.0"')
 		json.contains('"format":"CLDF"')
-		json.contains('"creationDate":"2024-01-15T10:00:00.000Z"')
+		json.contains('"creationDate":"2024-01-15T10:00:00Z"')
 		json.contains('"appVersion":"2.0.0"')
 		json.contains('"platform":"Android"')
 		json.contains('"climbsCount":50')

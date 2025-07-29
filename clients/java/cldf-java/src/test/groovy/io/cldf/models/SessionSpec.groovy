@@ -14,6 +14,7 @@ class SessionSpec extends Specification {
 	def setup() {
 		objectMapper = new ObjectMapper()
 		objectMapper.registerModule(new JavaTimeModule())
+		objectMapper.disable(com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 	}
 
 	def "should build session with required fields"() {
