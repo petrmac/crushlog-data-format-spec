@@ -10,4 +10,10 @@
     </root>
     
     <logger name="io.cldf" level="info" />
+    
+    <!-- Suppress noisy loggers that might conflict -->
+    <logger name="org.neo4j" level="WARN" />
+    <logger name="org.apache.logging" level="ERROR" />
+    <logger name="io.micronaut.context" level="WARN" />
+    
 </configuration>

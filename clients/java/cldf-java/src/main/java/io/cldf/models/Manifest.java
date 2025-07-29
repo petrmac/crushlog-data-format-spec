@@ -3,8 +3,10 @@ package io.cldf.models;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import io.cldf.utils.FlexibleDateTimeDeserializer;
+import io.cldf.utils.FlexibleLocalDateDeserializer;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -24,7 +26,7 @@ public class Manifest {
   private String format;
 
   @JsonProperty(required = true)
-  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
+  @JsonDeserialize(using = FlexibleDateTimeDeserializer.class)
   private OffsetDateTime creationDate;
 
   @JsonProperty(required = true)
@@ -97,10 +99,10 @@ public class Manifest {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class DateRange {
-      @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+      @JsonDeserialize(using = FlexibleLocalDateDeserializer.class)
       private LocalDate start;
 
-      @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+      @JsonDeserialize(using = FlexibleLocalDateDeserializer.class)
       private LocalDate end;
     }
   }

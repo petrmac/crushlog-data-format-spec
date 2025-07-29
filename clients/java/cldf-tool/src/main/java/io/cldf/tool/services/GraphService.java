@@ -12,10 +12,12 @@ import jakarta.inject.Singleton;
 import io.cldf.api.CLDFArchive;
 import io.cldf.models.*;
 import lombok.extern.slf4j.Slf4j;
+import org.neo4j.configuration.GraphDatabaseSettings;
 import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.dbms.api.DatabaseManagementServiceBuilder;
 import org.neo4j.graphdb.*;
 import org.neo4j.graphdb.schema.Schema;
+import org.neo4j.io.ByteUnit;
 
 import static org.neo4j.configuration.GraphDatabaseSettings.DEFAULT_DATABASE_NAME;
 
@@ -71,7 +73,10 @@ public class GraphService {
 
     log.info("Initializing embedded Neo4j at: {}", tempDbPath);
 
-    managementService = new DatabaseManagementServiceBuilder(tempDbPath).build();
+    managementService =
+        new DatabaseManagementServiceBuilder(tempDbPath)
+            .setConfig(GraphDatabaseSettings.pagecache_memory, ByteUnit.mebiBytes(64))
+            .build();
 
     graphDb = managementService.database(DEFAULT_DATABASE_NAME);
 

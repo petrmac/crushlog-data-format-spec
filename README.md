@@ -1,3 +1,5 @@
+[![SonarQube Cloud](https://sonarcloud.io/images/project_badges/sonarcloud-light.svg)](https://sonarcloud.io/summary/new_code?id=petrmac_crushlog-data-format-spec)
+
 # CrushLog Data Format (CLDF) Specification
 
 Version 1.0.0

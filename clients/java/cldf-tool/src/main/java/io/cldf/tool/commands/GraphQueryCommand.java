@@ -26,7 +26,7 @@ public class GraphQueryCommand extends BaseCommand {
   private String archiveFile;
 
   @Option(
-      names = {"-q", "--query"},
+      names = {"--query"},
       description = "Cypher query to execute")
   private String cypherQuery;
 

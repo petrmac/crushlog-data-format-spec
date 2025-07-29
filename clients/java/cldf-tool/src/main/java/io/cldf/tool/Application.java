@@ -27,6 +27,10 @@ public class Application implements Runnable {
   @Inject ApplicationContext applicationContext;
 
   public static void main(String[] args) {
+    // Set system properties to avoid logging conflicts
+    System.setProperty("log4j2.disable.jmx", "true");
+    System.setProperty("log4j.shutdownHookEnabled", "false");
+
     System.exit(PicocliRunner.execute(Application.class, args));
   }
 

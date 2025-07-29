@@ -49,11 +49,17 @@ dependencies {
     annotationProcessor("org.mapstruct:mapstruct-processor:$mapstructVersion")
     annotationProcessor("org.projectlombok:lombok-mapstruct-binding:0.2.0")
     
-    // Logging
+    // Logging - Use Logback only
+    implementation("org.slf4j:slf4j-api")
     runtimeOnly("ch.qos.logback:logback-classic")
     
     // Neo4j embedded database
-    implementation("org.neo4j:neo4j:$neo4jVersion")
+    implementation("org.neo4j:neo4j:$neo4jVersion") {
+        exclude(group = "org.slf4j", module = "slf4j-nop")
+        exclude(module = "neo4j-logging")
+        exclude(module = "neo4j-slf4j-provider")
+        exclude(group = "org.neo4j", module = "neo4j-slf4j-provider")
+    }
     implementation("org.neo4j:neo4j-cypher-dsl:2024.0.0")
     
     // Annotation processors
@@ -128,6 +134,30 @@ graalvmNative {
 
 tasks.test {
     useJUnitPlatform()
+}
+
+// Create a custom fat JAR task that produces an executable JAR
+tasks.register<Jar>("fatJar") {
+    dependsOn(configurations.runtimeClasspath)
+    from(sourceSets.main.get().output)
+    
+    // Include all runtime dependencies
+    from(configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) }) {
+        exclude("META-INF/*.SF", "META-INF/*.DSA", "META-INF/*.RSA")
+        exclude("META-INF/MANIFEST.MF")
+    }
+    
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+    
+    manifest {
+        attributes(
+            "Main-Class" to "io.cldf.tool.Application",
+            "Multi-Release" to "true"
+        )
+    }
+    
+    archiveBaseName.set("cldf-tool")
+    archiveClassifier.set("standalone")
 }
 
 // JMH Benchmark configuration
