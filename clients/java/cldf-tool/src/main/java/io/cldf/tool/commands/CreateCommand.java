@@ -5,6 +5,9 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import jakarta.inject.Inject;
 
@@ -28,6 +31,7 @@ public class CreateCommand extends BaseCommand {
 
   public static final String ALGORITHM = "SHA-256";
   public static final String ERRORS = "errors";
+
   @Option(
       names = {"-o", "--output"},
       description = "Output CLDF file",
@@ -123,14 +127,16 @@ public class CreateCommand extends BaseCommand {
     CLDFWriter writer = new CLDFWriter(prettyPrint, validate);
     writer.write(archive, outputFile);
 
-    Map<String, Object> resultData = new HashMap<>();
-    resultData.put("file", outputFile.getAbsolutePath());
-    resultData.put(
-        "stats",
+    Map<String, Object> resultData =
         Map.of(
-            "locations", archive.getLocations() != null ? archive.getLocations().size() : 0,
-            "sessions", archive.getSessions() != null ? archive.getSessions().size() : 0,
-            "climbs", archive.getClimbs() != null ? archive.getClimbs().size() : 0));
+            "file", outputFile.getAbsolutePath(),
+            "stats",
+                Map.of(
+                    "locations",
+                        Optional.ofNullable(archive.getLocations()).map(List::size).orElse(0),
+                    "sessions",
+                        Optional.ofNullable(archive.getSessions()).map(List::size).orElse(0),
+                    "climbs", Optional.ofNullable(archive.getClimbs()).map(List::size).orElse(0)));
 
     return CommandResult.builder()
         .success(true)
@@ -144,20 +150,27 @@ public class CreateCommand extends BaseCommand {
   protected void outputText(CommandResult result) {
     if (result.isSuccess()) {
       output.write("Successfully created CLDF archive: " + outputFile.getName());
-      if (result.getWarnings() != null && !result.getWarnings().isEmpty()) {
-        output.write("\nWarnings:");
-        result.getWarnings().forEach(w -> output.write("  - " + w));
-      }
+      Optional.ofNullable(result.getWarnings())
+          .filter(warnings -> !warnings.isEmpty())
+          .ifPresent(
+              warnings -> {
+                output.write("\nWarnings:");
+                warnings.forEach(w -> output.write("  - " + w));
+              });
     } else {
       output.writeError("Failed to create CLDF archive: " + result.getMessage());
-      if (result.getData() != null && result.getData() instanceof Map) {
-        Map<?, ?> data = (Map<?, ?>) result.getData();
-        if (data.containsKey(ERRORS)) {
-          output.writeError("\nErrors:", true);
-          List<?> errors = (List<?>) data.get(ERRORS);
-          errors.forEach(e -> output.writeError("  - " + e, true));
-        }
-      }
+      Optional.ofNullable(result.getData())
+          .filter(Map.class::isInstance)
+          .map(Map.class::cast)
+          .filter(data -> data.containsKey(ERRORS))
+          .ifPresent(
+              data -> {
+                output.writeError("\nErrors:", true);
+                Optional.ofNullable(data.get(ERRORS))
+                    .filter(List.class::isInstance)
+                    .map(List.class::cast)
+                    .ifPresent(errors -> errors.forEach(e -> output.writeError("  - " + e, true)));
+              });
     }
   }
 
@@ -345,32 +358,31 @@ public class CreateCommand extends BaseCommand {
                 .partners(List.of("Alex", "Sarah"))
                 .build());
 
-    // Create climbs
-    List<Climb> climbs = new ArrayList<>();
-
-    // Gym session climbs
-    for (int i = 0; i < 8; i++) {
-      climbs.add(
-          Climb.builder()
-              .id(i + 1)
-              .sessionId(1)
-              .date(sessions.get(0).getDate())
-              .routeName("Problem " + (i + 1))
-              .type(ClimbType.BOULDER)
-              .finishType(FinishType.TOP) // Use enum value
-              .attempts(i < 5 ? 1 : i - 3)
-              .grades(
-                  Climb.GradeInfo.builder()
-                      .system(GradeSystem.V_SCALE)
-                      .grade("V" + (i / 2))
-                      .build())
-              .isIndoor(true)
-              .rating(i % 2 == 0 ? 4 : 3)
-              .build());
-    }
+    // Create climbs using streams
+    List<Climb> gymClimbs =
+        IntStream.range(0, 8)
+            .mapToObj(
+                i ->
+                    Climb.builder()
+                        .id(i + 1)
+                        .sessionId(1)
+                        .date(sessions.get(0).getDate())
+                        .routeName("Problem " + (i + 1))
+                        .type(ClimbType.BOULDER)
+                        .finishType(FinishType.TOP) // Use enum value
+                        .attempts(i < 5 ? 1 : i - 3)
+                        .grades(
+                            Climb.GradeInfo.builder()
+                                .system(GradeSystem.V_SCALE)
+                                .grade("V" + (i / 2))
+                                .build())
+                        .isIndoor(true)
+                        .rating(i % 2 == 0 ? 4 : 3)
+                        .build())
+            .toList();
 
     // Outdoor session climb
-    climbs.add(
+    Climb outdoorClimb =
         Climb.builder()
             .id(9)
             .sessionId(2)
@@ -388,7 +400,11 @@ public class CreateCommand extends BaseCommand {
             .rockType(RockType.SANDSTONE)
             .partners(sessions.get(1).getPartners())
             .weather("sunny")
-            .build());
+            .build();
+
+    // Combine gym and outdoor climbs
+    List<Climb> climbs =
+        Stream.concat(gymClimbs.stream(), Stream.of(outdoorClimb)).collect(Collectors.toList());
 
     Manifest manifest =
         Manifest.builder()
