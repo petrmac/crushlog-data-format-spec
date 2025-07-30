@@ -67,6 +67,7 @@ jobs:
     - name: Copy schemas to resources
       run: |
         mkdir -p cldf-java/src/main/resources
+        rm -rf cldf-java/src/main/resources/schemas
         cp -r ../../schemas cldf-java/src/main/resources/
     
     - name: Grant execute permission for gradlew
@@ -139,6 +140,7 @@ jobs:
     - name: Copy schemas to resources
       run: |
         mkdir -p cldf-java/src/main/resources
+        rm -rf cldf-java/src/main/resources/schemas
         cp -r ../../schemas cldf-java/src/main/resources/
     
     - name: Grant execute permission for gradlew
@@ -205,6 +207,7 @@ jobs:
     - name: Copy schemas to resources
       run: |
         mkdir -p cldf-java/src/main/resources
+        rm -rf cldf-java/src/main/resources/schemas
         cp -r ../../schemas cldf-java/src/main/resources/
       shell: bash
     
@@ -274,6 +277,7 @@ jobs:
     - name: Copy schemas to resources
       run: |
         mkdir -p cldf-java/src/main/resources
+        rm -rf cldf-java/src/main/resources/schemas
         cp -r ../../schemas cldf-java/src/main/resources/
     
     - name: Grant execute permission for gradlew
