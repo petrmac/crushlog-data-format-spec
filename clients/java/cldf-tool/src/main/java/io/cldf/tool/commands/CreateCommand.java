@@ -26,6 +26,8 @@ import picocli.CommandLine.Option;
     mixinStandardHelpOptions = true)
 public class CreateCommand extends BaseCommand {
 
+  public static final String ALGORITHM = "SHA-256";
+  public static final String ERRORS = "errors";
   @Option(
       names = {"-o", "--output"},
       description = "Output CLDF file",
@@ -108,7 +110,7 @@ public class CreateCommand extends BaseCommand {
         return CommandResult.builder()
             .success(false)
             .message("Validation failed")
-            .data(Map.of("errors", validationResult.getErrors()))
+            .data(Map.of(ERRORS, validationResult.getErrors()))
             .exitCode(1)
             .build();
       }
@@ -150,9 +152,9 @@ public class CreateCommand extends BaseCommand {
       output.writeError("Failed to create CLDF archive: " + result.getMessage());
       if (result.getData() != null && result.getData() instanceof Map) {
         Map<?, ?> data = (Map<?, ?>) result.getData();
-        if (data.containsKey("errors")) {
+        if (data.containsKey(ERRORS)) {
           output.writeError("\nErrors:", true);
-          List<?> errors = (List<?>) data.get("errors");
+          List<?> errors = (List<?>) data.get(ERRORS);
           errors.forEach(e -> output.writeError("  - " + e, true));
         }
       }
@@ -220,7 +222,7 @@ public class CreateCommand extends BaseCommand {
         .locations(List.of(location))
         .sessions(List.of(session))
         .climbs(List.of(minimalClimb))
-        .checksums(Checksums.builder().algorithm("SHA-256").build())
+        .checksums(Checksums.builder().algorithm(ALGORITHM).build())
         .build();
   }
 
@@ -287,7 +289,7 @@ public class CreateCommand extends BaseCommand {
         .locations(List.of(location))
         .sessions(List.of(session))
         .climbs(climbs)
-        .checksums(Checksums.builder().algorithm("SHA-256").build())
+        .checksums(Checksums.builder().algorithm(ALGORITHM).build())
         .build();
   }
 
@@ -408,7 +410,7 @@ public class CreateCommand extends BaseCommand {
         .locations(locations)
         .sessions(sessions)
         .climbs(climbs)
-        .checksums(Checksums.builder().algorithm("SHA-256").build())
+        .checksums(Checksums.builder().algorithm(ALGORITHM).build())
         .build();
   }
 
