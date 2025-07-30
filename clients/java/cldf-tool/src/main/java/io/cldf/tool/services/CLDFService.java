@@ -3,21 +3,30 @@ package io.cldf.tool.services;
 import java.io.File;
 import java.io.IOException;
 
-import jakarta.inject.Singleton;
+import io.cldf.api.CLDFArchive;
 
-import io.cldf.api.*;
-import lombok.extern.slf4j.Slf4j;
+/**
+ * Interface for reading and writing CLDF archives. Provides methods to handle CLDF file I/O
+ * operations.
+ */
+public interface CLDFService {
 
-@Slf4j
-@Singleton
-public class CLDFService {
+  /**
+   * Reads a CLDF archive from a file.
+   *
+   * @param file the CLDF file to read
+   * @return the loaded CLDF archive
+   * @throws IOException if reading fails
+   */
+  CLDFArchive read(File file) throws IOException;
 
-  public CLDFArchive read(File file) throws IOException {
-    return CLDF.read(file);
-  }
-
-  public void write(CLDFArchive archive, File file, boolean prettyPrint) throws IOException {
-    CLDFWriter writer = new CLDFWriter(prettyPrint);
-    writer.write(archive, file);
-  }
+  /**
+   * Writes a CLDF archive to a file.
+   *
+   * @param archive the CLDF archive to write
+   * @param file the target file
+   * @param prettyPrint whether to format the JSON output
+   * @throws IOException if writing fails
+   */
+  void write(CLDFArchive archive, File file, boolean prettyPrint) throws IOException;
 }

@@ -7,8 +7,10 @@ import io.cldf.api.CLDFWriter
 import io.cldf.models.*
 import io.cldf.tool.models.CommandResult
 import io.cldf.tool.services.ValidationService
+import io.cldf.tool.services.ValidationResult
 import io.cldf.tool.utils.OutputHandler
 import io.cldf.tool.utils.OutputFormat
+import io.cldf.tool.utils.ValidationReportFormatter
 import java.nio.file.Path
 import java.nio.file.Files
 import java.time.LocalDate
@@ -62,7 +64,7 @@ class ValidateCommandSpec extends Specification {
         command.validateReferences = false
         command.reportFormat = ValidateCommand.ReportFormat.text
         
-        def validationResult = ValidationService.ValidationResult.builder()
+        def validationResult = ValidationResult.builder()
             .valid(true)
             .errors([])
             .warnings([])
@@ -98,6 +100,7 @@ class ValidateCommandSpec extends Specification {
 
     def "should test validation report formatting logic"() {
         given: "create a validation report directly"
+        def formatter = new ValidationReportFormatter()
         def report = ValidateCommand.ValidationReport.builder()
             .file("test.cldf")
             .timestamp(OffsetDateTime.now())
@@ -117,7 +120,7 @@ class ValidateCommandSpec extends Specification {
             .build()
 
         when: "formatting as text"
-        def textReport = formatTextReportDirectly(report)
+        def textReport = formatter.formatTextReport(report)
 
         then: "report contains all expected sections"
         textReport.contains("Validation Report")
@@ -141,6 +144,7 @@ class ValidateCommandSpec extends Specification {
 
     def "should test XML report formatting"() {
         given: "create a validation report with special characters"
+        def formatter = new ValidationReportFormatter()
         def report = ValidateCommand.ValidationReport.builder()
             .file("test.cldf")
             .timestamp(OffsetDateTime.now())
@@ -160,7 +164,7 @@ class ValidateCommandSpec extends Specification {
             .build()
 
         when: "formatting as XML"
-        def xmlReport = formatXmlReportDirectly(report)
+        def xmlReport = formatter.formatXmlReport(report)
 
         then: "report is valid XML with escaped characters"
         xmlReport.contains("<?xml version=\"1.0\" encoding=\"UTF-8\"?>")
@@ -173,6 +177,7 @@ class ValidateCommandSpec extends Specification {
 
     def "should test checksum result formatting"() {
         given: "create a report with checksum results"
+        def formatter = new ValidationReportFormatter()
         def checksumResult = ValidateCommand.ChecksumResult.builder()
             .algorithm("SHA-256")
             .valid(true)
@@ -199,7 +204,7 @@ class ValidateCommandSpec extends Specification {
             .build()
 
         when: "formatting as text"
-        def textReport = formatTextReportDirectly(report)
+        def textReport = formatter.formatTextReport(report)
 
         then: "checksum section is included"
         textReport.contains("Checksums:")
@@ -211,6 +216,7 @@ class ValidateCommandSpec extends Specification {
 
     def "should test JSON report formatting"() {
         given: "create a validation report"
+        def formatter = new ValidationReportFormatter()
         def report = ValidateCommand.ValidationReport.builder()
             .file("test.cldf")
             .timestamp(OffsetDateTime.now())
@@ -230,7 +236,7 @@ class ValidateCommandSpec extends Specification {
             .build()
 
         when: "formatting as JSON"
-        def jsonReport = formatJsonReportDirectly(report)
+        def jsonReport = formatter.formatJsonReport(report)
 
         then: "JSON structure is correct"
         jsonReport.contains('"file": "test.cldf"')
@@ -277,163 +283,6 @@ class ValidateCommandSpec extends Specification {
         1 * mockOutputHandler.writeError(_ as String)
     }
 
-    // Helper methods to test formatting directly
-    private String formatTextReportDirectly(ValidateCommand.ValidationReport report) {
-        // Replicate the logic from ValidateCommand.formatTextReport
-        StringBuilder sb = new StringBuilder()
-        
-        sb.append("\nValidation Report\n")
-        sb.append("=================\n\n")
-        
-        sb.append("File: ").append(report.getFile()).append("\n")
-        sb.append("Timestamp: ").append(report.getTimestamp()).append("\n")
-        sb.append("Result: ").append(report.isValid() ? "VALID" : "INVALID").append("\n\n")
-        
-        // Statistics
-        sb.append("Statistics:\n")
-        sb.append("-----------\n")
-        sb.append("  Locations: ").append(report.getStatistics().getLocations()).append("\n")
-        sb.append("  Sessions: ").append(report.getStatistics().getSessions()).append("\n")
-        sb.append("  Climbs: ").append(report.getStatistics().getClimbs()).append("\n")
-        if (report.getStatistics().getRoutes() > 0) {
-            sb.append("  Routes: ").append(report.getStatistics().getRoutes()).append("\n")
-        }
-        if (report.getStatistics().getSectors() > 0) {
-            sb.append("  Sectors: ").append(report.getStatistics().getSectors()).append("\n")
-        }
-        if (report.getStatistics().getTags() > 0) {
-            sb.append("  Tags: ").append(report.getStatistics().getTags()).append("\n")
-        }
-        if (report.getStatistics().getMediaItems() > 0) {
-            sb.append("  Media Items: ").append(report.getStatistics().getMediaItems()).append("\n")
-        }
-        sb.append("\n")
-        
-        // Errors
-        if (!report.getErrors().isEmpty()) {
-            sb.append("Errors (").append(report.getErrors().size()).append("):\n")
-            sb.append("------------\n")
-            for (String error : report.getErrors()) {
-                sb.append("  ✗ ").append(error).append("\n")
-            }
-            sb.append("\n")
-        }
-        
-        // Warnings
-        if (!report.getWarnings().isEmpty()) {
-            sb.append("Warnings (").append(report.getWarnings().size()).append("):\n")
-            sb.append("--------------\n")
-            for (String warning : report.getWarnings()) {
-                sb.append("  ⚠ ").append(warning).append("\n")
-            }
-            sb.append("\n")
-        }
-        
-        // Checksum results
-        if (report.getChecksumResult() != null) {
-            sb.append("Checksums:\n")
-            sb.append("----------\n")
-            sb.append("  Algorithm: ").append(report.getChecksumResult().getAlgorithm()).append("\n")
-            sb.append("  Valid: ")
-                .append(report.getChecksumResult().isValid() ? "YES" : "NO")
-                .append("\n")
-            if (report.getChecksumResult().getResults() != null && !report.getChecksumResult().getResults().isEmpty()) {
-                for (def entry : report.getChecksumResult().getResults().entrySet()) {
-                    sb.append("  ")
-                        .append(entry.getValue() ? "✓" : "✗")
-                        .append(" ")
-                        .append(entry.getKey())
-                        .append("\n")
-                }
-            }
-            sb.append("\n")
-        }
-        
-        // Summary
-        sb.append("Summary:\n")
-        sb.append("--------\n")
-        if (report.isValid() && report.getWarnings().isEmpty()) {
-            sb.append("✓ Validation passed\n")
-        } else if (report.isValid()) {
-            sb.append("✓ Validation passed with ")
-                .append(report.getWarnings().size())
-                .append(" warning(s)\n")
-        } else {
-            sb.append("✗ Validation failed with ")
-                .append(report.getErrors().size())
-                .append(" error(s) and ")
-                .append(report.getWarnings().size())
-                .append(" warning(s)\n")
-        }
-        
-        return sb.toString()
-    }
-
-    private String formatXmlReportDirectly(ValidateCommand.ValidationReport report) {
-        // Replicate the logic from ValidateCommand.formatXmlReport
-        StringBuilder sb = new StringBuilder()
-        sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n")
-        sb.append("<validationReport>\n")
-        sb.append("  <file>").append(report.getFile()).append("</file>\n")
-        sb.append("  <timestamp>").append(report.getTimestamp()).append("</timestamp>\n")
-        sb.append("  <valid>").append(report.isValid()).append("</valid>\n")
-        
-        sb.append("  <statistics>\n")
-        sb.append("    <locations>")
-            .append(report.getStatistics().getLocations())
-            .append("</locations>\n")
-        sb.append("    <sessions>")
-            .append(report.getStatistics().getSessions())
-            .append("</sessions>\n")
-        sb.append("    <climbs>").append(report.getStatistics().getClimbs()).append("</climbs>\n")
-        sb.append("    <routes>").append(report.getStatistics().getRoutes()).append("</routes>\n")
-        sb.append("    <sectors>").append(report.getStatistics().getSectors()).append("</sectors>\n")
-        sb.append("    <tags>").append(report.getStatistics().getTags()).append("</tags>\n")
-        sb.append("    <mediaItems>")
-            .append(report.getStatistics().getMediaItems())
-            .append("</mediaItems>\n")
-        sb.append("  </statistics>\n")
-        
-        if (!report.getErrors().isEmpty()) {
-            sb.append("  <errors count=\"").append(report.getErrors().size()).append("\">\n")
-            for (String error : report.getErrors()) {
-                sb.append("    <error>").append(escapeXml(error)).append("</error>\n")
-            }
-            sb.append("  </errors>\n")
-        }
-        
-        if (!report.getWarnings().isEmpty()) {
-            sb.append("  <warnings count=\"").append(report.getWarnings().size()).append("\">\n")
-            for (String warning : report.getWarnings()) {
-                sb.append("    <warning>").append(escapeXml(warning)).append("</warning>\n")
-            }
-            sb.append("  </warnings>\n")
-        }
-        
-        sb.append("</validationReport>")
-        return sb.toString()
-    }
-
-    private String formatJsonReportDirectly(ValidateCommand.ValidationReport report) {
-        // Simple JSON formatting
-        StringBuilder sb = new StringBuilder()
-        sb.append("{\n")
-        sb.append("  \"file\": \"").append(report.getFile()).append("\",\n")
-        sb.append("  \"timestamp\": \"").append(report.getTimestamp()).append("\",\n")
-        sb.append("  \"valid\": ").append(report.isValid()).append(",\n")
-        sb.append("  \"errors\": ").append(report.getErrors().size()).append(",\n")
-        sb.append("  \"warnings\": ").append(report.getWarnings().size()).append("\n")
-        sb.append("}")
-        return sb.toString()
-    }
-
-    private String escapeXml(String text) {
-        return text.replace("&", "&amp;")
-            .replace("<", "&lt;")
-            .replace(">", "&gt;")
-            .replace("\"", "&quot;")
-            .replace("'", "&apos;")
-    }
 
     // Helper methods to create test data
     private Path createValidCLDFFile() {
@@ -518,7 +367,7 @@ class ValidateCommandSpec extends Specification {
         archive.hasMedia() >> true
         archive.getMediaItems() >> [Mock(MediaItem)]
         
-        def validationResult = ValidationService.ValidationResult.builder()
+        def validationResult = ValidationResult.builder()
             .valid(true)
             .errors(["Error 1"])
             .warnings(["Warning 1", "Warning 2"])
@@ -562,7 +411,7 @@ class ValidateCommandSpec extends Specification {
         archive.hasTags() >> false
         archive.hasMedia() >> false
         
-        def validationResult = ValidationService.ValidationResult.builder()
+        def validationResult = ValidationResult.builder()
             .valid(false)
             .errors(["Critical error"])
             .warnings([])
@@ -621,7 +470,7 @@ class ValidateCommandSpec extends Specification {
         archive.hasTags() >> false
         archive.hasMedia() >> false
         
-        def validationResult = ValidationService.ValidationResult.builder()
+        def validationResult = ValidationResult.builder()
             .valid(true)
             .errors([])
             .warnings([])
@@ -641,11 +490,12 @@ class ValidateCommandSpec extends Specification {
     }
     
     def "should test escapeXml method"() {
-        given: "a command instance"
+        given: "a formatter instance"
+        def formatter = new ValidationReportFormatter()
         
         when: "escaping various XML entities"
-        def result1 = command.escapeXml("Test & <tag> with \"quotes\" and 'apostrophes'")
-        def result2 = command.escapeXml("Normal text")
+        def result1 = formatter.escapeXml("Test & <tag> with \"quotes\" and 'apostrophes'")
+        def result2 = formatter.escapeXml("Normal text")
         
         then: "XML entities are properly escaped"
         result1 == "Test &amp; &lt;tag&gt; with &quot;quotes&quot; and &apos;apostrophes&apos;"
@@ -742,7 +592,7 @@ class ValidateCommandSpec extends Specification {
         command.outputFormat = OutputFormat.text
         command.reportFormat = ValidateCommand.ReportFormat.text
         
-        def validationResult = ValidationService.ValidationResult.builder()
+        def validationResult = ValidationResult.builder()
             .valid(true)
             .errors([])
             .warnings([])
@@ -797,7 +647,7 @@ class ValidateCommandSpec extends Specification {
         mockArchive.hasTags() >> false
         mockArchive.hasMedia() >> false
         
-        def validationResult = ValidationService.ValidationResult.builder()
+        def validationResult = ValidationResult.builder()
             .valid(true)
             .errors([])
             .warnings([])
@@ -834,7 +684,7 @@ class ValidateCommandSpec extends Specification {
         mockArchive.hasTags() >> false
         mockArchive.hasMedia() >> false
         
-        def validationResult = ValidationService.ValidationResult.builder()
+        def validationResult = ValidationResult.builder()
             .valid(false)
             .errors(["Schema validation failed", "Invalid climb data"])
             .warnings(["Deprecated field used"])
@@ -874,7 +724,7 @@ class ValidateCommandSpec extends Specification {
         mockArchive.hasTags() >> false
         mockArchive.hasMedia() >> false
         
-        def validationResult = ValidationService.ValidationResult.builder()
+        def validationResult = ValidationResult.builder()
             .valid(true)
             .errors([])
             .warnings([])
@@ -910,7 +760,7 @@ class ValidateCommandSpec extends Specification {
         mockArchive.hasTags() >> false
         mockArchive.hasMedia() >> false
         
-        def validationResult = ValidationService.ValidationResult.builder()
+        def validationResult = ValidationResult.builder()
             .valid(true)
             .errors([])
             .warnings([])
@@ -944,7 +794,7 @@ class ValidateCommandSpec extends Specification {
         mockArchive.hasTags() >> false
         mockArchive.hasMedia() >> false
         
-        def validationResult = ValidationService.ValidationResult.builder()
+        def validationResult = ValidationResult.builder()
             .valid(true)
             .errors([])
             .warnings([])
@@ -981,7 +831,7 @@ class ValidateCommandSpec extends Specification {
         mockArchive.hasTags() >> false
         mockArchive.hasMedia() >> false
         
-        def validationResult = ValidationService.ValidationResult.builder()
+        def validationResult = ValidationResult.builder()
             .valid(true)
             .errors([])
             .warnings([])
@@ -1027,7 +877,7 @@ class ValidateCommandSpec extends Specification {
         mockArchive.hasMedia() >> true
         mockArchive.getMediaItems() >> [Mock(MediaItem)]
         
-        def validationResult = ValidationService.ValidationResult.builder()
+        def validationResult = ValidationResult.builder()
             .valid(true)
             .errors([])
             .warnings(["Minor formatting issue"])

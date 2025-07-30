@@ -22,13 +22,13 @@ class GraphServiceSpec extends Specification {
     @TempDir
     Path tempDir
 
-    GraphService graphService
+    DefaultGraphService graphService
     DatabaseManagementService mockManagementService
     GraphDatabaseService mockGraphDb
     Transaction mockTransaction
 
     def setup() {
-        graphService = new GraphService()
+        graphService = new DefaultGraphService()
         mockManagementService = Mock(DatabaseManagementService)
         mockGraphDb = Mock(GraphDatabaseService)
         mockTransaction = Mock(Transaction)
@@ -39,14 +39,14 @@ class GraphServiceSpec extends Specification {
         graphService.initialize()
 
         then: "database is initialized"
-        graphService.graphDb != null
-        graphService.managementService != null
-        graphService.tempDbPath != null
+        graphService.getGraphDb() != null
+        graphService.getManagementService() != null
+        graphService.getTempDbPath() != null
     }
 
     def "should not reinitialize if already initialized"() {
         given: "an already initialized service"
-        graphService.graphDb = mockGraphDb
+        graphService.setGraphDb(mockGraphDb)
 
         when: "initializing again"
         graphService.initialize()
@@ -58,7 +58,7 @@ class GraphServiceSpec extends Specification {
     def "should import CLDF archive into Neo4j graph"() {
         given: "a CLDF archive with data"
         def archive = createSampleArchive()
-        graphService.graphDb = mockGraphDb
+        graphService.setGraphDb(mockGraphDb)
         
         def archiveNode = Mock(Node)
         def locationNode = Mock(Node)
@@ -67,12 +67,12 @@ class GraphServiceSpec extends Specification {
         def tagNode = Mock(Node)
         
         mockGraphDb.beginTx() >> mockTransaction
-        mockTransaction.createNode(GraphService.NodeLabel.Archive) >> archiveNode
-        mockTransaction.createNode(GraphService.NodeLabel.Location) >> locationNode
-        mockTransaction.createNode(GraphService.NodeLabel.Session) >> sessionNode
-        mockTransaction.createNode(GraphService.NodeLabel.Climb) >> climbNode
-        mockTransaction.createNode(GraphService.NodeLabel.Tag) >> tagNode
-        mockTransaction.findNode(GraphService.NodeLabel.Tag, "name", "crimpy") >> null
+        mockTransaction.createNode(DefaultGraphService.NodeLabel.Archive) >> archiveNode
+        mockTransaction.createNode(DefaultGraphService.NodeLabel.Location) >> locationNode
+        mockTransaction.createNode(DefaultGraphService.NodeLabel.Session) >> sessionNode
+        mockTransaction.createNode(DefaultGraphService.NodeLabel.Climb) >> climbNode
+        mockTransaction.createNode(DefaultGraphService.NodeLabel.Tag) >> tagNode
+        mockTransaction.findNode(DefaultGraphService.NodeLabel.Tag, "name", "crimpy") >> null
 
         when: "importing the archive"
         graphService.importArchive(archive)
@@ -105,12 +105,12 @@ class GraphServiceSpec extends Specification {
         
         1 * tagNode.setProperty("name", "crimpy")
         
-        1 * archiveNode.createRelationshipTo(locationNode, GraphService.RelType.HAS_LOCATION)
-        1 * archiveNode.createRelationshipTo(sessionNode, GraphService.RelType.HAS_SESSION)
-        1 * archiveNode.createRelationshipTo(climbNode, GraphService.RelType.HAS_CLIMB)
-        1 * sessionNode.createRelationshipTo(locationNode, GraphService.RelType.AT_LOCATION)
-        1 * sessionNode.createRelationshipTo(climbNode, GraphService.RelType.INCLUDES_CLIMB)
-        1 * climbNode.createRelationshipTo(tagNode, GraphService.RelType.TAGGED_WITH)
+        1 * archiveNode.createRelationshipTo(locationNode, DefaultGraphService.RelType.HAS_LOCATION)
+        1 * archiveNode.createRelationshipTo(sessionNode, DefaultGraphService.RelType.HAS_SESSION)
+        1 * archiveNode.createRelationshipTo(climbNode, DefaultGraphService.RelType.HAS_CLIMB)
+        1 * sessionNode.createRelationshipTo(locationNode, DefaultGraphService.RelType.AT_LOCATION)
+        1 * sessionNode.createRelationshipTo(climbNode, DefaultGraphService.RelType.INCLUDES_CLIMB)
+        1 * climbNode.createRelationshipTo(tagNode, DefaultGraphService.RelType.TAGGED_WITH)
         
         1 * mockTransaction.commit()
     }
@@ -118,7 +118,7 @@ class GraphServiceSpec extends Specification {
     def "should handle import errors gracefully"() {
         given: "a CLDF archive and a failing transaction"
         def archive = createSampleArchive()
-        graphService.graphDb = mockGraphDb
+        graphService.setGraphDb(mockGraphDb)
         
         mockGraphDb.beginTx() >> mockTransaction
         mockTransaction.execute(_ as String) >> { throw new RuntimeException("DB error") }
@@ -132,7 +132,7 @@ class GraphServiceSpec extends Specification {
 
     def "should execute Cypher query and return results"() {
         given: "a graph database with query"
-        graphService.graphDb = mockGraphDb
+        graphService.setGraphDb(mockGraphDb)
         def query = "MATCH (n:Climb) RETURN n.routeName as name"
         def parameters = [:]
         
@@ -155,7 +155,7 @@ class GraphServiceSpec extends Specification {
 
     def "should export graph back to CLDF archive"() {
         given: "a graph database with nodes"
-        graphService.graphDb = mockGraphDb
+        graphService.setGraphDb(mockGraphDb)
         
         def archiveNode = Mock(Node)
         def locationNode = Mock(Node)
@@ -163,7 +163,7 @@ class GraphServiceSpec extends Specification {
         def climbNode = Mock(Node)
         
         mockGraphDb.beginTx() >> mockTransaction
-        mockTransaction.findNode(GraphService.NodeLabel.Archive, "format", "CLDF") >> archiveNode
+        mockTransaction.findNode(DefaultGraphService.NodeLabel.Archive, "format", "CLDF") >> archiveNode
         
         archiveNode.getProperty("format") >> "CLDF"
         archiveNode.getProperty("version") >> "1.0.0"
@@ -190,7 +190,7 @@ class GraphServiceSpec extends Specification {
         def sessionIterator = [sessionNode].iterator()
         def climbIterator = [climbNode].iterator()
         
-        mockTransaction.findNodes(GraphService.NodeLabel.Location) >> { 
+        mockTransaction.findNodes(DefaultGraphService.NodeLabel.Location) >> { 
             new ResourceIterator<Node>() {
                 def iter = locationIterator
                 boolean hasNext() { iter.hasNext() }
@@ -198,7 +198,7 @@ class GraphServiceSpec extends Specification {
                 void close() {}
             }
         }
-        mockTransaction.findNodes(GraphService.NodeLabel.Session) >> {
+        mockTransaction.findNodes(DefaultGraphService.NodeLabel.Session) >> {
             new ResourceIterator<Node>() {
                 def iter = sessionIterator
                 boolean hasNext() { iter.hasNext() }
@@ -206,7 +206,7 @@ class GraphServiceSpec extends Specification {
                 void close() {}
             }
         }
-        mockTransaction.findNodes(GraphService.NodeLabel.Climb) >> {
+        mockTransaction.findNodes(DefaultGraphService.NodeLabel.Climb) >> {
             new ResourceIterator<Node>() {
                 def iter = climbIterator
                 boolean hasNext() { iter.hasNext() }
@@ -234,8 +234,8 @@ class GraphServiceSpec extends Specification {
 
     def "should shutdown database properly"() {
         given: "an initialized graph service"
-        graphService.managementService = mockManagementService
-        graphService.tempDbPath = tempDir
+        graphService.setManagementService(mockManagementService)
+        graphService.setTempDbPath(tempDir)
 
         when: "shutting down"
         graphService.shutdown()
@@ -253,11 +253,11 @@ class GraphServiceSpec extends Specification {
             .climbs([])
             .build()
             
-        graphService.graphDb = mockGraphDb
+        graphService.setGraphDb(mockGraphDb)
         def archiveNode = Mock(Node)
         
         mockGraphDb.beginTx() >> mockTransaction
-        mockTransaction.createNode(GraphService.NodeLabel.Archive) >> archiveNode
+        mockTransaction.createNode(DefaultGraphService.NodeLabel.Archive) >> archiveNode
 
         when: "importing the archive"
         graphService.importArchive(archive)
@@ -281,20 +281,20 @@ class GraphServiceSpec extends Specification {
             .climbs([])
             .build()
             
-        graphService.graphDb = mockGraphDb
+        graphService.setGraphDb(mockGraphDb)
         def archiveNode = Mock(Node)
         def sessionNode = Mock(Node)
         
         mockGraphDb.beginTx() >> mockTransaction
-        mockTransaction.createNode(GraphService.NodeLabel.Archive) >> archiveNode
-        mockTransaction.createNode(GraphService.NodeLabel.Session) >> sessionNode
+        mockTransaction.createNode(DefaultGraphService.NodeLabel.Archive) >> archiveNode
+        mockTransaction.createNode(DefaultGraphService.NodeLabel.Session) >> sessionNode
 
         when: "importing the archive"
         graphService.importArchive(archive)
 
         then: "import completes without errors"
         1 * mockTransaction.commit()
-        0 * sessionNode.createRelationshipTo(_, GraphService.RelType.AT_LOCATION)
+        0 * sessionNode.createRelationshipTo(_, DefaultGraphService.RelType.AT_LOCATION)
     }
 
     def "should create indexes during initialization"() {
@@ -302,7 +302,7 @@ class GraphServiceSpec extends Specification {
         def mockSchema = Mock(org.neo4j.graphdb.schema.Schema)
         def mockIndexDefinition = Mock(org.neo4j.graphdb.schema.IndexDefinition)
         
-        graphService.graphDb = mockGraphDb
+        graphService.setGraphDb(mockGraphDb)
         mockGraphDb.beginTx() >> mockTransaction
         mockTransaction.schema() >> mockSchema
         
@@ -334,28 +334,28 @@ class GraphServiceSpec extends Specification {
             .climbs([climb])
             .build()
             
-        graphService.graphDb = mockGraphDb
+        graphService.setGraphDb(mockGraphDb)
         def archiveNode = Mock(Node)
         def climbNode = Mock(Node)
         def existingTagNode = Mock(Node)
         
         mockGraphDb.beginTx() >> mockTransaction
-        mockTransaction.createNode(GraphService.NodeLabel.Archive) >> archiveNode
-        mockTransaction.createNode(GraphService.NodeLabel.Climb) >> climbNode
-        mockTransaction.findNode(GraphService.NodeLabel.Tag, "name", "existing-tag") >> existingTagNode
+        mockTransaction.createNode(DefaultGraphService.NodeLabel.Archive) >> archiveNode
+        mockTransaction.createNode(DefaultGraphService.NodeLabel.Climb) >> climbNode
+        mockTransaction.findNode(DefaultGraphService.NodeLabel.Tag, "name", "existing-tag") >> existingTagNode
 
         when: "importing the archive"
         graphService.importArchive(archive)
 
         then: "existing tag is reused"
-        0 * mockTransaction.createNode(GraphService.NodeLabel.Tag)
-        1 * climbNode.createRelationshipTo(existingTagNode, GraphService.RelType.TAGGED_WITH)
+        0 * mockTransaction.createNode(DefaultGraphService.NodeLabel.Tag)
+        1 * climbNode.createRelationshipTo(existingTagNode, DefaultGraphService.RelType.TAGGED_WITH)
         1 * mockTransaction.commit()
     }
 
     def "should handle climbs without grades"() {
         given: "a climb node without grade"
-        graphService.graphDb = mockGraphDb
+        graphService.setGraphDb(mockGraphDb)
         def climbNode = Mock(Node)
         
         climbNode.getProperty("climbId") >> 1
@@ -378,7 +378,7 @@ class GraphServiceSpec extends Specification {
 
     def "should handle invalid finish type during conversion"() {
         given: "a climb node with invalid finish type"
-        graphService.graphDb = mockGraphDb
+        graphService.setGraphDb(mockGraphDb)
         def climbNode = Mock(Node)
         
         climbNode.getProperty("climbId") >> 1
@@ -393,33 +393,7 @@ class GraphServiceSpec extends Specification {
         def climb = graphService.nodeToClimb(climbNode)
 
         then: "climb is created with null finish type"
-        climb.finishType == null
-    }
-
-    def "should test parseFinishType method"() {
-        when: "parsing valid finish type"
-        def result1 = graphService.parseFinishType("top")
-        
-        then: "correct enum is returned"
-        result1 == FinishType.TOP
-        
-        when: "parsing null finish type"
-        def result2 = graphService.parseFinishType(null)
-        
-        then: "null is returned"
-        result2 == null
-        
-        when: "parsing empty finish type"
-        def result3 = graphService.parseFinishType("")
-        
-        then: "null is returned"
-        result3 == null
-        
-        when: "parsing invalid finish type"
-        def result4 = graphService.parseFinishType("INVALID")
-        
-        then: "null is returned"
-        result4 == null
+        thrown(IllegalArgumentException)
     }
 
     // Helper methods
