@@ -117,7 +117,6 @@ public class GraphBenchmark {
           for (int j = i + 1; j < partners.size(); j++) {
             String p1 = partners.get(i);
             String p2 = partners.get(j);
-            String key = p1.compareTo(p2) < 0 ? p1 + "-" + p2 : p2 + "-" + p1;
             partnerCounts.computeIfAbsent(p1, k -> new HashMap<>()).merge(p2, 1, Integer::sum);
           }
         }
