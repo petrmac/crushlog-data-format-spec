@@ -855,27 +855,15 @@ class ValidateCommandSpec extends Specification {
     
     def "should execute validate command with complex archive data"() {
         given: "a complex CLDF archive"
-        def cldfFile = createValidCLDFFile().toFile()
-        command.inputFile = cldfFile
+        // Create archive with specific counts matching our expectations
+        def archive = createTestArchive(3, 2, 4)  // 3 locations, 2 sessions, 4 climbs
+        def file = tempDir.resolve("complex.cldf")
+        new CLDFWriter(false).write(archive, file.toFile())
+        
+        command.inputFile = file.toFile()
         command.validateSchema = true
         command.validateChecksums = true
         command.reportFormat = ValidateCommand.ReportFormat.text
-        
-        def mockArchive = Mock(CLDFArchive)
-        def mockChecksums = Mock(Checksums)
-        mockChecksums.getAlgorithm() >> "MD5"
-        mockArchive.getChecksums() >> mockChecksums
-        mockArchive.getLocations() >> [Mock(Location), Mock(Location), Mock(Location)]
-        mockArchive.getSessions() >> [Mock(Session), Mock(Session)]
-        mockArchive.getClimbs() >> [Mock(Climb), Mock(Climb), Mock(Climb), Mock(Climb)]
-        mockArchive.hasRoutes() >> true
-        mockArchive.getRoutes() >> [Mock(Route)]
-        mockArchive.hasSectors() >> true
-        mockArchive.getSectors() >> [Mock(Sector)]
-        mockArchive.hasTags() >> true
-        mockArchive.getTags() >> [Mock(Tag), Mock(Tag)]
-        mockArchive.hasMedia() >> true
-        mockArchive.getMediaItems() >> [Mock(MediaItem)]
         
         def validationResult = ValidationResult.builder()
             .valid(true)
@@ -890,9 +878,9 @@ class ValidateCommandSpec extends Specification {
         then: "all data is processed correctly"
         result.success == true
         result.message.contains("Validation Report")
-        result.message.contains("Locations: ${mockArchive.getLocations().size()}")
-        result.message.contains("Sessions: ${mockSessionCount}")
-        result.message.contains("Climbs: ${mockedClimbs.size()}")
+        result.message.contains("Locations: 3")
+        result.message.contains("Sessions: 2")
+        result.message.contains("Climbs: 4")
         result.message.contains("Algorithm: SHA-256")
         result.message.contains("Minor formatting issue")
         
