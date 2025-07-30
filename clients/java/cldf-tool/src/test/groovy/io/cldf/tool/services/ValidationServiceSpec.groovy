@@ -2,6 +2,7 @@ package io.cldf.tool.services
 
 import io.cldf.api.CLDFArchive
 import io.cldf.models.*
+import io.cldf.tool.services.ValidationResult
 import spock.lang.Specification
 
 import java.time.LocalDate
@@ -16,7 +17,7 @@ class ValidationServiceSpec extends Specification {
     ValidationService validationService
     
     def setup() {
-        validationService = new ValidationService()
+        validationService = new DefaultValidationService()
     }
 
     def "should validate a complete and valid archive"() {
@@ -347,7 +348,7 @@ class ValidationServiceSpec extends Specification {
 
     def "should build ValidationResult correctly"() {
         given: "a validation result with errors and warnings"
-        def result = ValidationService.ValidationResult.builder()
+        def result = ValidationResult.builder()
             .valid(false)
             .errors(["Error 1", "Error 2"])
             .warnings(["Warning 1", "Warning 2", "Warning 3"])
@@ -363,7 +364,7 @@ class ValidationServiceSpec extends Specification {
 
     def "should handle empty warnings list"() {
         given: "a validation result with no warnings"
-        def result = ValidationService.ValidationResult.builder()
+        def result = ValidationResult.builder()
             .valid(true)
             .errors([])
             .warnings([])
@@ -376,7 +377,7 @@ class ValidationServiceSpec extends Specification {
 
     def "should handle null warnings list"() {
         given: "a validation result with null warnings"
-        def result = ValidationService.ValidationResult.builder()
+        def result = ValidationResult.builder()
             .valid(true)
             .errors([])
             .warnings(null)

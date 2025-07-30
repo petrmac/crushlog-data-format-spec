@@ -7,6 +7,7 @@ import io.cldf.models.enums.ClimbType
 import io.cldf.models.enums.RockType
 import io.cldf.tool.models.CommandResult
 import io.cldf.tool.services.ValidationService
+import io.cldf.tool.services.ValidationResult
 import io.cldf.tool.utils.InputHandler
 import io.cldf.tool.utils.OutputFormat
 import io.cldf.tool.utils.OutputHandler
@@ -47,7 +48,7 @@ class CreateCommandSpec extends Specification {
         command.output = new OutputHandler(OutputFormat.text, false)
         
         // Default mock behavior - return valid result
-        def defaultValidationResult = ValidationService.ValidationResult.builder()
+        def defaultValidationResult = ValidationResult.builder()
             .valid(true)
             .warnings([])
             .errors([])
@@ -160,7 +161,7 @@ class CreateCommandSpec extends Specification {
         
         // Override default mock validation service to return invalid result
         
-        def validationResult = ValidationService.ValidationResult.builder()
+        def validationResult = ValidationResult.builder()
             .valid(false)
             .errors(["Missing required field: locations"])
             .build()
@@ -186,7 +187,7 @@ class CreateCommandSpec extends Specification {
         
         // Override default mock validation service to return warnings
         
-        def validationResult = ValidationService.ValidationResult.builder()
+        def validationResult = ValidationResult.builder()
             .valid(true)
             .warnings(["No climbs found in archive", "Consider adding route information"])
             .errors([])

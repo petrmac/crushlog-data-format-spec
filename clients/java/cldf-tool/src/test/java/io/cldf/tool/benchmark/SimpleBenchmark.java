@@ -13,7 +13,7 @@ import io.cldf.models.Location;
 import io.cldf.models.Session;
 import io.cldf.models.enums.FinishType;
 import io.cldf.models.enums.GradeSystem;
-import io.cldf.tool.services.GraphService;
+import io.cldf.tool.services.DefaultGraphService;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
@@ -29,7 +29,7 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 public class SimpleBenchmark {
 
   private CLDFArchive archive;
-  private GraphService graphService;
+  private DefaultGraphService graphService;
 
   @Param({"100", "1000"})
   private int dataSize;
@@ -40,7 +40,7 @@ public class SimpleBenchmark {
     archive = createTestArchive(dataSize);
 
     // Initialize graph service
-    graphService = new GraphService();
+    graphService = new DefaultGraphService();
     try {
       graphService.initialize();
       graphService.importArchive(archive);

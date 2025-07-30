@@ -22,7 +22,7 @@ class CLDFServiceSpec extends Specification {
     File tempDir
     
     def setup() {
-        cldfService = new CLDFService()
+        cldfService = new DefaultCLDFService()
     }
 
     def "should read CLDF archive from file"() {

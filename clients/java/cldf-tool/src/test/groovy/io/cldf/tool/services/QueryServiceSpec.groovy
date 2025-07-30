@@ -11,7 +11,7 @@ import java.time.LocalDate
 
 class QueryServiceSpec extends Specification {
 
-    QueryService queryService = new QueryService()
+    QueryService queryService = new DefaultQueryService()
 
     def "should apply single equals filter to climbs"() {
         given: "a list of climbs"

@@ -13,8 +13,8 @@ import io.cldf.models.*;
 import io.cldf.models.enums.ClimbType;
 import io.cldf.models.enums.FinishType;
 import io.cldf.models.enums.GradeSystem;
-import io.cldf.tool.services.GraphService;
-import io.cldf.tool.services.QueryService;
+import io.cldf.tool.services.DefaultGraphService;
+import io.cldf.tool.services.DefaultQueryService;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.infra.Blackhole;
 
@@ -29,8 +29,8 @@ import org.openjdk.jmh.infra.Blackhole;
 @Measurement(iterations = 5, time = 1)
 public class GraphBenchmark {
 
-  private GraphService graphService;
-  private QueryService queryService;
+  private DefaultGraphService graphService;
+  private DefaultQueryService queryService;
   private CLDFArchive testArchive;
 
   @Param({"100", "1000", "10000"})
@@ -39,8 +39,8 @@ public class GraphBenchmark {
   @Setup(Level.Trial)
   public void setup() throws IOException {
     // Initialize services
-    graphService = new GraphService();
-    queryService = new QueryService();
+    graphService = new DefaultGraphService();
+    queryService = new DefaultQueryService();
 
     // Create test data
     testArchive = createTestArchive(dataSize);

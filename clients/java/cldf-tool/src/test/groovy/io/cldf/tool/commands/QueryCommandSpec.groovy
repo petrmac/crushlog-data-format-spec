@@ -5,6 +5,7 @@ import io.cldf.models.*
 import io.cldf.tool.models.CommandResult
 import io.cldf.tool.services.CLDFService
 import io.cldf.tool.services.QueryService
+import io.cldf.tool.services.DefaultQueryService
 import io.cldf.tool.utils.OutputFormat
 import io.cldf.tool.utils.OutputHandler
 import spock.lang.Specification
@@ -36,7 +37,7 @@ class QueryCommandSpec extends Specification {
 
     def setup() {
         cldfService = Mock(CLDFService)
-        queryService = new QueryService()
+        queryService = new DefaultQueryService()
         
         command = new QueryCommand(cldfService, queryService)
         command.outputFormat = OutputFormat.text
