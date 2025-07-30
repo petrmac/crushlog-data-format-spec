@@ -31,12 +31,28 @@ sonar {
         property("sonar.sourceEncoding", "UTF-8")
         property("sonar.java.source", "21")
         property("sonar.java.target", "21")
-        property("sonar.sources", "src/main/java")
-        property("sonar.tests", "src/test")
-        property("sonar.java.binaries", "build/classes")
-        property("sonar.java.test.binaries", "build/test-results/test")
         property("sonar.coverage.jacoco.xmlReportPaths", "**/build/reports/jacoco/test/jacocoTestReport.xml")
+        property("sonar.junit.reportPaths", "**/build/test-results/test")
     }
+}
+
+// Configure SonarQube for subprojects
+subprojects {
+    sonar {
+        properties {
+            property("sonar.sources", "src/main/java")
+            property("sonar.tests", "src/test")
+            property("sonar.java.binaries", "build/classes/java/main")
+            property("sonar.java.test.binaries", fileTree(layout.buildDirectory) {
+                include("classes/java/test/**", "classes/groovy/test/**")
+            }.files.joinToString(","))
+        }
+    }
+}
+
+// Ensure compilation happens before SonarQube analysis
+tasks.named("sonar") {
+    dependsOn(":cldf-java:build", ":cldf-tool:build")
 }
 
 allprojects {
@@ -49,6 +65,7 @@ subprojects {
     apply(plugin = "idea")
     apply(plugin = "io.freefair.lombok")
     apply(plugin = "jacoco")
+    apply(plugin = "org.sonarqube")
     
     configure<JavaPluginExtension> {
         sourceCompatibility = JavaVersion.VERSION_21
