@@ -891,7 +891,7 @@ class ValidateCommandSpec extends Specification {
         result.success == true
         result.message.contains("Validation Report")
         result.message.contains("Locations: 2")
-        result.message.contains("Sessions: 1")
+        result.message.contains("Sessions: ${mockSessionCount}")
         result.message.contains("Climbs: ${mockedClimbs.size()}")
         result.message.contains("Algorithm: SHA-256")
         result.message.contains("Minor formatting issue")
