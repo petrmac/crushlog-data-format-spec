@@ -7,6 +7,8 @@ import spock.lang.Specification
 import java.time.LocalDate
 import java.time.OffsetDateTime
 
+import io.cldf.models.enums.RouteType
+
 class RouteSpec extends Specification {
 
 	ObjectMapper objectMapper
@@ -22,14 +24,14 @@ class RouteSpec extends Specification {
 				.id("route-1")
 				.locationId("location-1")
 				.name("Test Route")
-				.routeType(Route.RouteType.route)
+				.routeType(RouteType.ROUTE)
 				.build()
 
 		then: "required fields are set"
 		route.id == "route-1"
 		route.locationId == "location-1"
 		route.name == "Test Route"
-		route.routeType == Route.RouteType.route
+		route.routeType == RouteType.ROUTE
 	}
 
 	def "should build route with all fields"() {
@@ -42,7 +44,7 @@ class RouteSpec extends Specification {
 				.locationId("location-1")
 				.sectorId("sector-1")
 				.name("Biographie")
-				.routeType(Route.RouteType.route)
+				.routeType(RouteType.ROUTE)
 				.grades(Route.Grades.builder()
 				.yds("5.15a")
 				.french("9a+")
@@ -68,7 +70,7 @@ class RouteSpec extends Specification {
 		route.locationId == "location-1"
 		route.sectorId == "sector-1"
 		route.name == "Biographie"
-		route.routeType == Route.RouteType.route
+		route.routeType == RouteType.ROUTE
 		route.qualityRating == 5
 		route.beta == "Start with undercling, big move to crimp"
 		route.height == 35
@@ -95,7 +97,7 @@ class RouteSpec extends Specification {
 				.id("route-1")
 				.locationId("location-1")
 				.name("Test Route")
-				.routeType(Route.RouteType.boulder)
+				.routeType(RouteType.BOULDER)
 				.grades(Route.Grades.builder()
 				.vScale("V10")
 				.font("7C+")
@@ -145,7 +147,7 @@ class RouteSpec extends Specification {
 		route.id == "route-1"
 		route.locationId == "location-1"
 		route.name == "The Mandala"
-		route.routeType == Route.RouteType.boulder
+		route.routeType == RouteType.BOULDER
 		route.qualityRating == 5
 		route.tags == ["highball", "slopers"]
 
@@ -162,8 +164,8 @@ class RouteSpec extends Specification {
 
 	def "should handle all route types"() {
 		expect: "all route types are valid"
-		Route.RouteType.values().size() == 2
-		Route.RouteType.valueOf(type) != null
+		RouteType.values().size() == 2
+		RouteType.fromValue(type) != null
 
 		where:
 		type << ["boulder", "route"]
@@ -194,13 +196,13 @@ class RouteSpec extends Specification {
 			.id("route-1")
 			.locationId("loc-1")
 			.name("Route 1")
-			.routeType(Route.RouteType.route)
+			.routeType(RouteType.ROUTE)
 			.build(),
 			Route.builder()
 			.id("route-2")
 			.locationId("loc-1")
 			.name("Boulder 1")
-			.routeType(Route.RouteType.boulder)
+			.routeType(RouteType.BOULDER)
 			.build()
 		]
 

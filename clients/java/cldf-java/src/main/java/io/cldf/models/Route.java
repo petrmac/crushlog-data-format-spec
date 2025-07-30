@@ -6,6 +6,9 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import io.cldf.models.enums.ProtectionRating;
+import io.cldf.models.enums.RouteCharacteristics;
+import io.cldf.models.enums.RouteType;
 import io.cldf.utils.FlexibleDateTimeDeserializer;
 import io.cldf.utils.FlexibleLocalDateDeserializer;
 import lombok.AllArgsConstructor;
@@ -86,27 +89,5 @@ public class Route {
     private LocalDate date;
 
     private String info;
-  }
-
-  /** Type of route. */
-  public enum RouteType {
-    boulder,
-    route
-  }
-
-  /** Characteristics of the route. */
-  public enum RouteCharacteristics {
-    trad,
-    bolted
-  }
-
-  /** Protection rating for traditional routes. */
-  public enum ProtectionRating {
-    bombproof,
-    good,
-    adequate,
-    runout,
-    serious,
-    x
   }
 }

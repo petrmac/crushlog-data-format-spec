@@ -7,6 +7,10 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import io.cldf.models.enums.ClimbType;
+import io.cldf.models.enums.RockType;
+import io.cldf.models.enums.SessionType;
+import io.cldf.models.enums.TerrainType;
 import io.cldf.utils.FlexibleLocalDateDeserializer;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -40,7 +44,7 @@ public class Session {
 
   private Boolean isIndoor;
 
-  private Climb.ClimbType climbType;
+  private ClimbType climbType;
 
   private SessionType sessionType;
 
@@ -50,9 +54,9 @@ public class Session {
 
   private String notes;
 
-  private Location.RockType rockType;
+  private RockType rockType;
 
-  private Location.TerrainType terrainType;
+  private TerrainType terrainType;
 
   private Integer approachTime;
 
@@ -69,15 +73,5 @@ public class Session {
     private Double temperature;
     private Double humidity;
     private String wind;
-  }
-
-  public enum SessionType {
-    sportClimbing,
-    multiPitch,
-    tradClimbing,
-    bouldering,
-    indoorClimbing,
-    indoorBouldering,
-    boardSession
   }
 }

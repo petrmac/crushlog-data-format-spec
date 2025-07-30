@@ -11,6 +11,7 @@ import jakarta.inject.Singleton;
 
 import io.cldf.api.CLDFArchive;
 import io.cldf.models.*;
+import io.cldf.models.enums.FinishType;
 import lombok.extern.slf4j.Slf4j;
 import org.neo4j.configuration.GraphDatabaseSettings;
 import org.neo4j.dbms.api.DatabaseManagementService;
@@ -302,7 +303,8 @@ public class GraphService {
     if (climb.getGrades() != null && climb.getGrades().getGrade() != null) {
       node.setProperty("grade", climb.getGrades().getGrade());
     }
-    if (climb.getFinishType() != null) node.setProperty("finishType", climb.getFinishType().name());
+    if (climb.getFinishType() != null)
+      node.setProperty("finishType", climb.getFinishType().getValue());
     node.setProperty("attempts", climb.getAttempts());
     if (climb.getRating() != null) node.setProperty("rating", climb.getRating());
     return node;
@@ -372,12 +374,12 @@ public class GraphService {
     return builder.build();
   }
 
-  private Climb.FinishType parseFinishType(String finishTypeStr) {
+  private FinishType parseFinishType(String finishTypeStr) {
     if (finishTypeStr == null || finishTypeStr.isEmpty()) {
       return null;
     }
     try {
-      return Climb.FinishType.valueOf(finishTypeStr);
+      return FinishType.fromValue(finishTypeStr);
     } catch (IllegalArgumentException e) {
       log.warn("Unknown finish type: {}", finishTypeStr);
       return null;

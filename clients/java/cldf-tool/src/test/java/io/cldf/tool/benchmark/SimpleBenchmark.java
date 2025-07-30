@@ -11,6 +11,8 @@ import io.cldf.api.CLDFArchive;
 import io.cldf.models.Climb;
 import io.cldf.models.Location;
 import io.cldf.models.Session;
+import io.cldf.models.enums.FinishType;
+import io.cldf.models.enums.GradeSystem;
 import io.cldf.tool.services.GraphService;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.runner.Runner;
@@ -123,10 +125,9 @@ public class SimpleBenchmark {
               .grades(
                   Climb.GradeInfo.builder()
                       .grade(grades[random.nextInt(grades.length)])
-                      .system(Climb.GradeInfo.GradeSystem.yds)
+                      .system(GradeSystem.YDS)
                       .build())
-              .finishType(
-                  random.nextBoolean() ? Climb.FinishType.redpoint : Climb.FinishType.onsight)
+              .finishType(random.nextBoolean() ? FinishType.REDPOINT : FinishType.ONSIGHT)
               .build());
     }
 

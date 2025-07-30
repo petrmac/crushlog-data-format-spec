@@ -8,6 +8,16 @@ import java.nio.file.Path
 import java.time.LocalDate
 import java.time.OffsetDateTime
 
+import io.cldf.models.enums.ClimbType
+import io.cldf.models.enums.FinishType
+import io.cldf.models.enums.GradeSystem
+import io.cldf.models.enums.RockType
+import io.cldf.models.enums.TerrainType
+import io.cldf.models.enums.RouteType
+import io.cldf.models.enums.SessionType
+import io.cldf.models.enums.PredefinedTagKey
+import io.cldf.models.enums.Platform
+
 class CLDFReaderWriterSpec extends Specification {
 
 	@TempDir
@@ -44,7 +54,7 @@ class CLDFReaderWriterSpec extends Specification {
 		and: "climbs should match"
 		readArchive.climbs.size() == 1
 		readArchive.climbs[0].routeName == "Test Route"
-		readArchive.climbs[0].type == Climb.ClimbType.boulder
+		readArchive.climbs[0].type == ClimbType.BOULDER
 
 		and: "sessions should match"
 		readArchive.sessions.size() == 1
@@ -132,7 +142,7 @@ class CLDFReaderWriterSpec extends Specification {
 				.format("CLDF")
 				.creationDate(OffsetDateTime.now())
 				.appVersion("1.0")
-				.platform(Manifest.Platform.Desktop)
+				.platform(Platform.DESKTOP)
 				.stats(Manifest.Stats.builder()
 				.climbsCount(1)
 				.locationsCount(1)
@@ -152,8 +162,8 @@ class CLDFReaderWriterSpec extends Specification {
 				.latitude(40.0)
 				.longitude(-105.0)
 				.build())
-				.rockType(Location.RockType.granite)
-				.terrainType(Location.TerrainType.natural)
+				.rockType(RockType.GRANITE)
+				.terrainType(TerrainType.NATURAL)
 				.build()
 	}
 
@@ -163,10 +173,10 @@ class CLDFReaderWriterSpec extends Specification {
 				.sessionId(1)
 				.date(LocalDate.now())
 				.routeName("Test Route")
-				.type(Climb.ClimbType.boulder)
-				.finishType(Climb.FinishType.top)
+				.type(ClimbType.BOULDER)
+				.finishType(FinishType.TOP)
 				.grades(Climb.GradeInfo.builder()
-				.system(Climb.GradeInfo.GradeSystem.vScale)
+				.system(GradeSystem.V_SCALE)
 				.grade("V5")
 				.build())
 				.attempts(1)
@@ -182,8 +192,8 @@ class CLDFReaderWriterSpec extends Specification {
 				.location("Test Crag")
 				.locationId("1")
 				.isIndoor(false)
-				.climbType(Climb.ClimbType.boulder)
-				.sessionType(Session.SessionType.bouldering)
+				.climbType(ClimbType.BOULDER)
+				.sessionType(SessionType.BOULDERING)
 				.notes("Good session")
 				.build()
 	}
@@ -193,7 +203,7 @@ class CLDFReaderWriterSpec extends Specification {
 				.id("1")
 				.locationId("1")
 				.name("Test Boulder")
-				.routeType(Route.RouteType.boulder)
+				.routeType(RouteType.BOULDER)
 				.grades(Route.Grades.builder()
 				.vScale("V5")
 				.build())
@@ -207,7 +217,7 @@ class CLDFReaderWriterSpec extends Specification {
 				.id("1")
 				.name("crimpy")
 				.isPredefined(true)
-				.predefinedTagKey(Tag.PredefinedTagKey.crimpy)
+				.predefinedTagKey(PredefinedTagKey.CRIMPY)
 				.color("#FF0000")
 				.category("holds")
 				.build()

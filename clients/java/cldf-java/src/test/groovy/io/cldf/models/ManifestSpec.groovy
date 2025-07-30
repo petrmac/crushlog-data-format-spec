@@ -6,6 +6,11 @@ import spock.lang.Specification
 
 import java.time.LocalDate
 import java.time.OffsetDateTime
+import io.cldf.models.enums.Platform
+import io.cldf.models.enums.MediaStrategy
+
+import io.cldf.models.enums.Platform
+import io.cldf.models.enums.MediaStrategy
 
 class ManifestSpec extends Specification {
 
@@ -27,7 +32,7 @@ class ManifestSpec extends Specification {
 				.format("CLDF")
 				.creationDate(creationDate)
 				.appVersion("1.0")
-				.platform(Manifest.Platform.Desktop)
+				.platform(Platform.DESKTOP)
 				.build()
 
 		then: "required fields are set"
@@ -35,7 +40,7 @@ class ManifestSpec extends Specification {
 		manifest.format == "CLDF"
 		manifest.creationDate == creationDate
 		manifest.appVersion == "1.0"
-		manifest.platform == Manifest.Platform.Desktop
+		manifest.platform == Platform.DESKTOP
 	}
 
 	def "should build manifest with all fields"() {
@@ -50,7 +55,7 @@ class ManifestSpec extends Specification {
 				.format("CLDF")
 				.creationDate(creationDate)
 				.appVersion("2.5.0")
-				.platform(Manifest.Platform.iOS)
+				.platform(Platform.IOS)
 				.stats(Manifest.Stats.builder()
 				.climbsCount(150)
 				.locationsCount(10)
@@ -61,7 +66,7 @@ class ManifestSpec extends Specification {
 				.build())
 				.exportOptions(Manifest.ExportOptions.builder()
 				.includeMedia(true)
-				.mediaStrategy(Manifest.ExportOptions.MediaStrategy.reference)
+				.mediaStrategy(MediaStrategy.REFERENCE)
 				.dateRange(Manifest.ExportOptions.DateRange.builder()
 				.start(startDate)
 				.end(endDate)
@@ -74,7 +79,7 @@ class ManifestSpec extends Specification {
 		manifest.format == "CLDF"
 		manifest.creationDate == creationDate
 		manifest.appVersion == "2.5.0"
-		manifest.platform == Manifest.Platform.iOS
+		manifest.platform == Platform.IOS
 
 		and: "stats are correct"
 		manifest.stats.climbsCount == 150
@@ -86,7 +91,7 @@ class ManifestSpec extends Specification {
 
 		and: "export options are correct"
 		manifest.exportOptions.includeMedia
-		manifest.exportOptions.mediaStrategy == Manifest.ExportOptions.MediaStrategy.reference
+		manifest.exportOptions.mediaStrategy == MediaStrategy.REFERENCE
 		manifest.exportOptions.dateRange.start == startDate
 		manifest.exportOptions.dateRange.end == endDate
 	}
@@ -98,7 +103,7 @@ class ManifestSpec extends Specification {
 				.format("CLDF")
 				.creationDate(OffsetDateTime.parse("2024-01-15T10:00:00Z"))
 				.appVersion("2.0.0")
-				.platform(Manifest.Platform.Android)
+				.platform(Platform.ANDROID)
 				.stats(Manifest.Stats.builder()
 				.climbsCount(50)
 				.locationsCount(5)
@@ -143,7 +148,7 @@ class ManifestSpec extends Specification {
 		manifest.format == "CLDF"
 		manifest.creationDate == OffsetDateTime.parse("2024-01-15T10:00:00Z")
 		manifest.appVersion == "2.5.0"
-		manifest.platform == Manifest.Platform.Desktop
+		manifest.platform == Platform.DESKTOP
 
 		and: "stats are deserialized"
 		manifest.stats != null
@@ -154,15 +159,15 @@ class ManifestSpec extends Specification {
 
 	def "should handle all platforms"() {
 		expect: "all platforms are valid"
-		Manifest.Platform.values().size() == 4
-		Manifest.Platform.valueOf(platform) != null
+		Platform.values().size() == 4
+		Platform.valueOf(platform) != null
 
 		where:
 		platform << [
-			"iOS",
-			"Android",
-			"Web",
-			"Desktop"
+			"IOS",
+			"ANDROID",
+			"WEB",
+			"DESKTOP"
 		]
 	}
 

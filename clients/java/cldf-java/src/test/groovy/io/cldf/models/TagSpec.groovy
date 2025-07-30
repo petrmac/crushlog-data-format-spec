@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import spock.lang.Specification
 
+import io.cldf.models.enums.PredefinedTagKey
+
 class TagSpec extends Specification {
 
 	ObjectMapper objectMapper
@@ -34,7 +36,7 @@ class TagSpec extends Specification {
 				.id("tag-1")
 				.name("crimpy")
 				.isPredefined(true)
-				.predefinedTagKey(Tag.PredefinedTagKey.crimpy)
+				.predefinedTagKey(PredefinedTagKey.CRIMPY)
 				.category("holds")
 				.color("#FF5722")
 				.build()
@@ -43,7 +45,7 @@ class TagSpec extends Specification {
 		tag.id == "tag-1"
 		tag.name == "crimpy"
 		tag.isPredefined
-		tag.predefinedTagKey == Tag.PredefinedTagKey.crimpy
+		tag.predefinedTagKey == PredefinedTagKey.CRIMPY
 		tag.category == "holds"
 		tag.color == "#FF5722"
 	}
@@ -54,7 +56,7 @@ class TagSpec extends Specification {
 				.id("tag-1")
 				.name("slopers")
 				.isPredefined(true)
-				.predefinedTagKey(Tag.PredefinedTagKey.slopers)
+				.predefinedTagKey(PredefinedTagKey.SLOPERS)
 				.category("holds")
 				.color("#4CAF50")
 				.build()
@@ -91,14 +93,14 @@ class TagSpec extends Specification {
 		tag.id == "tag-1"
 		tag.name == "overhang"
 		tag.isPredefined
-		tag.predefinedTagKey == Tag.PredefinedTagKey.overhang
+		tag.predefinedTagKey == PredefinedTagKey.OVERHANG
 		tag.category == "angle"
 		tag.color == "#9C27B0"
 	}
 
 	def "should handle all predefined tag keys"() {
 		expect: "all predefined keys are valid"
-		Tag.PredefinedTagKey.valueOf(key) != null
+		PredefinedTagKey.fromValue(key) != null
 
 		where:
 		key << [
@@ -145,7 +147,7 @@ class TagSpec extends Specification {
 			.id("1")
 			.name("crimpy")
 			.isPredefined(true)
-			.predefinedTagKey(Tag.PredefinedTagKey.crimpy)
+			.predefinedTagKey(PredefinedTagKey.CRIMPY)
 			.build(),
 			Tag.builder()
 			.id("2")

@@ -12,6 +12,11 @@ import java.time.OffsetDateTime
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 
+import io.cldf.models.enums.ClimbType
+import io.cldf.models.enums.FinishType
+import io.cldf.models.enums.RouteType
+import io.cldf.models.enums.Platform
+
 class CLDFReaderSpec extends Specification {
 
 	@TempDir
@@ -244,8 +249,8 @@ class CLDFReaderSpec extends Specification {
 					.sessionId(1)
 					.date(LocalDate.now())
 					.routeName("Custom Route")
-					.type(Climb.ClimbType.route)
-					.finishType(Climb.FinishType.redpoint)
+					.type(ClimbType.ROUTE)
+					.finishType(FinishType.REDPOINT)
 					.customFields([temperature: 72, humidity: 45])
 					.build()
 			def climbsFile = new ClimbsFile()
@@ -273,7 +278,7 @@ class CLDFReaderSpec extends Specification {
 				.format("CLDF")
 				.creationDate(OffsetDateTime.now())
 				.appVersion("1.0")
-				.platform(Manifest.Platform.Desktop)
+				.platform(Platform.DESKTOP)
 				.stats(Manifest.Stats.builder()
 				.climbsCount(1)
 				.locationsCount(1)
@@ -299,8 +304,8 @@ class CLDFReaderSpec extends Specification {
 				.sessionId(1)
 				.date(LocalDate.now())
 				.routeName("Test Route")
-				.type(Climb.ClimbType.route)
-				.finishType(Climb.FinishType.redpoint)
+				.type(ClimbType.ROUTE)
+				.finishType(FinishType.REDPOINT)
 				.build()
 		def file = new ClimbsFile()
 		file.climbs = [climb]
@@ -325,7 +330,7 @@ class CLDFReaderSpec extends Specification {
 				.id("1")
 				.locationId("1")
 				.name("Test Route")
-				.routeType(Route.RouteType.route)
+				.routeType(RouteType.ROUTE)
 				.build()
 		def file = new RoutesFile()
 		file.routes = [route]

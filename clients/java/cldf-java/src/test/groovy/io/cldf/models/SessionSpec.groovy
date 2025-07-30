@@ -7,6 +7,11 @@ import spock.lang.Specification
 import java.time.LocalDate
 import java.time.LocalTime
 
+import io.cldf.models.enums.ClimbType
+import io.cldf.models.enums.RockType
+import io.cldf.models.enums.TerrainType
+import io.cldf.models.enums.SessionType
+
 class SessionSpec extends Specification {
 
 	ObjectMapper objectMapper
@@ -52,8 +57,8 @@ class SessionSpec extends Specification {
 				.location("Bishop")
 				.locationId("location-1")
 				.isIndoor(false)
-				.climbType(Climb.ClimbType.boulder)
-				.sessionType(Session.SessionType.bouldering)
+				.climbType(ClimbType.BOULDER)
+				.sessionType(SessionType.BOULDERING)
 				.partners(["Alex", "Sam"])
 				.weather(Session.Weather.builder()
 				.conditions("sunny")
@@ -62,8 +67,8 @@ class SessionSpec extends Specification {
 				.wind("light breeze")
 				.build())
 				.notes("Great conditions today")
-				.rockType(Location.RockType.granite)
-				.terrainType(Location.TerrainType.natural)
+				.rockType(RockType.GRANITE)
+				.terrainType(TerrainType.NATURAL)
 				.approachTime(15)
 				.isOngoing(false)
 				.build()
@@ -76,12 +81,12 @@ class SessionSpec extends Specification {
 		session.location == "Bishop"
 		session.locationId == "location-1"
 		!session.isIndoor
-		session.climbType == Climb.ClimbType.boulder
-		session.sessionType == Session.SessionType.bouldering
+		session.climbType == ClimbType.BOULDER
+		session.sessionType == SessionType.BOULDERING
 		session.partners == ["Alex", "Sam"]
 		session.notes == "Great conditions today"
-		session.rockType == Location.RockType.granite
-		session.terrainType == Location.TerrainType.natural
+		session.rockType == RockType.GRANITE
+		session.terrainType == TerrainType.NATURAL
 		session.approachTime == 15
 		!session.isOngoing
 
@@ -100,7 +105,7 @@ class SessionSpec extends Specification {
 				.location("Test Gym")
 				.locationId("location-1")
 				.isIndoor(true)
-				.sessionType(Session.SessionType.indoorClimbing)
+				.sessionType(SessionType.INDOOR_CLIMBING)
 				.build()
 
 		when: "serializing to JSON"
@@ -143,8 +148,8 @@ class SessionSpec extends Specification {
 		session.location == "Bishop"
 		session.locationId == "location-1"
 		!session.isIndoor
-		session.climbType == Climb.ClimbType.boulder
-		session.sessionType == Session.SessionType.bouldering
+		session.climbType == ClimbType.BOULDER
+		session.sessionType == SessionType.BOULDERING
 
 		and: "weather is deserialized"
 		session.weather != null
@@ -154,8 +159,8 @@ class SessionSpec extends Specification {
 
 	def "should handle all session types"() {
 		expect: "all session types are valid"
-		Session.SessionType.values().size() == 7
-		Session.SessionType.valueOf(type) != null
+		SessionType.values().size() == 7
+		SessionType.fromValue(type) != null
 
 		where:
 		type << [

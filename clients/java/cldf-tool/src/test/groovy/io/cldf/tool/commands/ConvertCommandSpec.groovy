@@ -14,6 +14,9 @@ import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 
+import io.cldf.models.enums.ClimbType
+import io.cldf.models.enums.FinishType
+
 class ConvertCommandSpec extends Specification {
 
     @TempDir
@@ -158,8 +161,8 @@ class ConvertCommandSpec extends Specification {
                 .sessionId(1)
                 .date(LocalDate.now())
                 .routeName("Test Route")
-                .type(Climb.ClimbType.route)
-                .finishType(Climb.FinishType.onsight)
+                .type(ClimbType.ROUTE)
+                .finishType(FinishType.ONSIGHT)
                 .build()
         ]
         
@@ -195,9 +198,9 @@ class ConvertCommandSpec extends Specification {
                 .sessionId(1)
                 .date(LocalDate.of(2023, 7, 15))
                 .routeName("Test Route 1")
-                .type(Climb.ClimbType.route)
+                .type(ClimbType.ROUTE)
                 .grades(Climb.GradeInfo.builder().grade("5.10a").build())
-                .finishType(Climb.FinishType.onsight)
+                .finishType(FinishType.ONSIGHT)
                 .attempts(1)
                 .rating(4)
                 .notes("Great climb!")
@@ -207,9 +210,9 @@ class ConvertCommandSpec extends Specification {
                 .sessionId(1)
                 .date(LocalDate.of(2023, 7, 15))
                 .routeName("Test Route 2")
-                .type(Climb.ClimbType.boulder)
+                .type(ClimbType.BOULDER)
                 .grades(Climb.GradeInfo.builder().grade("V5").build())
-                .finishType(Climb.FinishType.flash)
+                .finishType(FinishType.FLASH)
                 .attempts(1)
                 .build()
         ]
@@ -229,8 +232,8 @@ class ConvertCommandSpec extends Specification {
         command.outputFile.exists()
         def csvContent = command.outputFile.text
         csvContent.contains("Date,Location,Route Name,Type,Grade,Finish Type,Attempts,Rating,Notes")
-        csvContent.contains("2023-07-15,Test Crag,Test Route 1,route,5.10a,onsight,1,4,Great climb!")
-        csvContent.contains("2023-07-15,Test Crag,Test Route 2,boulder,V5,flash,1,,")
+        csvContent.contains("2023-07-15,Test Crag,Test Route 1,ROUTE,5.10a,ONSIGHT,1,4,Great climb!")
+        csvContent.contains("2023-07-15,Test Crag,Test Route 2,BOULDER,V5,FLASH,1,,")
     }
 
     def "should test convertToCsv without headers"() {
@@ -250,8 +253,8 @@ class ConvertCommandSpec extends Specification {
                 .sessionId(1)
                 .date(LocalDate.of(2023, 7, 15))
                 .routeName("Test Route")
-                .type(Climb.ClimbType.route)
-                .finishType(Climb.FinishType.redpoint)
+                .type(ClimbType.ROUTE)
+                .finishType(FinishType.REDPOINT)
                 .attempts(3)
                 .build()
         ]
@@ -271,7 +274,7 @@ class ConvertCommandSpec extends Specification {
         command.outputFile.exists()
         def csvContent = command.outputFile.text
         !csvContent.contains("Date,Location,Route Name")
-        csvContent.contains("07/15/2023,Test Crag,Test Route,route,,redpoint,3,,")
+        csvContent.contains("07/15/2023,Test Crag,Test Route,ROUTE,,REDPOINT,3,,")
     }
 
     def "should test escapeCsv method"() {
@@ -298,8 +301,8 @@ class ConvertCommandSpec extends Specification {
                 .sessionId(999) // Non-existent session
                 .date(LocalDate.of(2023, 7, 15))
                 .routeName("Orphaned Route")
-                .type(Climb.ClimbType.route)
-                .finishType(Climb.FinishType.project)
+                .type(ClimbType.ROUTE)
+                .finishType(FinishType.PROJECT)
                 .attempts(5)
                 .build()
         ]
@@ -318,7 +321,7 @@ class ConvertCommandSpec extends Specification {
         result.itemCount == 1
         command.outputFile.exists()
         def csvContent = command.outputFile.text
-        csvContent.contains("2023-07-15,Unknown,Orphaned Route,route,,project,5,,")
+        csvContent.contains("2023-07-15,Unknown,Orphaned Route,ROUTE,,PROJECT,5,,")
     }
 
     def "should handle climb with null values"() {
@@ -331,8 +334,8 @@ class ConvertCommandSpec extends Specification {
                 .sessionId(null)
                 .date(LocalDate.of(2023, 7, 15))
                 .routeName("Minimal Route")
-                .type(Climb.ClimbType.boulder)
-                .finishType(Climb.FinishType.top)
+                .type(ClimbType.BOULDER)
+                .finishType(FinishType.TOP)
                 .attempts(2)
                 .grades(null)
                 .rating(null)
@@ -354,7 +357,7 @@ class ConvertCommandSpec extends Specification {
         result.itemCount == 1
         command.outputFile.exists()
         def csvContent = command.outputFile.text
-        csvContent.contains("2023-07-15,Unknown,Minimal Route,boulder,,top,2,,")
+        csvContent.contains("2023-07-15,Unknown,Minimal Route,BOULDER,,TOP,2,,")
     }
 
     def "should handle ConversionResult class"() {

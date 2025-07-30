@@ -1,6 +1,7 @@
 package io.cldf.models;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.cldf.models.enums.PredefinedTagKey;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -27,22 +28,4 @@ public class Tag {
   private String color;
 
   private String category;
-
-  public enum PredefinedTagKey {
-    overhang,
-    slab,
-    vertical,
-    roof,
-    crack,
-    corner,
-    arete,
-    dyno,
-    crimpy,
-    slopers,
-    jugs,
-    pockets,
-    technical,
-    powerful,
-    endurance
-  }
 }

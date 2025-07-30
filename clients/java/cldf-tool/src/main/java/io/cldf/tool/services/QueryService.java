@@ -13,6 +13,7 @@ import jakarta.inject.Singleton;
 import io.cldf.models.Climb;
 import io.cldf.models.Location;
 import io.cldf.models.Session;
+import io.cldf.models.enums.FinishType;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -296,17 +297,17 @@ public class QueryService {
     Map<String, Long> byType =
         climbs.stream()
             .filter(c -> c.getType() != null)
-            .collect(Collectors.groupingBy(c -> c.getType().name(), Collectors.counting()));
+            .collect(Collectors.groupingBy(c -> c.getType().getValue(), Collectors.counting()));
     stats.put("byType", byType);
 
-    Map<Climb.FinishType, Long> byFinishType =
+    Map<FinishType, Long> byFinishType =
         climbs.stream()
             .filter(c -> c.getFinishType() != null)
             .collect(Collectors.groupingBy(Climb::getFinishType, Collectors.counting()));
     // Convert enum keys to strings for JSON serialization
     Map<String, Long> byFinishTypeStr =
         byFinishType.entrySet().stream()
-            .collect(Collectors.toMap(e -> e.getKey().name(), Map.Entry::getValue));
+            .collect(Collectors.toMap(e -> e.getKey().getValue(), Map.Entry::getValue));
     stats.put("byFinishType", byFinishTypeStr);
 
     double avgRating =

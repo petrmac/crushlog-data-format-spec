@@ -10,6 +10,10 @@ import java.nio.file.Path
 import java.time.LocalDate
 import java.time.OffsetDateTime
 
+import io.cldf.models.enums.ClimbType
+import io.cldf.models.enums.FinishType
+import io.cldf.models.enums.Platform
+
 class InputHandlerSpec extends Specification {
 
     InputHandler inputHandler
@@ -106,7 +110,7 @@ class InputHandlerSpec extends Specification {
                 .format("CLDF")
                 .creationDate(OffsetDateTime.parse("2024-01-15T10:00:00Z"))
                 .appVersion("2.0")
-                .platform(Manifest.Platform.Desktop)
+                .platform(Platform.DESKTOP)
                 .build())
             .locations([Location.builder()
                 .id(1)
@@ -125,8 +129,8 @@ class InputHandlerSpec extends Specification {
                 .sessionId(1)
                 .date(LocalDate.of(2024, 1, 15))
                 .routeName("Test Route")
-                .type(Climb.ClimbType.boulder)
-                .finishType(Climb.FinishType.top)
+                .type(ClimbType.BOULDER)
+                .finishType(FinishType.TOP)
                 .build()])
             .build()
         
@@ -143,8 +147,8 @@ class InputHandlerSpec extends Specification {
         archive.locations.size() == 1
         archive.sessions.size() == 1
         archive.climbs.size() == 1
-        archive.climbs[0].type == Climb.ClimbType.boulder
-        archive.climbs[0].finishType == Climb.FinishType.top
+        archive.climbs[0].type == ClimbType.BOULDER
+        archive.climbs[0].finishType == FinishType.TOP
     }
 
     def "should read text from input stream"() {
@@ -281,8 +285,8 @@ class InputHandlerSpec extends Specification {
         climb.sessionId == 2
         climb.date == LocalDate.of(2024, 1, 15)
         climb.routeName == "Test Route"
-        climb.type == Climb.ClimbType.route
-        climb.finishType == Climb.FinishType.redpoint
+        climb.type == ClimbType.ROUTE
+        climb.finishType == FinishType.REDPOINT
         climb.attempts == 3
         climb.rating == 4
         climb.height == 15.5

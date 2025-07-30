@@ -14,6 +14,10 @@ import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 
+import io.cldf.models.enums.ClimbType
+import io.cldf.models.enums.FinishType
+import io.cldf.models.enums.Platform
+
 class ExtractCommandSpec extends Specification {
 
     @TempDir
@@ -242,7 +246,7 @@ class ExtractCommandSpec extends Specification {
             .format("cldf")
             .appVersion("1.0")
             .creationDate(OffsetDateTime.now())
-            .platform(Manifest.Platform.Desktop)
+            .platform(Platform.DESKTOP)
             .build()
         def locations = [Location.builder().id(1).name("Test Location").isIndoor(false).build()]
         def sessions = [Session.builder().id("1").locationId("1").date(LocalDate.now()).build()]
@@ -251,8 +255,8 @@ class ExtractCommandSpec extends Specification {
             .sessionId(1)
             .date(LocalDate.now())
             .routeName("Test Route")
-            .type(Climb.ClimbType.route)
-            .finishType(Climb.FinishType.onsight)
+            .type(ClimbType.ROUTE)
+            .finishType(FinishType.ONSIGHT)
             .build()]
         
         archive.getManifest() >> manifest
@@ -298,7 +302,7 @@ class ExtractCommandSpec extends Specification {
             .format("cldf")
             .appVersion("1.0")
             .creationDate(OffsetDateTime.now())
-            .platform(Manifest.Platform.Desktop)
+            .platform(Platform.DESKTOP)
             .build()
         def locations = [Location.builder().id(1).name("Test Location").isIndoor(false).build()]
         def sessions = [Session.builder().id("1").locationId("1").date(LocalDate.now()).build()]

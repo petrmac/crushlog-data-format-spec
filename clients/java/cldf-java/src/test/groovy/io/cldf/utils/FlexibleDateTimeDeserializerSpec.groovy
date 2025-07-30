@@ -9,6 +9,9 @@ import spock.lang.Unroll
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 
+import io.cldf.models.enums.Platform
+import io.cldf.models.enums.MediaStrategy
+
 class FlexibleDateTimeDeserializerSpec extends Specification {
 
 	ObjectMapper objectMapper
@@ -240,7 +243,7 @@ class FlexibleDateTimeDeserializerSpec extends Specification {
 		manifest.format == "CLDF"
 		manifest.creationDate == OffsetDateTime.of(2024, 1, 29, 12, 0, 0, 0, ZoneOffset.UTC)
 		manifest.appVersion == "2.1.0"
-		manifest.platform == Manifest.Platform.Desktop
+		manifest.platform == Platform.DESKTOP
 		manifest.author.name == "Test User"
 		manifest.author.email == "test@example.com"
 		manifest.author.website == "https://example.com"
@@ -252,6 +255,6 @@ class FlexibleDateTimeDeserializerSpec extends Specification {
 		manifest.stats.tagsCount == 20
 		manifest.stats.mediaCount == 100
 		manifest.exportOptions.includeMedia == true
-		manifest.exportOptions.mediaStrategy == Manifest.ExportOptions.MediaStrategy.thumbnails
+		manifest.exportOptions.mediaStrategy == MediaStrategy.THUMBNAILS
 	}
 }

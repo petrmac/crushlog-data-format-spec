@@ -11,6 +11,12 @@ import java.time.LocalTime
 import java.time.OffsetDateTime
 import java.util.zip.ZipFile
 
+import io.cldf.models.enums.ClimbType
+import io.cldf.models.enums.FinishType
+import io.cldf.models.enums.RouteType
+import io.cldf.models.enums.MediaType
+import io.cldf.models.enums.Platform
+
 class CLDFWriterSpec extends Specification {
 
 	@TempDir
@@ -89,7 +95,7 @@ class CLDFWriterSpec extends Specification {
 
 		then: "exception is thrown"
 		def e = thrown(IllegalArgumentException)
-		e.message.contains("required")
+		e.message == "Archive must contain at least one of: locations, climbs, sessions, or routes"
 	}
 
 	def "should generate checksums"() {
@@ -228,8 +234,8 @@ class CLDFWriterSpec extends Specification {
 				.sessionId(1)
 				.date(LocalDate.now())
 				.routeName("Custom Route")
-				.type(Climb.ClimbType.route)
-				.finishType(Climb.FinishType.redpoint)
+				.type(ClimbType.ROUTE)
+				.finishType(FinishType.REDPOINT)
 				.customFields([temperature: 72, humidity: 45])
 				.build()
 
@@ -247,8 +253,8 @@ class CLDFWriterSpec extends Specification {
 				.sessionId(1)
 				.date(LocalDate.now())
 				.routeName("Photo Route")
-				.type(Climb.ClimbType.route)
-				.finishType(Climb.FinishType.redpoint)
+				.type(ClimbType.ROUTE)
+				.finishType(FinishType.REDPOINT)
 				.media(Climb.Media.builder()
 				.photos(["photo1.jpg", "photo2.jpg"])
 				.build())
@@ -258,7 +264,7 @@ class CLDFWriterSpec extends Specification {
 				.id("media-1")
 				.climbId("1")
 				.filename("photo1.jpg")
-				.type(MediaItem.MediaType.photo)
+				.type(MediaType.PHOTO)
 				.createdAt(OffsetDateTime.now())
 				.metadata(MediaItem.Metadata.builder()
 				.width(1920)
@@ -291,8 +297,8 @@ class CLDFWriterSpec extends Specification {
 					.sessionId(1)
 					.date(LocalDate.now())
 					.routeName("Route $i")
-					.type(Climb.ClimbType.route)
-					.finishType(Climb.FinishType.redpoint)
+					.type(ClimbType.ROUTE)
+					.finishType(FinishType.REDPOINT)
 					.build()
 		}
 
@@ -301,7 +307,7 @@ class CLDFWriterSpec extends Specification {
 				.format("CLDF")
 				.creationDate(OffsetDateTime.now())
 				.appVersion("1.0")
-				.platform(Manifest.Platform.Desktop)
+				.platform(Platform.DESKTOP)
 				.stats(Manifest.Stats.builder()
 				.locationsCount(locationCount)
 				.climbsCount(climbCount)
@@ -323,7 +329,7 @@ class CLDFWriterSpec extends Specification {
 				.format("CLDF")
 				.creationDate(OffsetDateTime.now())
 				.appVersion("1.0")
-				.platform(Manifest.Platform.Desktop)
+				.platform(Platform.DESKTOP)
 				.build()
 	}
 
@@ -344,8 +350,8 @@ class CLDFWriterSpec extends Specification {
 			.sessionId(1)
 			.date(LocalDate.now())
 			.routeName("Test Route")
-			.type(Climb.ClimbType.route)
-			.finishType(Climb.FinishType.redpoint)
+			.type(ClimbType.ROUTE)
+			.finishType(FinishType.REDPOINT)
 			.build()
 		]
 	}
@@ -368,7 +374,7 @@ class CLDFWriterSpec extends Specification {
 			.id("1")
 			.locationId("1")
 			.name("Test Route")
-			.routeType(Route.RouteType.route)
+			.routeType(RouteType.ROUTE)
 			.build()
 		]
 	}
@@ -399,7 +405,7 @@ class CLDFWriterSpec extends Specification {
 			.id("1")
 			.climbId("1")
 			.filename("test.jpg")
-			.type(MediaItem.MediaType.photo)
+			.type(MediaType.PHOTO)
 			.createdAt(OffsetDateTime.now())
 			.build()
 		]

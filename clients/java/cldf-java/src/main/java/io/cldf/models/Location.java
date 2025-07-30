@@ -5,6 +5,8 @@ import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import io.cldf.models.enums.RockType;
+import io.cldf.models.enums.TerrainType;
 import io.cldf.utils.FlexibleDateTimeDeserializer;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -57,47 +59,5 @@ public class Location {
 
     @JsonProperty(required = true)
     private Double longitude;
-  }
-
-  /** Types of rock found at climbing locations. */
-  public enum RockType {
-    // Sandstone
-    sandstone,
-    // Limestone
-    limestone,
-    // Granite
-    granite,
-    // Basalt
-    basalt,
-    // Gneiss
-    gneiss,
-    // Quartzite
-    quartzite,
-    // Conglomerate
-    conglomerate,
-    // Schist
-    schist,
-    // Dolomite
-    dolomite,
-    // Slate
-    slate,
-    // Rhyolite
-    rhyolite,
-    // Gabbro
-    gabbro,
-    // Volcanic tuff
-    volcanicTuff,
-    // Andesite
-    andesite,
-    // Chalk
-    chalk
-  }
-
-  /** Type of terrain (natural or artificial). */
-  public enum TerrainType {
-    // Natural rock
-    natural,
-    // Artificial climbing wall
-    artificial
   }
 }

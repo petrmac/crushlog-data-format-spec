@@ -7,6 +7,10 @@ import spock.lang.Specification
 import java.time.LocalDate
 import java.time.OffsetDateTime
 
+import io.cldf.models.enums.ClimbType
+import io.cldf.models.enums.FinishType
+import io.cldf.models.enums.Platform
+
 class ValidationServiceSpec extends Specification {
 
     ValidationService validationService
@@ -160,16 +164,16 @@ class ValidationServiceSpec extends Specification {
                     .sessionId(1)
                     .date(futureDate)
                     .routeName("Future Climb")
-                    .type(Climb.ClimbType.boulder)
-                    .finishType(Climb.FinishType.top)
+                    .type(ClimbType.BOULDER)
+                    .finishType(FinishType.TOP)
                     .build(),
                 Climb.builder()
                     .id(3)
                     .sessionId(1)
                     .date(futureDate.plusDays(1))
                     .routeName("Another Future")
-                    .type(Climb.ClimbType.boulder)
-                    .finishType(Climb.FinishType.top)
+                    .type(ClimbType.BOULDER)
+                    .finishType(FinishType.TOP)
                     .build()
             ])
             .build()
@@ -199,24 +203,24 @@ class ValidationServiceSpec extends Specification {
                     .sessionId(1)
                     .date(date)
                     .routeName("The Classic")
-                    .type(Climb.ClimbType.boulder)
-                    .finishType(Climb.FinishType.top)
+                    .type(ClimbType.BOULDER)
+                    .finishType(FinishType.TOP)
                     .build(),
                 Climb.builder()
                     .id(2)
                     .sessionId(1)
                     .date(date)
                     .routeName("The Classic")
-                    .type(Climb.ClimbType.boulder)
-                    .finishType(Climb.FinishType.top)
+                    .type(ClimbType.BOULDER)
+                    .finishType(FinishType.TOP)
                     .build(),
                 Climb.builder()
                     .id(3)
                     .sessionId(1)
                     .date(date)
                     .routeName("The Classic")
-                    .type(Climb.ClimbType.boulder)
-                    .finishType(Climb.FinishType.top)
+                    .type(ClimbType.BOULDER)
+                    .finishType(FinishType.TOP)
                     .build()
             ])
             .build()
@@ -244,16 +248,16 @@ class ValidationServiceSpec extends Specification {
                     .sessionId(1)
                     .date(LocalDate.now().minusDays(1)) // past date, not null
                     .routeName("No Date")
-                    .type(Climb.ClimbType.boulder)
-                    .finishType(Climb.FinishType.top)
+                    .type(ClimbType.BOULDER)
+                    .finishType(FinishType.TOP)
                     .build(),
                 Climb.builder()
                     .id(2)
                     .sessionId(1)
                     .date(LocalDate.now())
                     .routeName("Has Date") // not null
-                    .type(Climb.ClimbType.boulder)
-                    .finishType(Climb.FinishType.top)
+                    .type(ClimbType.BOULDER)
+                    .finishType(FinishType.TOP)
                     .build()
             ])
             .build()
@@ -304,8 +308,8 @@ class ValidationServiceSpec extends Specification {
                     .sessionId(1)
                     .date(today.plusDays(1))
                     .routeName("Future Route")
-                    .type(Climb.ClimbType.route)
-                    .finishType(Climb.FinishType.redpoint)
+                    .type(ClimbType.ROUTE)
+                    .finishType(FinishType.REDPOINT)
                     .build(),
                 // Duplicate on same day
                 Climb.builder()
@@ -313,16 +317,16 @@ class ValidationServiceSpec extends Specification {
                     .sessionId(1)
                     .date(today)
                     .routeName("Test Route")
-                    .type(Climb.ClimbType.boulder)
-                    .finishType(Climb.FinishType.top)
+                    .type(ClimbType.BOULDER)
+                    .finishType(FinishType.TOP)
                     .build(),
                 Climb.builder()
                     .id(4)
                     .sessionId(1)
                     .date(today)
                     .routeName("Test Route")
-                    .type(Climb.ClimbType.boulder)
-                    .finishType(Climb.FinishType.top)
+                    .type(ClimbType.BOULDER)
+                    .finishType(FinishType.TOP)
                     .build()
             ])
             .build()
@@ -399,7 +403,7 @@ class ValidationServiceSpec extends Specification {
             .format("CLDF")
             .creationDate(OffsetDateTime.now())
             .appVersion("1.0")
-            .platform(Manifest.Platform.Desktop)
+            .platform(Platform.DESKTOP)
             .stats(Manifest.Stats.builder()
                 .climbsCount(1)
                 .locationsCount(1)
@@ -432,8 +436,8 @@ class ValidationServiceSpec extends Specification {
             .sessionId(1)
             .date(LocalDate.now())
             .routeName("Test Route")
-            .type(Climb.ClimbType.boulder)
-            .finishType(Climb.FinishType.top)
+            .type(ClimbType.BOULDER)
+            .finishType(FinishType.TOP)
             .build()
     }
 }

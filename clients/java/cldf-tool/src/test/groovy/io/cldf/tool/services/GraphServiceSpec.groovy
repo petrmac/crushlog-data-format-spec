@@ -15,6 +15,8 @@ import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 
+import io.cldf.models.enums.FinishType
+
 class GraphServiceSpec extends Specification {
 
     @TempDir
@@ -399,7 +401,7 @@ class GraphServiceSpec extends Specification {
         def result1 = graphService.parseFinishType("top")
         
         then: "correct enum is returned"
-        result1 == Climb.FinishType.top
+        result1 == FinishType.TOP
         
         when: "parsing null finish type"
         def result2 = graphService.parseFinishType(null)
@@ -449,7 +451,7 @@ class GraphServiceSpec extends Specification {
             .grades(Climb.GradeInfo.builder()
                 .grade("5.10a")
                 .build())
-            .finishType(Climb.FinishType.top)
+            .finishType(FinishType.TOP)
             .attempts(2)
             .rating(4)
             .tags(["crimpy"])

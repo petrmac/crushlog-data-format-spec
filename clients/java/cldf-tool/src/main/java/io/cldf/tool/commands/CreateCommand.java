@@ -11,6 +11,7 @@ import jakarta.inject.Inject;
 import io.cldf.api.CLDFArchive;
 import io.cldf.api.CLDFWriter;
 import io.cldf.models.*;
+import io.cldf.models.enums.*;
 import io.cldf.tool.models.CommandResult;
 import io.cldf.tool.services.ValidationService;
 import io.cldf.tool.utils.InputHandler;
@@ -180,7 +181,7 @@ public class CreateCommand extends BaseCommand {
             .format("CLDF")
             .creationDate(OffsetDateTime.now())
             .appVersion("1.0.0")
-            .platform(Manifest.Platform.Desktop)
+            .platform(Platform.DESKTOP)
             .build();
 
     Location location =
@@ -207,14 +208,10 @@ public class CreateCommand extends BaseCommand {
             .sessionId(1)
             .date(session.getDate())
             .routeName("Sample Route")
-            .type(Climb.ClimbType.boulder)
-            .finishType(Climb.FinishType.top) // Use enum value
+            .type(ClimbType.BOULDER)
+            .finishType(FinishType.TOP) // Use enum value
             .attempts(1)
-            .grades(
-                Climb.GradeInfo.builder()
-                    .system(Climb.GradeInfo.GradeSystem.vScale)
-                    .grade("V0")
-                    .build())
+            .grades(Climb.GradeInfo.builder().system(GradeSystem.V_SCALE).grade("V0").build())
             .isIndoor(true)
             .build();
 
@@ -254,14 +251,10 @@ public class CreateCommand extends BaseCommand {
                 .sessionId(1)
                 .date(session.getDate())
                 .routeName("Warm-up V0")
-                .type(Climb.ClimbType.boulder)
-                .finishType(Climb.FinishType.top) // Use enum value
+                .type(ClimbType.BOULDER)
+                .finishType(FinishType.TOP) // Use enum value
                 .attempts(1)
-                .grades(
-                    Climb.GradeInfo.builder()
-                        .system(Climb.GradeInfo.GradeSystem.vScale)
-                        .grade("V0")
-                        .build())
+                .grades(Climb.GradeInfo.builder().system(GradeSystem.V_SCALE).grade("V0").build())
                 .isIndoor(true)
                 .build(),
             Climb.builder()
@@ -269,14 +262,10 @@ public class CreateCommand extends BaseCommand {
                 .sessionId(1)
                 .date(session.getDate())
                 .routeName("Project V4")
-                .type(Climb.ClimbType.boulder)
-                .finishType(Climb.FinishType.top) // Use enum value
+                .type(ClimbType.BOULDER)
+                .finishType(FinishType.TOP) // Use enum value
                 .attempts(5)
-                .grades(
-                    Climb.GradeInfo.builder()
-                        .system(Climb.GradeInfo.GradeSystem.vScale)
-                        .grade("V4")
-                        .build())
+                .grades(Climb.GradeInfo.builder().system(GradeSystem.V_SCALE).grade("V4").build())
                 .rating(4)
                 .notes("Finally sent it! Crux was the heel hook.")
                 .isIndoor(true)
@@ -288,7 +277,7 @@ public class CreateCommand extends BaseCommand {
             .format("CLDF")
             .creationDate(OffsetDateTime.now())
             .appVersion("1.0.0")
-            .platform(Manifest.Platform.Desktop)
+            .platform(Platform.DESKTOP)
             .stats(
                 Manifest.Stats.builder().locationsCount(1).sessionsCount(1).climbsCount(2).build())
             .build();
@@ -321,7 +310,7 @@ public class CreateCommand extends BaseCommand {
                 .isIndoor(false)
                 .country("United States")
                 .state("Colorado")
-                .rockType(Location.RockType.sandstone)
+                .rockType(RockType.SANDSTONE)
                 .coordinates(
                     Location.Coordinates.builder().latitude(39.9308).longitude(-105.2925).build())
                 .createdAt(OffsetDateTime.now())
@@ -336,7 +325,7 @@ public class CreateCommand extends BaseCommand {
                 .location(locations.get(0).getName())
                 .locationId("1")
                 .isIndoor(true)
-                .sessionType(Session.SessionType.indoorClimbing)
+                .sessionType(SessionType.INDOOR_CLIMBING)
                 .build(),
             Session.builder()
                 .id("sess_outdoor")
@@ -344,7 +333,7 @@ public class CreateCommand extends BaseCommand {
                 .location(locations.get(1).getName())
                 .locationId("2")
                 .isIndoor(false)
-                .climbType(Climb.ClimbType.route)
+                .climbType(ClimbType.ROUTE)
                 .weather(
                     Session.Weather.builder()
                         .conditions("sunny")
@@ -365,12 +354,12 @@ public class CreateCommand extends BaseCommand {
               .sessionId(1)
               .date(sessions.get(0).getDate())
               .routeName("Problem " + (i + 1))
-              .type(Climb.ClimbType.boulder)
-              .finishType(Climb.FinishType.top) // Use enum value
+              .type(ClimbType.BOULDER)
+              .finishType(FinishType.TOP) // Use enum value
               .attempts(i < 5 ? 1 : i - 3)
               .grades(
                   Climb.GradeInfo.builder()
-                      .system(Climb.GradeInfo.GradeSystem.vScale)
+                      .system(GradeSystem.V_SCALE)
                       .grade("V" + (i / 2))
                       .build())
               .isIndoor(true)
@@ -385,20 +374,16 @@ public class CreateCommand extends BaseCommand {
             .sessionId(2)
             .date(sessions.get(1).getDate())
             .routeName("The Bastille Crack")
-            .type(Climb.ClimbType.route)
-            .finishType(Climb.FinishType.onsight) // Use enum value
+            .type(ClimbType.ROUTE)
+            .finishType(FinishType.ONSIGHT) // Use enum value
             .attempts(1)
-            .grades(
-                Climb.GradeInfo.builder()
-                    .system(Climb.GradeInfo.GradeSystem.yds)
-                    .grade("5.7")
-                    .build())
-            .belayType(Climb.BelayType.lead)
+            .grades(Climb.GradeInfo.builder().system(GradeSystem.YDS).grade("5.7").build())
+            .belayType(BelayType.LEAD)
             .height(110.0)
             .rating(5)
             .notes("Classic route! Perfect hand jams all the way.")
             .isIndoor(false)
-            .rockType(Location.RockType.sandstone)
+            .rockType(RockType.SANDSTONE)
             .partners(sessions.get(1).getPartners())
             .weather("sunny")
             .build());
@@ -409,7 +394,7 @@ public class CreateCommand extends BaseCommand {
             .format("CLDF")
             .creationDate(OffsetDateTime.now())
             .appVersion("1.0.0")
-            .platform(Manifest.Platform.Desktop)
+            .platform(Platform.DESKTOP)
             .stats(
                 Manifest.Stats.builder()
                     .locationsCount(locations.size())

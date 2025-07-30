@@ -8,6 +8,14 @@ import spock.lang.TempDir
 
 import java.nio.file.Path
 
+import io.cldf.models.enums.ClimbType
+import io.cldf.models.enums.FinishType
+import io.cldf.models.enums.RockType
+import io.cldf.models.enums.TerrainType
+import io.cldf.models.enums.SessionType
+import io.cldf.models.enums.PredefinedTagKey
+import io.cldf.models.enums.Platform
+
 class CLDFExampleSpec extends Specification {
 
 	@TempDir
@@ -66,7 +74,7 @@ class CLDFExampleSpec extends Specification {
 		archive.manifest.version == "1.0.0"
 		archive.manifest.format == "CLDF"
 		archive.manifest.appVersion == "1.0.0"
-		archive.manifest.platform == Manifest.Platform.Desktop
+		archive.manifest.platform == Platform.DESKTOP
 		archive.manifest.stats.locationsCount == 2
 		archive.manifest.stats.climbsCount == 5
 		archive.manifest.stats.sessionsCount == 2
@@ -77,12 +85,12 @@ class CLDFExampleSpec extends Specification {
 		archive.locations[0].isIndoor == true
 		archive.locations[0].country == "USA"
 		archive.locations[0].state == "Colorado"
-		archive.locations[0].terrainType == Location.TerrainType.artificial
+		archive.locations[0].terrainType == TerrainType.ARTIFICIAL
 		archive.locations[0].starred == true
 
 		archive.locations[1].name == "Clear Creek Canyon"
 		archive.locations[1].isIndoor == false
-		archive.locations[1].rockType == Location.RockType.granite
+		archive.locations[1].rockType == RockType.GRANITE
 		archive.locations[1].accessInfo == "Park at pullout mile marker 269"
 
 		and: "sessions are correct"
@@ -90,7 +98,7 @@ class CLDFExampleSpec extends Specification {
 		archive.sessions[0].id == "session-1"
 		archive.sessions[0].location == "The Spot Bouldering Gym"
 		archive.sessions[0].isIndoor == true
-		archive.sessions[0].sessionType == Session.SessionType.indoorBouldering
+		archive.sessions[0].sessionType == SessionType.INDOOR_BOULDERING
 		archive.sessions[0].partners == ["Alice", "Bob"]
 
 		archive.sessions[1].id == "session-2"
@@ -104,8 +112,8 @@ class CLDFExampleSpec extends Specification {
 		archive.climbs.size() == 5
 
 		def purpleCrimps = archive.climbs.find { it.routeName == "Purple Crimps" }
-		purpleCrimps.type == Climb.ClimbType.boulder
-		purpleCrimps.finishType == Climb.FinishType.flash
+		purpleCrimps.type == ClimbType.BOULDER
+		purpleCrimps.finishType == FinishType.FLASH
 		purpleCrimps.grades.grade == "V4"
 		purpleCrimps.attempts == 1
 		purpleCrimps.rating == 4
@@ -113,21 +121,21 @@ class CLDFExampleSpec extends Specification {
 		purpleCrimps.tags == ["crimpy", "technical"]
 
 		def theEgg = archive.climbs.find { it.routeName == "The Egg" }
-		theEgg.finishType == Climb.FinishType.project
+		theEgg.finishType == FinishType.PROJECT
 		theEgg.grades.grade == "V7"
 		theEgg.attempts == 5
 		theEgg.falls == 4
 		theEgg.beta == "Start matched on sloper, big move to crimp rail"
 
 		def classicArete = archive.climbs.find { it.routeName == "Classic Arete" }
-		classicArete.finishType == Climb.FinishType.repeat
+		classicArete.finishType == FinishType.REPEAT
 		classicArete.isRepeat == true
 
 		and: "tags are correct"
 		archive.tags.size() == 3
 		archive.tags[0].name == "crimpy"
 		archive.tags[0].isPredefined == true
-		archive.tags[0].predefinedTagKey == Tag.PredefinedTagKey.crimpy
+		archive.tags[0].predefinedTagKey == PredefinedTagKey.CRIMPY
 		archive.tags[0].category == "holds"
 
 		archive.tags[2].name == "project"

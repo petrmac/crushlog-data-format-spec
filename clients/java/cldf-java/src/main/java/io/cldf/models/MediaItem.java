@@ -4,6 +4,8 @@ import java.time.OffsetDateTime;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import io.cldf.models.enums.MediaSource;
+import io.cldf.models.enums.MediaType;
 import io.cldf.utils.FlexibleDateTimeDeserializer;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -60,16 +62,5 @@ public class MediaItem {
       private Double latitude;
       private Double longitude;
     }
-  }
-
-  public enum MediaType {
-    photo,
-    video
-  }
-
-  public enum MediaSource {
-    photos_library,
-    local,
-    embedded
   }
 }

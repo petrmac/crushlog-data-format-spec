@@ -3,6 +3,8 @@ package io.cldf.tool.commands
 import io.cldf.api.CLDFArchive
 import io.cldf.api.CLDFWriter
 import io.cldf.models.*
+import io.cldf.models.enums.ClimbType
+import io.cldf.models.enums.RockType
 import io.cldf.tool.models.CommandResult
 import io.cldf.tool.services.ValidationService
 import io.cldf.tool.utils.InputHandler
@@ -14,6 +16,11 @@ import spock.lang.TempDir
 import java.nio.file.Path
 import java.time.LocalDate
 import java.time.OffsetDateTime
+
+import io.cldf.models.enums.BelayType
+import io.cldf.models.enums.FinishType
+import io.cldf.models.enums.GradeSystem
+import io.cldf.models.enums.Platform
 
 class CreateCommandSpec extends Specification {
 
@@ -75,7 +82,7 @@ class CreateCommandSpec extends Specification {
         archive.sessions.size() == 1
         archive.climbs.size() == 1
         archive.climbs[0].routeName == "Sample Route"
-        archive.climbs[0].type == Climb.ClimbType.boulder
+        archive.climbs[0].type == ClimbType.BOULDER
     }
 
     def "should create basic template archive"() {
@@ -102,9 +109,9 @@ class CreateCommandSpec extends Specification {
         archive.sessions.size() == 1
         archive.climbs.size() == 2
         archive.climbs[0].routeName == "Warm-up V0"
-        archive.climbs[0].finishType == Climb.FinishType.top
+        archive.climbs[0].finishType == FinishType.TOP
         archive.climbs[1].routeName == "Project V4"
-        archive.climbs[1].finishType == Climb.FinishType.top
+        archive.climbs[1].finishType == FinishType.TOP
         archive.climbs[1].attempts == 5
     }
 
@@ -130,16 +137,16 @@ class CreateCommandSpec extends Specification {
         archive.locations[0].isIndoor == true
         archive.locations[1].name == "Eldorado Canyon"
         archive.locations[1].isIndoor == false
-        archive.locations[1].rockType == Location.RockType.sandstone
+        archive.locations[1].rockType == RockType.SANDSTONE
         archive.sessions.size() == 2
         archive.climbs.size() == 9
         
         // Check outdoor climb details
         def outdoorClimb = archive.climbs.find { it.routeName == "The Bastille Crack" }
         outdoorClimb != null
-        outdoorClimb.type == Climb.ClimbType.route
-        outdoorClimb.finishType == Climb.FinishType.onsight
-        outdoorClimb.belayType == Climb.BelayType.lead
+        outdoorClimb.type == ClimbType.ROUTE
+        outdoorClimb.finishType == FinishType.ONSIGHT
+        outdoorClimb.belayType == BelayType.LEAD
         outdoorClimb.height == 110.0
         outdoorClimb.rating == 5
     }
@@ -301,7 +308,7 @@ class CreateCommandSpec extends Specification {
                 .format("CLDF")
                 .creationDate(OffsetDateTime.now())
                 .appVersion("test")
-                .platform(Manifest.Platform.Desktop)
+                .platform(Platform.DESKTOP)
                 .build())
             .locations([Location.builder()
                 .id(1)
@@ -321,11 +328,11 @@ class CreateCommandSpec extends Specification {
                 .sessionId(1)
                 .date(LocalDate.now())
                 .routeName("Test Route")
-                .type(Climb.ClimbType.boulder)
-                .finishType(Climb.FinishType.top)
+                .type(ClimbType.BOULDER)
+                .finishType(FinishType.TOP)
                 .attempts(1)
                 .grades(Climb.GradeInfo.builder()
-                    .system(Climb.GradeInfo.GradeSystem.vScale)
+                    .system(GradeSystem.V_SCALE)
                     .grade("V1")
                     .build())
                 .isIndoor(true)

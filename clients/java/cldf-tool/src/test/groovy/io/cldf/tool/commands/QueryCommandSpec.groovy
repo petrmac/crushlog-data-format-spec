@@ -14,6 +14,14 @@ import java.nio.file.Path
 import java.time.LocalDate
 import java.time.OffsetDateTime
 
+import io.cldf.models.enums.ClimbType
+import io.cldf.models.enums.BelayType
+import io.cldf.models.enums.FinishType
+import io.cldf.models.enums.GradeSystem
+import io.cldf.models.enums.RockType
+import io.cldf.models.enums.SessionType
+import io.cldf.models.enums.Platform
+
 class QueryCommandSpec extends Specification {
 
     QueryCommand command
@@ -49,7 +57,7 @@ class QueryCommandSpec extends Specification {
             .format("CLDF")
             .creationDate(OffsetDateTime.now())
             .appVersion("1.0.0")
-            .platform(Manifest.Platform.Desktop)
+            .platform(Platform.DESKTOP)
             .build()
             
         def locations = [
@@ -66,7 +74,7 @@ class QueryCommandSpec extends Specification {
                 .isIndoor(false)
                 .country("USA")
                 .state("Colorado")
-                .rockType(Location.RockType.granite)
+                .rockType(RockType.GRANITE)
                 .build()
         ]
         
@@ -77,7 +85,7 @@ class QueryCommandSpec extends Specification {
                 .location("Movement Gym")
                 .locationId("1")
                 .isIndoor(true)
-                .sessionType(Session.SessionType.indoorClimbing)
+                .sessionType(SessionType.INDOOR_CLIMBING)
                 .build(),
             Session.builder()
                 .id("sess_2")
@@ -85,7 +93,7 @@ class QueryCommandSpec extends Specification {
                 .location("Clear Creek Canyon")
                 .locationId("2")
                 .isIndoor(false)
-                .climbType(Climb.ClimbType.route)
+                .climbType(ClimbType.ROUTE)
                 .build()
         ]
         
@@ -95,11 +103,11 @@ class QueryCommandSpec extends Specification {
                 .sessionId(1)
                 .date(LocalDate.of(2024, 1, 15))
                 .routeName("Blue Problem")
-                .type(Climb.ClimbType.boulder)
-                .finishType(Climb.FinishType.top)
+                .type(ClimbType.BOULDER)
+                .finishType(FinishType.TOP)
                 .attempts(3)
                 .grades(Climb.GradeInfo.builder()
-                    .system(Climb.GradeInfo.GradeSystem.vScale)
+                    .system(GradeSystem.V_SCALE)
                     .grade("V3")
                     .build())
                 .isIndoor(true)
@@ -110,11 +118,11 @@ class QueryCommandSpec extends Specification {
                 .sessionId(1)
                 .date(LocalDate.of(2024, 1, 15))
                 .routeName("Yellow Slab")
-                .type(Climb.ClimbType.boulder)
-                .finishType(Climb.FinishType.top)
+                .type(ClimbType.BOULDER)
+                .finishType(FinishType.TOP)
                 .attempts(1)
                 .grades(Climb.GradeInfo.builder()
-                    .system(Climb.GradeInfo.GradeSystem.vScale)
+                    .system(GradeSystem.V_SCALE)
                     .grade("V2")
                     .build())
                 .isIndoor(true)
@@ -125,17 +133,17 @@ class QueryCommandSpec extends Specification {
                 .sessionId(2)
                 .date(LocalDate.of(2024, 1, 20))
                 .routeName("The Bulge")
-                .type(Climb.ClimbType.route)
-                .finishType(Climb.FinishType.onsight)
+                .type(ClimbType.ROUTE)
+                .finishType(FinishType.ONSIGHT)
                 .attempts(1)
                 .grades(Climb.GradeInfo.builder()
-                    .system(Climb.GradeInfo.GradeSystem.yds)
+                    .system(GradeSystem.YDS)
                     .grade("5.10a")
                     .build())
-                .belayType(Climb.BelayType.lead)
+                .belayType(BelayType.LEAD)
                 .height(25.0)
                 .isIndoor(false)
-                .rockType(Location.RockType.granite)
+                .rockType(RockType.GRANITE)
                 .rating(5)
                 .build()
         ]

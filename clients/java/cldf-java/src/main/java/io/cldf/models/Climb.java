@@ -8,6 +8,12 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import io.cldf.models.enums.BelayType;
+import io.cldf.models.enums.ClimbType;
+import io.cldf.models.enums.FinishType;
+import io.cldf.models.enums.GradeSystem;
+import io.cldf.models.enums.RockType;
+import io.cldf.models.enums.TerrainType;
 import io.cldf.utils.FlexibleLocalDateDeserializer;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -75,9 +81,9 @@ public class Climb {
 
   private String color;
 
-  private Location.RockType rockType;
+  private RockType rockType;
 
-  private Location.TerrainType terrainType;
+  private TerrainType terrainType;
 
   private Boolean isIndoor;
 
@@ -100,20 +106,6 @@ public class Climb {
     private String grade;
 
     private Map<String, String> conversions;
-
-    /** Supported grading systems. */
-    public enum GradeSystem {
-      // V-Scale for bouldering
-      vScale,
-      // Fontainebleau grading
-      font,
-      // French sport climbing grades
-      french,
-      // Yosemite Decimal System
-      yds,
-      // UIAA grading system
-      uiaa
-    }
   }
 
   /** Media references for a climb. */
@@ -125,41 +117,5 @@ public class Climb {
     private List<String> photos;
     private List<String> videos;
     private Integer count;
-  }
-
-  /** Type of climb. */
-  public enum ClimbType {
-    // Bouldering climb
-    boulder,
-    // Roped route
-    route
-  }
-
-  /** Type of belay used for roped climbs. */
-  public enum BelayType {
-    // Top rope belay
-    topRope,
-    // Lead climbing
-    lead,
-    // Auto-belay device
-    autoBelay
-  }
-
-  /** How the climb was completed. */
-  public enum FinishType {
-    // Common finish types for both boulder and route
-    flash,
-    top,
-    repeat,
-    project,
-    attempt, // Attempting the climb but falling or giving up
-
-    // Route-specific finish types (onsight and redpoint are route-only)
-    onsight,
-    redpoint
-
-    // Note: flash, repeat, project, and attempt appear in both boulder and route schemas
-    // but we define them once here. The validation should be done at a higher level
-    // based on the climb type.
   }
 }

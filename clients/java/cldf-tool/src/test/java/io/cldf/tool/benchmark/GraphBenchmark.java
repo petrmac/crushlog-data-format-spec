@@ -10,6 +10,9 @@ import java.util.stream.IntStream;
 
 import io.cldf.api.CLDFArchive;
 import io.cldf.models.*;
+import io.cldf.models.enums.ClimbType;
+import io.cldf.models.enums.FinishType;
+import io.cldf.models.enums.GradeSystem;
 import io.cldf.tool.services.GraphService;
 import io.cldf.tool.services.QueryService;
 import org.openjdk.jmh.annotations.*;
@@ -253,12 +256,8 @@ public class GraphBenchmark {
     String[] grades = {
       "5.8", "5.9", "5.10a", "5.10b", "5.10c", "5.10d", "5.11a", "5.11b", "5.11c", "5.11d", "5.12a"
     };
-    Climb.FinishType[] finishTypes = {
-      Climb.FinishType.redpoint,
-      Climb.FinishType.flash,
-      Climb.FinishType.onsight,
-      Climb.FinishType.top,
-      Climb.FinishType.project
+    FinishType[] finishTypes = {
+      FinishType.REDPOINT, FinishType.FLASH, FinishType.ONSIGHT, FinishType.TOP, FinishType.PROJECT
     };
 
     List<Climb> climbs =
@@ -274,9 +273,9 @@ public class GraphBenchmark {
                       .grades(
                           Climb.GradeInfo.builder()
                               .grade(grades[random.nextInt(grades.length)])
-                              .system(Climb.GradeInfo.GradeSystem.yds)
+                              .system(GradeSystem.YDS)
                               .build())
-                      .type(Climb.ClimbType.route)
+                      .type(ClimbType.ROUTE)
                       .finishType(finishTypes[random.nextInt(finishTypes.length)])
                       .attempts(random.nextInt(5) + 1)
                       .rating(random.nextInt(5) + 1)

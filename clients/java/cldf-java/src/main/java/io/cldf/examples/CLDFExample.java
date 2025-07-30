@@ -10,6 +10,7 @@ import java.util.List;
 import io.cldf.api.CLDF;
 import io.cldf.api.CLDFArchive;
 import io.cldf.models.*;
+import io.cldf.models.enums.*;
 
 /** Example usage of the CLDF Java client library. */
 public class CLDFExample {
@@ -58,7 +59,7 @@ public class CLDFExample {
             .format("CLDF")
             .creationDate(OffsetDateTime.now())
             .appVersion("1.0.0")
-            .platform(Manifest.Platform.Desktop)
+            .platform(Platform.DESKTOP)
             .stats(
                 Manifest.Stats.builder().locationsCount(2).climbsCount(5).sessionsCount(2).build())
             .build();
@@ -74,7 +75,7 @@ public class CLDFExample {
                 .state("Colorado")
                 .coordinates(
                     Location.Coordinates.builder().latitude(40.0170).longitude(-105.2830).build())
-                .terrainType(Location.TerrainType.artificial)
+                .terrainType(TerrainType.ARTIFICIAL)
                 .starred(true)
                 .build(),
             Location.builder()
@@ -83,8 +84,8 @@ public class CLDFExample {
                 .isIndoor(false)
                 .country("USA")
                 .state("Colorado")
-                .rockType(Location.RockType.granite)
-                .terrainType(Location.TerrainType.natural)
+                .rockType(RockType.GRANITE)
+                .terrainType(TerrainType.NATURAL)
                 .accessInfo("Park at pullout mile marker 269")
                 .build());
 
@@ -97,8 +98,8 @@ public class CLDFExample {
                 .location("The Spot Bouldering Gym")
                 .locationId("1")
                 .isIndoor(true)
-                .climbType(Climb.ClimbType.boulder)
-                .sessionType(Session.SessionType.indoorBouldering)
+                .climbType(ClimbType.BOULDER)
+                .sessionType(SessionType.INDOOR_BOULDERING)
                 .partners(Arrays.asList("Alice", "Bob"))
                 .notes("Great session, worked on crimpy problems")
                 .build(),
@@ -108,8 +109,8 @@ public class CLDFExample {
                 .location("Clear Creek Canyon")
                 .locationId("2")
                 .isIndoor(false)
-                .climbType(Climb.ClimbType.boulder)
-                .sessionType(Session.SessionType.bouldering)
+                .climbType(ClimbType.BOULDER)
+                .sessionType(SessionType.BOULDERING)
                 .weather(
                     Session.Weather.builder()
                         .conditions("Sunny")
@@ -127,13 +128,9 @@ public class CLDFExample {
                 .sessionId(1)
                 .date(LocalDate.now().minusDays(7))
                 .routeName("Purple Crimps")
-                .type(Climb.ClimbType.boulder)
-                .finishType(Climb.FinishType.flash)
-                .grades(
-                    Climb.GradeInfo.builder()
-                        .system(Climb.GradeInfo.GradeSystem.vScale)
-                        .grade("V4")
-                        .build())
+                .type(ClimbType.BOULDER)
+                .finishType(FinishType.FLASH)
+                .grades(Climb.GradeInfo.builder().system(GradeSystem.V_SCALE).grade("V4").build())
                 .attempts(1)
                 .rating(4)
                 .color("#800080")
@@ -145,13 +142,9 @@ public class CLDFExample {
                 .sessionId(1)
                 .date(LocalDate.now().minusDays(7))
                 .routeName("Yellow Overhang")
-                .type(Climb.ClimbType.boulder)
-                .finishType(Climb.FinishType.top)
-                .grades(
-                    Climb.GradeInfo.builder()
-                        .system(Climb.GradeInfo.GradeSystem.vScale)
-                        .grade("V5")
-                        .build())
+                .type(ClimbType.BOULDER)
+                .finishType(FinishType.TOP)
+                .grades(Climb.GradeInfo.builder().system(GradeSystem.V_SCALE).grade("V5").build())
                 .attempts(3)
                 .rating(5)
                 .color("#FFFF00")
@@ -164,34 +157,26 @@ public class CLDFExample {
                 .sessionId(2)
                 .date(LocalDate.now().minusDays(1))
                 .routeName("Warmup Traverse")
-                .type(Climb.ClimbType.boulder)
-                .finishType(Climb.FinishType.top)
-                .grades(
-                    Climb.GradeInfo.builder()
-                        .system(Climb.GradeInfo.GradeSystem.vScale)
-                        .grade("V2")
-                        .build())
+                .type(ClimbType.BOULDER)
+                .finishType(FinishType.TOP)
+                .grades(Climb.GradeInfo.builder().system(GradeSystem.V_SCALE).grade("V2").build())
                 .attempts(1)
                 .isIndoor(false)
-                .rockType(Location.RockType.granite)
+                .rockType(RockType.GRANITE)
                 .build(),
             Climb.builder()
                 .id(4)
                 .sessionId(2)
                 .date(LocalDate.now().minusDays(1))
                 .routeName("The Egg")
-                .type(Climb.ClimbType.boulder)
-                .finishType(Climb.FinishType.project)
-                .grades(
-                    Climb.GradeInfo.builder()
-                        .system(Climb.GradeInfo.GradeSystem.vScale)
-                        .grade("V7")
-                        .build())
+                .type(ClimbType.BOULDER)
+                .finishType(FinishType.PROJECT)
+                .grades(Climb.GradeInfo.builder().system(GradeSystem.V_SCALE).grade("V7").build())
                 .attempts(5)
                 .falls(4)
                 .rating(5)
                 .isIndoor(false)
-                .rockType(Location.RockType.granite)
+                .rockType(RockType.GRANITE)
                 .beta("Start matched on sloper, big move to crimp rail")
                 .notes("So close! Got to the top hold but couldn't match")
                 .build(),
@@ -200,18 +185,14 @@ public class CLDFExample {
                 .sessionId(2)
                 .date(LocalDate.now().minusDays(1))
                 .routeName("Classic Arete")
-                .type(Climb.ClimbType.boulder)
-                .finishType(Climb.FinishType.repeat)
-                .grades(
-                    Climb.GradeInfo.builder()
-                        .system(Climb.GradeInfo.GradeSystem.vScale)
-                        .grade("V3")
-                        .build())
+                .type(ClimbType.BOULDER)
+                .finishType(FinishType.REPEAT)
+                .grades(Climb.GradeInfo.builder().system(GradeSystem.V_SCALE).grade("V3").build())
                 .attempts(1)
                 .isRepeat(true)
                 .rating(4)
                 .isIndoor(false)
-                .rockType(Location.RockType.granite)
+                .rockType(RockType.GRANITE)
                 .tags(Arrays.asList("arete", "technical"))
                 .build());
 
@@ -222,7 +203,7 @@ public class CLDFExample {
                 .id("tag-1")
                 .name("crimpy")
                 .isPredefined(true)
-                .predefinedTagKey(Tag.PredefinedTagKey.crimpy)
+                .predefinedTagKey(PredefinedTagKey.CRIMPY)
                 .color("#FF6B6B")
                 .category("holds")
                 .build(),
@@ -230,7 +211,7 @@ public class CLDFExample {
                 .id("tag-2")
                 .name("overhang")
                 .isPredefined(true)
-                .predefinedTagKey(Tag.PredefinedTagKey.overhang)
+                .predefinedTagKey(PredefinedTagKey.OVERHANG)
                 .color("#4ECDC4")
                 .category("angle")
                 .build(),

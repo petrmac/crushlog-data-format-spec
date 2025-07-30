@@ -8,6 +8,11 @@ import spock.lang.Unroll
 
 import java.time.LocalDate
 
+import io.cldf.models.enums.ClimbType
+import io.cldf.models.enums.RockType
+import io.cldf.models.enums.TerrainType
+import io.cldf.models.enums.SessionType
+
 class FlexibleLocalDateDeserializerSpec extends Specification {
 
 	ObjectMapper objectMapper
@@ -193,16 +198,16 @@ class FlexibleLocalDateDeserializerSpec extends Specification {
 		session.location == "Boulder Canyon"
 		session.locationId == "1"
 		session.isIndoor == false
-		session.climbType == io.cldf.models.Climb.ClimbType.boulder
-		session.sessionType == Session.SessionType.bouldering
+		session.climbType == ClimbType.BOULDER
+		session.sessionType == SessionType.BOULDERING
 		session.partners == ["Alice", "Bob"]
 		session.weather.conditions == "sunny"
 		session.weather.temperature == 22.5
 		session.weather.humidity == 45.0
 		session.weather.wind == "light"
 		session.notes == "Great day out!"
-		session.rockType == io.cldf.models.Location.RockType.granite
-		session.terrainType == io.cldf.models.Location.TerrainType.natural
+		session.rockType == RockType.GRANITE
+		session.terrainType == TerrainType.NATURAL
 		session.approachTime == 30
 		session.isOngoing == false
 	}

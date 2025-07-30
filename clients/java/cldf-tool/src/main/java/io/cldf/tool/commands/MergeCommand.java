@@ -8,6 +8,7 @@ import io.cldf.api.CLDF;
 import io.cldf.api.CLDFArchive;
 import io.cldf.api.CLDFWriter;
 import io.cldf.models.*;
+import io.cldf.models.enums.Platform;
 import io.cldf.tool.models.CommandResult;
 import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine.Command;
@@ -170,7 +171,7 @@ public class MergeCommand extends BaseCommand {
             .format("CLDF")
             .creationDate(OffsetDateTime.now())
             .appVersion("1.0.0")
-            .platform(Manifest.Platform.Desktop)
+            .platform(Platform.DESKTOP)
             .stats(
                 Manifest.Stats.builder()
                     .locationsCount(allLocations.size())

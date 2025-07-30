@@ -7,6 +7,13 @@ import spock.lang.Specification
 import java.time.LocalDate
 import java.time.LocalTime
 
+import io.cldf.models.enums.ClimbType
+import io.cldf.models.enums.BelayType
+import io.cldf.models.enums.FinishType
+import io.cldf.models.enums.GradeSystem
+import io.cldf.models.enums.RockType
+import io.cldf.models.enums.TerrainType
+
 class ClimbSpec extends Specification {
 
 	ObjectMapper objectMapper
@@ -26,16 +33,16 @@ class ClimbSpec extends Specification {
 				.id(1)
 				.date(date)
 				.routeName("Midnight Lightning")
-				.type(Climb.ClimbType.boulder)
-				.finishType(Climb.FinishType.flash)
+				.type(ClimbType.BOULDER)
+				.finishType(FinishType.FLASH)
 				.build()
 
 		then: "required fields are set"
 		climb.id == 1
 		climb.date == date
 		climb.routeName == "Midnight Lightning"
-		climb.type == Climb.ClimbType.boulder
-		climb.finishType == Climb.FinishType.flash
+		climb.type == ClimbType.BOULDER
+		climb.finishType == FinishType.FLASH
 
 		and: "defaults are applied"
 		climb.attempts == 1
@@ -57,16 +64,16 @@ class ClimbSpec extends Specification {
 				.date(date)
 				.time(time)
 				.routeName("The Nose")
-				.type(Climb.ClimbType.route)
-				.finishType(Climb.FinishType.redpoint)
+				.type(ClimbType.ROUTE)
+				.finishType(FinishType.REDPOINT)
 				.grades(Climb.GradeInfo.builder()
-				.system(Climb.GradeInfo.GradeSystem.yds)
+				.system(GradeSystem.YDS)
 				.grade("5.14a")
 				.build())
 				.attempts(3)
 				.repeats(0)
 				.isRepeat(false)
-				.belayType(Climb.BelayType.lead)
+				.belayType(BelayType.LEAD)
 				.duration(180)
 				.falls(2)
 				.height(35.5)
@@ -80,8 +87,8 @@ class ClimbSpec extends Specification {
 				.count(3)
 				.build())
 				.color("red")
-				.rockType(Location.RockType.granite)
-				.terrainType(Location.TerrainType.natural)
+				.rockType(RockType.GRANITE)
+				.terrainType(TerrainType.NATURAL)
 				.isIndoor(false)
 				.partners(["Alex", "Sam"])
 				.weather("sunny")
@@ -95,12 +102,12 @@ class ClimbSpec extends Specification {
 		climb.date == date
 		climb.time == time
 		climb.routeName == "The Nose"
-		climb.type == Climb.ClimbType.route
-		climb.finishType == Climb.FinishType.redpoint
+		climb.type == ClimbType.ROUTE
+		climb.finishType == FinishType.REDPOINT
 		climb.attempts == 3
 		climb.repeats == 0
 		!climb.isRepeat
-		climb.belayType == Climb.BelayType.lead
+		climb.belayType == BelayType.LEAD
 		climb.duration == 180
 		climb.falls == 2
 		climb.height == 35.5
@@ -109,15 +116,15 @@ class ClimbSpec extends Specification {
 		climb.tags == ["overhang", "endurance"]
 		climb.beta == "Start with undercling"
 		climb.color == "red"
-		climb.rockType == Location.RockType.granite
-		climb.terrainType == Location.TerrainType.natural
+		climb.rockType == RockType.GRANITE
+		climb.terrainType == TerrainType.NATURAL
 		!climb.isIndoor
 		climb.partners == ["Alex", "Sam"]
 		climb.weather == "sunny"
 		climb.customFields == customFields
 
 		and: "grade info is correct"
-		climb.grades.system == Climb.GradeInfo.GradeSystem.yds
+		climb.grades.system == GradeSystem.YDS
 		climb.grades.grade == "5.14a"
 
 		and: "media is correct"
@@ -132,8 +139,8 @@ class ClimbSpec extends Specification {
 				.id(1)
 				.date(LocalDate.of(2024, 1, 15))
 				.routeName("Test Route")
-				.type(Climb.ClimbType.boulder)
-				.finishType(Climb.FinishType.flash)
+				.type(ClimbType.BOULDER)
+				.finishType(FinishType.FLASH)
 				.attempts(1)
 				.rating(4)
 				.build()
@@ -178,51 +185,51 @@ class ClimbSpec extends Specification {
 		climb.sessionId == 1
 		climb.date == LocalDate.of(2024, 1, 15)
 		climb.routeName == "Test Boulder"
-		climb.type == Climb.ClimbType.boulder
-		climb.finishType == Climb.FinishType.flash
+		climb.type == ClimbType.BOULDER
+		climb.finishType == FinishType.FLASH
 		climb.attempts == 2
 		climb.rating == 4
 
 		and: "grade info is deserialized"
 		climb.grades != null
-		climb.grades.system == Climb.GradeInfo.GradeSystem.vScale
+		climb.grades.system == GradeSystem.V_SCALE
 		climb.grades.grade == "V5"
 	}
 
 	def "should handle all climb types"() {
 		expect: "all climb types are valid"
-		Climb.ClimbType.values().size() == 2
-		Climb.ClimbType.valueOf(climbType) != null
+		ClimbType.values().size() == 2
+		ClimbType.valueOf(climbType) != null
 
 		where:
-		climbType << ["boulder", "route"]
+		climbType << ["BOULDER", "ROUTE"]
 	}
 
 	def "should handle all grade systems"() {
 		expect: "all grade systems are valid"
-		Climb.GradeInfo.GradeSystem.values().size() == 5
-		Climb.GradeInfo.GradeSystem.valueOf(system) != null
+		GradeSystem.values().size() == 5
+		GradeSystem.valueOf(system) != null
 
 		where:
 		system << [
-			"vScale",
-			"font",
-			"french",
-			"yds",
-			"uiaa"
+			"V_SCALE",
+			"FONT",
+			"FRENCH",
+			"YDS",
+			"UIAA"
 		]
 	}
 
 	def "should handle all belay types"() {
 		expect: "all belay types are valid"
-		Climb.BelayType.values().size() == 3
-		Climb.BelayType.valueOf(belayType) != null
+		BelayType.values().size() == 3
+		BelayType.valueOf(belayType) != null
 
 		where:
 		belayType << [
-			"topRope",
-			"lead",
-			"autoBelay"
+			"TOP_ROPE",
+			"LEAD",
+			"AUTO_BELAY"
 		]
 	}
 
@@ -232,8 +239,8 @@ class ClimbSpec extends Specification {
 				.id(1)
 				.date(LocalDate.now())
 				.routeName("Test")
-				.type(Climb.ClimbType.route)
-				.finishType(Climb.FinishType.redpoint)
+				.type(ClimbType.ROUTE)
+				.finishType(FinishType.REDPOINT)
 				.build()
 
 		then: "defaults are set"
@@ -253,15 +260,15 @@ class ClimbSpec extends Specification {
 			.id(1)
 			.date(LocalDate.now())
 			.routeName("Route 1")
-			.type(Climb.ClimbType.route)
-			.finishType(Climb.FinishType.redpoint)
+			.type(ClimbType.ROUTE)
+			.finishType(FinishType.REDPOINT)
 			.build(),
 			Climb.builder()
 			.id(2)
 			.date(LocalDate.now())
 			.routeName("Boulder 1")
-			.type(Climb.ClimbType.boulder)
-			.finishType(Climb.FinishType.flash)
+			.type(ClimbType.BOULDER)
+			.finishType(FinishType.FLASH)
 			.build()
 		]
 

@@ -10,6 +10,10 @@ import java.nio.file.Files
 import java.time.LocalDate
 import java.time.OffsetDateTime
 
+import io.cldf.models.enums.ClimbType
+import io.cldf.models.enums.FinishType
+import io.cldf.models.enums.Platform
+
 class CLDFServiceSpec extends Specification {
 
     CLDFService cldfService
@@ -128,7 +132,7 @@ class CLDFServiceSpec extends Specification {
         readArchive.sessions.size() == 3
         readArchive.climbs.size() == 5
         readArchive.climbs.find { it.routeName == "The Classic" } != null
-        readArchive.climbs.find { it.type == Climb.ClimbType.route } != null
+        readArchive.climbs.find { it.type == ClimbType.ROUTE } != null
     }
 
     // Helper methods
@@ -186,40 +190,40 @@ class CLDFServiceSpec extends Specification {
                 .sessionId(1)
                 .date(LocalDate.now().minusDays(10))
                 .routeName("The Classic")
-                .type(Climb.ClimbType.boulder)
-                .finishType(Climb.FinishType.flash)
+                .type(ClimbType.BOULDER)
+                .finishType(FinishType.FLASH)
                 .build(),
             Climb.builder()
                 .id(2)
                 .sessionId(1)
                 .date(LocalDate.now().minusDays(10))
                 .routeName("Hard Boulder")
-                .type(Climb.ClimbType.boulder)
-                .finishType(Climb.FinishType.project)
+                .type(ClimbType.BOULDER)
+                .finishType(FinishType.PROJECT)
                 .build(),
             Climb.builder()
                 .id(3)
                 .sessionId(2)
                 .date(LocalDate.now().minusDays(5))
                 .routeName("Gym Route 1")
-                .type(Climb.ClimbType.route)
-                .finishType(Climb.FinishType.onsight)
+                .type(ClimbType.ROUTE)
+                .finishType(FinishType.ONSIGHT)
                 .build(),
             Climb.builder()
                 .id(4)
                 .sessionId(2)
                 .date(LocalDate.now().minusDays(5))
                 .routeName("Gym Route 2")
-                .type(Climb.ClimbType.route)
-                .finishType(Climb.FinishType.flash)
+                .type(ClimbType.ROUTE)
+                .finishType(FinishType.FLASH)
                 .build(),
             Climb.builder()
                 .id(5)
                 .sessionId(3)
                 .date(LocalDate.now())
                 .routeName("New Beta")
-                .type(Climb.ClimbType.boulder)
-                .finishType(Climb.FinishType.top)
+                .type(ClimbType.BOULDER)
+                .finishType(FinishType.TOP)
                 .build()
         ]
         
@@ -229,7 +233,7 @@ class CLDFServiceSpec extends Specification {
                 .format("CLDF")
                 .creationDate(OffsetDateTime.now())
                 .appVersion("2.0")
-                .platform(Manifest.Platform.iOS)
+                .platform(Platform.IOS)
                 .stats(Manifest.Stats.builder()
                     .climbsCount(5)
                     .locationsCount(2)
@@ -248,7 +252,7 @@ class CLDFServiceSpec extends Specification {
             .format("CLDF")
             .creationDate(OffsetDateTime.now())
             .appVersion("1.0")
-            .platform(Manifest.Platform.Desktop)
+            .platform(Platform.DESKTOP)
             .stats(Manifest.Stats.builder()
                 .climbsCount(1)
                 .locationsCount(1)
@@ -281,8 +285,8 @@ class CLDFServiceSpec extends Specification {
             .sessionId(1)
             .date(LocalDate.now())
             .routeName("Test Route")
-            .type(Climb.ClimbType.boulder)
-            .finishType(Climb.FinishType.top)
+            .type(ClimbType.BOULDER)
+            .finishType(FinishType.TOP)
             .build()
     }
 }

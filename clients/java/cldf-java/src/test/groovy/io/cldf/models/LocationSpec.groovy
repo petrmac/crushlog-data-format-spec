@@ -7,6 +7,9 @@ import spock.lang.Subject
 
 import java.time.OffsetDateTime
 
+import io.cldf.models.enums.RockType
+import io.cldf.models.enums.TerrainType
+
 class LocationSpec extends Specification {
 
 	ObjectMapper objectMapper
@@ -51,8 +54,8 @@ class LocationSpec extends Specification {
 				.build())
 				.country("USA")
 				.state("Colorado")
-				.rockType(Location.RockType.granite)
-				.terrainType(Location.TerrainType.natural)
+				.rockType(RockType.GRANITE)
+				.terrainType(TerrainType.NATURAL)
 				.accessInfo("Park at the main lot")
 				.createdAt(now)
 				.customFields(customFields)
@@ -64,8 +67,8 @@ class LocationSpec extends Specification {
 		!location.isIndoor
 		location.country == "USA"
 		location.state == "Colorado"
-		location.rockType == Location.RockType.granite
-		location.terrainType == Location.TerrainType.natural
+		location.rockType == RockType.GRANITE
+		location.terrainType == TerrainType.NATURAL
 		location.accessInfo == "Park at the main lot"
 		location.createdAt == now
 		location.customFields == customFields
@@ -85,7 +88,7 @@ class LocationSpec extends Specification {
 				.latitude(40.0)
 				.longitude(-105.0)
 				.build())
-				.rockType(Location.RockType.granite)
+				.rockType(RockType.GRANITE)
 				.build()
 
 		when: "serializing to JSON"
@@ -126,8 +129,8 @@ class LocationSpec extends Specification {
 		location.name == "Test Crag"
 		!location.isIndoor
 		location.country == "USA"
-		location.rockType == Location.RockType.granite
-		location.terrainType == Location.TerrainType.natural
+		location.rockType == RockType.GRANITE
+		location.terrainType == TerrainType.NATURAL
 
 		and: "coordinates are deserialized"
 		location.coordinates != null
@@ -137,8 +140,8 @@ class LocationSpec extends Specification {
 
 	def "should handle all rock types"() {
 		expect: "all rock types are valid"
-		Location.RockType.values().size() == 15
-		Location.RockType.valueOf(rockType) != null
+		RockType.values().size() == 15
+		RockType.fromValue(rockType) != null
 
 		where:
 		rockType << [
@@ -162,8 +165,8 @@ class LocationSpec extends Specification {
 
 	def "should handle all terrain types"() {
 		expect: "all terrain types are valid"
-		Location.TerrainType.values().size() == 2
-		Location.TerrainType.valueOf(terrainType) != null
+		TerrainType.values().size() == 2
+		TerrainType.fromValue(terrainType) != null
 
 		where:
 		terrainType << ["natural", "artificial"]

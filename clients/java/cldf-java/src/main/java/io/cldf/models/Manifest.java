@@ -5,6 +5,8 @@ import java.time.OffsetDateTime;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import io.cldf.models.enums.MediaStrategy;
+import io.cldf.models.enums.Platform;
 import io.cldf.utils.FlexibleDateTimeDeserializer;
 import io.cldf.utils.FlexibleLocalDateDeserializer;
 import lombok.AllArgsConstructor;
@@ -43,14 +45,6 @@ public class Manifest {
 
   private ExportOptions exportOptions;
 
-  /** Platform that created the export. */
-  public enum Platform {
-    iOS,
-    Android,
-    Web,
-    Desktop
-  }
-
   /** Author information for the export. */
   @Data
   @Builder
@@ -85,13 +79,6 @@ public class Manifest {
     private Boolean includeMedia;
     private MediaStrategy mediaStrategy;
     private DateRange dateRange;
-
-    /** Media export strategy. */
-    public enum MediaStrategy {
-      reference,
-      thumbnails,
-      full
-    }
 
     /** Date range for filtered exports. */
     @Data

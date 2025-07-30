@@ -16,6 +16,12 @@ import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import picocli.CommandLine
 
+import io.cldf.models.enums.ClimbType
+import io.cldf.models.enums.FinishType
+import io.cldf.models.enums.GradeSystem
+import io.cldf.models.enums.SessionType
+import io.cldf.models.enums.Platform
+
 class ValidateCommandSpec extends Specification {
 
     @TempDir
@@ -441,7 +447,7 @@ class ValidateCommandSpec extends Specification {
             .format("CLDF")
             .creationDate(OffsetDateTime.now())
             .appVersion("1.0.0")
-            .platform(Manifest.Platform.Desktop)
+            .platform(Platform.DESKTOP)
             .build()
         
         def locations = (1..locationCount).collect { i ->
@@ -461,7 +467,7 @@ class ValidateCommandSpec extends Specification {
                 .location("Location ${(i % locationCount) + 1}")
                 .locationId("${(i % locationCount) + 1}")
                 .isIndoor(i % 2 == 0)
-                .sessionType(Session.SessionType.indoorClimbing)
+                .sessionType(SessionType.INDOOR_CLIMBING)
                 .build()
         }
         
@@ -471,11 +477,11 @@ class ValidateCommandSpec extends Specification {
                 .sessionId(1)
                 .date(LocalDate.of(2024, 1, 15))
                 .routeName("Route $i")
-                .type(Climb.ClimbType.boulder)
-                .finishType(Climb.FinishType.top)
+                .type(ClimbType.BOULDER)
+                .finishType(FinishType.TOP)
                 .attempts(1)
                 .grades(Climb.GradeInfo.builder()
-                    .system(Climb.GradeInfo.GradeSystem.vScale)
+                    .system(GradeSystem.V_SCALE)
                     .grade("V${i % 10}")
                     .build())
                 .isIndoor(true)

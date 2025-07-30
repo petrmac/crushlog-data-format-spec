@@ -12,6 +12,12 @@ import java.nio.file.Files
 import java.time.LocalDate
 import java.time.OffsetDateTime
 
+import io.cldf.models.enums.ClimbType
+import io.cldf.models.enums.FinishType
+import io.cldf.models.enums.GradeSystem
+import io.cldf.models.enums.SessionType
+import io.cldf.models.enums.Platform
+
 class MergeCommandSpec extends Specification {
 
     @TempDir
@@ -171,8 +177,8 @@ class MergeCommandSpec extends Specification {
                 .sessionId(1)
                 .date(LocalDate.of(2023, 7, 1))
                 .routeName("Route 1")
-                .type(Climb.ClimbType.route)
-                .finishType(Climb.FinishType.onsight)
+                .type(ClimbType.ROUTE)
+                .finishType(FinishType.ONSIGHT)
                 .build()
         ]
         def climbs2 = [
@@ -181,8 +187,8 @@ class MergeCommandSpec extends Specification {
                 .sessionId(3)
                 .date(LocalDate.of(2023, 7, 3))
                 .routeName("Boulder 1")
-                .type(Climb.ClimbType.boulder)
-                .finishType(Climb.FinishType.flash)
+                .type(ClimbType.BOULDER)
+                .finishType(FinishType.FLASH)
                 .build()
         ]
         
@@ -298,7 +304,7 @@ class MergeCommandSpec extends Specification {
         manifest.version == "1.0.0"
         manifest.format == "CLDF"
         manifest.appVersion == "1.0.0"
-        manifest.platform == Manifest.Platform.Desktop
+        manifest.platform == Platform.DESKTOP
         manifest.stats.locationsCount == 0
         manifest.stats.sessionsCount == 0
         manifest.stats.climbsCount == 0
@@ -517,7 +523,7 @@ class MergeCommandSpec extends Specification {
             .format("CLDF")
             .creationDate(OffsetDateTime.now())
             .appVersion("1.0.0")
-            .platform(Manifest.Platform.Desktop)
+            .platform(Platform.DESKTOP)
             .build()
         
         def locations = (1..locationCount).collect { i ->
@@ -537,7 +543,7 @@ class MergeCommandSpec extends Specification {
                 .location("Location $i")
                 .locationId("$i")
                 .isIndoor(i % 2 == 0)
-                .sessionType(Session.SessionType.indoorClimbing)
+                .sessionType(SessionType.INDOOR_CLIMBING)
                 .build()
         }
         
@@ -547,11 +553,11 @@ class MergeCommandSpec extends Specification {
                 .sessionId(1)
                 .date(LocalDate.of(2024, 1, 15))
                 .routeName("Route $i")
-                .type(Climb.ClimbType.boulder)
-                .finishType(Climb.FinishType.top)
+                .type(ClimbType.BOULDER)
+                .finishType(FinishType.TOP)
                 .attempts(1)
                 .grades(Climb.GradeInfo.builder()
-                    .system(Climb.GradeInfo.GradeSystem.vScale)
+                    .system(GradeSystem.V_SCALE)
                     .grade("V$i")
                     .build())
                 .isIndoor(true)

@@ -10,6 +10,14 @@ import java.time.LocalDate
 import java.time.LocalTime
 import java.time.OffsetDateTime
 
+import io.cldf.models.enums.ClimbType
+import io.cldf.models.enums.BelayType
+import io.cldf.models.enums.FinishType
+import io.cldf.models.enums.GradeSystem
+import io.cldf.models.enums.RouteType
+import io.cldf.models.enums.ProtectionRating
+import io.cldf.models.enums.Platform
+
 class SchemaValidationSpec extends Specification {
 
 	@TempDir
@@ -134,7 +142,7 @@ class SchemaValidationSpec extends Specification {
 				.format("CLDF")
 				.creationDate(OffsetDateTime.now())
 				.appVersion("1.0")
-				.platform(Manifest.Platform.Desktop)
+				.platform(Platform.DESKTOP)
 				.author(Manifest.Author.builder()
 				.name("Test Author")
 				.email("test@example.com")
@@ -165,8 +173,8 @@ class SchemaValidationSpec extends Specification {
 			.id("route-1")
 			.locationId("1")
 			.name("Trad Route")
-			.routeType(Route.RouteType.route)
-			.protectionRating(Route.ProtectionRating.adequate)
+			.routeType(RouteType.ROUTE)
+			.protectionRating(ProtectionRating.ADEQUATE)
 			.build()
 		]
 
@@ -179,7 +187,7 @@ class SchemaValidationSpec extends Specification {
 		def readArchive = reader.read(outputFile)
 
 		then: "validation passes"
-		readArchive.routes[0].protectionRating == Route.ProtectionRating.adequate
+		readArchive.routes[0].protectionRating == ProtectionRating.ADEQUATE
 	}
 
 	def "should use SchemaValidator directly"() {
@@ -190,7 +198,7 @@ class SchemaValidationSpec extends Specification {
 				.format("CLDF")
 				.creationDate(OffsetDateTime.now())
 				.appVersion("1.0")
-				.platform(Manifest.Platform.Desktop)
+				.platform(Platform.DESKTOP)
 				.build()
 
 		when: "validating a valid manifest"
@@ -219,7 +227,7 @@ class SchemaValidationSpec extends Specification {
 				.format("CLDF")
 				.creationDate(OffsetDateTime.now())
 				.appVersion("1.0")
-				.platform(Manifest.Platform.Desktop)
+				.platform(Platform.DESKTOP)
 				.stats(Manifest.Stats.builder()
 				.climbsCount(1)
 				.locationsCount(1)
@@ -241,13 +249,13 @@ class SchemaValidationSpec extends Specification {
 					.date(LocalDate.now())
 					.time(LocalTime.of(14, 30, 0))
 					.routeName("Test Route")
-					.type(Climb.ClimbType.route)
-					.finishType(Climb.FinishType.redpoint)
+					.type(ClimbType.ROUTE)
+					.finishType(FinishType.REDPOINT)
 					.grades(Climb.GradeInfo.builder()
-					.system(Climb.GradeInfo.GradeSystem.yds)
+					.system(GradeSystem.YDS)
 					.grade("5.10a")
 					.build())
-					.belayType(Climb.BelayType.lead)
+					.belayType(BelayType.LEAD)
 					.attempts(1)
 					.duration(15)
 					.falls(0)
