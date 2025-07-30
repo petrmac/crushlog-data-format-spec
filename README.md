@@ -1,3 +1,5 @@
+[![SonarQube Cloud](https://sonarcloud.io/images/project_badges/sonarcloud-light.svg)](https://sonarcloud.io/summary/new_code?id=petrmac_crushlog-data-format-spec)
+
 # CrushLog Data Format (CLDF) Specification
 
 Version 1.0.0
@@ -100,6 +102,63 @@ Defines climbing locations with geographical and characteristic information.
 
 [Full schema →](schemas/locations.schema.json)
 
+### sectors.json
+
+Groups routes within a location for better organization.
+
+**Required fields:**
+- `id` (integer): Unique identifier
+- `locationId` (integer): Reference to parent location
+- `name` (string): Sector name
+
+**Optional fields:**
+- `description` (string): Sector description
+- `order` (integer): Display order
+- `coordinates` (object): GPS coordinates
+
+[Full schema →](schemas/sectors.schema.json)
+
+### routes.json
+
+Defines climbing routes or boulder problems.
+
+**Required fields:**
+- `id` (integer): Unique identifier
+- `locationId` (integer): Reference to location
+- `name` (string): Route/problem name
+- `routeType` (string): "boulder" or "route"
+
+**Optional fields:**
+- `sectorId` (integer): Reference to sector
+- `routeCharacteristics` (string): "trad" or "bolted"
+- `grades` (object): Grades in different systems
+- `height` (number): Height in meters
+- `firstAscent` (object): FA information
+- `protectionRating` (string): Protection quality (enum)
+- `tags` (array): Associated tags
+
+[Full schema →](schemas/routes.schema.json)
+
+### sessions.json
+
+Represents climbing sessions (visits to locations).
+
+**Required fields:**
+- `id` (integer): Unique identifier
+- `date` (string): Session date (YYYY-MM-DD)
+- `location` (string): Location name
+
+**Optional fields:**
+- `locationId` (integer): Reference to location ID
+- `startTime` (string): Start time (HH:MM:SS)
+- `endTime` (string): End time (HH:MM:SS)
+- `duration` (integer): Duration in minutes
+- `partners` (array): Climbing partners
+- `notes` (string): Session notes
+- `tags` (array): Associated tags
+
+[Full schema →](schemas/sessions.schema.json)
+
 ### climbs.json
 
 Records individual climb attempts and completions.
@@ -112,8 +171,8 @@ Records individual climb attempts and completions.
 - `finishType` (string): Completion style (enum)
 
 **Optional fields:**
-- `sessionId` (string): Reference to session
-- `routeId` (string): Reference to route
+- `sessionId` (integer): Reference to session
+- `routeId` (integer): Reference to route
 - `grades` (object): Grade information
 - `attempts` (integer): Number of attempts
 - `rating` (integer): Quality rating (0-5)
@@ -122,6 +181,40 @@ Records individual climb attempts and completions.
 - `media` (object): Media references
 
 [Full schema →](schemas/climbs.schema.json)
+
+### tags.json
+
+Defines custom and predefined tags for categorization.
+
+**Required fields:**
+- `id` (integer): Unique identifier
+- `name` (string): Tag name
+- `isPredefined` (boolean): System vs user tag
+
+**Optional fields:**
+- `color` (string): Hex color code
+- `category` (string): Tag category
+- `description` (string): Tag description
+
+[Full schema →](schemas/tags.schema.json)
+
+### media-metadata.json
+
+References to media files (photos/videos).
+
+**Required fields:**
+- `id` (integer): Unique identifier
+- `climbId` (integer): Reference to climb
+- `type` (string): "photo" or "video"
+
+**Optional fields:**
+- `filename` (string): Original filename
+- `path` (string): Path within archive
+- `caption` (string): Media caption
+- `timestamp` (string): ISO 8601 timestamp
+- `location` (object): GPS coordinates
+
+[Full schema →](schemas/media-metadata.schema.json)
 
 ## Data Model
 
@@ -173,7 +266,7 @@ classDiagram
         +int qualityRating
         +string color
         +string beta
-        +string protection
+        +string protectionRating
         +array tags
         +datetime createdAt
         +datetime updatedAt
@@ -237,6 +330,17 @@ classDiagram
         +string category
     }
     
+    class MediaItem {
+        +int id
+        +int climbId
+        +string type
+        +string filename
+        +string path
+        +string caption
+        +datetime timestamp
+        +object location
+    }
+    
     Location "1" --> "0..*" Sector : contains
     Location "1" --> "0..*" Route : has
     Sector "1" --> "0..*" Route : contains
@@ -244,6 +348,7 @@ classDiagram
     Session "1" --> "0..*" Climb : includes
     Route "1" --> "0..*" Climb : climbed
     Climb "0..*" --> "0..*" Tag : tagged
+    Climb "1" --> "0..*" MediaItem : has media
     Route "0..*" --> "0..*" Tag : tagged
 ```
 

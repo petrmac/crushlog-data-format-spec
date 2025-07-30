@@ -12,6 +12,11 @@ import java.time.OffsetDateTime
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 
+import io.cldf.models.enums.ClimbType
+import io.cldf.models.enums.FinishType
+import io.cldf.models.enums.RouteType
+import io.cldf.models.enums.Platform
+
 class CLDFReaderSpec extends Specification {
 
 	@TempDir
@@ -25,6 +30,7 @@ class CLDFReaderSpec extends Specification {
 		objectMapper = new ObjectMapper()
 		objectMapper.findAndRegisterModules()
 		objectMapper.setSerializationInclusion(com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL)
+		objectMapper.disable(com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 	}
 
 	def "should read valid CLDF archive"() {
@@ -243,8 +249,8 @@ class CLDFReaderSpec extends Specification {
 					.sessionId(1)
 					.date(LocalDate.now())
 					.routeName("Custom Route")
-					.type(Climb.ClimbType.route)
-					.finishType("redpoint")
+					.type(ClimbType.ROUTE)
+					.finishType(FinishType.REDPOINT)
 					.customFields([temperature: 72, humidity: 45])
 					.build()
 			def climbsFile = new ClimbsFile()
@@ -272,7 +278,7 @@ class CLDFReaderSpec extends Specification {
 				.format("CLDF")
 				.creationDate(OffsetDateTime.now())
 				.appVersion("1.0")
-				.platform(Manifest.Platform.Desktop)
+				.platform(Platform.DESKTOP)
 				.stats(Manifest.Stats.builder()
 				.climbsCount(1)
 				.locationsCount(1)
@@ -298,8 +304,8 @@ class CLDFReaderSpec extends Specification {
 				.sessionId(1)
 				.date(LocalDate.now())
 				.routeName("Test Route")
-				.type(Climb.ClimbType.route)
-				.finishType("redpoint")
+				.type(ClimbType.ROUTE)
+				.finishType(FinishType.REDPOINT)
 				.build()
 		def file = new ClimbsFile()
 		file.climbs = [climb]
@@ -308,10 +314,10 @@ class CLDFReaderSpec extends Specification {
 
 	private SessionsFile createSessionsFile() {
 		def session = Session.builder()
-				.id("1")
+				.id(1)
 				.date(LocalDate.now())
 				.location("Test Location")
-				.locationId("1")
+				.locationId(1)
 				.isIndoor(false)
 				.build()
 		def file = new SessionsFile()
@@ -321,10 +327,10 @@ class CLDFReaderSpec extends Specification {
 
 	private RoutesFile createRoutesFile() {
 		def route = Route.builder()
-				.id("1")
-				.locationId("1")
+				.id(1)
+				.locationId(1)
 				.name("Test Route")
-				.routeType(Route.RouteType.route)
+				.routeType(RouteType.ROUTE)
 				.build()
 		def file = new RoutesFile()
 		file.routes = [route]
@@ -333,7 +339,7 @@ class CLDFReaderSpec extends Specification {
 
 	private TagsFile createTagsFile() {
 		def tag = Tag.builder()
-				.id("1")
+				.id(1)
 				.name("crimpy")
 				.isPredefined(true)
 				.build()
@@ -344,8 +350,8 @@ class CLDFReaderSpec extends Specification {
 
 	private SectorsFile createSectorsFile() {
 		def sector = Sector.builder()
-				.id("1")
-				.locationId("1")
+				.id(1)
+				.locationId(1)
 				.name("Main Area")
 				.build()
 		def file = new SectorsFile()

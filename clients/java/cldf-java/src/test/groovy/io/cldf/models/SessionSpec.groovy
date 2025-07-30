@@ -7,6 +7,11 @@ import spock.lang.Specification
 import java.time.LocalDate
 import java.time.LocalTime
 
+import io.cldf.models.enums.ClimbType
+import io.cldf.models.enums.RockType
+import io.cldf.models.enums.TerrainType
+import io.cldf.models.enums.SessionType
+
 class SessionSpec extends Specification {
 
 	ObjectMapper objectMapper
@@ -14,6 +19,7 @@ class SessionSpec extends Specification {
 	def setup() {
 		objectMapper = new ObjectMapper()
 		objectMapper.registerModule(new JavaTimeModule())
+		objectMapper.disable(com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 	}
 
 	def "should build session with required fields"() {
@@ -22,13 +28,13 @@ class SessionSpec extends Specification {
 
 		when: "creating a session"
 		def session = Session.builder()
-				.id("session-1")
+				.id(1)
 				.date(date)
 				.location("Test Crag")
 				.build()
 
 		then: "required fields are set"
-		session.id == "session-1"
+		session.id == 1
 		session.date == date
 		session.location == "Test Crag"
 
@@ -44,15 +50,15 @@ class SessionSpec extends Specification {
 
 		when: "creating a complete session"
 		def session = Session.builder()
-				.id("session-1")
+				.id(1)
 				.date(date)
 				.startTime(startTime)
 				.endTime(endTime)
 				.location("Bishop")
-				.locationId("location-1")
+				.locationId(1)
 				.isIndoor(false)
-				.climbType(Climb.ClimbType.boulder)
-				.sessionType(Session.SessionType.bouldering)
+				.climbType(ClimbType.BOULDER)
+				.sessionType(SessionType.BOULDERING)
 				.partners(["Alex", "Sam"])
 				.weather(Session.Weather.builder()
 				.conditions("sunny")
@@ -61,26 +67,26 @@ class SessionSpec extends Specification {
 				.wind("light breeze")
 				.build())
 				.notes("Great conditions today")
-				.rockType(Location.RockType.granite)
-				.terrainType(Location.TerrainType.natural)
+				.rockType(RockType.GRANITE)
+				.terrainType(TerrainType.NATURAL)
 				.approachTime(15)
 				.isOngoing(false)
 				.build()
 
 		then: "all fields are set"
-		session.id == "session-1"
+		session.id == 1
 		session.date == date
 		session.startTime == startTime
 		session.endTime == endTime
 		session.location == "Bishop"
-		session.locationId == "location-1"
+		session.locationId == 1
 		!session.isIndoor
-		session.climbType == Climb.ClimbType.boulder
-		session.sessionType == Session.SessionType.bouldering
+		session.climbType == ClimbType.BOULDER
+		session.sessionType == SessionType.BOULDERING
 		session.partners == ["Alex", "Sam"]
 		session.notes == "Great conditions today"
-		session.rockType == Location.RockType.granite
-		session.terrainType == Location.TerrainType.natural
+		session.rockType == RockType.GRANITE
+		session.terrainType == TerrainType.NATURAL
 		session.approachTime == 15
 		!session.isOngoing
 
@@ -94,22 +100,22 @@ class SessionSpec extends Specification {
 	def "should serialize session to JSON"() {
 		given: "a session"
 		def session = Session.builder()
-				.id("session-1")
+				.id(1)
 				.date(LocalDate.of(2024, 1, 15))
 				.location("Test Gym")
-				.locationId("location-1")
+				.locationId(1)
 				.isIndoor(true)
-				.sessionType(Session.SessionType.indoorClimbing)
+				.sessionType(SessionType.INDOOR_CLIMBING)
 				.build()
 
 		when: "serializing to JSON"
 		def json = objectMapper.writeValueAsString(session)
 
 		then: "JSON contains expected fields"
-		json.contains('"id":"session-1"')
+		json.contains('"id":1')
 		json.contains('"date":"2024-01-15"')
 		json.contains('"location":"Test Gym"')
-		json.contains('"locationId":"location-1"')
+		json.contains('"locationId":1')
 		json.contains('"isIndoor":true')
 		json.contains('"sessionType":"indoorClimbing"')
 		json.contains('"isOngoing":false')
@@ -119,10 +125,10 @@ class SessionSpec extends Specification {
 		given: "JSON representation"
 		def json = '''
             {
-                "id": "session-1",
+                "id": 1,
                 "date": "2024-01-15",
                 "location": "Bishop",
-                "locationId": "location-1",
+                "locationId": 1,
                 "isIndoor": false,
                 "climbType": "boulder",
                 "sessionType": "bouldering",
@@ -137,13 +143,13 @@ class SessionSpec extends Specification {
 		def session = objectMapper.readValue(json, Session)
 
 		then: "session is created correctly"
-		session.id == "session-1"
+		session.id == 1
 		session.date == LocalDate.of(2024, 1, 15)
 		session.location == "Bishop"
-		session.locationId == "location-1"
+		session.locationId == 1
 		!session.isIndoor
-		session.climbType == Climb.ClimbType.boulder
-		session.sessionType == Session.SessionType.bouldering
+		session.climbType == ClimbType.BOULDER
+		session.sessionType == SessionType.BOULDERING
 
 		and: "weather is deserialized"
 		session.weather != null
@@ -153,8 +159,8 @@ class SessionSpec extends Specification {
 
 	def "should handle all session types"() {
 		expect: "all session types are valid"
-		Session.SessionType.values().size() == 7
-		Session.SessionType.valueOf(type) != null
+		SessionType.values().size() == 7
+		SessionType.fromValue(type) != null
 
 		where:
 		type << [
@@ -171,7 +177,7 @@ class SessionSpec extends Specification {
 	def "should handle ongoing sessions"() {
 		when: "creating an ongoing session"
 		def session = Session.builder()
-				.id("ongoing-1")
+				.id(1)
 				.date(LocalDate.now())
 				.location("Gym")
 				.startTime(LocalTime.now())
@@ -187,12 +193,12 @@ class SessionSpec extends Specification {
 		given: "a list of sessions"
 		def sessions = [
 			Session.builder()
-			.id("session-1")
+			.id(1)
 			.date(LocalDate.now())
 			.location("Gym")
 			.build(),
 			Session.builder()
-			.id("session-2")
+			.id(2)
 			.date(LocalDate.now())
 			.location("Crag")
 			.build()

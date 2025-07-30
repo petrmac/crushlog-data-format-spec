@@ -1,0 +1,6 @@
+applicationType: cli
+defaultPackage: io.cldf.tool
+testFramework: junit
+sourceLanguage: java
+buildTool: gradle
+features: [annotation-api, app-name, graalvm, java, java-application, logback, micronaut-build, picocli, picocli-java-application, readme, shade]

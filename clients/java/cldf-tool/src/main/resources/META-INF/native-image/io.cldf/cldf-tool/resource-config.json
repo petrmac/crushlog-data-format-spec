@@ -1,0 +1,18 @@
+{
+  "resources": {
+    "includes": [
+      {
+        "pattern": "application.yml"
+      },
+      {
+        "pattern": "logback.xml"
+      },
+      {
+        "pattern": "schemas/.*\\.json"
+      },
+      {
+        "pattern": "META-INF/services/.*"
+      }
+    ]
+  }
+}

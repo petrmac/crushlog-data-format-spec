@@ -4,8 +4,13 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import io.cldf.models.enums.ProtectionRating;
+import io.cldf.models.enums.RouteCharacteristics;
+import io.cldf.models.enums.RouteType;
+import io.cldf.utils.FlexibleDateTimeDeserializer;
+import io.cldf.utils.FlexibleLocalDateDeserializer;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,12 +24,12 @@ import lombok.NoArgsConstructor;
 public class Route {
 
   @JsonProperty(required = true)
-  private String id;
+  private Integer id;
 
   @JsonProperty(required = true)
-  private String locationId;
+  private Integer locationId;
 
-  private String sectorId;
+  private Integer sectorId;
 
   @JsonProperty(required = true)
   private String name;
@@ -51,10 +56,10 @@ public class Route {
   private String gearNotes;
   private List<String> tags;
 
-  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
+  @JsonDeserialize(using = FlexibleDateTimeDeserializer.class)
   private OffsetDateTime createdAt;
 
-  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
+  @JsonDeserialize(using = FlexibleDateTimeDeserializer.class)
   private OffsetDateTime updatedAt;
 
   /** Grade information for different grading systems. */
@@ -80,31 +85,9 @@ public class Route {
   public static class FirstAscent {
     private String name;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    @JsonDeserialize(using = FlexibleLocalDateDeserializer.class)
     private LocalDate date;
 
     private String info;
-  }
-
-  /** Type of route. */
-  public enum RouteType {
-    boulder,
-    route
-  }
-
-  /** Characteristics of the route. */
-  public enum RouteCharacteristics {
-    trad,
-    bolted
-  }
-
-  /** Protection rating for traditional routes. */
-  public enum ProtectionRating {
-    bombproof,
-    good,
-    adequate,
-    runout,
-    serious,
-    x
   }
 }

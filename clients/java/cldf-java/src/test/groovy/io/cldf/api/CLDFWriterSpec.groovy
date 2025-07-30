@@ -11,6 +11,12 @@ import java.time.LocalTime
 import java.time.OffsetDateTime
 import java.util.zip.ZipFile
 
+import io.cldf.models.enums.ClimbType
+import io.cldf.models.enums.FinishType
+import io.cldf.models.enums.RouteType
+import io.cldf.models.enums.MediaType
+import io.cldf.models.enums.Platform
+
 class CLDFWriterSpec extends Specification {
 
 	@TempDir
@@ -89,7 +95,7 @@ class CLDFWriterSpec extends Specification {
 
 		then: "exception is thrown"
 		def e = thrown(IllegalArgumentException)
-		e.message.contains("required")
+		e.message == "Archive must contain at least one of: locations, climbs, sessions, or routes"
 	}
 
 	def "should generate checksums"() {
@@ -228,8 +234,8 @@ class CLDFWriterSpec extends Specification {
 				.sessionId(1)
 				.date(LocalDate.now())
 				.routeName("Custom Route")
-				.type(Climb.ClimbType.route)
-				.finishType("redpoint")
+				.type(ClimbType.ROUTE)
+				.finishType(FinishType.REDPOINT)
 				.customFields([temperature: 72, humidity: 45])
 				.build()
 
@@ -247,18 +253,18 @@ class CLDFWriterSpec extends Specification {
 				.sessionId(1)
 				.date(LocalDate.now())
 				.routeName("Photo Route")
-				.type(Climb.ClimbType.route)
-				.finishType("redpoint")
+				.type(ClimbType.ROUTE)
+				.finishType(FinishType.REDPOINT)
 				.media(Climb.Media.builder()
 				.photos(["photo1.jpg", "photo2.jpg"])
 				.build())
 				.build()
 
 		def mediaItem = MediaItem.builder()
-				.id("media-1")
+				.id(1)
 				.climbId("1")
 				.filename("photo1.jpg")
-				.type(MediaItem.MediaType.photo)
+				.type(MediaType.PHOTO)
 				.createdAt(OffsetDateTime.now())
 				.metadata(MediaItem.Metadata.builder()
 				.width(1920)
@@ -291,8 +297,8 @@ class CLDFWriterSpec extends Specification {
 					.sessionId(1)
 					.date(LocalDate.now())
 					.routeName("Route $i")
-					.type(Climb.ClimbType.route)
-					.finishType("redpoint")
+					.type(ClimbType.ROUTE)
+					.finishType(FinishType.REDPOINT)
 					.build()
 		}
 
@@ -301,7 +307,7 @@ class CLDFWriterSpec extends Specification {
 				.format("CLDF")
 				.creationDate(OffsetDateTime.now())
 				.appVersion("1.0")
-				.platform(Manifest.Platform.Desktop)
+				.platform(Platform.DESKTOP)
 				.stats(Manifest.Stats.builder()
 				.locationsCount(locationCount)
 				.climbsCount(climbCount)
@@ -323,7 +329,7 @@ class CLDFWriterSpec extends Specification {
 				.format("CLDF")
 				.creationDate(OffsetDateTime.now())
 				.appVersion("1.0")
-				.platform(Manifest.Platform.Desktop)
+				.platform(Platform.DESKTOP)
 				.build()
 	}
 
@@ -344,8 +350,8 @@ class CLDFWriterSpec extends Specification {
 			.sessionId(1)
 			.date(LocalDate.now())
 			.routeName("Test Route")
-			.type(Climb.ClimbType.route)
-			.finishType("redpoint")
+			.type(ClimbType.ROUTE)
+			.finishType(FinishType.REDPOINT)
 			.build()
 		]
 	}
@@ -353,10 +359,10 @@ class CLDFWriterSpec extends Specification {
 	private List<Session> createSessions() {
 		return [
 			Session.builder()
-			.id("1")
+			.id(1)
 			.date(LocalDate.now())
 			.location("Test Location")
-			.locationId("1")
+			.locationId(1)
 			.isIndoor(false)
 			.build()
 		]
@@ -365,10 +371,10 @@ class CLDFWriterSpec extends Specification {
 	private List<Route> createRoutes() {
 		return [
 			Route.builder()
-			.id("1")
-			.locationId("1")
+			.id(1)
+			.locationId(1)
 			.name("Test Route")
-			.routeType(Route.RouteType.route)
+			.routeType(RouteType.ROUTE)
 			.build()
 		]
 	}
@@ -376,7 +382,7 @@ class CLDFWriterSpec extends Specification {
 	private List<Tag> createTags() {
 		return [
 			Tag.builder()
-			.id("1")
+			.id(1)
 			.name("crimpy")
 			.isPredefined(true)
 			.build()
@@ -386,8 +392,8 @@ class CLDFWriterSpec extends Specification {
 	private List<Sector> createSectors() {
 		return [
 			Sector.builder()
-			.id("1")
-			.locationId("1")
+			.id(1)
+			.locationId(1)
 			.name("Main Area")
 			.build()
 		]
@@ -396,10 +402,10 @@ class CLDFWriterSpec extends Specification {
 	private List<MediaItem> createMediaMetadata() {
 		return [
 			MediaItem.builder()
-			.id("1")
+			.id(1)
 			.climbId("1")
 			.filename("test.jpg")
-			.type(MediaItem.MediaType.photo)
+			.type(MediaType.PHOTO)
 			.createdAt(OffsetDateTime.now())
 			.build()
 		]

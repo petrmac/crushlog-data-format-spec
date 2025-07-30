@@ -3,8 +3,12 @@ package io.cldf.models;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import io.cldf.models.enums.MediaStrategy;
+import io.cldf.models.enums.Platform;
+import io.cldf.utils.FlexibleDateTimeDeserializer;
+import io.cldf.utils.FlexibleLocalDateDeserializer;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -24,7 +28,7 @@ public class Manifest {
   private String format;
 
   @JsonProperty(required = true)
-  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
+  @JsonDeserialize(using = FlexibleDateTimeDeserializer.class)
   private OffsetDateTime creationDate;
 
   @JsonProperty(required = true)
@@ -40,14 +44,6 @@ public class Manifest {
   private Stats stats;
 
   private ExportOptions exportOptions;
-
-  /** Platform that created the export. */
-  public enum Platform {
-    iOS,
-    Android,
-    Web,
-    Desktop
-  }
 
   /** Author information for the export. */
   @Data
@@ -84,23 +80,16 @@ public class Manifest {
     private MediaStrategy mediaStrategy;
     private DateRange dateRange;
 
-    /** Media export strategy. */
-    public enum MediaStrategy {
-      reference,
-      thumbnails,
-      full
-    }
-
     /** Date range for filtered exports. */
     @Data
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
     public static class DateRange {
-      @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+      @JsonDeserialize(using = FlexibleLocalDateDeserializer.class)
       private LocalDate start;
 
-      @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+      @JsonDeserialize(using = FlexibleLocalDateDeserializer.class)
       private LocalDate end;
     }
   }

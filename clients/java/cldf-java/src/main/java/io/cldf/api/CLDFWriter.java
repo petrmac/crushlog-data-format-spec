@@ -109,21 +109,28 @@ public class CLDFWriter {
     fileContents.put(MANIFEST_FILE, manifestBytes);
     checksums.put(MANIFEST_FILE, calculateSHA256(manifestBytes));
 
-    // Prepare required files
-    LocationsFile locationsFile = LocationsFile.builder().locations(archive.getLocations()).build();
-    byte[] locationsBytes = serializeToJson(locationsFile);
-    fileContents.put(LOCATIONS_FILE, locationsBytes);
-    checksums.put(LOCATIONS_FILE, calculateSHA256(locationsBytes));
+    // Prepare files - all are now optional except manifest and checksums
+    if (archive.getLocations() != null && !archive.getLocations().isEmpty()) {
+      LocationsFile locationsFile =
+          LocationsFile.builder().locations(archive.getLocations()).build();
+      byte[] locationsBytes = serializeToJson(locationsFile);
+      fileContents.put(LOCATIONS_FILE, locationsBytes);
+      checksums.put(LOCATIONS_FILE, calculateSHA256(locationsBytes));
+    }
 
-    ClimbsFile climbsFile = ClimbsFile.builder().climbs(archive.getClimbs()).build();
-    byte[] climbsBytes = serializeToJson(climbsFile);
-    fileContents.put(CLIMBS_FILE, climbsBytes);
-    checksums.put(CLIMBS_FILE, calculateSHA256(climbsBytes));
+    if (archive.getClimbs() != null && !archive.getClimbs().isEmpty()) {
+      ClimbsFile climbsFile = ClimbsFile.builder().climbs(archive.getClimbs()).build();
+      byte[] climbsBytes = serializeToJson(climbsFile);
+      fileContents.put(CLIMBS_FILE, climbsBytes);
+      checksums.put(CLIMBS_FILE, calculateSHA256(climbsBytes));
+    }
 
-    SessionsFile sessionsFile = SessionsFile.builder().sessions(archive.getSessions()).build();
-    byte[] sessionsBytes = serializeToJson(sessionsFile);
-    fileContents.put(SESSIONS_FILE, sessionsBytes);
-    checksums.put(SESSIONS_FILE, calculateSHA256(sessionsBytes));
+    if (archive.getSessions() != null && !archive.getSessions().isEmpty()) {
+      SessionsFile sessionsFile = SessionsFile.builder().sessions(archive.getSessions()).build();
+      byte[] sessionsBytes = serializeToJson(sessionsFile);
+      fileContents.put(SESSIONS_FILE, sessionsBytes);
+      checksums.put(SESSIONS_FILE, calculateSHA256(sessionsBytes));
+    }
 
     // Prepare optional files
     if (archive.hasRoutes()) {
@@ -178,7 +185,19 @@ public class CLDFWriter {
       for (Map.Entry<String, byte[]> entry : fileContents.entrySet()) {
         // Skip media files
         if (!entry.getKey().startsWith("media/")) {
-          schemaValidator.validateOrThrow(entry.getKey(), entry.getValue());
+          ValidationResult result =
+              schemaValidator.validateWithResult(entry.getKey(), entry.getValue());
+          if (!result.valid()) {
+            StringBuilder errorMessage = new StringBuilder();
+            errorMessage
+                .append("Schema validation failed for ")
+                .append(entry.getKey())
+                .append(":\n");
+            for (ValidationResult.ValidationError error : result.errors()) {
+              errorMessage.append("  - ").append(error.message()).append("\n");
+            }
+            throw new IOException(errorMessage.toString());
+          }
         }
       }
     }
@@ -205,14 +224,15 @@ public class CLDFWriter {
     if (archive.getManifest() == null) {
       throw new IllegalArgumentException("Manifest is required");
     }
-    if (archive.getLocations() == null || archive.getLocations().isEmpty()) {
-      throw new IllegalArgumentException("At least one location is required");
-    }
-    if (archive.getClimbs() == null || archive.getClimbs().isEmpty()) {
-      throw new IllegalArgumentException("At least one climb is required");
-    }
-    if (archive.getSessions() == null || archive.getSessions().isEmpty()) {
-      throw new IllegalArgumentException("At least one session is required");
+    // Only validate that we have at least some data
+    boolean hasLocations = archive.getLocations() != null && !archive.getLocations().isEmpty();
+    boolean hasClimbs = archive.getClimbs() != null && !archive.getClimbs().isEmpty();
+    boolean hasSessions = archive.getSessions() != null && !archive.getSessions().isEmpty();
+    boolean hasRoutes = archive.getRoutes() != null && !archive.getRoutes().isEmpty();
+
+    if (!hasLocations && !hasClimbs && !hasSessions && !hasRoutes) {
+      throw new IllegalArgumentException(
+          "Archive must contain at least one of: locations, climbs, sessions, or routes");
     }
   }
 

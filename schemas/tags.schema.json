@@ -19,7 +19,7 @@
       "required": ["id", "name", "isPredefined"],
       "properties": {
         "id": {
-          "type": "string",
+          "type": "integer",
           "description": "Unique identifier for the tag"
         },
         "name": {

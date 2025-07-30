@@ -118,17 +118,36 @@ public class CLDFReader {
     // Validate schemas if enabled
     if (validateSchemas) {
       // Validate all required files first
-      schemaValidator.validateOrThrow(MANIFEST_FILE, fileContents.get(MANIFEST_FILE));
-      schemaValidator.validateOrThrow(LOCATIONS_FILE, fileContents.get(LOCATIONS_FILE));
-      schemaValidator.validateOrThrow(CLIMBS_FILE, fileContents.get(CLIMBS_FILE));
-      schemaValidator.validateOrThrow(SESSIONS_FILE, fileContents.get(SESSIONS_FILE));
-      schemaValidator.validateOrThrow(CHECKSUMS_FILE, fileContents.get(CHECKSUMS_FILE));
+      for (String filename :
+          new String[] {
+            MANIFEST_FILE, LOCATIONS_FILE, CLIMBS_FILE, SESSIONS_FILE, CHECKSUMS_FILE
+          }) {
+        ValidationResult result =
+            schemaValidator.validateWithResult(filename, fileContents.get(filename));
+        if (!result.valid()) {
+          StringBuilder errorMessage = new StringBuilder();
+          errorMessage.append("Schema validation failed for ").append(filename).append(":\n");
+          for (ValidationResult.ValidationError error : result.errors()) {
+            errorMessage.append("  - ").append(error.message()).append("\n");
+          }
+          throw new IOException(errorMessage.toString());
+        }
+      }
 
       // Validate optional files if present
       for (String filename :
           new String[] {"routes.json", "sectors.json", "tags.json", "media-metadata.json"}) {
         if (fileContents.containsKey(filename)) {
-          schemaValidator.validateOrThrow(filename, fileContents.get(filename));
+          ValidationResult result =
+              schemaValidator.validateWithResult(filename, fileContents.get(filename));
+          if (!result.valid()) {
+            StringBuilder errorMessage = new StringBuilder();
+            errorMessage.append("Schema validation failed for ").append(filename).append(":\n");
+            for (ValidationResult.ValidationError error : result.errors()) {
+              errorMessage.append("  - ").append(error.message()).append("\n");
+            }
+            throw new IOException(errorMessage.toString());
+          }
         }
       }
     }

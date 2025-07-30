@@ -8,6 +8,10 @@ import java.nio.file.Path
 import java.time.LocalDate
 import java.time.OffsetDateTime
 
+import io.cldf.models.enums.ClimbType
+import io.cldf.models.enums.FinishType
+import io.cldf.models.enums.Platform
+
 class CLDFSpec extends Specification {
 
 	@TempDir
@@ -140,7 +144,7 @@ class CLDFSpec extends Specification {
 				.format("CLDF")
 				.creationDate(OffsetDateTime.now())
 				.appVersion("1.0")
-				.platform(Manifest.Platform.Desktop)
+				.platform(Platform.DESKTOP)
 				.stats(Manifest.Stats.builder()
 				.climbsCount(1)
 				.locationsCount(1)
@@ -163,17 +167,17 @@ class CLDFSpec extends Specification {
 				.sessionId(1)
 				.date(LocalDate.now())
 				.routeName("Test Route")
-				.type(Climb.ClimbType.route)
-				.finishType("redpoint")
+				.type(ClimbType.ROUTE)
+				.finishType(FinishType.REDPOINT)
 				.build()
 	}
 
 	private Session createSession() {
 		return Session.builder()
-				.id("1")
+				.id(1)
 				.date(LocalDate.now())
 				.location("Test Location")
-				.locationId("1")
+				.locationId(1)
 				.isIndoor(false)
 				.build()
 	}

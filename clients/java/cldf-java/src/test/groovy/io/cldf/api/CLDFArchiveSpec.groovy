@@ -6,6 +6,16 @@ import spock.lang.Specification
 import java.time.LocalDate
 import java.time.OffsetDateTime
 
+import io.cldf.models.enums.ClimbType
+import io.cldf.models.enums.FinishType
+import io.cldf.models.enums.GradeSystem
+import io.cldf.models.enums.RockType
+import io.cldf.models.enums.TerrainType
+import io.cldf.models.enums.RouteType
+import io.cldf.models.enums.SessionType
+import io.cldf.models.enums.MediaType
+import io.cldf.models.enums.Platform
+
 class CLDFArchiveSpec extends Specification {
 
 	def "should build archive with required fields"() {
@@ -180,7 +190,7 @@ class CLDFArchiveSpec extends Specification {
 				.format("CLDF")
 				.creationDate(creationDate)
 				.appVersion("2.5.0")
-				.platform(Manifest.Platform.iOS)
+				.platform(Platform.IOS)
 				.stats(Manifest.Stats.builder()
 				.climbsCount(5)
 				.locationsCount(1)
@@ -199,18 +209,18 @@ class CLDFArchiveSpec extends Specification {
 					.latitude(37.4167)
 					.longitude(-118.5833)
 					.build())
-					.rockType(Location.RockType.granite)
-					.terrainType(Location.TerrainType.natural)
+					.rockType(RockType.GRANITE)
+					.terrainType(TerrainType.NATURAL)
 					.build()
 				])
 				.sessions([
 					Session.builder()
-					.id("session-1")
+					.id(1)
 					.date(tripDate)
 					.location("Bishop - Buttermilks")
-					.locationId("1")
+					.locationId(1)
 					.isIndoor(false)
-					.sessionType(Session.SessionType.bouldering)
+					.sessionType(SessionType.BOULDERING)
 					.weather(Session.Weather.builder()
 					.temperature(68.0)
 					.conditions("sunny")
@@ -225,10 +235,10 @@ class CLDFArchiveSpec extends Specification {
 					.date(tripDate)
 					.routeName("High Plains Drifter")
 					.routeId(1)
-					.type(Climb.ClimbType.boulder)
-					.finishType("flash")
+					.type(ClimbType.BOULDER)
+					.finishType(FinishType.FLASH)
 					.grades(Climb.GradeInfo.builder()
-					.system(Climb.GradeInfo.GradeSystem.vScale)
+					.system(GradeSystem.V_SCALE)
 					.grade("V7")
 					.build())
 					.attempts(1)
@@ -240,10 +250,10 @@ class CLDFArchiveSpec extends Specification {
 					.date(tripDate)
 					.routeName("Cave Route")
 					.routeId(2)
-					.type(Climb.ClimbType.boulder)
-					.finishType("redpoint")
+					.type(ClimbType.BOULDER)
+					.finishType(FinishType.REDPOINT)
 					.grades(Climb.GradeInfo.builder()
-					.system(Climb.GradeInfo.GradeSystem.vScale)
+					.system(GradeSystem.V_SCALE)
 					.grade("V6")
 					.build())
 					.attempts(3)
@@ -253,20 +263,20 @@ class CLDFArchiveSpec extends Specification {
 				])
 				.routes([
 					Route.builder()
-					.id("route-1")
-					.locationId("1")
+					.id(1)
+					.locationId(1)
 					.name("High Plains Drifter")
-					.routeType(Route.RouteType.boulder)
+					.routeType(RouteType.BOULDER)
 					.grades(Route.Grades.builder()
 					.vScale("V7")
 					.build())
 					.qualityRating(5)
 					.build(),
 					Route.builder()
-					.id("route-2")
-					.locationId("1")
+					.id(2)
+					.locationId(1)
 					.name("Cave Route")
-					.routeType(Route.RouteType.boulder)
+					.routeType(RouteType.BOULDER)
 					.grades(Route.Grades.builder()
 					.vScale("V6")
 					.build())
@@ -281,7 +291,7 @@ class CLDFArchiveSpec extends Specification {
 		archive.locations[0].name == "Bishop - Buttermilks"
 		archive.sessions[0].weather.temperature == 68
 		archive.climbs.size() == 2
-		archive.climbs[0].finishType == "flash"
+		archive.climbs[0].finishType == FinishType.FLASH
 		archive.climbs[1].notes == "Tricky heel hook"
 		archive.routes.size() == 2
 	}
@@ -292,7 +302,7 @@ class CLDFArchiveSpec extends Specification {
 				.format("CLDF")
 				.creationDate(OffsetDateTime.now())
 				.appVersion("1.0")
-				.platform(Manifest.Platform.Desktop)
+				.platform(Platform.DESKTOP)
 				.build()
 	}
 
@@ -313,8 +323,8 @@ class CLDFArchiveSpec extends Specification {
 			.sessionId(1)
 			.date(LocalDate.now())
 			.routeName("Test Route")
-			.type(Climb.ClimbType.route)
-			.finishType("redpoint")
+			.type(ClimbType.ROUTE)
+			.finishType(FinishType.REDPOINT)
 			.build()
 		]
 	}
@@ -322,10 +332,10 @@ class CLDFArchiveSpec extends Specification {
 	private List<Session> createSessions() {
 		return [
 			Session.builder()
-			.id("1")
+			.id(1)
 			.date(LocalDate.now())
 			.location("Test Location")
-			.locationId("1")
+			.locationId(1)
 			.isIndoor(false)
 			.build()
 		]
@@ -334,10 +344,10 @@ class CLDFArchiveSpec extends Specification {
 	private List<Route> createRoutes() {
 		return [
 			Route.builder()
-			.id("1")
-			.locationId("1")
+			.id(1)
+			.locationId(1)
 			.name("Test Route")
-			.routeType(Route.RouteType.route)
+			.routeType(RouteType.ROUTE)
 			.build()
 		]
 	}
@@ -345,7 +355,7 @@ class CLDFArchiveSpec extends Specification {
 	private List<Tag> createTags() {
 		return [
 			Tag.builder()
-			.id("1")
+			.id(1)
 			.name("crimpy")
 			.isPredefined(true)
 			.build()
@@ -355,8 +365,8 @@ class CLDFArchiveSpec extends Specification {
 	private List<Sector> createSectors() {
 		return [
 			Sector.builder()
-			.id("1")
-			.locationId("1")
+			.id(1)
+			.locationId(1)
 			.name("Main Area")
 			.build()
 		]
@@ -365,10 +375,10 @@ class CLDFArchiveSpec extends Specification {
 	private List<MediaItem> createMediaMetadata() {
 		return [
 			MediaItem.builder()
-			.id("1")
+			.id(1)
 			.climbId("1")
 			.filename("test.jpg")
-			.type(MediaItem.MediaType.photo)
+			.type(MediaType.PHOTO)
 			.createdAt(OffsetDateTime.now())
 			.build()
 		]

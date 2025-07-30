@@ -2,8 +2,11 @@ package io.cldf.models;
 
 import java.time.OffsetDateTime;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import io.cldf.models.enums.MediaSource;
+import io.cldf.models.enums.MediaType;
+import io.cldf.utils.FlexibleDateTimeDeserializer;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,7 +20,7 @@ import lombok.NoArgsConstructor;
 public class MediaItem {
 
   @JsonProperty(required = true)
-  private String id;
+  private Integer id;
 
   @JsonProperty(required = true)
   private String climbId;
@@ -35,7 +38,7 @@ public class MediaItem {
 
   @Builder.Default private boolean embedded = false;
 
-  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
+  @JsonDeserialize(using = FlexibleDateTimeDeserializer.class)
   private OffsetDateTime createdAt;
 
   private Metadata metadata;
@@ -59,16 +62,5 @@ public class MediaItem {
       private Double latitude;
       private Double longitude;
     }
-  }
-
-  public enum MediaType {
-    photo,
-    video
-  }
-
-  public enum MediaSource {
-    photos_library,
-    local,
-    embedded
   }
 }

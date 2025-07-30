@@ -19,11 +19,11 @@
       "required": ["id", "locationId", "name"],
       "properties": {
         "id": {
-          "type": "string",
+          "type": "integer",
           "description": "Unique identifier for the sector"
         },
         "locationId": {
-          "type": "string",
+          "type": "integer",
           "description": "Reference to parent location ID"
         },
         "name": {

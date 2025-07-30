@@ -1,0 +1,247 @@
+name: Java Release
+
+on:
+  push:
+    tags:
+      - 'java-v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g., 1.0.0)'
+        required: true
+        type: string
+
+jobs:
+  build-artifacts:
+    name: Build Release Artifacts
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            platform: linux
+            arch: amd64
+            native-arch: amd64
+          - os: macos-latest
+            platform: darwin
+            arch: amd64
+            native-arch: amd64
+          - os: macos-latest
+            platform: darwin
+            arch: arm64
+            native-arch: aarch64
+          - os: windows-latest
+            platform: windows
+            arch: amd64
+            native-arch: amd64
+    defaults:
+      run:
+        working-directory: clients/java
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up GraalVM
+      uses: graalvm/setup-graalvm@v1
+      with:
+        java-version: '21'
+        distribution: 'graalvm'
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: Copy schemas to resources
+      run: |
+        mkdir -p cldf-java/src/main/resources
+        rm -rf cldf-java/src/main/resources/schemas
+        cp -r ../../schemas cldf-java/src/main/resources/
+      shell: bash
+      
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+      shell: bash
+      
+    - name: Cache Gradle packages
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-release-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-release-
+          
+    - name: Build all modules
+      run: ./gradlew clean build
+      
+    - name: Build native binary
+      run: |
+        if [[ "${{ matrix.arch }}" == "arm64" && "${{ matrix.platform }}" == "darwin" ]]; then
+          # Cross-compile for ARM64 on Intel Mac
+          ./gradlew :cldf-tool:nativeCompile -Dorg.graalvm.buildtools.native.architectures=${{ matrix.native-arch }}
+        else
+          ./gradlew :cldf-tool:nativeCompile
+        fi
+      shell: bash
+      
+    - name: Create distribution archive
+      run: |
+        mkdir -p dist/cldf-${{ matrix.platform }}-${{ matrix.arch }}
+        
+        # Copy native binary
+        if [[ "${{ matrix.platform }}" == "windows" ]]; then
+          cp cldf-tool/build/native/nativeCompile/cldf.exe dist/cldf-${{ matrix.platform }}-${{ matrix.arch }}/
+        else
+          cp cldf-tool/build/native/nativeCompile/cldf dist/cldf-${{ matrix.platform }}-${{ matrix.arch }}/
+          chmod +x dist/cldf-${{ matrix.platform }}-${{ matrix.arch }}/cldf
+        fi
+        
+        # Copy README and LICENSE
+        cp cldf-tool/README.md dist/cldf-${{ matrix.platform }}-${{ matrix.arch }}/
+        cp ../../LICENSE dist/cldf-${{ matrix.platform }}-${{ matrix.arch }}/ || echo "No LICENSE file found"
+        
+        # Create archive
+        cd dist
+        if [[ "${{ matrix.platform }}" == "windows" ]]; then
+          7z a -tzip cldf-${{ matrix.platform }}-${{ matrix.arch }}.zip cldf-${{ matrix.platform }}-${{ matrix.arch }}/*
+        else
+          tar -czf cldf-${{ matrix.platform }}-${{ matrix.arch }}.tar.gz cldf-${{ matrix.platform }}-${{ matrix.arch }}
+        fi
+      shell: bash
+      
+    - name: Upload distribution archive
+      uses: actions/upload-artifact@v4
+      with:
+        name: cldf-${{ matrix.platform }}-${{ matrix.arch }}
+        path: |
+          clients/java/dist/*.tar.gz
+          clients/java/dist/*.zip
+          
+    - name: Upload JARs (Ubuntu only)
+      if: matrix.os == 'ubuntu-latest'
+      uses: actions/upload-artifact@v4
+      with:
+        name: java-jars
+        path: |
+          clients/java/cldf-java/build/libs/*.jar
+          clients/java/cldf-tool/build/libs/*.jar
+
+  create-release:
+    name: Create GitHub Release
+    needs: build-artifacts
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: artifacts
+        
+    - name: Determine version
+      id: version
+      run: |
+        if [[ "${{ github.event_name }}" == "push" ]]; then
+          VERSION=${GITHUB_REF#refs/tags/java-v}
+        else
+          VERSION=${{ github.event.inputs.version }}
+        fi
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+        
+    - name: Create Release Notes
+      run: |
+        cat > release-notes.md << EOF
+        # CLDF Java Client v${{ steps.version.outputs.version }}
+        
+        ## Downloads
+        
+        ### Native Binaries
+        - [Linux AMD64](https://github.com/${{ github.repository }}/releases/download/java-v${{ steps.version.outputs.version }}/cldf-linux-amd64.tar.gz)
+        - [macOS AMD64](https://github.com/${{ github.repository }}/releases/download/java-v${{ steps.version.outputs.version }}/cldf-darwin-amd64.tar.gz)
+        - [macOS ARM64](https://github.com/${{ github.repository }}/releases/download/java-v${{ steps.version.outputs.version }}/cldf-darwin-arm64.tar.gz)
+        - [Windows AMD64](https://github.com/${{ github.repository }}/releases/download/java-v${{ steps.version.outputs.version }}/cldf-windows-amd64.zip)
+        
+        ### Java Libraries
+        - cldf-java-${{ steps.version.outputs.version }}.jar - Core library
+        - cldf-tool-${{ steps.version.outputs.version }}.jar - CLI tool (executable JAR)
+        - cldf-tool-${{ steps.version.outputs.version }}-runner.jar - CLI tool (fat JAR with all dependencies)
+        
+        ## Installation
+        
+        ### Native Binary
+        Download the appropriate binary for your platform and add it to your PATH.
+        
+        ### Java Library
+        Add to your project dependencies:
+        
+        \`\`\`gradle
+        implementation 'io.cldf:cldf-java:${{ steps.version.outputs.version }}'
+        \`\`\`
+        
+        \`\`\`xml
+        <dependency>
+            <groupId>io.cldf</groupId>
+            <artifactId>cldf-java</artifactId>
+            <version>${{ steps.version.outputs.version }}</version>
+        </dependency>
+        \`\`\`
+        
+        ## What's Changed
+        See the [changelog](https://github.com/${{ github.repository }}/blob/main/clients/java/CHANGELOG.md) for details.
+        EOF
+        
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: java-v${{ steps.version.outputs.version }}
+        name: CLDF Java v${{ steps.version.outputs.version }}
+        body_path: release-notes.md
+        draft: false
+        prerelease: false
+        files: |
+          artifacts/*/*.tar.gz
+          artifacts/*/*.zip
+          artifacts/*/*.jar
+          
+  publish-maven:
+    name: Publish to Maven Central
+    needs: build-artifacts
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' || github.event.inputs.version != ''
+    defaults:
+      run:
+        working-directory: clients/java
+        
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+        
+    - name: Copy schemas to resources
+      run: |
+        mkdir -p cldf-java/src/main/resources
+        rm -rf cldf-java/src/main/resources/schemas
+        cp -r ../../schemas cldf-java/src/main/resources/
+      shell: bash
+      
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+      shell: bash
+      
+    - name: Publish to Maven Central
+      env:
+        MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }}
+        MAVEN_PASSWORD: ${{ secrets.MAVEN_PASSWORD }}
+        SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
+        SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
+      run: |
+        ./gradlew :cldf-java:publishToSonatype closeAndReleaseSonatypeStagingRepository \
+          -PossrhUsername=$MAVEN_USERNAME \
+          -PossrhPassword=$MAVEN_PASSWORD \
+          -PsigningKey="$SIGNING_KEY" \
+          -PsigningPassword=$SIGNING_PASSWORD

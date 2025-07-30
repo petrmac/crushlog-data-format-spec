@@ -2,8 +2,9 @@ package io.cldf.models;
 
 import java.time.OffsetDateTime;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import io.cldf.utils.FlexibleDateTimeDeserializer;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,10 +18,10 @@ import lombok.NoArgsConstructor;
 public class Sector {
 
   @JsonProperty(required = true)
-  private String id;
+  private Integer id;
 
   @JsonProperty(required = true)
-  private String locationId;
+  private Integer locationId;
 
   @JsonProperty(required = true)
   private String name;
@@ -35,7 +36,7 @@ public class Sector {
 
   private Coordinates coordinates;
 
-  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
+  @JsonDeserialize(using = FlexibleDateTimeDeserializer.class)
   private OffsetDateTime createdAt;
 
   @Data

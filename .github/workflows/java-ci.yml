@@ -13,32 +13,26 @@ on:
       - '.github/workflows/java-ci.yml'
 
 jobs:
-  gradle-build:
-    name: Build with Gradle
+  # Step 1: Lint and code style checks
+  lint:
+    name: Lint and Code Style
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: clients/java/cldf-java
-
+        working-directory: clients/java
+    
     steps:
     - uses: actions/checkout@v4
     
     - name: Set up JDK 21
       uses: actions/setup-java@v4
       with:
-        java-version: '21'
+        java-version: 21
         distribution: 'temurin'
-        
-    - name: Copy schemas to resources
-      run: |
-        mkdir -p src/main/resources
-        cp -r ../../../schemas src/main/resources/
-      working-directory: clients/java/cldf-java
-      
+    
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
-      working-directory: clients/java/cldf-java
-      
+    
     - name: Cache Gradle packages
       uses: actions/cache@v4
       with:
@@ -48,59 +42,313 @@ jobs:
         key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
         restore-keys: |
           ${{ runner.os }}-gradle-
-          
-    - name: Build with Gradle
-      run: ./gradlew build
-      
-    - name: Run tests
-      run: ./gradlew test
-      
-    - name: Upload test results
-      uses: actions/upload-artifact@v4
-      if: always()
-      with:
-        name: gradle-test-results
-        path: clients/java/cldf-java/build/test-results
-        
-  maven-build:
-    name: Build with Maven
+    
+    - name: Run Spotless check
+      run: ./gradlew spotlessCheck
+    
+  # Step 2: Build, test and coverage
+  build-test-coverage:
+    name: Build, Test and Coverage
+    needs: lint
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: clients/java/cldf-java
-
+        working-directory: clients/java
+    
     steps:
     - uses: actions/checkout@v4
     
     - name: Set up JDK 21
       uses: actions/setup-java@v4
       with:
-        java-version: '21'
+        java-version: 21
         distribution: 'temurin'
-        
+    
     - name: Copy schemas to resources
       run: |
-        mkdir -p src/main/resources
-        cp -r ../../../schemas src/main/resources/
-      working-directory: clients/java/cldf-java
-      
-    - name: Cache Maven packages
+        mkdir -p cldf-java/src/main/resources
+        rm -rf cldf-java/src/main/resources/schemas
+        cp -r ../../schemas cldf-java/src/main/resources/
+    
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+    
+    - name: Cache Gradle packages
       uses: actions/cache@v4
       with:
-        path: ~/.m2
-        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
         restore-keys: |
-          ${{ runner.os }}-m2-
-          
-    - name: Build with Maven
-      run: mvn clean compile
-      
-    - name: Run tests
-      run: mvn test
-      
+          ${{ runner.os }}-gradle-
+    
+    - name: Build and test with coverage
+      run: ./gradlew build jacocoTestReport
+    
+    - name: Generate aggregate coverage report
+      run: ./gradlew jacocoTestCoverageVerification
+    
     - name: Upload test results
       uses: actions/upload-artifact@v4
       if: always()
       with:
-        name: maven-test-results
-        path: clients/java/cldf-java/target/surefire-reports
+        name: test-results
+        path: |
+          clients/java/cldf-java/build/test-results
+          clients/java/cldf-java/build/reports/tests
+          clients/java/cldf-tool/build/test-results
+          clients/java/cldf-tool/build/reports/tests
+    
+    - name: Upload coverage reports
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-reports
+        path: |
+          clients/java/cldf-java/build/reports/jacoco
+          clients/java/cldf-tool/build/reports/jacoco
+    
+    - name: Upload JARs
+      uses: actions/upload-artifact@v4
+      with:
+        name: jars
+        path: |
+          clients/java/cldf-java/build/libs/*.jar
+          clients/java/cldf-tool/build/libs/*.jar
+    
+  # Step 3: SonarQube analysis
+  sonarqube:
+    name: SonarQube Analysis
+    needs: build-test-coverage
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository)
+    defaults:
+      run:
+        working-directory: clients/java
+    
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Shallow clones should be disabled for better analysis
+    
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: 21
+        distribution: 'temurin'
+    
+    - name: Copy schemas to resources
+      run: |
+        mkdir -p cldf-java/src/main/resources
+        rm -rf cldf-java/src/main/resources/schemas
+        cp -r ../../schemas cldf-java/src/main/resources/
+    
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+    
+    - name: Cache Gradle packages
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-
+    
+    - name: Cache SonarQube packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.sonar/cache
+        key: ${{ runner.os }}-sonar
+        restore-keys: ${{ runner.os }}-sonar
+    
+    - name: Build project
+      run: ./gradlew build
+    
+    - name: Run SonarQube analysis
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      run: ./gradlew sonar --info
+    
+  # Step 4: Build native binaries for each platform
+  build-native:
+    name: Native Build - ${{ matrix.os }} ${{ matrix.arch }}
+    needs: build-test-coverage
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            arch: 'amd64'
+            native-arch: 'amd64'
+          - os: macos-latest
+            arch: 'amd64'
+            native-arch: 'amd64'
+          - os: macos-latest
+            arch: 'arm64'
+            native-arch: 'aarch64'
+          - os: windows-latest
+            arch: 'amd64'
+            native-arch: 'amd64'
+    defaults:
+      run:
+        working-directory: clients/java
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up GraalVM
+      uses: graalvm/setup-graalvm@v1
+      with:
+        java-version: '21'
+        distribution: 'graalvm'
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Copy schemas to resources
+      run: |
+        mkdir -p cldf-java/src/main/resources
+        rm -rf cldf-java/src/main/resources/schemas
+        cp -r ../../schemas cldf-java/src/main/resources/
+      shell: bash
+    
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+      shell: bash
+    
+    - name: Cache Gradle packages
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-native-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-native-
+    
+    - name: Build native binary
+      run: |
+        if [[ "${{ matrix.arch }}" == "arm64" && "${{ runner.os }}" == "macOS" ]]; then
+          # Cross-compile for ARM64 on Intel Mac
+          ./gradlew :cldf-tool:nativeCompile -Dorg.graalvm.buildtools.native.architectures=${{ matrix.native-arch }}
+        else
+          ./gradlew :cldf-tool:nativeCompile
+        fi
+      shell: bash
+    
+    - name: Test native binary
+      run: |
+        if [[ "${{ matrix.arch }}" == "arm64" && "${{ runner.os }}" == "macOS" ]]; then
+          # Skip testing ARM64 binary on Intel Mac (cross-compiled)
+          echo "Skipping test for cross-compiled ARM64 binary"
+        elif [[ "${{ runner.os }}" == "Windows" ]]; then
+          ./cldf-tool/build/native/nativeCompile/cldf.exe --version
+        else
+          ./cldf-tool/build/native/nativeCompile/cldf --version
+        fi
+      shell: bash
+    
+    - name: Upload native binary
+      uses: actions/upload-artifact@v4
+      with:
+        name: cldf-native-${{ matrix.os }}-${{ matrix.arch }}
+        path: |
+          clients/java/cldf-tool/build/native/nativeCompile/cldf
+          clients/java/cldf-tool/build/native/nativeCompile/cldf.exe
+    
+  # Step 5: Publish artifacts
+  publish-artifacts:
+    name: Publish Artifacts
+    needs: [build-test-coverage, build-native]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    defaults:
+      run:
+        working-directory: clients/java
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: 21
+        distribution: 'temurin'
+    
+    - name: Copy schemas to resources
+      run: |
+        mkdir -p cldf-java/src/main/resources
+        rm -rf cldf-java/src/main/resources/schemas
+        cp -r ../../schemas cldf-java/src/main/resources/
+    
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+    
+    - name: Cache Gradle packages
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-
+    
+    - name: Download JAR artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: jars
+        path: artifacts/jars
+    
+    - name: Download native binaries
+      uses: actions/download-artifact@v4
+      with:
+        pattern: cldf-native-*
+        path: artifacts/native
+    
+    - name: Build additional artifacts
+      run: |
+        # Build fat JAR
+        ./gradlew :cldf-tool:fatJar
+        
+        # Build source JARs
+        ./gradlew :cldf-java:sourcesJar :cldf-tool:sourcesJar
+        
+        # Build JavaDoc JARs
+        ./gradlew :cldf-java:javadocJar :cldf-tool:javadocJar
+    
+    - name: Prepare release artifacts
+      run: |
+        mkdir -p release
+        
+        # Copy JARs
+        cp cldf-java/build/libs/*.jar release/
+        cp cldf-tool/build/libs/*.jar release/
+        
+        # Copy native binaries
+        cp -r artifacts/native/* release/
+        
+        # Create checksums
+        cd release
+        for file in *; do
+          if [ -f "$file" ]; then
+            sha256sum "$file" > "$file.sha256"
+          fi
+        done
+        cd ..
+    
+    - name: Upload release artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: release-artifacts
+        path: clients/java/release/*
+    
+    # Optional: Publish to Maven repository
+    # - name: Publish to Maven Central
+    #   env:
+    #     MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }}
+    #     MAVEN_PASSWORD: ${{ secrets.MAVEN_PASSWORD }}
+    #     SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
+    #     SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
+    #   run: ./gradlew publish

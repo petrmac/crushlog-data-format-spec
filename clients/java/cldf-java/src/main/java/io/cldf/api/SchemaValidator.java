@@ -2,7 +2,9 @@ package io.cldf.api;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -40,6 +42,14 @@ public class SchemaValidator {
 
   public SchemaValidator() {
     this.objectMapper = new ObjectMapper();
+    // Register JSR310 module for Java 8 time types
+    this.objectMapper.findAndRegisterModules();
+    // Configure to omit null fields during serialization
+    this.objectMapper.setSerializationInclusion(
+        com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL);
+    // Configure to write dates as strings, not arrays
+    this.objectMapper.disable(
+        com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
     // Create schema factory with custom config to disable network fetching
     SchemaValidatorsConfig config = new SchemaValidatorsConfig();
     config.setHandleNullableField(true);
@@ -55,72 +65,69 @@ public class SchemaValidator {
   }
 
   /**
-   * Validates JSON content against the appropriate schema based on the filename.
+   * Validates JSON content and returns a ValidationResult. This is the preferred method for new
+   * code as it provides a cleaner API without throwing exceptions for validation failures.
    *
    * @param filename The name of the file being validated (e.g., "manifest.json")
    * @param jsonContent The JSON content as a byte array
-   * @return true if valid, false otherwise
-   * @throws IOException if schema cannot be loaded or content cannot be parsed
+   * @return ValidationResult containing success/failure status and any errors
    */
-  public boolean validate(String filename, byte[] jsonContent) throws IOException {
-    String schemaFile = FILE_TO_SCHEMA_MAPPING.get(filename);
-    if (schemaFile == null) {
-      log.warn("No schema mapping found for file: {}", filename);
-      return true; // Allow unknown files
-    }
-
-    JsonSchema schema = loadSchema(schemaFile);
-    JsonNode jsonNode = objectMapper.readTree(jsonContent);
-
-    Set<ValidationMessage> errors = schema.validate(jsonNode);
-
-    if (!errors.isEmpty()) {
-      log.error("Validation errors for {}: {}", filename, errors);
-      return false;
-    }
-
-    return true;
-  }
-
-  /**
-   * Validates JSON content against the appropriate schema and throws exception on failure.
-   *
-   * @param filename The name of the file being validated
-   * @param jsonContent The JSON content as a byte array
-   * @throws IOException if validation fails or schema cannot be loaded
-   */
-  public void validateOrThrow(String filename, byte[] jsonContent) throws IOException {
-    String schemaFile = FILE_TO_SCHEMA_MAPPING.get(filename);
-    if (schemaFile == null) {
-      log.debug("No schema mapping found for file: {}", filename);
-      return; // Allow unknown files
-    }
-
-    JsonSchema schema = loadSchema(schemaFile);
-    JsonNode jsonNode = objectMapper.readTree(jsonContent);
-
-    Set<ValidationMessage> errors = schema.validate(jsonNode);
-
-    if (!errors.isEmpty()) {
-      StringBuilder errorMessage = new StringBuilder();
-      errorMessage.append("Schema validation failed for ").append(filename).append(":\n");
-      for (ValidationMessage error : errors) {
-        errorMessage.append("  - ").append(error.getMessage()).append("\n");
+  public ValidationResult validateWithResult(String filename, byte[] jsonContent) {
+    try {
+      String schemaFile = FILE_TO_SCHEMA_MAPPING.get(filename);
+      if (schemaFile == null) {
+        log.debug("No schema mapping found for file: {}", filename);
+        return ValidationResult.success(filename); // Allow unknown files
       }
-      throw new IOException(errorMessage.toString());
+
+      JsonSchema schema = loadSchema(schemaFile);
+      JsonNode jsonNode = objectMapper.readTree(jsonContent);
+
+      Set<ValidationMessage> errors = schema.validate(jsonNode);
+
+      if (errors.isEmpty()) {
+        return ValidationResult.success(filename);
+      }
+
+      List<ValidationResult.ValidationError> validationErrors = new ArrayList<>();
+      for (ValidationMessage error : errors) {
+        validationErrors.add(
+            new ValidationResult.ValidationError(
+                error.getInstanceLocation().toString(), error.getMessage(), error.getType()));
+      }
+
+      return ValidationResult.failure(filename, validationErrors);
+    } catch (IOException e) {
+      // If we can't parse the JSON or load the schema, return a failure
+      return ValidationResult.failure(
+          filename,
+          List.of(
+              new ValidationResult.ValidationError(
+                  "$", "Failed to validate: " + e.getMessage(), "parse_error")));
     }
   }
 
   /**
-   * Validates an object against the appropriate schema after serializing to JSON.
+   * Validates an object against the appropriate schema and returns a ValidationResult. This is the
+   * preferred method for new code as it provides a cleaner API without throwing exceptions for
+   * validation failures.
    *
    * @param filename The name of the file being validated
    * @param object The object to validate
-   * @throws IOException if validation fails
+   * @return ValidationResult containing success/failure status and any errors
    */
-  public void validateObject(String filename, Object object) throws IOException {
-    byte[] jsonBytes = objectMapper.writeValueAsBytes(object);
-    validateOrThrow(filename, jsonBytes);
+  public ValidationResult validateObjectWithResult(String filename, Object object) {
+    try {
+      byte[] jsonBytes = objectMapper.writeValueAsBytes(object);
+      return validateWithResult(filename, jsonBytes);
+    } catch (Exception e) {
+      // If we can't serialize the object, return a failure
+      return ValidationResult.failure(
+          filename,
+          List.of(
+              new ValidationResult.ValidationError(
+                  "$", "Failed to serialize object: " + e.getMessage(), "serialization_error")));
+    }
   }
 
   private JsonSchema loadSchema(String schemaFile) throws IOException {
