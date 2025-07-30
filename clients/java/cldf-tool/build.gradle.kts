@@ -23,37 +23,30 @@ val neo4jVersion = "5.15.0"
 val jmhVersion = "1.37"
 
 dependencies {
-    // Internal dependency on cldf-java
+    // ===== IMPLEMENTATION DEPENDENCIES =====
+    // Internal dependency
     implementation(project(":cldf-java"))
     
-    // Micronaut
+    // Micronaut Framework
     implementation("io.micronaut:micronaut-runtime")
     implementation("io.micronaut:micronaut-inject")
     implementation("io.micronaut.picocli:micronaut-picocli")
     implementation("jakarta.annotation:jakarta.annotation-api")
     
-    // Picocli
+    // CLI Framework
     implementation("info.picocli:picocli")
-    annotationProcessor("info.picocli:picocli-codegen")
     
-    // Jackson (for JsonUtils - these should come transitively from cldf-java but let's be explicit)
+    // JSON Processing (explicit versions to ensure consistency)
     implementation("com.fasterxml.jackson.core:jackson-databind:2.17.0")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.17.0")
     
-    // Lombok
-    compileOnly("org.projectlombok:lombok")
-    annotationProcessor("org.projectlombok:lombok")
-    
     // MapStruct
     implementation("org.mapstruct:mapstruct:$mapstructVersion")
-    annotationProcessor("org.mapstruct:mapstruct-processor:$mapstructVersion")
-    annotationProcessor("org.projectlombok:lombok-mapstruct-binding:0.2.0")
     
-    // Logging - Use Logback only
+    // Logging
     implementation("org.slf4j:slf4j-api")
-    runtimeOnly("ch.qos.logback:logback-classic")
     
-    // Neo4j embedded database
+    // Neo4j Database
     implementation("org.neo4j:neo4j:$neo4jVersion") {
         exclude(group = "org.slf4j", module = "slf4j-nop")
         exclude(module = "neo4j-logging")
@@ -62,31 +55,48 @@ dependencies {
     }
     implementation("org.neo4j:neo4j-cypher-dsl:2024.0.0")
     
-    // Annotation processors
-    annotationProcessor("io.micronaut:micronaut-inject-java")
+    // ===== COMPILE-ONLY DEPENDENCIES =====
+    compileOnly("org.projectlombok:lombok")
     
-    // Testing
+    // ===== RUNTIME-ONLY DEPENDENCIES =====
+    runtimeOnly("ch.qos.logback:logback-classic")
+    
+    // ===== ANNOTATION PROCESSORS =====
+    annotationProcessor("io.micronaut:micronaut-inject-java")
+    annotationProcessor("info.picocli:picocli-codegen")
+    annotationProcessor("org.projectlombok:lombok")
+    annotationProcessor("org.mapstruct:mapstruct-processor:$mapstructVersion")
+    annotationProcessor("org.projectlombok:lombok-mapstruct-binding:0.2.0")
+    
+    // ===== TEST IMPLEMENTATION DEPENDENCIES =====
+    // Micronaut Testing
     testImplementation("io.micronaut:micronaut-http-client")
     testImplementation("io.micronaut.test:micronaut-test-spock")
+    
+    // Spock Framework
     testImplementation("org.spockframework:spock-core:2.4-M1-groovy-4.0")
     testImplementation("org.apache.groovy:groovy-json:4.0.21")
+    
+    // JUnit and Mockito
     testImplementation("org.junit.jupiter:junit-jupiter-api")
     testImplementation("org.mockito:mockito-core")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
     
-    // Lombok for tests
-    testCompileOnly("org.projectlombok:lombok")
-    testAnnotationProcessor("org.projectlombok:lombok")
-    
-    // MapStruct for tests
-    testAnnotationProcessor("org.mapstruct:mapstruct-processor:$mapstructVersion")
-    
-    // Integration testing
+    // Neo4j Test Harness
     testImplementation("org.neo4j.test:neo4j-harness:$neo4jVersion")
     testImplementation("org.assertj:assertj-core:3.25.1")
     
-    // JMH for microbenchmarks
+    // JMH Benchmarking
     testImplementation("org.openjdk.jmh:jmh-core:$jmhVersion")
+    
+    // ===== TEST COMPILE-ONLY DEPENDENCIES =====
+    testCompileOnly("org.projectlombok:lombok")
+    
+    // ===== TEST RUNTIME-ONLY DEPENDENCIES =====
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
+    
+    // ===== TEST ANNOTATION PROCESSORS =====
+    testAnnotationProcessor("org.projectlombok:lombok")
+    testAnnotationProcessor("org.mapstruct:mapstruct-processor:$mapstructVersion")
     testAnnotationProcessor("org.openjdk.jmh:jmh-generator-annprocess:$jmhVersion")
 }
 

@@ -25,6 +25,7 @@ repositories {
 val mapstructVersion = "1.5.5.Final"
 
 dependencies {
+    // ===== IMPLEMENTATION DEPENDENCIES =====
     // JSON Processing
     implementation("com.fasterxml.jackson.core:jackson-databind:2.17.0")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.17.0")
@@ -32,28 +33,33 @@ dependencies {
     // JSON Schema Validation
     implementation("com.networknt:json-schema-validator:1.3.3")
     
-    // Lombok
-    compileOnly("org.projectlombok:lombok")
-    annotationProcessor("org.projectlombok:lombok")
-    
     // MapStruct
     implementation("org.mapstruct:mapstruct:$mapstructVersion")
-    annotationProcessor("org.mapstruct:mapstruct-processor:$mapstructVersion")
-    annotationProcessor("org.projectlombok:lombok-mapstruct-binding:0.2.0")
     
     // Archive handling
     implementation("org.apache.commons:commons-compress:1.26.1")
     
+    // ===== COMPILE-ONLY DEPENDENCIES =====
+    // Lombok
+    compileOnly("org.projectlombok:lombok")
+    
+    // ===== ANNOTATION PROCESSORS =====
+    annotationProcessor("org.projectlombok:lombok")
+    annotationProcessor("org.mapstruct:mapstruct-processor:$mapstructVersion")
+    annotationProcessor("org.projectlombok:lombok-mapstruct-binding:0.2.0")
+    
+    // ===== TEST IMPLEMENTATION DEPENDENCIES =====
     // Spock Testing
     testImplementation("org.spockframework:spock-core:2.4-M1-groovy-4.0")
     testImplementation("org.apache.groovy:groovy:4.0.21")
     testImplementation("org.mockito:mockito-core:5.11.0")
     
+    // ===== TEST COMPILE-ONLY DEPENDENCIES =====
     // Lombok for tests
     testCompileOnly("org.projectlombok:lombok")
-    testAnnotationProcessor("org.projectlombok:lombok")
     
-    // MapStruct for tests
+    // ===== TEST ANNOTATION PROCESSORS =====
+    testAnnotationProcessor("org.projectlombok:lombok")
     testAnnotationProcessor("org.mapstruct:mapstruct-processor:$mapstructVersion")
 }
 

@@ -1,5 +1,6 @@
 package io.cldf.tool.commands
 
+import io.cldf.schema.SchemaService
 import io.cldf.tool.models.CommandResult
 import io.cldf.tool.utils.OutputFormat
 import io.cldf.tool.utils.OutputHandler
@@ -9,10 +10,12 @@ import spock.lang.Unroll
 class SchemaCommandSpec extends Specification {
 
     SchemaCommand command
+    SchemaService mockSchemaService
     OutputHandler mockOutput
 
     def setup() {
-        command = new SchemaCommand()
+        mockSchemaService = Mock(SchemaService)
+        command = new SchemaCommand(mockSchemaService)
         mockOutput = Mock(OutputHandler)
         command.outputFormat = OutputFormat.json
         command.output = mockOutput
@@ -22,6 +25,7 @@ class SchemaCommandSpec extends Specification {
     def "should retrieve schema for component '#component'"() {
         given:
         command.component = component
+        mockSchemaService.getSchemaInfo(component) >> [(expectedKey): [:]]
 
         when:
         CommandResult result = command.execute()
@@ -47,6 +51,13 @@ class SchemaCommandSpec extends Specification {
     def "should include correct finish types for boulder and route climbs"() {
         given:
         command.component = "enums"
+        def mockEnums = [
+            finishType: [
+                boulder: ["flash", "top", "repeat", "project", "attempt"],
+                route: ["flash", "top", "repeat", "project", "attempt", "onsight", "redpoint"]
+            ]
+        ]
+        mockSchemaService.getSchemaInfo("enums") >> [enums: mockEnums]
 
         when:
         CommandResult result = command.execute()
@@ -78,6 +89,12 @@ class SchemaCommandSpec extends Specification {
     def "should include corrected common mistakes about route IDs"() {
         given:
         command.component = "commonMistakes"
+        def mockMistakes = [
+            "Route IDs should be strings, and routeId in climbs should also be strings (both must match)",
+            "FinishType values for boulder climbs: flash, top, repeat, project, attempt (NOT onsight, redpoint)",
+            "FinishType values for route climbs: flash, top, repeat, project, attempt, onsight, redpoint"
+        ]
+        mockSchemaService.getSchemaInfo("commonMistakes") >> [commonMistakes: mockMistakes]
 
         when:
         CommandResult result = command.execute()
@@ -90,67 +107,56 @@ class SchemaCommandSpec extends Specification {
         mistakes.any { it.contains("FinishType values for route climbs: flash, top, repeat, project, attempt, onsight, redpoint") }
     }
 
-    def "should load actual JSON schema from classpath for manifest component"() {
+    def "should handle IOException when loading schema"() {
         given:
         command.component = "manifest"
+        mockSchemaService.getSchemaInfo("manifest") >> { throw new IOException("Failed to load schema") }
 
         when:
-        CommandResult result = command.execute()
+        def result = command.execute()
 
         then:
-        result.success
-        def manifestSchema = result.data.manifest
-        
-        // Verify it's actual JSON schema
-        manifestSchema.'$schema' == "http://json-schema.org/draft-07/schema#"
-        manifestSchema.'$id' == "https://cldf.io/schemas/manifest.schema.json"
-        manifestSchema.title == "CLDF Manifest"
-        manifestSchema.required.contains("version")
-        manifestSchema.required.contains("format")
-        manifestSchema.required.contains("creationDate")
-        manifestSchema.required.contains("appVersion")
-        manifestSchema.required.contains("platform")
-        
-        // Verify platform enum values
-        manifestSchema.properties.platform.enum == ["iOS", "Android", "Web", "Desktop"]
+        !result.success
+        result.exitCode == 1
+        result.message.contains("Failed to retrieve schema information")
     }
 
-    def "should load actual JSON schema from classpath for climb component"() {
+    def "should output text format correctly"() {
         given:
-        command.component = "climb"
+        command.component = "enums"
+        command.outputFormat = OutputFormat.text
+        command.output = mockOutput
+        def mockData = [
+            enums: [
+                platform: ["iOS", "Android"],
+                climbType: ["boulder", "route"]
+            ]
+        ]
+        mockSchemaService.getSchemaInfo("enums") >> mockData
 
         when:
-        CommandResult result = command.execute()
+        def result = command.execute()
+        command.outputText(result)
 
         then:
         result.success
-        def climbSchema = result.data.climb
-        
-        // Verify it's actual JSON schema
-        climbSchema.'$schema' == "http://json-schema.org/draft-07/schema#"
-        climbSchema.'$id' == "https://cldf.io/schemas/climbs.schema.json"
-        climbSchema.title == "CLDF Climbs"
-        
-        // Verify routeId is now integer type
-        climbSchema.definitions.climb.properties.routeId.type == "integer"
-        
-        // Verify finish types include 'attempt' for both boulder and route
-        def boulderFinishTypes = climbSchema.definitions.climb.allOf.find { 
-            it.if?.properties?.type?.const == "boulder" 
-        }?.then?.properties?.finishType?.enum
-        boulderFinishTypes != null
-        boulderFinishTypes.contains("attempt")
-        
-        def routeFinishTypes = climbSchema.definitions.climb.allOf.find { 
-            it.if?.properties?.type?.const == "route" 
-        }?.then?.properties?.finishType?.enum
-        routeFinishTypes != null
-        routeFinishTypes.contains("attempt")
+        1 * mockOutput.write("ENUMS SCHEMA:")
+        _ * mockOutput.write(_) // Allow any number of writes for nested structure output
     }
 
     def "should provide example data with correct types"() {
         given:
         command.component = "exampleData"
+        def mockExamples = [
+            exampleData: [
+                minimal: [
+                    routes: [[id: "1", locationId: "1"]],
+                    climbs: [[routeId: "1"]],
+                    locations: [[id: 1]]
+                ]
+            ]
+        ]
+        mockSchemaService.getSchemaInfo("exampleData") >> mockExamples
 
         when:
         CommandResult result = command.execute()
@@ -174,21 +180,31 @@ class SchemaCommandSpec extends Specification {
         minimal.routes[0].locationId instanceof String
     }
 
-    def "should throw exception for unknown component"() {
+    def "should handle exception for unknown component"() {
         given:
         command.component = "unknownComponent"
+        mockSchemaService.getSchemaInfo("unknownComponent") >> { throw new IllegalArgumentException("Unknown component: unknownComponent") }
 
         when:
-        command.execute()
+        def result = command.execute()
 
         then:
-        IllegalArgumentException ex = thrown()
-        ex.message.contains("Unknown component: unknownComponent")
+        !result.success
+        result.exitCode == 1
+        result.message == "Unknown component: unknownComponent"
     }
 
-    def "should extract enums from actual schema files"() {
+    def "should extract enums from schema service"() {
         given:
         command.component = "enums"
+        def mockEnums = [
+            enums: [
+                platform: ["iOS", "Android", "Web", "Desktop"],
+                routeType: ["boulder", "route"],
+                gradeSystem: ["vScale", "font", "french", "yds", "uiaa"]
+            ]
+        ]
+        mockSchemaService.getSchemaInfo("enums") >> mockEnums
 
         when:
         CommandResult result = command.execute()
@@ -214,6 +230,17 @@ class SchemaCommandSpec extends Specification {
     def "should handle date formats information"() {
         given:
         command.component = "dateFormats"
+        def mockDateFormats = [
+            dateFormats: [
+                description: "CLDF supports flexible date parsing with multiple formats",
+                supportedFormats: ["ISO-8601", "yyyy-MM-dd"],
+                examples: [
+                    offsetDateTime: "2024-01-29T12:00:00Z",
+                    localDate: "2024-01-29"
+                ]
+            ]
+        ]
+        mockSchemaService.getSchemaInfo("dateFormats") >> mockDateFormats
 
         when:
         CommandResult result = command.execute()
@@ -230,6 +257,19 @@ class SchemaCommandSpec extends Specification {
     def "should provide comprehensive schema for 'all' component"() {
         given:
         command.component = "all"
+        def mockAllSchema = [
+            manifest: ['$schema': "http://json-schema.org/draft-07/schema#"],
+            location: [:],
+            route: [:],
+            climb: ['$schema': "http://json-schema.org/draft-07/schema#"],
+            session: [:],
+            tag: [:],
+            enums: [:],
+            dateFormats: [:],
+            commonMistakes: [],
+            exampleData: [:]
+        ]
+        mockSchemaService.getSchemaInfo("all") >> mockAllSchema
 
         when:
         CommandResult result = command.execute()
