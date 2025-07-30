@@ -84,7 +84,7 @@ Location location = Location.builder()
 
 // Create session
 Session session = Session.builder()
-    .id("1")
+    .id(1)
     .date(LocalDate.now())
     .location("Local Climbing Gym")
     .build();

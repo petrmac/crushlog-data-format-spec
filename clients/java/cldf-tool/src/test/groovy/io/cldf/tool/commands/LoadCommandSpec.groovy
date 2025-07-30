@@ -447,10 +447,10 @@ class LoadCommandSpec extends Specification {
         
         def sessions = (1..sessionCount).collect { i ->
             Session.builder()
-                .id("sess_$i")
+                .id(i)
                 .date(LocalDate.of(2024, 1, Math.min(i, 28)))
                 .location("Location ${(i % locationCount) + 1}")
-                .locationId("${(i % locationCount) + 1}")
+                .locationId((i % locationCount) + 1)
                 .isIndoor(i % 2 == 0)
                 .sessionType(SessionType.INDOOR_CLIMBING)
                 .build()

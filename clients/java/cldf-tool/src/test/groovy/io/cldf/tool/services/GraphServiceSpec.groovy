@@ -91,7 +91,7 @@ class GraphServiceSpec extends Specification {
         1 * locationNode.setProperty("latitude", 37.7749)
         1 * locationNode.setProperty("longitude", -122.4194)
         
-        1 * sessionNode.setProperty("sessionId", "session1")
+        1 * sessionNode.setProperty("sessionId", 1)
         1 * sessionNode.setProperty("date", "2024-01-01")
         1 * sessionNode.setProperty("locationName", "Test Crag")
         
@@ -174,7 +174,7 @@ class GraphServiceSpec extends Specification {
         locationNode.getProperty("state", null) >> "CA"
         locationNode.getProperty("isIndoor", false) >> false
         
-        sessionNode.getProperty("sessionId") >> "session1"
+        sessionNode.getProperty("sessionId") >> 1
         sessionNode.getProperty("date") >> "2024-01-01"
         sessionNode.getProperty("locationName", null) >> "Test Crag"
         
@@ -225,7 +225,7 @@ class GraphServiceSpec extends Specification {
         exportedArchive.locations[0].id == 1
         exportedArchive.locations[0].name == "Test Crag"
         exportedArchive.sessions.size() == 1
-        exportedArchive.sessions[0].id == "session1"
+        exportedArchive.sessions[0].id == 1
         exportedArchive.climbs.size() == 1
         exportedArchive.climbs[0].id == 1
         exportedArchive.climbs[0].routeName == "Test Route"
@@ -266,12 +266,12 @@ class GraphServiceSpec extends Specification {
         1 * mockTransaction.commit()
     }
 
-    def "should handle non-numeric location IDs in sessions"() {
-        given: "a session with non-numeric location ID"
+    def "should handle non-existent location IDs in sessions"() {
+        given: "a session with non-existent location ID"
         def session = Session.builder()
-            .id("session1")
+            .id(1)
             .date(LocalDate.of(2024, 1, 1))
-            .locationId("invalid-id")
+            .locationId(999) // Non-existent location
             .build()
             
         def archive = CLDFArchive.builder()
@@ -437,10 +437,10 @@ class GraphServiceSpec extends Specification {
             .build()
             
         def session = Session.builder()
-            .id("session1")
+            .id(1)
             .date(LocalDate.of(2024, 1, 1))
             .location("Test Crag")
-            .locationId("1")
+            .locationId(1)
             .build()
             
         def climb = Climb.builder()

@@ -18,12 +18,12 @@ class TagSpec extends Specification {
 	def "should build tag with required fields"() {
 		when: "creating a tag"
 		def tag = Tag.builder()
-				.id("tag-1")
+				.id(1)
 				.name("crimpy")
 				.build()
 
 		then: "required fields are set"
-		tag.id == "tag-1"
+		tag.id == 1
 		tag.name == "crimpy"
 
 		and: "defaults are applied"
@@ -33,7 +33,7 @@ class TagSpec extends Specification {
 	def "should build predefined tag"() {
 		when: "creating a predefined tag"
 		def tag = Tag.builder()
-				.id("tag-1")
+				.id(1)
 				.name("crimpy")
 				.isPredefined(true)
 				.predefinedTagKey(PredefinedTagKey.CRIMPY)
@@ -42,7 +42,7 @@ class TagSpec extends Specification {
 				.build()
 
 		then: "all fields are set"
-		tag.id == "tag-1"
+		tag.id == 1
 		tag.name == "crimpy"
 		tag.isPredefined
 		tag.predefinedTagKey == PredefinedTagKey.CRIMPY
@@ -53,7 +53,7 @@ class TagSpec extends Specification {
 	def "should serialize tag to JSON"() {
 		given: "a tag"
 		def tag = Tag.builder()
-				.id("tag-1")
+				.id(1)
 				.name("slopers")
 				.isPredefined(true)
 				.predefinedTagKey(PredefinedTagKey.SLOPERS)
@@ -65,7 +65,7 @@ class TagSpec extends Specification {
 		def json = objectMapper.writeValueAsString(tag)
 
 		then: "JSON contains expected fields"
-		json.contains('"id":"tag-1"')
+		json.contains('"id":1')
 		json.contains('"name":"slopers"')
 		json.contains('"isPredefined":true')
 		json.contains('"predefinedTagKey":"slopers"')
@@ -77,7 +77,7 @@ class TagSpec extends Specification {
 		given: "JSON representation"
 		def json = '''
             {
-                "id": "tag-1",
+                "id": 1,
                 "name": "overhang",
                 "isPredefined": true,
                 "predefinedTagKey": "overhang",
@@ -90,7 +90,7 @@ class TagSpec extends Specification {
 		def tag = objectMapper.readValue(json, Tag)
 
 		then: "tag is created correctly"
-		tag.id == "tag-1"
+		tag.id == 1
 		tag.name == "overhang"
 		tag.isPredefined
 		tag.predefinedTagKey == PredefinedTagKey.OVERHANG
@@ -125,7 +125,7 @@ class TagSpec extends Specification {
 	def "should create custom tag"() {
 		when: "creating a custom tag"
 		def tag = Tag.builder()
-				.id("custom-1")
+				.id(2)
 				.name("My Custom Tag")
 				.isPredefined(false)
 				.category("custom")
@@ -133,7 +133,7 @@ class TagSpec extends Specification {
 				.build()
 
 		then: "custom tag is created"
-		tag.id == "custom-1"
+		tag.id == 2
 		tag.name == "My Custom Tag"
 		!tag.isPredefined
 		tag.predefinedTagKey == null
@@ -144,13 +144,13 @@ class TagSpec extends Specification {
 		given: "a mix of predefined and custom tags"
 		def tags = [
 			Tag.builder()
-			.id("1")
+			.id(1)
 			.name("crimpy")
 			.isPredefined(true)
 			.predefinedTagKey(PredefinedTagKey.CRIMPY)
 			.build(),
 			Tag.builder()
-			.id("2")
+			.id(2)
 			.name("My Project")
 			.isPredefined(false)
 			.build()

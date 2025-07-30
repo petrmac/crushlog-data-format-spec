@@ -18,10 +18,10 @@ import lombok.NoArgsConstructor;
 public class Sector {
 
   @JsonProperty(required = true)
-  private String id;
+  private Integer id;
 
   @JsonProperty(required = true)
-  private String locationId;
+  private Integer locationId;
 
   @JsonProperty(required = true)
   private String name;

@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 public class Tag {
 
   @JsonProperty(required = true)
-  private String id;
+  private Integer id;
 
   @JsonProperty(required = true)
   private String name;

@@ -25,7 +25,7 @@ import lombok.NoArgsConstructor;
 public class Session {
 
   @JsonProperty(required = true)
-  private String id;
+  private Integer id;
 
   @JsonProperty(required = true)
   @JsonDeserialize(using = FlexibleLocalDateDeserializer.class)
@@ -40,7 +40,7 @@ public class Session {
   @JsonProperty(required = true)
   private String location;
 
-  private String locationId;
+  private Integer locationId;
 
   private Boolean isIndoor;
 

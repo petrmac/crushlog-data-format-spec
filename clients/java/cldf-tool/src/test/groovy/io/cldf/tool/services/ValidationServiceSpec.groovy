@@ -289,7 +289,8 @@ class ValidationServiceSpec extends Specification {
 
         then: "validation fails with schema error"
         result.valid == false
-        result.errors.any { it.contains("Schema validation failed") }
+        result.errors.size() > 0
+        result.errors.any { it.contains("manifest.json") }
     }
 
     def "should validate complex archive with mixed issues"() {
@@ -422,10 +423,10 @@ class ValidationServiceSpec extends Specification {
     
     private Session createValidSession() {
         return Session.builder()
-            .id("1")
+            .id(1)
             .date(LocalDate.now())
             .location("Test Crag")
-            .locationId("1")
+            .locationId(1)
             .isIndoor(false)
             .build()
     }

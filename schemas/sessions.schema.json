@@ -19,7 +19,7 @@
       "required": ["id", "date", "location"],
       "properties": {
         "id": {
-          "type": "string",
+          "type": "integer",
           "description": "Unique identifier for the session"
         },
         "date": {
@@ -43,7 +43,7 @@
           "description": "Location name"
         },
         "locationId": {
-          "type": "string",
+          "type": "integer",
           "description": "Reference to location ID"
         },
         "isIndoor": {

@@ -116,8 +116,8 @@ class SchemaValidationSpec extends Specification {
 		def archive = createValidArchive()
 		archive.routes = [
 			Route.builder()
-			.id("route-1")
-			.locationId("1")
+			.id(1)
+			.locationId(1)
 			.name("Test Route")
 			// Missing required routeType field
 			.build()
@@ -170,8 +170,8 @@ class SchemaValidationSpec extends Specification {
 		def archive = createValidArchive()
 		archive.routes = [
 			Route.builder()
-			.id("route-1")
-			.locationId("1")
+			.id(1)
+			.locationId(1)
 			.name("Trad Route")
 			.routeType(RouteType.ROUTE)
 			.protectionRating(ProtectionRating.ADEQUATE)
@@ -207,17 +207,23 @@ class SchemaValidationSpec extends Specification {
 		objectMapper.setSerializationInclusion(com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL)
 		objectMapper.disable(com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 		def json = objectMapper.writeValueAsBytes(manifest)
-		def result = validator.validate("manifest.json", json)
+		def result = validator.validateWithResult("manifest.json", json)
 
 		then: "validation passes"
-		result == true
+		result.valid()
+		result.errors().isEmpty()
 
 		when: "validating invalid data"
 		def invalidJson = '{"format": "CLDF"}'.bytes // Missing required fields
-		validator.validateOrThrow("manifest.json", invalidJson)
+		def invalidResult = validator.validateWithResult("manifest.json", invalidJson)
 
 		then: "validation fails"
-		thrown(IOException)
+		!invalidResult.valid()
+		invalidResult.errors().size() >= 4 // Missing version, creationDate, appVersion, platform
+		invalidResult.errors().any { it.message().contains("version") }
+		invalidResult.errors().any { it.message().contains("creationDate") }
+		invalidResult.errors().any { it.message().contains("appVersion") }
+		invalidResult.errors().any { it.message().contains("platform") }
 	}
 
 	private CLDFArchive createValidArchive() {
@@ -245,7 +251,7 @@ class SchemaValidationSpec extends Specification {
 					Climb.builder()
 					.id(1)
 					.sessionId(1)
-					.routeId("1")
+					.routeId(1)
 					.date(LocalDate.now())
 					.time(LocalTime.of(14, 30, 0))
 					.routeName("Test Route")
@@ -266,10 +272,10 @@ class SchemaValidationSpec extends Specification {
 				])
 				.sessions([
 					Session.builder()
-					.id("1")
+					.id(1)
 					.date(LocalDate.now())
 					.location("Test Location")
-					.locationId("1")
+					.locationId(1)
 					.isIndoor(false)
 					.build()
 				])

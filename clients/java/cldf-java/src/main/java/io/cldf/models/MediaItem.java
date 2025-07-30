@@ -20,7 +20,7 @@ import lombok.NoArgsConstructor;
 public class MediaItem {
 
   @JsonProperty(required = true)
-  private String id;
+  private Integer id;
 
   @JsonProperty(required = true)
   private String climbId;

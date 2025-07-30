@@ -27,7 +27,7 @@ class FlexibleLocalDateDeserializerSpec extends Specification {
 		given: "a JSON string with the date format"
 		def json = """
         {
-            "id": "session-1",
+            "id": 1,
             "date": "$dateString",
             "location": "Test Location"
         }
@@ -58,7 +58,7 @@ class FlexibleLocalDateDeserializerSpec extends Specification {
 		given: "a JSON string with edge case date format"
 		def json = """
         {
-            "id": "session-1",
+            "id": 1,
             "date": "$dateString",
             "location": "Test Location"
         }
@@ -84,7 +84,7 @@ class FlexibleLocalDateDeserializerSpec extends Specification {
 		given: "JSON with null date"
 		def jsonWithNull = """
         {
-            "id": "session-1",
+            "id": 1,
             "date": null,
             "location": "Test Location"
         }
@@ -101,7 +101,7 @@ class FlexibleLocalDateDeserializerSpec extends Specification {
 		given: "JSON with empty date string"
 		def json = """
         {
-            "id": "session-1",
+            "id": 1,
             "date": "",
             "location": "Test Location"
         }
@@ -119,7 +119,7 @@ class FlexibleLocalDateDeserializerSpec extends Specification {
 		given: "a JSON string with invalid date format"
 		def json = """
         {
-            "id": "session-1",
+            "id": 1,
             "date": "$invalidDate",
             "location": "Test Location"
         }
@@ -148,7 +148,7 @@ class FlexibleLocalDateDeserializerSpec extends Specification {
 		given: "date string with leading/trailing whitespace"
 		def json = """
         {
-            "id": "session-1",
+            "id": 1,
             "date": "  2024-01-29  ",
             "location": "Test Location"
         }
@@ -165,12 +165,12 @@ class FlexibleLocalDateDeserializerSpec extends Specification {
 		given: "a complete session JSON with flexible date"
 		def json = """
         {
-            "id": "session-1",
+            "id": 1,
             "date": "2024-01-29",
             "startTime": "09:00:00",
             "endTime": "17:00:00",
             "location": "Boulder Canyon",
-            "locationId": "1",
+            "locationId": 1,
             "isIndoor": false,
             "climbType": "boulder",
             "sessionType": "bouldering",
@@ -193,10 +193,10 @@ class FlexibleLocalDateDeserializerSpec extends Specification {
 		def session = objectMapper.readValue(json, Session.class)
 
 		then: "all fields should be parsed correctly"
-		session.id == "session-1"
+		session.id == 1
 		session.date == LocalDate.of(2024, 1, 29)
 		session.location == "Boulder Canyon"
-		session.locationId == "1"
+		session.locationId == 1
 		session.isIndoor == false
 		session.climbType == ClimbType.BOULDER
 		session.sessionType == SessionType.BOULDERING
@@ -217,7 +217,7 @@ class FlexibleLocalDateDeserializerSpec extends Specification {
 		given: "a JSON string with different year format"
 		def json = """
         {
-            "id": "session-1",
+            "id": 1,
             "date": "$dateString",
             "location": "Test Location"
         }

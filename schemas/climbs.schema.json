@@ -57,7 +57,7 @@
           "description": "Reference to the session this climb belongs to"
         },
         "routeId": {
-          "type": "string",
+          "type": "integer",
           "description": "Reference to the route definition"
         },
         "date": {

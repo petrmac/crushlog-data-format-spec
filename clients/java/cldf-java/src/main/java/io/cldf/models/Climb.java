@@ -35,7 +35,7 @@ public class Climb {
 
   private Integer sessionId;
 
-  private String routeId;
+  private Integer routeId;
 
   @JsonProperty(required = true)
   @JsonDeserialize(using = FlexibleLocalDateDeserializer.class)

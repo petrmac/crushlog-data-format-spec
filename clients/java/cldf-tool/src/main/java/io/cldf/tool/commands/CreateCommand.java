@@ -194,10 +194,10 @@ public class CreateCommand extends BaseCommand {
 
     Session session =
         Session.builder()
-            .id("sess_1")
+            .id(1)
             .date(LocalDate.now())
             .location("Default Location")
-            .locationId("1")
+            .locationId(1)
             .isIndoor(true)
             .build();
 
@@ -237,10 +237,10 @@ public class CreateCommand extends BaseCommand {
 
     Session session =
         Session.builder()
-            .id("sess_" + System.currentTimeMillis())
+            .id(1)
             .date(LocalDate.now())
             .location(location.getName())
-            .locationId("1")
+            .locationId(1)
             .isIndoor(true)
             .build();
 
@@ -320,18 +320,18 @@ public class CreateCommand extends BaseCommand {
     List<Session> sessions =
         List.of(
             Session.builder()
-                .id("sess_gym")
+                .id(1)
                 .date(LocalDate.now().minusDays(7))
                 .location(locations.get(0).getName())
-                .locationId("1")
+                .locationId(1)
                 .isIndoor(true)
                 .sessionType(SessionType.INDOOR_CLIMBING)
                 .build(),
             Session.builder()
-                .id("sess_outdoor")
+                .id(2)
                 .date(LocalDate.now().minusDays(2))
                 .location(locations.get(1).getName())
-                .locationId("2")
+                .locationId(2)
                 .isIndoor(false)
                 .climbType(ClimbType.ROUTE)
                 .weather(

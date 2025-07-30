@@ -60,7 +60,7 @@ class ClimbSpec extends Specification {
 		def climb = Climb.builder()
 				.id(1)
 				.sessionId(1)
-				.routeId("123")
+				.routeId(123)
 				.date(date)
 				.time(time)
 				.routeName("The Nose")
@@ -98,7 +98,7 @@ class ClimbSpec extends Specification {
 		then: "all fields are set"
 		climb.id == 1
 		climb.sessionId == 1
-		climb.routeId == "123"
+		climb.routeId == 123
 		climb.date == date
 		climb.time == time
 		climb.routeName == "The Nose"

@@ -314,10 +314,10 @@ class CLDFReaderSpec extends Specification {
 
 	private SessionsFile createSessionsFile() {
 		def session = Session.builder()
-				.id("1")
+				.id(1)
 				.date(LocalDate.now())
 				.location("Test Location")
-				.locationId("1")
+				.locationId(1)
 				.isIndoor(false)
 				.build()
 		def file = new SessionsFile()
@@ -327,8 +327,8 @@ class CLDFReaderSpec extends Specification {
 
 	private RoutesFile createRoutesFile() {
 		def route = Route.builder()
-				.id("1")
-				.locationId("1")
+				.id(1)
+				.locationId(1)
 				.name("Test Route")
 				.routeType(RouteType.ROUTE)
 				.build()
@@ -339,7 +339,7 @@ class CLDFReaderSpec extends Specification {
 
 	private TagsFile createTagsFile() {
 		def tag = Tag.builder()
-				.id("1")
+				.id(1)
 				.name("crimpy")
 				.isPredefined(true)
 				.build()
@@ -350,8 +350,8 @@ class CLDFReaderSpec extends Specification {
 
 	private SectorsFile createSectorsFile() {
 		def sector = Sector.builder()
-				.id("1")
-				.locationId("1")
+				.id(1)
+				.locationId(1)
 				.name("Main Area")
 				.build()
 		def file = new SectorsFile()

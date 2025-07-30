@@ -164,11 +164,11 @@ class MergeCommandSpec extends Specification {
         ]
         
         def sessions1 = [
-            Session.builder().id("1").locationId("1").date(LocalDate.of(2023, 7, 1)).build(),
-            Session.builder().id("2").locationId("2").date(LocalDate.of(2023, 7, 2)).build()
+            Session.builder().id(1).locationId(1).date(LocalDate.of(2023, 7, 1)).build(),
+            Session.builder().id(2).locationId(2).date(LocalDate.of(2023, 7, 2)).build()
         ]
         def sessions2 = [
-            Session.builder().id("3").locationId("3").date(LocalDate.of(2023, 7, 3)).build()
+            Session.builder().id(3).locationId(3).date(LocalDate.of(2023, 7, 3)).build()
         ]
         
         def climbs1 = [
@@ -538,10 +538,10 @@ class MergeCommandSpec extends Specification {
         
         def sessions = (1..sessionCount).collect { i ->
             Session.builder()
-                .id("sess_$i")
+                .id(i)
                 .date(LocalDate.of(2024, 1, Math.max(1, i)))  // Ensure day is at least 1
                 .location("Location $i")
-                .locationId("$i")
+                .locationId(i)
                 .isIndoor(i % 2 == 0)
                 .sessionType(SessionType.INDOOR_CLIMBING)
                 .build()

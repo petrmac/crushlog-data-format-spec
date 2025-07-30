@@ -110,7 +110,7 @@ public class GraphService {
       }
 
       // Import sessions
-      Map<String, Node> sessionNodes = new HashMap<>();
+      Map<Integer, Node> sessionNodes = new HashMap<>();
       if (archive.getSessions() != null) {
         for (Session session : archive.getSessions()) {
           Node sessionNode = createSessionNode(tx, session);
@@ -119,13 +119,9 @@ public class GraphService {
 
           // Link to location
           if (session.getLocationId() != null) {
-            try {
-              Integer locId = Integer.parseInt(session.getLocationId());
-              if (locationNodes.containsKey(locId)) {
-                sessionNode.createRelationshipTo(locationNodes.get(locId), RelType.AT_LOCATION);
-              }
-            } catch (NumberFormatException e) {
-              // Handle non-numeric location IDs
+            if (locationNodes.containsKey(session.getLocationId())) {
+              sessionNode.createRelationshipTo(
+                  locationNodes.get(session.getLocationId()), RelType.AT_LOCATION);
             }
           }
         }
@@ -139,9 +135,10 @@ public class GraphService {
 
           // Link to session
           if (climb.getSessionId() != null) {
-            String sessionId = "session" + climb.getSessionId();
-            if (sessionNodes.containsKey(sessionId)) {
-              sessionNodes.get(sessionId).createRelationshipTo(climbNode, RelType.INCLUDES_CLIMB);
+            if (sessionNodes.containsKey(climb.getSessionId())) {
+              sessionNodes
+                  .get(climb.getSessionId())
+                  .createRelationshipTo(climbNode, RelType.INCLUDES_CLIMB);
             }
           }
 
@@ -346,7 +343,7 @@ public class GraphService {
 
   private Session nodeToSession(Node node) {
     return Session.builder()
-        .id((String) node.getProperty("sessionId"))
+        .id((Integer) node.getProperty("sessionId"))
         .date(java.time.LocalDate.parse((String) node.getProperty("date")))
         .location((String) node.getProperty("locationName", null))
         .build();

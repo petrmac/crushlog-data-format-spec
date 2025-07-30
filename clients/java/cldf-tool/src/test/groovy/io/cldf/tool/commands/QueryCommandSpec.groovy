@@ -80,18 +80,18 @@ class QueryCommandSpec extends Specification {
         
         def sessions = [
             Session.builder()
-                .id("sess_1")
+                .id(1)
                 .date(LocalDate.of(2024, 1, 15))
                 .location("Movement Gym")
-                .locationId("1")
+                .locationId(1)
                 .isIndoor(true)
                 .sessionType(SessionType.INDOOR_CLIMBING)
                 .build(),
             Session.builder()
-                .id("sess_2")
+                .id(2)
                 .date(LocalDate.of(2024, 1, 20))
                 .location("Clear Creek Canyon")
-                .locationId("2")
+                .locationId(2)
                 .isIndoor(false)
                 .climbType(ClimbType.ROUTE)
                 .build()

@@ -110,9 +110,9 @@ public class SimpleBenchmark {
       if (i % 10 == 0) {
         sessions.add(
             Session.builder()
-                .id("session-" + sessions.size())
+                .id(sessions.size() + 1)
                 .date(LocalDate.now().minusDays(random.nextInt(365)))
-                .locationId(String.valueOf(random.nextInt(5) + 1))
+                .locationId(random.nextInt(5) + 1)
                 .build());
       }
 

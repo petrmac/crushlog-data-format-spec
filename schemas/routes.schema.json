@@ -19,15 +19,15 @@
       "required": ["id", "locationId", "name", "routeType"],
       "properties": {
         "id": {
-          "type": "string",
+          "type": "integer",
           "description": "Unique identifier for the route"
         },
         "locationId": {
-          "type": "string",
+          "type": "integer",
           "description": "Reference to location ID"
         },
         "sectorId": {
-          "type": "string",
+          "type": "integer",
           "description": "Reference to sector ID"
         },
         "name": {

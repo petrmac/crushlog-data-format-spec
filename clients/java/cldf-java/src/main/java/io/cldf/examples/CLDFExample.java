@@ -93,10 +93,10 @@ public class CLDFExample {
     List<Session> sessions =
         Arrays.asList(
             Session.builder()
-                .id("session-1")
+                .id(1)
                 .date(LocalDate.now().minusDays(7))
                 .location("The Spot Bouldering Gym")
-                .locationId("1")
+                .locationId(1)
                 .isIndoor(true)
                 .climbType(ClimbType.BOULDER)
                 .sessionType(SessionType.INDOOR_BOULDERING)
@@ -104,10 +104,10 @@ public class CLDFExample {
                 .notes("Great session, worked on crimpy problems")
                 .build(),
             Session.builder()
-                .id("session-2")
+                .id(2)
                 .date(LocalDate.now().minusDays(1))
                 .location("Clear Creek Canyon")
-                .locationId("2")
+                .locationId(2)
                 .isIndoor(false)
                 .climbType(ClimbType.BOULDER)
                 .sessionType(SessionType.BOULDERING)
@@ -200,7 +200,7 @@ public class CLDFExample {
     List<Tag> tags =
         Arrays.asList(
             Tag.builder()
-                .id("tag-1")
+                .id(1)
                 .name("crimpy")
                 .isPredefined(true)
                 .predefinedTagKey(PredefinedTagKey.CRIMPY)
@@ -208,7 +208,7 @@ public class CLDFExample {
                 .category("holds")
                 .build(),
             Tag.builder()
-                .id("tag-2")
+                .id(2)
                 .name("overhang")
                 .isPredefined(true)
                 .predefinedTagKey(PredefinedTagKey.OVERHANG)
@@ -216,7 +216,7 @@ public class CLDFExample {
                 .category("angle")
                 .build(),
             Tag.builder()
-                .id("tag-3")
+                .id(3)
                 .name("project")
                 .isPredefined(false)
                 .color("#FFD93D")

@@ -249,7 +249,7 @@ class ExtractCommandSpec extends Specification {
             .platform(Platform.DESKTOP)
             .build()
         def locations = [Location.builder().id(1).name("Test Location").isIndoor(false).build()]
-        def sessions = [Session.builder().id("1").locationId("1").date(LocalDate.now()).build()]
+        def sessions = [Session.builder().id(1).locationId(1).date(LocalDate.now()).build()]
         def climbs = [Climb.builder()
             .id(1)
             .sessionId(1)
@@ -305,7 +305,7 @@ class ExtractCommandSpec extends Specification {
             .platform(Platform.DESKTOP)
             .build()
         def locations = [Location.builder().id(1).name("Test Location").isIndoor(false).build()]
-        def sessions = [Session.builder().id("1").locationId("1").date(LocalDate.now()).build()]
+        def sessions = [Session.builder().id(1).locationId(1).date(LocalDate.now()).build()]
         
         archive.getManifest() >> manifest
         archive.getLocations() >> locations

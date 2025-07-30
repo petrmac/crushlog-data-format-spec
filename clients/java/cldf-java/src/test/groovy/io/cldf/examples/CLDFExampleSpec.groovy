@@ -95,13 +95,13 @@ class CLDFExampleSpec extends Specification {
 
 		and: "sessions are correct"
 		archive.sessions.size() == 2
-		archive.sessions[0].id == "session-1"
+		archive.sessions[0].id == 1
 		archive.sessions[0].location == "The Spot Bouldering Gym"
 		archive.sessions[0].isIndoor == true
 		archive.sessions[0].sessionType == SessionType.INDOOR_BOULDERING
 		archive.sessions[0].partners == ["Alice", "Bob"]
 
-		archive.sessions[1].id == "session-2"
+		archive.sessions[1].id == 2
 		archive.sessions[1].location == "Clear Creek Canyon"
 		archive.sessions[1].isIndoor == false
 		archive.sessions[1].weather != null

@@ -185,7 +185,19 @@ public class CLDFWriter {
       for (Map.Entry<String, byte[]> entry : fileContents.entrySet()) {
         // Skip media files
         if (!entry.getKey().startsWith("media/")) {
-          schemaValidator.validateOrThrow(entry.getKey(), entry.getValue());
+          ValidationResult result =
+              schemaValidator.validateWithResult(entry.getKey(), entry.getValue());
+          if (!result.valid()) {
+            StringBuilder errorMessage = new StringBuilder();
+            errorMessage
+                .append("Schema validation failed for ")
+                .append(entry.getKey())
+                .append(":\n");
+            for (ValidationResult.ValidationError error : result.errors()) {
+              errorMessage.append("  - ").append(error.message()).append("\n");
+            }
+            throw new IOException(errorMessage.toString());
+          }
         }
       }
     }

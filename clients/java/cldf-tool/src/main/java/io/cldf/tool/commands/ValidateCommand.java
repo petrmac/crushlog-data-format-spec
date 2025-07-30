@@ -88,28 +88,78 @@ public class ValidateCommand extends BaseCommand {
 
     logInfo("Validating: " + inputFile.getName());
 
-    // Read the archive
-    CLDFArchive archive = CLDF.read(inputFile);
+    try {
+      // Read the archive
+      CLDFArchive archive = CLDF.read(inputFile);
 
-    // Perform validation
-    ValidationReport report = performValidation(archive);
+      // Perform validation
+      ValidationReport report = performValidation(archive);
 
-    // Build result based on report format
-    if (reportFormat == ReportFormat.json || outputFormat == io.cldf.tool.utils.OutputFormat.json) {
-      return CommandResult.builder()
-          .success(report.isValid())
-          .message(report.isValid() ? "Validation passed" : "Validation failed")
-          .data(report)
-          .exitCode(report.isValid() ? 0 : 1)
-          .build();
-    } else {
-      // For text/xml format, we'll handle output in outputText method
-      String formattedReport = formatReport(report);
-      return CommandResult.builder()
-          .success(report.isValid())
-          .message(formattedReport)
-          .exitCode(report.isValid() ? 0 : 1)
-          .build();
+      // Build result based on report format
+      if (reportFormat == ReportFormat.json
+          || outputFormat == io.cldf.tool.utils.OutputFormat.json) {
+        return CommandResult.builder()
+            .success(report.isValid())
+            .message(report.isValid() ? "Validation passed" : "Validation failed")
+            .data(report)
+            .exitCode(report.isValid() ? 0 : 1)
+            .build();
+      } else {
+        // For text/xml format, we'll handle output in outputText method
+        String formattedReport = formatReport(report);
+        return CommandResult.builder()
+            .success(report.isValid())
+            .message(formattedReport)
+            .exitCode(report.isValid() ? 0 : 1)
+            .build();
+      }
+    } catch (IOException e) {
+      // Handle various validation errors from CLDFReader
+      String errorMessage = e.getMessage();
+      String errorType = "Validation failed";
+
+      if (errorMessage.contains("Schema validation failed")) {
+        errorType = "Schema validation failed";
+      } else if (errorMessage.contains("Checksum mismatch")) {
+        errorType = "Checksum validation failed";
+      } else if (errorMessage.contains("Missing required file")) {
+        errorType = "Archive structure validation failed";
+      }
+
+      ValidationReport errorReport =
+          ValidationReport.builder()
+              .timestamp(OffsetDateTime.now())
+              .file(inputFile.getName())
+              .valid(false)
+              .errors(java.util.Arrays.asList(errorType + ": " + errorMessage))
+              .warnings(new java.util.ArrayList<>())
+              .statistics(
+                  Statistics.builder()
+                      .locations(0)
+                      .sessions(0)
+                      .climbs(0)
+                      .routes(0)
+                      .sectors(0)
+                      .tags(0)
+                      .mediaItems(0)
+                      .build())
+              .build();
+
+      if (reportFormat == ReportFormat.json
+          || outputFormat == io.cldf.tool.utils.OutputFormat.json) {
+        return CommandResult.builder()
+            .success(false)
+            .message(errorType)
+            .data(errorReport)
+            .exitCode(1)
+            .build();
+      } else {
+        return CommandResult.builder()
+            .success(false)
+            .message(formatReport(errorReport))
+            .exitCode(1)
+            .build();
+      }
     }
   }
 

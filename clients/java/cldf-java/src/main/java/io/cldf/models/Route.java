@@ -24,12 +24,12 @@ import lombok.NoArgsConstructor;
 public class Route {
 
   @JsonProperty(required = true)
-  private String id;
+  private Integer id;
 
   @JsonProperty(required = true)
-  private String locationId;
+  private Integer locationId;
 
-  private String sectorId;
+  private Integer sectorId;
 
   @JsonProperty(required = true)
   private String name;

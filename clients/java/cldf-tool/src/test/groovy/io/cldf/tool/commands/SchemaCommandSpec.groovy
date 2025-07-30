@@ -131,8 +131,8 @@ class SchemaCommandSpec extends Specification {
         climbSchema.'$id' == "https://cldf.io/schemas/climbs.schema.json"
         climbSchema.title == "CLDF Climbs"
         
-        // Verify routeId is now string type (not integer)
-        climbSchema.definitions.climb.properties.routeId.type == "string"
+        // Verify routeId is now integer type
+        climbSchema.definitions.climb.properties.routeId.type == "integer"
         
         // Verify finish types include 'attempt' for both boulder and route
         def boulderFinishTypes = climbSchema.definitions.climb.allOf.find { 

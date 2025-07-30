@@ -261,7 +261,7 @@ class CLDFWriterSpec extends Specification {
 				.build()
 
 		def mediaItem = MediaItem.builder()
-				.id("media-1")
+				.id(1)
 				.climbId("1")
 				.filename("photo1.jpg")
 				.type(MediaType.PHOTO)
@@ -359,10 +359,10 @@ class CLDFWriterSpec extends Specification {
 	private List<Session> createSessions() {
 		return [
 			Session.builder()
-			.id("1")
+			.id(1)
 			.date(LocalDate.now())
 			.location("Test Location")
-			.locationId("1")
+			.locationId(1)
 			.isIndoor(false)
 			.build()
 		]
@@ -371,8 +371,8 @@ class CLDFWriterSpec extends Specification {
 	private List<Route> createRoutes() {
 		return [
 			Route.builder()
-			.id("1")
-			.locationId("1")
+			.id(1)
+			.locationId(1)
 			.name("Test Route")
 			.routeType(RouteType.ROUTE)
 			.build()
@@ -382,7 +382,7 @@ class CLDFWriterSpec extends Specification {
 	private List<Tag> createTags() {
 		return [
 			Tag.builder()
-			.id("1")
+			.id(1)
 			.name("crimpy")
 			.isPredefined(true)
 			.build()
@@ -392,8 +392,8 @@ class CLDFWriterSpec extends Specification {
 	private List<Sector> createSectors() {
 		return [
 			Sector.builder()
-			.id("1")
-			.locationId("1")
+			.id(1)
+			.locationId(1)
 			.name("Main Area")
 			.build()
 		]
@@ -402,7 +402,7 @@ class CLDFWriterSpec extends Specification {
 	private List<MediaItem> createMediaMetadata() {
 		return [
 			MediaItem.builder()
-			.id("1")
+			.id(1)
 			.climbId("1")
 			.filename("test.jpg")
 			.type(MediaType.PHOTO)

@@ -153,7 +153,7 @@ class ConvertCommandSpec extends Specification {
             Location.builder().id(1).name("Test Crag").isIndoor(false).build()
         ]
         def sessions = [
-            Session.builder().id("1").locationId("1").date(LocalDate.now()).build()
+            Session.builder().id(1).locationId(1).date(LocalDate.now()).build()
         ]
         def climbs = [
             Climb.builder()
@@ -186,9 +186,9 @@ class ConvertCommandSpec extends Specification {
         def archive = Mock(CLDFArchive)
         def sessions = [
             Session.builder()
-                .id("1")
+                .id(1)
                 .location("Test Crag")
-                .locationId("1")
+                .locationId(1)
                 .date(LocalDate.of(2023, 7, 15))
                 .build()
         ]
@@ -241,9 +241,9 @@ class ConvertCommandSpec extends Specification {
         def archive = Mock(CLDFArchive)
         def sessions = [
             Session.builder()
-                .id("1")
+                .id(1)
                 .location("Test Crag")
-                .locationId("1")
+                .locationId(1)
                 .date(LocalDate.now())
                 .build()
         ]

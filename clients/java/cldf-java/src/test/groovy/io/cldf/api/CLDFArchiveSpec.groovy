@@ -215,10 +215,10 @@ class CLDFArchiveSpec extends Specification {
 				])
 				.sessions([
 					Session.builder()
-					.id("session-1")
+					.id(1)
 					.date(tripDate)
 					.location("Bishop - Buttermilks")
-					.locationId("1")
+					.locationId(1)
 					.isIndoor(false)
 					.sessionType(SessionType.BOULDERING)
 					.weather(Session.Weather.builder()
@@ -234,7 +234,7 @@ class CLDFArchiveSpec extends Specification {
 					.sessionId(1)
 					.date(tripDate)
 					.routeName("High Plains Drifter")
-					.routeId("route-1")
+					.routeId(1)
 					.type(ClimbType.BOULDER)
 					.finishType(FinishType.FLASH)
 					.grades(Climb.GradeInfo.builder()
@@ -249,7 +249,7 @@ class CLDFArchiveSpec extends Specification {
 					.sessionId(1)
 					.date(tripDate)
 					.routeName("Cave Route")
-					.routeId("route-2")
+					.routeId(2)
 					.type(ClimbType.BOULDER)
 					.finishType(FinishType.REDPOINT)
 					.grades(Climb.GradeInfo.builder()
@@ -263,8 +263,8 @@ class CLDFArchiveSpec extends Specification {
 				])
 				.routes([
 					Route.builder()
-					.id("route-1")
-					.locationId("1")
+					.id(1)
+					.locationId(1)
 					.name("High Plains Drifter")
 					.routeType(RouteType.BOULDER)
 					.grades(Route.Grades.builder()
@@ -273,8 +273,8 @@ class CLDFArchiveSpec extends Specification {
 					.qualityRating(5)
 					.build(),
 					Route.builder()
-					.id("route-2")
-					.locationId("1")
+					.id(2)
+					.locationId(1)
 					.name("Cave Route")
 					.routeType(RouteType.BOULDER)
 					.grades(Route.Grades.builder()
@@ -332,10 +332,10 @@ class CLDFArchiveSpec extends Specification {
 	private List<Session> createSessions() {
 		return [
 			Session.builder()
-			.id("1")
+			.id(1)
 			.date(LocalDate.now())
 			.location("Test Location")
-			.locationId("1")
+			.locationId(1)
 			.isIndoor(false)
 			.build()
 		]
@@ -344,8 +344,8 @@ class CLDFArchiveSpec extends Specification {
 	private List<Route> createRoutes() {
 		return [
 			Route.builder()
-			.id("1")
-			.locationId("1")
+			.id(1)
+			.locationId(1)
 			.name("Test Route")
 			.routeType(RouteType.ROUTE)
 			.build()
@@ -355,7 +355,7 @@ class CLDFArchiveSpec extends Specification {
 	private List<Tag> createTags() {
 		return [
 			Tag.builder()
-			.id("1")
+			.id(1)
 			.name("crimpy")
 			.isPredefined(true)
 			.build()
@@ -365,8 +365,8 @@ class CLDFArchiveSpec extends Specification {
 	private List<Sector> createSectors() {
 		return [
 			Sector.builder()
-			.id("1")
-			.locationId("1")
+			.id(1)
+			.locationId(1)
 			.name("Main Area")
 			.build()
 		]
@@ -375,7 +375,7 @@ class CLDFArchiveSpec extends Specification {
 	private List<MediaItem> createMediaMetadata() {
 		return [
 			MediaItem.builder()
-			.id("1")
+			.id(1)
 			.climbId("1")
 			.filename("test.jpg")
 			.type(MediaType.PHOTO)

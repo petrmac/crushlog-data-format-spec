@@ -162,24 +162,24 @@ class CLDFServiceSpec extends Specification {
         
         def sessions = [
             Session.builder()
-                .id("1")
+                .id(1)
                 .date(LocalDate.now().minusDays(10))
                 .location("Outdoor Crag")
-                .locationId("1")
+                .locationId(1)
                 .isIndoor(false)
                 .build(),
             Session.builder()
-                .id("2")
+                .id(2)
                 .date(LocalDate.now().minusDays(5))
                 .location("Indoor Gym")
-                .locationId("2")
+                .locationId(2)
                 .isIndoor(true)
                 .build(),
             Session.builder()
-                .id("3")
+                .id(3)
                 .date(LocalDate.now())
                 .location("Outdoor Crag")
-                .locationId("1")
+                .locationId(1)
                 .isIndoor(false)
                 .build()
         ]
@@ -271,10 +271,10 @@ class CLDFServiceSpec extends Specification {
     
     private Session createValidSession() {
         return Session.builder()
-            .id("1")
+            .id(1)
             .date(LocalDate.now())
             .location("Test Crag")
-            .locationId("1")
+            .locationId(1)
             .isIndoor(false)
             .build()
     }

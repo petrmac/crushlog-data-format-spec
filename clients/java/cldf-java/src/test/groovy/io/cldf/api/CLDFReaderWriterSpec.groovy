@@ -187,10 +187,10 @@ class CLDFReaderWriterSpec extends Specification {
 
 	private Session createTestSession() {
 		return Session.builder()
-				.id("1")
+				.id(1)
 				.date(LocalDate.now())
 				.location("Test Crag")
-				.locationId("1")
+				.locationId(1)
 				.isIndoor(false)
 				.climbType(ClimbType.BOULDER)
 				.sessionType(SessionType.BOULDERING)
@@ -200,8 +200,8 @@ class CLDFReaderWriterSpec extends Specification {
 
 	private Route createTestRoute() {
 		return Route.builder()
-				.id("1")
-				.locationId("1")
+				.id(1)
+				.locationId(1)
 				.name("Test Boulder")
 				.routeType(RouteType.BOULDER)
 				.grades(Route.Grades.builder()
@@ -214,7 +214,7 @@ class CLDFReaderWriterSpec extends Specification {
 
 	private Tag createTestTag() {
 		return Tag.builder()
-				.id("1")
+				.id(1)
 				.name("crimpy")
 				.isPredefined(true)
 				.predefinedTagKey(PredefinedTagKey.CRIMPY)
@@ -225,8 +225,8 @@ class CLDFReaderWriterSpec extends Specification {
 
 	private Sector createTestSector() {
 		return Sector.builder()
-				.id("1")
-				.locationId("1")
+				.id(1)
+				.locationId(1)
 				.name("Main Area")
 				.isDefault(true)
 				.description("The main bouldering area")

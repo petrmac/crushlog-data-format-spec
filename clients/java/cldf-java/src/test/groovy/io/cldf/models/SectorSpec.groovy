@@ -18,14 +18,14 @@ class SectorSpec extends Specification {
 	def "should build sector with required fields"() {
 		when: "creating a sector"
 		def sector = Sector.builder()
-				.id("sector-1")
-				.locationId("location-1")
+				.id(1)
+				.locationId(1)
 				.name("Main Boulder Field")
 				.build()
 
 		then: "required fields are set"
-		sector.id == "sector-1"
-		sector.locationId == "location-1"
+		sector.id == 1
+		sector.locationId == 1
 		sector.name == "Main Boulder Field"
 
 		and: "defaults are applied"
@@ -38,8 +38,8 @@ class SectorSpec extends Specification {
 
 		when: "creating a complete sector"
 		def sector = Sector.builder()
-				.id("sector-1")
-				.locationId("location-1")
+				.id(1)
+				.locationId(1)
 				.name("Warm Up Area")
 				.isDefault(true)
 				.description("Easy access area with V0-V5 problems")
@@ -52,8 +52,8 @@ class SectorSpec extends Specification {
 				.build()
 
 		then: "all fields are set"
-		sector.id == "sector-1"
-		sector.locationId == "location-1"
+		sector.id == 1
+		sector.locationId == 1
 		sector.name == "Warm Up Area"
 		sector.isDefault
 		sector.description == "Easy access area with V0-V5 problems"
@@ -68,8 +68,8 @@ class SectorSpec extends Specification {
 	def "should serialize sector to JSON"() {
 		given: "a sector"
 		def sector = Sector.builder()
-				.id("sector-1")
-				.locationId("location-1")
+				.id(1)
+				.locationId(1)
 				.name("North Face")
 				.isDefault(false)
 				.description("Shady area, good for summer")
@@ -83,8 +83,8 @@ class SectorSpec extends Specification {
 		def json = objectMapper.writeValueAsString(sector)
 
 		then: "JSON contains expected fields"
-		json.contains('"id":"sector-1"')
-		json.contains('"locationId":"location-1"')
+		json.contains('"id":1')
+		json.contains('"locationId":1')
 		json.contains('"name":"North Face"')
 		json.contains('"isDefault":false')
 		json.contains('"description":"Shady area, good for summer"')
@@ -96,8 +96,8 @@ class SectorSpec extends Specification {
 		given: "JSON representation"
 		def json = '''
             {
-                "id": "sector-1",
-                "locationId": "location-1",
+                "id": 1,
+                "locationId": 1,
                 "name": "Cave Area",
                 "isDefault": true,
                 "description": "Protected from rain",
@@ -112,8 +112,8 @@ class SectorSpec extends Specification {
 		def sector = objectMapper.readValue(json, Sector)
 
 		then: "sector is created correctly"
-		sector.id == "sector-1"
-		sector.locationId == "location-1"
+		sector.id == 1
+		sector.locationId == 1
 		sector.name == "Cave Area"
 		sector.isDefault
 		sector.description == "Protected from rain"
@@ -128,22 +128,22 @@ class SectorSpec extends Specification {
 		when: "creating multiple sectors for one location"
 		def sectors = [
 			Sector.builder()
-			.id("sector-1")
-			.locationId("location-1")
+			.id(1)
+			.locationId(1)
 			.name("Lower Tier")
 			.isDefault(true)
 			.description("Main area with easy access")
 			.build(),
 			Sector.builder()
-			.id("sector-2")
-			.locationId("location-1")
+			.id(2)
+			.locationId(1)
 			.name("Upper Tier")
 			.isDefault(false)
 			.description("Requires 15 min approach")
 			.build(),
 			Sector.builder()
-			.id("sector-3")
-			.locationId("location-1")
+			.id(3)
+			.locationId(1)
 			.name("Secret Garden")
 			.isDefault(false)
 			.description("Hidden area with classic problems")
@@ -154,7 +154,7 @@ class SectorSpec extends Specification {
 		sectors.count { it.isDefault } == 1
 
 		and: "all belong to same location"
-		sectors.every { it.locationId == "location-1" }
+		sectors.every { it.locationId == 1 }
 
 		and: "names are unique"
 		sectors.collect { it.name }.unique().size() == 3
@@ -164,14 +164,14 @@ class SectorSpec extends Specification {
 		given: "a list of sectors"
 		def sectors = [
 			Sector.builder()
-			.id("1")
-			.locationId("loc-1")
+			.id(1)
+			.locationId(1)
 			.name("Main Area")
 			.isDefault(true)
 			.build(),
 			Sector.builder()
-			.id("2")
-			.locationId("loc-1")
+			.id(2)
+			.locationId(1)
 			.name("Back Area")
 			.build()
 		]

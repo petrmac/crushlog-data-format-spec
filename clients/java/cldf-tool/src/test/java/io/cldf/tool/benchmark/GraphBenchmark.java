@@ -169,14 +169,14 @@ public class GraphBenchmark {
     Map<String, LocationStats> locationStats = new HashMap<>();
 
     // Build session to location map
-    Map<String, String> sessionToLocation = new HashMap<>();
+    Map<Integer, String> sessionToLocation = new HashMap<>();
     for (Session session : testArchive.getSessions()) {
       sessionToLocation.put(session.getId(), session.getLocation());
     }
 
     // Calculate stats
     for (Climb climb : testArchive.getClimbs()) {
-      String sessionId = String.valueOf(climb.getSessionId());
+      Integer sessionId = climb.getSessionId();
       String location = sessionToLocation.get(sessionId);
       if (location != null) {
         LocationStats stats = locationStats.computeIfAbsent(location, k -> new LocationStats());
@@ -243,10 +243,10 @@ public class GraphBenchmark {
                   }
 
                   return Session.builder()
-                      .id("session" + i)
+                      .id(i + 1)
                       .date(LocalDate.of(2024, 1, 1).plusDays(i % 365))
                       .location(locations.get(i % locations.size()).getName())
-                      .locationId(String.valueOf((i % locations.size()) + 1))
+                      .locationId((i % locations.size()) + 1)
                       .partners(partners)
                       .build();
                 })
@@ -304,7 +304,7 @@ public class GraphBenchmark {
   }
 
   private static class LocationStats {
-    Set<String> sessions = new HashSet<>();
+    Set<Integer> sessions = new HashSet<>();
     int climbCount = 0;
     int totalRating = 0;
     int ratedClimbs = 0;

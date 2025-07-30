@@ -1,13 +1,11 @@
 package io.cldf.tool.services;
 
-import java.io.File;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Singleton;
 
 import io.cldf.api.CLDFArchive;
-import io.cldf.api.CLDFWriter;
 import io.cldf.models.*;
 import lombok.Builder;
 import lombok.Data;
@@ -33,6 +31,9 @@ public class ValidationService {
 
     // Business rules
     validateBusinessRules(archive, warnings);
+
+    // Reference integrity validation
+    validateReferenceIntegrity(archive, errors);
 
     return ValidationResult.builder()
         .valid(errors.isEmpty())
@@ -60,19 +61,104 @@ public class ValidationService {
   }
 
   private void validateSchemas(CLDFArchive archive, List<String> errors) {
-    // Schema validation is already performed by CLDFWriter when validateSchemas is enabled
-    // We can use CLDFWriter to validate without actually writing
-    try {
-      CLDFWriter validator = new CLDFWriter(false, true);
-      // This will throw if validation fails
-      File tempFile = File.createTempFile("cldf_validate_", ".tmp");
-      try {
-        validator.write(archive, tempFile);
-      } finally {
-        tempFile.delete();
+    io.cldf.api.SchemaValidator schemaValidator = new io.cldf.api.SchemaValidator();
+
+    // Validate manifest
+    if (archive.getManifest() != null) {
+      io.cldf.api.ValidationResult result =
+          schemaValidator.validateObjectWithResult("manifest.json", archive.getManifest());
+      if (!result.valid()) {
+        for (io.cldf.api.ValidationResult.ValidationError error : result.errors()) {
+          errors.add(String.format("manifest.json%s: %s", error.path(), error.message()));
+        }
       }
-    } catch (Exception e) {
-      errors.add("Schema validation failed: " + e.getMessage());
+    }
+
+    // Validate locations
+    if (archive.getLocations() != null && !archive.getLocations().isEmpty()) {
+      io.cldf.api.ValidationResult result =
+          schemaValidator.validateObjectWithResult(
+              "locations.json",
+              io.cldf.models.LocationsFile.builder().locations(archive.getLocations()).build());
+      if (!result.valid()) {
+        for (io.cldf.api.ValidationResult.ValidationError error : result.errors()) {
+          errors.add(String.format("locations.json%s: %s", error.path(), error.message()));
+        }
+      }
+    }
+
+    // Validate sessions
+    if (archive.getSessions() != null && !archive.getSessions().isEmpty()) {
+      io.cldf.api.ValidationResult result =
+          schemaValidator.validateObjectWithResult(
+              "sessions.json",
+              io.cldf.models.SessionsFile.builder().sessions(archive.getSessions()).build());
+      if (!result.valid()) {
+        for (io.cldf.api.ValidationResult.ValidationError error : result.errors()) {
+          errors.add(String.format("sessions.json%s: %s", error.path(), error.message()));
+        }
+      }
+    }
+
+    // Validate climbs
+    if (archive.getClimbs() != null && !archive.getClimbs().isEmpty()) {
+      io.cldf.api.ValidationResult result =
+          schemaValidator.validateObjectWithResult(
+              "climbs.json",
+              io.cldf.models.ClimbsFile.builder().climbs(archive.getClimbs()).build());
+      if (!result.valid()) {
+        for (io.cldf.api.ValidationResult.ValidationError error : result.errors()) {
+          errors.add(String.format("climbs.json%s: %s", error.path(), error.message()));
+        }
+      }
+    }
+
+    // Validate optional files
+    if (archive.hasRoutes()) {
+      io.cldf.api.ValidationResult result =
+          schemaValidator.validateObjectWithResult(
+              "routes.json",
+              io.cldf.models.RoutesFile.builder().routes(archive.getRoutes()).build());
+      if (!result.valid()) {
+        for (io.cldf.api.ValidationResult.ValidationError error : result.errors()) {
+          errors.add(String.format("routes.json%s: %s", error.path(), error.message()));
+        }
+      }
+    }
+
+    if (archive.hasSectors()) {
+      io.cldf.api.ValidationResult result =
+          schemaValidator.validateObjectWithResult(
+              "sectors.json",
+              io.cldf.models.SectorsFile.builder().sectors(archive.getSectors()).build());
+      if (!result.valid()) {
+        for (io.cldf.api.ValidationResult.ValidationError error : result.errors()) {
+          errors.add(String.format("sectors.json%s: %s", error.path(), error.message()));
+        }
+      }
+    }
+
+    if (archive.hasTags()) {
+      io.cldf.api.ValidationResult result =
+          schemaValidator.validateObjectWithResult(
+              "tags.json", io.cldf.models.TagsFile.builder().tags(archive.getTags()).build());
+      if (!result.valid()) {
+        for (io.cldf.api.ValidationResult.ValidationError error : result.errors()) {
+          errors.add(String.format("tags.json%s: %s", error.path(), error.message()));
+        }
+      }
+    }
+
+    if (archive.hasMedia()) {
+      io.cldf.api.ValidationResult result =
+          schemaValidator.validateObjectWithResult(
+              "media-metadata.json",
+              io.cldf.models.MediaMetadataFile.builder().media(archive.getMediaItems()).build());
+      if (!result.valid()) {
+        for (io.cldf.api.ValidationResult.ValidationError error : result.errors()) {
+          errors.add(String.format("media-metadata.json%s: %s", error.path(), error.message()));
+        }
+      }
     }
   }
 
@@ -111,6 +197,106 @@ public class ValidationService {
                   String.format(
                       "Route '%s' appears %d times on %s", parts[1], e.getValue(), parts[0]));
             });
+  }
+
+  private void validateReferenceIntegrity(CLDFArchive archive, List<String> errors) {
+    // Create lookup maps for validation
+    Set<Integer> locationIds = new HashSet<>();
+    Set<Integer> sessionIds = new HashSet<>();
+    Set<Integer> routeIds = new HashSet<>();
+    Set<Integer> sectorIds = new HashSet<>();
+
+    // Collect all valid IDs
+    if (archive.getLocations() != null) {
+      locationIds =
+          archive.getLocations().stream()
+              .map(Location::getId)
+              .filter(Objects::nonNull)
+              .collect(Collectors.toSet());
+    }
+
+    if (archive.getSessions() != null) {
+      sessionIds =
+          archive.getSessions().stream()
+              .map(Session::getId)
+              .filter(Objects::nonNull)
+              .collect(Collectors.toSet());
+    }
+
+    if (archive.getRoutes() != null) {
+      routeIds =
+          archive.getRoutes().stream()
+              .map(Route::getId)
+              .filter(Objects::nonNull)
+              .collect(Collectors.toSet());
+    }
+
+    if (archive.getSectors() != null) {
+      sectorIds =
+          archive.getSectors().stream()
+              .map(Sector::getId)
+              .filter(Objects::nonNull)
+              .collect(Collectors.toSet());
+    }
+
+    // Validate session references
+    if (archive.getSessions() != null) {
+      for (Session session : archive.getSessions()) {
+        if (session.getLocationId() != null && !locationIds.contains(session.getLocationId())) {
+          errors.add(
+              String.format(
+                  "Session %d references non-existent location %d",
+                  session.getId(), session.getLocationId()));
+        }
+      }
+    }
+
+    // Validate climb references
+    if (archive.getClimbs() != null) {
+      for (Climb climb : archive.getClimbs()) {
+        if (climb.getSessionId() != null && !sessionIds.contains(climb.getSessionId())) {
+          errors.add(
+              String.format(
+                  "Climb %d references non-existent session %d",
+                  climb.getId(), climb.getSessionId()));
+        }
+        if (climb.getRouteId() != null && !routeIds.contains(climb.getRouteId())) {
+          errors.add(
+              String.format(
+                  "Climb %d references non-existent route %d", climb.getId(), climb.getRouteId()));
+        }
+      }
+    }
+
+    // Validate route references
+    if (archive.getRoutes() != null) {
+      for (Route route : archive.getRoutes()) {
+        if (route.getSectorId() != null && !sectorIds.contains(route.getSectorId())) {
+          errors.add(
+              String.format(
+                  "Route %d references non-existent sector %d",
+                  route.getId(), route.getSectorId()));
+        }
+        if (route.getLocationId() != null && !locationIds.contains(route.getLocationId())) {
+          errors.add(
+              String.format(
+                  "Route %d references non-existent location %d",
+                  route.getId(), route.getLocationId()));
+        }
+      }
+    }
+
+    // Validate sector references
+    if (archive.getSectors() != null) {
+      for (Sector sector : archive.getSectors()) {
+        if (sector.getLocationId() != null && !locationIds.contains(sector.getLocationId())) {
+          errors.add(
+              String.format(
+                  "Sector %d references non-existent location %d",
+                  sector.getId(), sector.getLocationId()));
+        }
+      }
+    }
   }
 
   @Data

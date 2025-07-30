@@ -21,15 +21,15 @@ class RouteSpec extends Specification {
 	def "should build route with required fields"() {
 		when: "creating a route"
 		def route = Route.builder()
-				.id("route-1")
-				.locationId("location-1")
+				.id(1)
+				.locationId(1)
 				.name("Test Route")
 				.routeType(RouteType.ROUTE)
 				.build()
 
 		then: "required fields are set"
-		route.id == "route-1"
-		route.locationId == "location-1"
+		route.id == 1
+		route.locationId == 1
 		route.name == "Test Route"
 		route.routeType == RouteType.ROUTE
 	}
@@ -40,9 +40,9 @@ class RouteSpec extends Specification {
 
 		when: "creating a complete route"
 		def route = Route.builder()
-				.id("route-1")
-				.locationId("location-1")
-				.sectorId("sector-1")
+				.id(1)
+				.locationId(1)
+				.sectorId(1)
 				.name("Biographie")
 				.routeType(RouteType.ROUTE)
 				.grades(Route.Grades.builder()
@@ -66,9 +66,9 @@ class RouteSpec extends Specification {
 				.build()
 
 		then: "all fields are set"
-		route.id == "route-1"
-		route.locationId == "location-1"
-		route.sectorId == "sector-1"
+		route.id == 1
+		route.locationId == 1
+		route.sectorId == 1
 		route.name == "Biographie"
 		route.routeType == RouteType.ROUTE
 		route.qualityRating == 5
@@ -94,8 +94,8 @@ class RouteSpec extends Specification {
 	def "should serialize route to JSON"() {
 		given: "a route"
 		def route = Route.builder()
-				.id("route-1")
-				.locationId("location-1")
+				.id(1)
+				.locationId(1)
 				.name("Test Route")
 				.routeType(RouteType.BOULDER)
 				.grades(Route.Grades.builder()
@@ -109,8 +109,8 @@ class RouteSpec extends Specification {
 		def json = objectMapper.writeValueAsString(route)
 
 		then: "JSON contains expected fields"
-		json.contains('"id":"route-1"')
-		json.contains('"locationId":"location-1"')
+		json.contains('"id":1')
+		json.contains('"locationId":1')
 		json.contains('"name":"Test Route"')
 		json.contains('"routeType":"boulder"')
 		json.contains('"grades"')
@@ -123,8 +123,8 @@ class RouteSpec extends Specification {
 		given: "JSON representation"
 		def json = '''
             {
-                "id": "route-1",
-                "locationId": "location-1",
+                "id": 1,
+                "locationId": 1,
                 "name": "The Mandala",
                 "routeType": "boulder",
                 "grades": {
@@ -144,8 +144,8 @@ class RouteSpec extends Specification {
 		def route = objectMapper.readValue(json, Route)
 
 		then: "route is created correctly"
-		route.id == "route-1"
-		route.locationId == "location-1"
+		route.id == 1
+		route.locationId == 1
 		route.name == "The Mandala"
 		route.routeType == RouteType.BOULDER
 		route.qualityRating == 5
@@ -193,14 +193,14 @@ class RouteSpec extends Specification {
 		given: "a list of routes"
 		def routes = [
 			Route.builder()
-			.id("route-1")
-			.locationId("loc-1")
+			.id(1)
+			.locationId(1)
 			.name("Route 1")
 			.routeType(RouteType.ROUTE)
 			.build(),
 			Route.builder()
-			.id("route-2")
-			.locationId("loc-1")
+			.id(2)
+			.locationId(1)
 			.name("Boulder 1")
 			.routeType(RouteType.BOULDER)
 			.build()

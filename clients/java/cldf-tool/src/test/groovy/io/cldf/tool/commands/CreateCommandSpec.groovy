@@ -317,10 +317,10 @@ class CreateCommandSpec extends Specification {
                 .createdAt(OffsetDateTime.now())
                 .build()])
             .sessions([Session.builder()
-                .id("sess_1")
+                .id(1)
                 .date(LocalDate.now())
                 .location("Test Gym")
-                .locationId("1")
+                .locationId(1)
                 .isIndoor(true)
                 .build()])
             .climbs([Climb.builder()
@@ -371,10 +371,10 @@ class CreateCommandSpec extends Specification {
                 "createdAt": "2024-01-01T00:00:00.000Z"
             }],
             "sessions": [{
-                "id": "sess_1",
+                "id": 1,
                 "date": "2024-01-01",
                 "location": "JSON Test Gym",
-                "locationId": "1",
+                "locationId": 1,
                 "isIndoor": true
             }],
             "climbs": [{
@@ -478,10 +478,10 @@ class CreateCommandSpec extends Specification {
                 "createdAt": "2024-01-01T00:00:00.000Z"
             }],
             "sessions": [{
-                "id": "sess_1",
+                "id": 1,
                 "date": "2024-01-01",
                 "location": "Priority JSON Gym",
-                "locationId": "1",
+                "locationId": 1,
                 "isIndoor": true
             }],
             "climbs": [{

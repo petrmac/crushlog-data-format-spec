@@ -88,10 +88,12 @@ class ValidateCommandSpec extends Specification {
         command.reportFormat = ValidateCommand.ReportFormat.text
 
         when: "executing the command"
-        command.execute()
+        def result = command.execute()
 
-        then: "IOException is thrown by CLDF.read"
-        thrown(IOException)
+        then: "command fails with validation error"
+        !result.success
+        result.exitCode == 1
+        result.message.contains("Validation failed")
     }
 
     def "should test validation report formatting logic"() {
@@ -462,10 +464,10 @@ class ValidateCommandSpec extends Specification {
         
         def sessions = (1..sessionCount).collect { i ->
             Session.builder()
-                .id("sess_$i")
+                .id(i)
                 .date(LocalDate.of(2024, 1, Math.min(i, 28)))
                 .location("Location ${(i % locationCount) + 1}")
-                .locationId("${(i % locationCount) + 1}")
+                .locationId((i % locationCount) + 1)
                 .isIndoor(i % 2 == 0)
                 .sessionType(SessionType.INDOOR_CLIMBING)
                 .build()
@@ -767,10 +769,12 @@ class ValidateCommandSpec extends Specification {
         command.reportFormat = ValidateCommand.ReportFormat.text
 
         when: "executing the command"
-        command.execute()
+        def result = command.execute()
 
-        then: "IOException is thrown (not caught by ValidateCommand)"
-        thrown(IOException)
+        then: "command fails with validation error"
+        !result.success
+        result.exitCode == 1
+        result.message.contains("Validation failed")
     }
     
     def "should execute validate command with strict mode"() {

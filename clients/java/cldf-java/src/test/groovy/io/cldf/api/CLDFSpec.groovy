@@ -174,10 +174,10 @@ class CLDFSpec extends Specification {
 
 	private Session createSession() {
 		return Session.builder()
-				.id("1")
+				.id(1)
 				.date(LocalDate.now())
 				.location("Test Location")
-				.locationId("1")
+				.locationId(1)
 				.isIndoor(false)
 				.build()
 	}
