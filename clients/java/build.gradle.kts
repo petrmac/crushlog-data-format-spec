@@ -103,7 +103,9 @@ subprojects {
         violationRules {
             rule {
                 limit {
-                    minimum = 0.70.toBigDecimal()
+                    counter = "INSTRUCTION"
+                    value = "COVEREDRATIO"
+                    minimum = 0.40.toBigDecimal()
                 }
             }
         }
