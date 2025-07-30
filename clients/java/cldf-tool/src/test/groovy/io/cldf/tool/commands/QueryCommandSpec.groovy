@@ -669,4 +669,256 @@ class QueryCommandSpec extends Specification {
         result.data.containsKey("stats")
         result.data.stats != null
     }
+    
+    def "should output error message for failed result"() {
+        given: "a failed result"
+        def mockOutput = Mock(OutputHandler)
+        command.output = mockOutput
+        def result = CommandResult.builder()
+            .success(false)
+            .message("Failed to process query")
+            .build()
+
+        when: "outputting text"
+        command.outputText(result)
+
+        then: "error message is written"
+        1 * mockOutput.writeError("Failed to process query")
+    }
+    
+    def "should output no results found message"() {
+        given: "an empty result set"
+        def mockOutput = Mock(OutputHandler)
+        command.output = mockOutput
+        def result = CommandResult.builder()
+            .success(true)
+            .message("Query completed")
+            .data([
+                count: 0,
+                results: []
+            ])
+            .build()
+
+        when: "outputting text"
+        command.outputText(result)
+
+        then: "no results message is written"
+        1 * mockOutput.write("No results found.")
+    }
+    
+    def "should display sessions with proper formatting"() {
+        given: "a result with sessions"
+        def mockOutput = Mock(OutputHandler)
+        command.output = mockOutput
+        command.selectType = QueryCommand.DataType.sessions
+        def result = CommandResult.builder()
+            .success(true)
+            .message("Query completed")
+            .data([
+                count: 2,
+                results: testArchive.sessions
+            ])
+            .build()
+
+        when: "outputting text"
+        command.outputText(result)
+
+        then: "sessions are displayed correctly"
+        1 * mockOutput.write("Found 2 sessions:")
+        1 * mockOutput.write("  - 2024-01-15 at Movement Gym (INDOOR_CLIMBING)")
+        1 * mockOutput.write("  - 2024-01-20 at Clear Creek Canyon")
+    }
+    
+    def "should display locations with proper formatting"() {
+        given: "a result with locations"
+        def mockOutput = Mock(OutputHandler)
+        command.output = mockOutput
+        command.selectType = QueryCommand.DataType.locations
+        def result = CommandResult.builder()
+            .success(true)
+            .message("Query completed")
+            .data([
+                count: 2,
+                results: testArchive.locations
+            ])
+            .build()
+
+        when: "outputting text"
+        command.outputText(result)
+
+        then: "locations are displayed correctly"
+        1 * mockOutput.write("Found 2 locations:")
+        1 * mockOutput.write("  - Movement Gym - USA, Colorado (Indoor)")
+        1 * mockOutput.write("  - Clear Creek Canyon - USA, Colorado (Outdoor)")
+    }
+    
+    def "should display generic items for unsupported types"() {
+        given: "a result with generic type"
+        def mockOutput = Mock(OutputHandler)
+        command.output = mockOutput
+        command.selectType = QueryCommand.DataType.tags
+        def tags = [Tag.builder().id(1).name("Hard").build()]
+        def result = CommandResult.builder()
+            .success(true)
+            .message("Query completed")
+            .data([
+                count: 1,
+                results: tags
+            ])
+            .build()
+
+        when: "outputting text"
+        command.outputText(result)
+
+        then: "generic format is used"
+        1 * mockOutput.write("Found 1 results:")
+        1 * mockOutput.write({ it.contains("Tag(id=1, name=Hard") })
+    }
+    
+    def "should display climbs with null values gracefully"() {
+        given: "climbs with null values"
+        def mockOutput = Mock(OutputHandler)
+        command.output = mockOutput
+        command.selectType = QueryCommand.DataType.climbs
+        def climbWithNulls = Climb.builder()
+            .id(99)
+            .routeName(null)
+            .grades(null)
+            .type(null)
+            .date(null)
+            .build()
+        def result = CommandResult.builder()
+            .success(true)
+            .message("Query completed")
+            .data([
+                count: 1,
+                results: [climbWithNulls]
+            ])
+            .build()
+
+        when: "outputting text"
+        command.outputText(result)
+
+        then: "null values are handled gracefully"
+        1 * mockOutput.write("Found 1 climbs:")
+        1 * mockOutput.write("  - Unnamed")
+    }
+    
+    def "should handle locations without state information"() {
+        given: "a location without state"
+        def mockOutput = Mock(OutputHandler)
+        command.output = mockOutput
+        command.selectType = QueryCommand.DataType.locations
+        def locationNoState = Location.builder()
+            .id(3)
+            .name("International Crag")
+            .country("France")
+            .state(null)
+            .isIndoor(false)
+            .build()
+        def result = CommandResult.builder()
+            .success(true)
+            .message("Query completed")
+            .data([
+                count: 1,
+                results: [locationNoState]
+            ])
+            .build()
+
+        when: "outputting text"
+        command.outputText(result)
+
+        then: "location is displayed without state"
+        1 * mockOutput.write("Found 1 locations:")
+        1 * mockOutput.write("  - International Crag - France (Outdoor)")
+    }
+    
+    def "should handle locations without country information"() {
+        given: "a location without country"
+        def mockOutput = Mock(OutputHandler)
+        command.output = mockOutput
+        command.selectType = QueryCommand.DataType.locations
+        def locationNoCountry = Location.builder()
+            .id(4)
+            .name("Local Crag")
+            .country(null)
+            .isIndoor(false)
+            .build()
+        def result = CommandResult.builder()
+            .success(true)
+            .message("Query completed")
+            .data([
+                count: 1,
+                results: [locationNoCountry]
+            ])
+            .build()
+
+        when: "outputting text"
+        command.outputText(result)
+
+        then: "location is displayed without country"
+        1 * mockOutput.write("Found 1 locations:")
+        1 * mockOutput.write("  - Local Crag (Outdoor)")
+    }
+    
+    def "should handle sessions without session type"() {
+        given: "a session without session type"
+        def mockOutput = Mock(OutputHandler)
+        command.output = mockOutput
+        command.selectType = QueryCommand.DataType.sessions
+        def sessionNoType = Session.builder()
+            .id(3)
+            .date(LocalDate.of(2024, 2, 1))
+            .location("Unknown Gym")
+            .sessionType(null)
+            .build()
+        def result = CommandResult.builder()
+            .success(true)
+            .message("Query completed")
+            .data([
+                count: 1,
+                results: [sessionNoType]
+            ])
+            .build()
+
+        when: "outputting text"
+        command.outputText(result)
+
+        then: "session is displayed without type"
+        1 * mockOutput.write("Found 1 sessions:")
+        1 * mockOutput.write("  - 2024-02-01 at Unknown Gym")
+    }
+    
+    def "should test no-arg constructor"() {
+        when: "creating command with no-arg constructor"
+        def cmd = new QueryCommand()
+        
+        then: "services are null"
+        cmd.cldfService == null
+        cmd.queryService == null
+    }
+    
+    def "should handle query all with null collections in archive"() {
+        given: "an archive with all null collections"
+        command.selectType = QueryCommand.DataType.all
+        def archiveWithNulls = CLDFArchive.builder()
+            .manifest(testArchive.manifest)
+            .locations(null)
+            .sessions(null)
+            .climbs(null)
+            .checksums(testArchive.checksums)
+            .build()
+        cldfService.read(inputFile) >> archiveWithNulls
+
+        when: "executing the command"
+        def result = command.execute()
+
+        then: "summary shows zero counts"
+        result.success
+        def results = result.data["results"] as List
+        def summary = results[0] as Map
+        summary["locationsCount"] == 0
+        summary["sessionsCount"] == 0
+        summary["climbsCount"] == 0
+    }
 }
