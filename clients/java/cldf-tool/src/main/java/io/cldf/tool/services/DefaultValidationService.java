@@ -50,13 +50,7 @@ public class DefaultValidationService implements ValidationService {
       errors.add("At least one location is required");
     }
 
-    if (archive.getSessions() == null || archive.getSessions().isEmpty()) {
-      errors.add("At least one session is required");
-    }
-
-    if (archive.getClimbs() == null || archive.getClimbs().isEmpty()) {
-      errors.add("At least one climb is required");
-    }
+    // Sessions and climbs are optional - an archive can contain just locations and routes
   }
 
   private void validateSchemas(CLDFArchive archive, List<String> errors) {

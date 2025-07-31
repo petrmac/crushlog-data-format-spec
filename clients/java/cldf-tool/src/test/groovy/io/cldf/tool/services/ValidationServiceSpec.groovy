@@ -11,6 +11,7 @@ import java.time.OffsetDateTime
 import io.cldf.models.enums.ClimbType
 import io.cldf.models.enums.FinishType
 import io.cldf.models.enums.Platform
+import io.cldf.models.enums.RouteType
 
 class ValidationServiceSpec extends Specification {
 
@@ -85,70 +86,70 @@ class ValidationServiceSpec extends Specification {
         result.errors.contains("At least one location is required")
     }
 
-    def "should fail validation when sessions are missing"() {
+    def "should pass validation when sessions are missing"() {
         given: "an archive without sessions"
         def archive = CLDFArchive.builder()
             .manifest(createValidManifest())
             .locations([createValidLocation()])
-            .climbs([createValidClimb()])
+            .routes([createValidRoute()])
             .build()
 
         when: "validating the archive"
         def result = validationService.validate(archive)
 
-        then: "validation fails"
-        result.valid == false
-        result.errors.contains("At least one session is required")
+        then: "validation passes"
+        result.valid == true
+        !result.errors.contains("At least one session is required")
     }
 
-    def "should fail validation when sessions are empty"() {
+    def "should pass validation when sessions are empty"() {
         given: "an archive with empty sessions"
         def archive = CLDFArchive.builder()
             .manifest(createValidManifest())
             .locations([createValidLocation()])
             .sessions([])
-            .climbs([createValidClimb()])
+            .routes([createValidRoute()])
             .build()
 
         when: "validating the archive"
         def result = validationService.validate(archive)
 
-        then: "validation fails"
-        result.valid == false
-        result.errors.contains("At least one session is required")
+        then: "validation passes"
+        result.valid == true
+        !result.errors.contains("At least one session is required")
     }
 
-    def "should fail validation when climbs are missing"() {
+    def "should pass validation when climbs are missing"() {
         given: "an archive without climbs"
         def archive = CLDFArchive.builder()
             .manifest(createValidManifest())
             .locations([createValidLocation()])
-            .sessions([createValidSession()])
+            .routes([createValidRoute()])
             .build()
 
         when: "validating the archive"
         def result = validationService.validate(archive)
 
-        then: "validation fails"
-        result.valid == false
-        result.errors.contains("At least one climb is required")
+        then: "validation passes"
+        result.valid == true
+        !result.errors.contains("At least one climb is required")
     }
 
-    def "should fail validation when climbs are empty"() {
+    def "should pass validation when climbs are empty"() {
         given: "an archive with empty climbs"
         def archive = CLDFArchive.builder()
             .manifest(createValidManifest())
             .locations([createValidLocation()])
-            .sessions([createValidSession()])
             .climbs([])
+            .routes([createValidRoute()])
             .build()
 
         when: "validating the archive"
         def result = validationService.validate(archive)
 
-        then: "validation fails"
-        result.valid == false
-        result.errors.contains("At least one climb is required")
+        then: "validation passes"
+        result.valid == true
+        !result.errors.contains("At least one climb is required")
     }
 
     def "should warn about climbs with future dates"() {
@@ -440,6 +441,16 @@ class ValidationServiceSpec extends Specification {
             .routeName("Test Route")
             .type(ClimbType.BOULDER)
             .finishType(FinishType.TOP)
+            .build()
+    }
+
+    private Route createValidRoute() {
+        return Route.builder()
+            .id(1)
+            .locationId(1)
+            .name("Test Route")
+            .routeType(RouteType.ROUTE)
+            .grades(new Route.Grades(french: "5c"))
             .build()
     }
 }
