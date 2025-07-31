@@ -14,7 +14,7 @@ export class McpServerService {
 
   constructor(private readonly toolHandlers: ToolHandlersService) {
     this.logger.log('Initializing MCP server...');
-    
+
     this.server = new Server(
       {
         name: 'cldf-tools',
@@ -24,7 +24,7 @@ export class McpServerService {
         capabilities: {
           tools: {},
         },
-      }
+      },
     );
 
     this.setupHandlers();

@@ -16,10 +16,12 @@ export class CldfService {
     this.logger.log(`CLDF CLI path: ${this.CLDF_CLI}`);
   }
 
-  async executeCommand(command: string): Promise<{ stdout: string; stderr: string }> {
+  async executeCommand(
+    command: string,
+  ): Promise<{ stdout: string; stderr: string }> {
     this.logger.debug(`Executing command: ${command}`);
     const startTime = Date.now();
-    
+
     try {
       const result = await execAsync(command);
       const duration = Date.now() - startTime;
@@ -32,7 +34,10 @@ export class CldfService {
     }
   }
 
-  async createTempFile(content: string, prefix: string = 'cldf'): Promise<string> {
+  async createTempFile(
+    content: string,
+    prefix: string = 'cldf',
+  ): Promise<string> {
     const tempFile = join(tmpdir(), `${prefix}-${Date.now()}.json`);
     this.logger.debug(`Creating temp file: ${tempFile}`);
     await writeFile(tempFile, content);
@@ -55,7 +60,7 @@ export class CldfService {
 
   buildCommand(baseCommand: string, args: Record<string, any>): string {
     let command = `${this.CLDF_CLI} ${baseCommand}`;
-    
+
     for (const [key, value] of Object.entries(args)) {
       if (value !== undefined && value !== null) {
         if (typeof value === 'boolean') {
@@ -67,7 +72,7 @@ export class CldfService {
         }
       }
     }
-    
+
     return command;
   }
 }

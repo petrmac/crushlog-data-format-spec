@@ -9,13 +9,13 @@ export interface LoggerConfig {
 export const getLoggerConfig = (): LoggerConfig => {
   const isDevelopment = process.env.NODE_ENV === 'development';
   const isDebug = process.env.DEBUG === 'true';
-  
+
   let logLevels: LogLevel[] = ['error', 'warn'];
-  
+
   if (isDevelopment || isDebug) {
     logLevels = ['log', 'debug', 'error', 'warn', 'verbose'];
   }
-  
+
   return {
     logLevels,
     timestamp: true,

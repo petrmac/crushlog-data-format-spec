@@ -17,7 +17,9 @@ describe('McpServerService', () => {
       connect: jest.fn(),
     } as any;
 
-    (Server as jest.MockedClass<typeof Server>).mockImplementation(() => mockServer);
+    (Server as jest.MockedClass<typeof Server>).mockImplementation(
+      () => mockServer,
+    );
 
     const mockToolHandlers = {
       handleToolCall: jest.fn(),
@@ -34,7 +36,9 @@ describe('McpServerService', () => {
     }).compile();
 
     service = module.get<McpServerService>(McpServerService);
-    toolHandlers = module.get(ToolHandlersService) as jest.Mocked<ToolHandlersService>;
+    toolHandlers = module.get(
+      ToolHandlersService,
+    ) as jest.Mocked<ToolHandlersService>;
   });
 
   describe('initialization', () => {
@@ -48,7 +52,7 @@ describe('McpServerService', () => {
           capabilities: {
             tools: {},
           },
-        }
+        },
       );
     });
 
@@ -61,7 +65,7 @@ describe('McpServerService', () => {
     it('should connect to transport', async () => {
       const mockTransport = {};
       await service.connect(mockTransport);
-      
+
       expect(mockServer.connect).toHaveBeenCalledWith(mockTransport);
     });
   });
@@ -71,7 +75,7 @@ describe('McpServerService', () => {
       const listToolsHandler = mockServer.setRequestHandler.mock.calls[0][1];
       const mockExtra = { signal: new AbortController().signal };
       const result = await listToolsHandler({}, mockExtra);
-      
+
       expect(result).toEqual({ tools: TOOL_DEFINITIONS });
     });
 
@@ -79,29 +83,41 @@ describe('McpServerService', () => {
       const callToolHandler = mockServer.setRequestHandler.mock.calls[1][1];
       const mockResult = { content: [{ type: 'text', text: 'Success' }] };
       const mockExtra = { signal: new AbortController().signal };
-      
+
       toolHandlers.handleToolCall.mockResolvedValue(mockResult);
-      
-      const result = await callToolHandler({
-        method: 'tools/call',
-        params: { name: 'cldf_validate', arguments: { filePath: '/tmp/test.cldf' } }
-      } as any, mockExtra);
-      
-      expect(toolHandlers.handleToolCall).toHaveBeenCalledWith('cldf_validate', { filePath: '/tmp/test.cldf' });
+
+      const result = await callToolHandler(
+        {
+          method: 'tools/call',
+          params: {
+            name: 'cldf_validate',
+            arguments: { filePath: '/tmp/test.cldf' },
+          },
+        } as any,
+        mockExtra,
+      );
+
+      expect(toolHandlers.handleToolCall).toHaveBeenCalledWith(
+        'cldf_validate',
+        { filePath: '/tmp/test.cldf' },
+      );
       expect(result).toEqual(mockResult);
     });
 
     it('should handle CallToolRequest errors', async () => {
       const callToolHandler = mockServer.setRequestHandler.mock.calls[1][1];
       const mockExtra = { signal: new AbortController().signal };
-      
+
       toolHandlers.handleToolCall.mockRejectedValue(new Error('Tool error'));
-      
-      const result = await callToolHandler({
-        method: 'tools/call',
-        params: { name: 'cldf_validate', arguments: {} }
-      } as any, mockExtra);
-      
+
+      const result = await callToolHandler(
+        {
+          method: 'tools/call',
+          params: { name: 'cldf_validate', arguments: {} },
+        } as any,
+        mockExtra,
+      );
+
       expect(result).toEqual({
         content: [
           {

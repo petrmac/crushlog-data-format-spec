@@ -38,7 +38,9 @@ describe('CldfService', () => {
       });
       mockExec.mockImplementation(mockCallback);
 
-      await expect(service.executeCommand('test command')).rejects.toThrow('Command failed');
+      await expect(service.executeCommand('test command')).rejects.toThrow(
+        'Command failed',
+      );
     });
   });
 
@@ -46,8 +48,11 @@ describe('CldfService', () => {
     it('should create temp file with content', async () => {
       mockWriteFile.mockResolvedValue(undefined);
 
-      const filePath = await service.createTempFile('test content', 'test-prefix');
-      
+      const filePath = await service.createTempFile(
+        'test content',
+        'test-prefix',
+      );
+
       expect(filePath).toMatch(/test-prefix-\d+\.json$/);
       expect(mockWriteFile).toHaveBeenCalledWith(filePath, 'test content');
     });
@@ -58,14 +63,16 @@ describe('CldfService', () => {
       mockUnlink.mockResolvedValue(undefined);
 
       await service.deleteTempFile('/tmp/test.json');
-      
+
       expect(mockUnlink).toHaveBeenCalledWith('/tmp/test.json');
     });
 
     it('should ignore errors when deleting', async () => {
       mockUnlink.mockRejectedValue(new Error('File not found'));
 
-      await expect(service.deleteTempFile('/tmp/test.json')).resolves.toBeUndefined();
+      await expect(
+        service.deleteTempFile('/tmp/test.json'),
+      ).resolves.toBeUndefined();
     });
   });
 
@@ -80,7 +87,9 @@ describe('CldfService', () => {
         undefinedValue: undefined,
       });
 
-      expect(command).toBe('cldf test --string "value" --number "123" --boolean');
+      expect(command).toBe(
+        'cldf test --string "value" --number "123" --boolean',
+      );
       expect(command).not.toContain('falseBoolean');
       expect(command).not.toContain('nullValue');
       expect(command).not.toContain('undefinedValue');
@@ -95,10 +104,10 @@ describe('CldfService', () => {
     it('should return custom CLI path from env', () => {
       const originalEnv = process.env.CLDF_CLI;
       process.env.CLDF_CLI = '/custom/path/cldf';
-      
+
       const newService = new CldfService();
       expect(newService.getCliPath()).toBe('/custom/path/cldf');
-      
+
       process.env.CLDF_CLI = originalEnv;
     });
   });

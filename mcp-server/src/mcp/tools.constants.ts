@@ -1,36 +1,54 @@
 export const TOOL_DEFINITIONS = [
   {
     name: 'cldf_schema_info',
-    description: 'Get CLDF data structure schema and validation rules to help understand the expected format',
+    description:
+      'Get CLDF data structure schema and validation rules to help understand the expected format',
     inputSchema: {
       type: 'object',
       properties: {
         component: {
           type: 'string',
-          enum: ['all', 'manifest', 'location', 'route', 'sector', 'climb', 'session', 'tag', 'dateFormats', 'enums', 'commonMistakes', 'exampleData', 'fieldReference'],
-          description: 'Specific component schema to retrieve, or "all" for complete schema information',
-          default: 'all'
-        }
-      }
+          enum: [
+            'all',
+            'manifest',
+            'location',
+            'route',
+            'sector',
+            'climb',
+            'session',
+            'tag',
+            'dateFormats',
+            'enums',
+            'commonMistakes',
+            'exampleData',
+            'fieldReference',
+          ],
+          description:
+            'Specific component schema to retrieve, or "all" for complete schema information',
+          default: 'all',
+        },
+      },
     },
   },
   {
     name: 'cldf_validate_data',
-    description: 'Validate CLDF data structure before creating an archive. Helps identify issues early.',
+    description:
+      'Validate CLDF data structure before creating an archive. Helps identify issues early.',
     inputSchema: {
       type: 'object',
       properties: {
         data: {
           type: 'object',
           description: 'JSON data to validate against CLDF schema',
-        }
+        },
       },
-      required: ['data']
+      required: ['data'],
     },
   },
   {
     name: 'cldf_create',
-    description: 'Create a new CLDF archive with climbing data. Archives can contain just locations and routes, or full session/climb data. Use cldf_schema_info first to understand data structure requirements.',
+    description:
+      'Create a new CLDF archive with climbing data. Archives can contain just locations and routes, or full session/climb data. Use cldf_schema_info first to understand data structure requirements.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -45,7 +63,8 @@ export const TOOL_DEFINITIONS = [
         },
         data: {
           type: 'object',
-          description: 'Optional JSON data to include in the archive. Must match CLDF schema - use cldf_schema_info to understand structure. Minimum required: manifest, locations. Sessions and climbs are optional.',
+          description:
+            'Optional JSON data to include in the archive. Must match CLDF schema - use cldf_schema_info to understand structure. Minimum required: manifest, locations. Sessions and climbs are optional.',
         },
       },
       required: ['template', 'outputPath'],
@@ -152,7 +171,16 @@ export const TOOL_DEFINITIONS = [
         },
         dataType: {
           type: 'string',
-          enum: ['manifest', 'locations', 'routes', 'sectors', 'climbs', 'sessions', 'tags', 'media'],
+          enum: [
+            'manifest',
+            'locations',
+            'routes',
+            'sectors',
+            'climbs',
+            'sessions',
+            'tags',
+            'media',
+          ],
           description: 'Type of data to extract',
         },
         outputDir: {
