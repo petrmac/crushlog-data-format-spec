@@ -82,11 +82,13 @@ jobs:
 
     - name: Test build artifact exists
       run: |
-        if [ -f "dist/main.js" ]; then
-          echo "✓ Build artifact found: dist/main.js"
+        if [ -f "dist/src/main.js" ]; then
+          echo "✓ Build artifact found: dist/src/main.js"
           echo "Build successful!"
         else
-          echo "✗ Build artifact not found: dist/main.js"
+          echo "✗ Build artifact not found: dist/src/main.js"
+          echo "Checking dist directory contents:"
+          ls -la dist/ || echo "dist directory not found"
           exit 1
         fi
       shell: bash
