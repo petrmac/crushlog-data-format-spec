@@ -115,14 +115,14 @@ export const COMMON_MISTAKES = {
   
   invalidGradeFormat: {
     issue: "Incorrect grade patterns",
-    wrong: { 
-      grades: { french: "6a++" },  // Double plus
-      grades: { vScale: "v4" }     // Lowercase v
-    },
-    correct: { 
-      grades: { french: "6a+" },
-      grades: { vScale: "V4" }
-    }
+    wrong: [
+      { grades: { french: "6a++" } },  // Double plus
+      { grades: { vScale: "v4" } }     // Lowercase v
+    ],
+    correct: [
+      { grades: { french: "6a+" } },
+      { grades: { vScale: "V4" } }
+    ]
   },
   
   missingRequiredFields: {
