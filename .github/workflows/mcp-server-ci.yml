@@ -80,5 +80,13 @@ jobs:
     - name: Build
       run: npm run build
 
-    - name: Test build artifact
-      run: node dist/main.js --version || echo "Version check completed"
+    - name: Test build artifact exists
+      run: |
+        if [ -f "dist/main.js" ]; then
+          echo "✓ Build artifact found: dist/main.js"
+          echo "Build successful!"
+        else
+          echo "✗ Build artifact not found: dist/main.js"
+          exit 1
+        fi
+      shell: bash
