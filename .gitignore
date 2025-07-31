@@ -1,2 +1,7 @@
 /.idea/
 /clients/java/cldf-java/build/
+.DS_Store
+*.DS_Store
+/clients/java/mcp-server/node_modules/
+/clients/java/mcp-server/dist/
+/clients/java/sample-data.json

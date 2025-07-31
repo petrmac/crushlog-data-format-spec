@@ -326,8 +326,17 @@ jobs:
         cp cldf-java/build/libs/*.jar release/
         cp cldf-tool/build/libs/*.jar release/
         
-        # Copy native binaries
-        cp -r artifacts/native/* release/
+        # Copy native binaries with platform names
+        for dir in artifacts/native/cldf-native-*; do
+          if [ -d "$dir" ]; then
+            platform=$(basename "$dir" | sed 's/cldf-native-//')
+            if [ -f "$dir/cldf" ]; then
+              cp "$dir/cldf" "release/cldf-$platform"
+            elif [ -f "$dir/cldf.exe" ]; then
+              cp "$dir/cldf.exe" "release/cldf-$platform.exe"
+            fi
+          fi
+        done
         
         # Create checksums
         cd release
