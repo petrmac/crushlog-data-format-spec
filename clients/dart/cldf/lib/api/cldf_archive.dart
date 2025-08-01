@@ -20,6 +20,7 @@ class CLDFArchive {
     this.sessions,
     this.tags,
     this.mediaItems,
+    this.mediaFiles,
     this.checksums,
   });
 
@@ -47,6 +48,9 @@ class CLDFArchive {
   /// Media items
   final List<MediaItem>? mediaItems;
 
+  /// Embedded media files (path -> bytes)
+  final Map<String, List<int>>? mediaFiles;
+
   /// Checksums for files
   final Checksums? checksums;
 
@@ -67,4 +71,13 @@ class CLDFArchive {
 
   /// Check if the archive has media
   bool get hasMedia => mediaItems != null && mediaItems!.isNotEmpty;
+
+  /// Check if the archive has embedded media files
+  bool get hasEmbeddedMedia => mediaFiles != null && mediaFiles!.isNotEmpty;
+
+  /// Get media file by path
+  List<int>? getMediaFile(String path) => mediaFiles?[path];
+
+  /// Get all media file paths
+  List<String> get mediaFilePaths => mediaFiles?.keys.toList() ?? [];
 }

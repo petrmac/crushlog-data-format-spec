@@ -45,6 +45,12 @@ export class ToolHandlersService {
         case 'cldf_extract':
           result = await this.handleExtract(args);
           break;
+        case 'cldf_query_media':
+          result = await this.handleQueryMedia(args);
+          break;
+        case 'cldf_extract_media':
+          result = await this.handleExtractMedia(args);
+          break;
         default:
           throw new Error(`Unknown tool: ${name}`);
       }
@@ -466,6 +472,121 @@ Use cldf_schema_info with component="commonMistakes" for more details.
           {
             type: 'text',
             text: stdout,
+          },
+        ],
+      };
+    }
+  }
+
+  private async handleQueryMedia(args: any) {
+    const { filePath, includeEmbedded = true, mediaType = 'all' } = args;
+
+    // First query media metadata
+    let command = `${this.cldfService.getCliPath()} query "${filePath}" --select all --json json`;
+    const { stdout, stderr } = await this.cldfService.executeCommand(command);
+
+    if (stderr && !stdout) {
+      throw new Error(stderr);
+    }
+
+    try {
+      const result = JSON.parse(stdout);
+      const data = result.data || {};
+      
+      let mediaInfo: any = {
+        metadata: data.media || [],
+        embedded: [],
+        stats: {
+          total: 0,
+          photos: 0,
+          videos: 0,
+          embedded: 0,
+          external: 0,
+        },
+      };
+
+      // Filter by media type if specified
+      if (mediaType !== 'all' && mediaInfo.metadata.length > 0) {
+        mediaInfo.metadata = mediaInfo.metadata.filter((item: any) => 
+          mediaType === 'photo' ? item.type === 'PHOTO' : item.type === 'VIDEO'
+        );
+      }
+
+      // Calculate stats
+      mediaInfo.stats.total = mediaInfo.metadata.length;
+      mediaInfo.stats.photos = mediaInfo.metadata.filter((m: any) => m.type === 'PHOTO').length;
+      mediaInfo.stats.videos = mediaInfo.metadata.filter((m: any) => m.type === 'VIDEO').length;
+      mediaInfo.stats.embedded = mediaInfo.metadata.filter((m: any) => m.embedded).length;
+      mediaInfo.stats.external = mediaInfo.stats.total - mediaInfo.stats.embedded;
+
+      // Get embedded file info if requested
+      if (includeEmbedded && mediaInfo.stats.embedded > 0) {
+        const extractCommand = `${this.cldfService.getCliPath()} extract "${filePath}" --files media --json json`;
+        try {
+          const extractResult = await this.cldfService.executeCommand(extractCommand);
+          if (extractResult.stdout) {
+            const extractData = JSON.parse(extractResult.stdout);
+            if (extractData.files) {
+              mediaInfo.embedded = extractData.files.filter((f: string) => f.startsWith('media/'));
+            }
+          }
+        } catch (error) {
+          this.logger.warn('Failed to get embedded media file info', error);
+        }
+      }
+
+      return {
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify(mediaInfo, null, 2),
+          },
+        ],
+      };
+    } catch (error) {
+      this.logger.error('Failed to parse media query result', error);
+      throw new Error('Failed to query media information');
+    }
+  }
+
+  private async handleExtractMedia(args: any) {
+    const { filePath, outputDir, preserveStructure = true } = args;
+
+    let command = `${this.cldfService.getCliPath()} extract "${filePath}" --output "${outputDir}" --files media`;
+    
+    if (!preserveStructure) {
+      command += ' --no-preserve-structure';
+    }
+
+    const { stdout, stderr } = await this.cldfService.executeCommand(command);
+
+    if (stderr && !stdout) {
+      throw new Error(stderr);
+    }
+
+    try {
+      const result = JSON.parse(stdout);
+      const mediaFiles = result.files?.filter((f: string) => f.startsWith('media/')) || [];
+      
+      return {
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              success: true,
+              message: `Extracted ${mediaFiles.length} media files`,
+              outputDirectory: outputDir,
+              files: mediaFiles,
+            }, null, 2),
+          },
+        ],
+      };
+    } catch {
+      return {
+        content: [
+          {
+            type: 'text',
+            text: stdout || 'Media extraction completed',
           },
         ],
       };

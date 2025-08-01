@@ -101,7 +101,7 @@ export const TOOL_DEFINITIONS = [
         },
         dataType: {
           type: 'string',
-          enum: ['locations', 'climbs', 'sessions', 'all'],
+          enum: ['locations', 'climbs', 'sessions', 'media', 'all'],
           description: 'Type of data to query',
         },
         filter: {
@@ -189,6 +189,54 @@ export const TOOL_DEFINITIONS = [
         },
       },
       required: ['filePath', 'dataType'],
+    },
+  },
+  {
+    name: 'cldf_query_media',
+    description: 'Query media information from a CLDF archive, including metadata and embedded file details',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        filePath: {
+          type: 'string',
+          description: 'Path to the CLDF archive',
+        },
+        includeEmbedded: {
+          type: 'boolean',
+          description: 'Include information about embedded media files',
+          default: true,
+        },
+        mediaType: {
+          type: 'string',
+          enum: ['photo', 'video', 'all'],
+          description: 'Filter by media type',
+          default: 'all',
+        },
+      },
+      required: ['filePath'],
+    },
+  },
+  {
+    name: 'cldf_extract_media',
+    description: 'Extract media files from a CLDF archive to a directory',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        filePath: {
+          type: 'string',
+          description: 'Path to the CLDF archive',
+        },
+        outputDir: {
+          type: 'string',
+          description: 'Directory to extract media files to',
+        },
+        preserveStructure: {
+          type: 'boolean',
+          description: 'Preserve the original directory structure',
+          default: true,
+        },
+      },
+      required: ['filePath', 'outputDir'],
     },
   },
 ];

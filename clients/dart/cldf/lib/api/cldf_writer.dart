@@ -74,6 +74,21 @@ class CLDFWriter {
       }, checksums);
     }
 
+    // Add embedded media files
+    if (archive.hasEmbeddedMedia) {
+      for (final entry in archive.mediaFiles!.entries) {
+        final path = entry.key;
+        final bytes = entry.value;
+
+        // Calculate checksum
+        final digest = sha256.convert(bytes);
+        checksums[path] = digest.toString();
+
+        // Add to archive
+        zipArchive.addFile(ArchiveFile(path, bytes.length, bytes));
+      }
+    }
+
     // Add checksums file
     final checksumsData = Checksums(algorithm: 'SHA-256', files: checksums);
 

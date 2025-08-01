@@ -37,11 +37,17 @@ class CLDFReader {
 
     // Extract and parse files
     final files = <String, Map<String, dynamic>>{};
+    final mediaFiles = <String, List<int>>{};
 
     for (final file in archive) {
-      if (file.isFile && file.name.endsWith('.json')) {
-        final content = utf8.decode(file.content);
-        files[file.name] = json.decode(content);
+      if (file.isFile) {
+        if (file.name.endsWith('.json')) {
+          final content = utf8.decode(file.content);
+          files[file.name] = json.decode(content);
+        } else if (file.name.startsWith('media/')) {
+          // Store media files as bytes
+          mediaFiles[file.name] = file.content;
+        }
       }
     }
 
@@ -125,6 +131,7 @@ class CLDFReader {
       sessions: sessions,
       tags: tags,
       mediaItems: mediaItems,
+      mediaFiles: mediaFiles.isEmpty ? null : mediaFiles,
       checksums: checksums,
     );
   }
