@@ -208,6 +208,10 @@ jobs:
         dart pub get
         dart pub global activate coverage
     
+    - name: Run build_runner
+      working-directory: clients/dart/cldf
+      run: dart run build_runner build --delete-conflicting-outputs
+    
     - name: Run tests with coverage
       working-directory: clients/dart/cldf
       run: |
