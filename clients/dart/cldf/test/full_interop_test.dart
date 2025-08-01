@@ -10,7 +10,7 @@ void main() {
       // Check if Java CLI is available
       final cliPath =
           '/Users/petrmacek/git-mirrors/crushlog-data-format-spec/clients/java/cldf-tool/build/native/nativeCompile/cldf';
-      
+
       if (!File(cliPath).existsSync()) {
         print('Java CLI not available, skipping interoperability test');
         print('Expected CLI path: $cliPath');
