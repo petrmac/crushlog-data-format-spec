@@ -5,6 +5,7 @@ import { ToolHandlersService } from '../src/mcp/tool-handlers.service';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { tmpdir } from 'os';
+import { skipIfNoCldfCli } from './helpers/cldf-cli-check';
 
 describe('Memory Load Test', () => {
   let app: INestApplication;
@@ -12,8 +13,15 @@ describe('Memory Load Test', () => {
   let testOutputPath: string;
 
   beforeAll(async () => {
-    // Set the CLDF CLI path for testing
-    process.env.CLDF_CLI = '/Users/petrmacek/git-mirrors/crushlog-data-format-spec/clients/java/cldf-tool/build/native/nativeCompile/cldf';
+    // Skip these tests if CLDF CLI is not available (e.g., in CI)
+    if (skipIfNoCldfCli()) {
+      return;
+    }
+
+    // Set the CLDF CLI path for testing if not already set
+    if (!process.env.CLDF_CLI) {
+      process.env.CLDF_CLI = '/Users/petrmacek/git-mirrors/crushlog-data-format-spec/clients/java/cldf-tool/build/native/nativeCompile/cldf';
+    }
     
     const moduleRef = await Test.createTestingModule({
       imports: [AppModule],
@@ -27,15 +35,23 @@ describe('Memory Load Test', () => {
   });
 
   afterAll(async () => {
-    await app.close();
-    try {
-      await fs.unlink(testOutputPath);
-    } catch (error) {
-      // Ignore cleanup errors
+    if (app) {
+      await app.close();
+    }
+    if (testOutputPath) {
+      try {
+        await fs.unlink(testOutputPath);
+      } catch (error) {
+        // Ignore cleanup errors
+      }
     }
   });
 
   it('should handle creating CLDF archive with 1000 routes without memory issues', async () => {
+    if (!app) {
+      console.log('Skipping test - CLDF CLI not available');
+      return;
+    }
     // Generate test data with 1000 routes
     const testData = generateLargeTestData(1000);
     
@@ -108,6 +124,10 @@ describe('Memory Load Test', () => {
 
   // Test repeated operations to check for memory leaks
   it('should not leak memory when processing multiple archives', async () => {
+    if (!app) {
+      console.log('Skipping test - CLDF CLI not available');
+      return;
+    }
     const iterations = 5;
     const memoryUsage: any[] = [];
 

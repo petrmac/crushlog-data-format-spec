@@ -5,13 +5,22 @@ import { ToolHandlersService } from '../src/mcp/tool-handlers.service';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { tmpdir } from 'os';
+import { skipIfNoCldfCli } from './helpers/cldf-cli-check';
 
 describe('CLDF Route Reference Tests', () => {
   let app: INestApplication;
   let toolHandlers: ToolHandlersService;
 
   beforeAll(async () => {
-    process.env.CLDF_CLI = '/Users/petrmacek/git-mirrors/crushlog-data-format-spec/clients/java/cldf-tool/build/native/nativeCompile/cldf';
+    // Skip these tests if CLDF CLI is not available (e.g., in CI)
+    if (skipIfNoCldfCli()) {
+      return;
+    }
+
+    // Set the CLDF CLI path for testing if not already set
+    if (!process.env.CLDF_CLI) {
+      process.env.CLDF_CLI = '/Users/petrmacek/git-mirrors/crushlog-data-format-spec/clients/java/cldf-tool/build/native/nativeCompile/cldf';
+    }
     
     const moduleRef = await Test.createTestingModule({
       imports: [AppModule],
@@ -24,11 +33,17 @@ describe('CLDF Route Reference Tests', () => {
   });
 
   afterAll(async () => {
-    await app.close();
+    if (app) {
+      await app.close();
+    }
   });
 
   describe('Route References in Climbs', () => {
     it('should handle climbs with routeName when routes exist', async () => {
+      if (!app) {
+        console.log('Skipping test - CLDF CLI not available');
+        return;
+      }
       const outputPath = path.join(tmpdir(), `cldf-routename-with-routes-${Date.now()}.cldf`);
       
       try {
@@ -119,6 +134,10 @@ describe('CLDF Route Reference Tests', () => {
     });
 
     it('should handle climbs with routeId integer references', async () => {
+      if (!app) {
+        console.log('Skipping test - CLDF CLI not available');
+        return;
+      }
       const outputPath = path.join(tmpdir(), `cldf-routeid-${Date.now()}.cldf`);
       
       try {
@@ -215,6 +234,10 @@ describe('CLDF Route Reference Tests', () => {
     });
 
     it('should demonstrate route query performance with 1000 routes and climbs', async () => {
+      if (!app) {
+        console.log('Skipping test - CLDF CLI not available');
+        return;
+      }
       const outputPath = path.join(tmpdir(), `cldf-perf-routes-${Date.now()}.cldf`);
       
       try {

@@ -5,14 +5,22 @@ import { ToolHandlersService } from '../src/mcp/tool-handlers.service';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { tmpdir } from 'os';
+import { skipIfNoCldfCli } from './helpers/cldf-cli-check';
 
 describe('CLDF Simple Scenarios', () => {
   let app: INestApplication;
   let toolHandlers: ToolHandlersService;
 
   beforeAll(async () => {
-    // Set the CLDF CLI path for testing
-    process.env.CLDF_CLI = '/Users/petrmacek/git-mirrors/crushlog-data-format-spec/clients/java/cldf-tool/build/native/nativeCompile/cldf';
+    // Skip these tests if CLDF CLI is not available (e.g., in CI)
+    if (skipIfNoCldfCli()) {
+      return;
+    }
+
+    // Set the CLDF CLI path for testing if not already set
+    if (!process.env.CLDF_CLI) {
+      process.env.CLDF_CLI = '/Users/petrmacek/git-mirrors/crushlog-data-format-spec/clients/java/cldf-tool/build/native/nativeCompile/cldf';
+    }
     
     const moduleRef = await Test.createTestingModule({
       imports: [AppModule],
@@ -25,11 +33,17 @@ describe('CLDF Simple Scenarios', () => {
   });
 
   afterAll(async () => {
-    await app.close();
+    if (app) {
+      await app.close();
+    }
   });
 
   describe('Scenario 1: Just Locations and Routes', () => {
     it('should create and query archive with only locations and routes', async () => {
+      if (!app) {
+        console.log('Skipping test - CLDF CLI not available');
+        return;
+      }
       const outputPath = path.join(tmpdir(), `cldf-scenario1-${Date.now()}.cldf`);
       
       try {
@@ -114,6 +128,10 @@ describe('CLDF Simple Scenarios', () => {
 
   describe('Scenario 2: Just Climbs Without Route Links', () => {
     it('should create and query archive with climbs that have no route references', async () => {
+      if (!app) {
+        console.log('Skipping test - CLDF CLI not available');
+        return;
+      }
       const outputPath = path.join(tmpdir(), `cldf-scenario2-${Date.now()}.cldf`);
       
       try {
@@ -190,6 +208,10 @@ describe('CLDF Simple Scenarios', () => {
 
   describe('Scenario 3: Full Data With Tags', () => {
     it('should create and query archive with locations, routes, climbs enriched with tags', async () => {
+      if (!app) {
+        console.log('Skipping test - CLDF CLI not available');
+        return;
+      }
       const outputPath = path.join(tmpdir(), `cldf-scenario3-${Date.now()}.cldf`);
       
       try {
@@ -329,6 +351,10 @@ describe('CLDF Simple Scenarios', () => {
 
   describe('Scenario 4: Climbs Referencing Routes by ID', () => {
     it('should create and query archive with climbs that reference routes by integer ID', async () => {
+      if (!app) {
+        console.log('Skipping test - CLDF CLI not available');
+        return;
+      }
       const outputPath = path.join(tmpdir(), `cldf-scenario4-${Date.now()}.cldf`);
       
       try {
@@ -463,6 +489,10 @@ describe('CLDF Simple Scenarios', () => {
 
   describe('Memory Performance Summary', () => {
     it('should show memory usage for each scenario', async () => {
+      if (!app) {
+        console.log('Skipping test - CLDF CLI not available');
+        return;
+      }
       const scenarios = [
         { name: 'Locations+Routes (1000 routes)', locationCount: 100, routeCount: 1000 },
         { name: 'Climbs Only (1000 climbs)', locationCount: 20, sessionCount: 100, climbCount: 1000 },

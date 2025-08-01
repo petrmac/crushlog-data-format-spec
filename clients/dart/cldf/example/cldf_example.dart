@@ -9,10 +9,7 @@ void main() async {
       platform: Platform.mobile,
       appVersion: '1.0.0',
       description: 'Sample climbing data export',
-      creator: Creator(
-        name: 'John Climber',
-        email: 'john@example.com',
-      ),
+      creator: Creator(name: 'John Climber', email: 'john@example.com'),
     ),
     locations: [
       Location(
@@ -22,10 +19,7 @@ void main() async {
         isIndoor: false,
         state: 'Colorado',
         city: 'Boulder',
-        coordinates: Coordinates(
-          latitude: 40.0150,
-          longitude: -105.2705,
-        ),
+        coordinates: Coordinates(latitude: 40.0150, longitude: -105.2705),
         rockType: RockType.granite,
         terrainType: TerrainType.natural,
       ),
@@ -36,10 +30,7 @@ void main() async {
         locationId: 1,
         name: 'Classic Line',
         routeType: RouteType.route,
-        grades: {
-          'french': '6a',
-          'yds': '5.10a',
-        },
+        grades: {'french': '6a', 'yds': '5.10a'},
         height: 20,
         bolts: 8,
         qualityRating: 4,
@@ -50,10 +41,7 @@ void main() async {
         locationId: 1,
         name: 'Power Problem',
         routeType: RouteType.boulder,
-        grades: {
-          'vScale': 'V4',
-          'font': '6A',
-        },
+        grades: {'vScale': 'V4', 'font': '6A'},
         color: '#FF0000',
         tags: ['crimpy', 'overhang'],
       ),
@@ -72,9 +60,7 @@ void main() async {
         grades: GradeInfo(
           system: GradeSystem.french,
           grade: '6a',
-          conversions: {
-            'yds': '5.10a',
-          },
+          conversions: {'yds': '5.10a'},
         ),
       ),
     ],
@@ -85,11 +71,7 @@ void main() async {
         locationId: 1,
         sessionType: SessionType.sportClimbing,
         partners: ['Jane Doe', 'Bob Smith'],
-        weather: Weather(
-          conditions: 'Sunny',
-          temperature: 18,
-          humidity: 45,
-        ),
+        weather: Weather(conditions: 'Sunny', temperature: 18, humidity: 45),
         notes: 'Perfect conditions for climbing',
       ),
     ],
@@ -117,7 +99,7 @@ void main() async {
   // Read back the file
   final reader = CLDFReader();
   final loadedArchive = await reader.readFile('sample.cldf');
-  
+
   print('Loaded archive:');
   print('- Locations: ${loadedArchive.locations.length}');
   print('- Routes: ${loadedArchive.routes?.length ?? 0}');
