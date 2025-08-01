@@ -8,7 +8,6 @@ part 'manifest.g.dart';
 /// Metadata about the CLDF archive
 @JsonSerializable()
 class Manifest {
-
   /// Creates a new [Manifest] instance
   Manifest({
     required this.version,
@@ -24,6 +23,7 @@ class Manifest {
   /// Creates a [Manifest] from JSON
   factory Manifest.fromJson(Map<String, dynamic> json) =>
       _$ManifestFromJson(json);
+
   /// CLDF specification version
   final String version;
 
@@ -56,23 +56,19 @@ class Manifest {
 /// Creator information
 @JsonSerializable()
 class Creator {
-
   /// Creates a new [Creator] instance
-  Creator({
-    this.name,
-    this.email,
-    this.userId,
-  });
+  Creator({this.name, this.email, this.userId});
 
   /// Creates a [Creator] from JSON
   factory Creator.fromJson(Map<String, dynamic> json) =>
       _$CreatorFromJson(json);
+
   /// Name of the creator
   final String? name;
-  
+
   /// Email of the creator
   final String? email;
-  
+
   /// User ID of the creator
   final String? userId;
 
@@ -83,7 +79,6 @@ class Creator {
 /// Export configuration
 @JsonSerializable()
 class ExportConfig {
-
   /// Creates a new [ExportConfig] instance
   ExportConfig({
     this.includeMedia = false,
@@ -95,15 +90,16 @@ class ExportConfig {
   /// Creates a [ExportConfig] from JSON
   factory ExportConfig.fromJson(Map<String, dynamic> json) =>
       _$ExportConfigFromJson(json);
+
   /// Whether to include media files
   final bool includeMedia;
-  
+
   /// Media export strategy
   final String? mediaStrategy;
-  
+
   /// Media quality (0-100)
   final int? mediaQuality;
-  
+
   /// Whether data is anonymized
   final bool? anonymized;
 

@@ -14,8 +14,15 @@ void main() {
         '2024-01-29T12:00:00.000Z': DateTime.utc(2024, 1, 29, 12),
         '2024-01-29T12:00:00+00:00': DateTime.utc(2024, 1, 29, 12),
         '2024-01-29T12:00:00Z': DateTime.utc(2024, 1, 29, 12),
-        '2024-01-29T12:00:00.123+00:00':
-            DateTime.utc(2024, 1, 29, 12, 0, 0, 123),
+        '2024-01-29T12:00:00.123+00:00': DateTime.utc(
+          2024,
+          1,
+          29,
+          12,
+          0,
+          0,
+          123,
+        ),
         '2024-01-29T12:00:00.123Z': DateTime.utc(2024, 1, 29, 12, 0, 0, 123),
       };
 
@@ -29,12 +36,19 @@ void main() {
     test('should handle timezone offsets', () {
       // Note: DateTime.parse handles timezone offsets correctly
       final testCases = {
-        '2024-01-29T12:00:00-05:00':
-            DateTime.utc(2024, 1, 29, 17), // EST to UTC
-        '2024-01-29T12:00:00+02:00':
-            DateTime.utc(2024, 1, 29, 10), // CEST to UTC
-        '2024-06-15T14:30:00+05:30':
-            DateTime.utc(2024, 6, 15, 9), // IST to UTC
+        '2024-01-29T12:00:00-05:00': DateTime.utc(
+          2024,
+          1,
+          29,
+          17,
+        ), // EST to UTC
+        '2024-01-29T12:00:00+02:00': DateTime.utc(
+          2024,
+          1,
+          29,
+          10,
+        ), // CEST to UTC
+        '2024-06-15T14:30:00+05:30': DateTime.utc(2024, 6, 15, 9), // IST to UTC
       };
 
       for (final entry in testCases.entries) {
@@ -87,8 +101,10 @@ void main() {
     test('should serialize to ISO 8601 UTC', () {
       final date = DateTime(2024, 1, 29, 12);
       final result = converter.toJson(date);
-      expect(result,
-          matches(RegExp(r'^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$')));
+      expect(
+        result,
+        matches(RegExp(r'^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$')),
+      );
     });
   });
 
@@ -111,8 +127,11 @@ void main() {
 
       for (final entry in testCases.entries) {
         final result = converter.fromJson(entry.key);
-        expect(result, equals(entry.value),
-            reason: 'Failed for input: ${entry.key}');
+        expect(
+          result,
+          equals(entry.value),
+          reason: 'Failed for input: ${entry.key}',
+        );
       }
     });
 
@@ -175,8 +194,10 @@ void main() {
       );
 
       final json = manifest.toJson();
-      expect(json['creationDate'],
-          matches(RegExp(r'^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$')));
+      expect(
+        json['creationDate'],
+        matches(RegExp(r'^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$')),
+      );
 
       // Test round trip
       final decoded = Manifest.fromJson(json);
@@ -231,21 +252,25 @@ void main() {
 
       final manifest = Manifest.fromJson(json.decode(javaJson));
       expect(manifest.version, equals('1.0.0'));
-      expect(manifest.creationDate.toUtc(),
-          equals(DateTime.utc(2024, 1, 29, 12)));
+      expect(
+        manifest.creationDate.toUtc(),
+        equals(DateTime.utc(2024, 1, 29, 12)),
+      );
     });
 
-    test('should deserialize Java-serialized Session with various date formats',
-        () {
-      final dateFormats = [
-        '2024-01-29',
-        '2024/01/29',
-        '01/29/2024',
-        '29/01/2024',
-      ];
+    test(
+      'should deserialize Java-serialized Session with various date formats',
+      () {
+        final dateFormats = [
+          '2024-01-29',
+          '2024/01/29',
+          '01/29/2024',
+          '29/01/2024',
+        ];
 
-      for (final dateFormat in dateFormats) {
-        final javaJson = '''
+        for (final dateFormat in dateFormats) {
+          final javaJson =
+              '''
           {
             "id": 1,
             "date": "$dateFormat",
@@ -253,11 +278,15 @@ void main() {
           }
         ''';
 
-        final session = Session.fromJson(json.decode(javaJson));
-        expect(session.date, equals('2024-01-29'),
-            reason: 'Failed for format: $dateFormat');
-      }
-    });
+          final session = Session.fromJson(json.decode(javaJson));
+          expect(
+            session.date,
+            equals('2024-01-29'),
+            reason: 'Failed for format: $dateFormat',
+          );
+        }
+      },
+    );
   });
 
   group('Date String Validation', () {

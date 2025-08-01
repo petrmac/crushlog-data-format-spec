@@ -23,10 +23,7 @@ void main() {
         name: 'Test Crag',
         country: 'USA',
         isIndoor: false,
-        coordinates: Coordinates(
-          latitude: 40.0,
-          longitude: -105.0,
-        ),
+        coordinates: Coordinates(latitude: 40.0, longitude: -105.0),
       );
 
       final json = location.toJson();

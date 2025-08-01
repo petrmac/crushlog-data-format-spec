@@ -8,7 +8,6 @@ part 'route.g.dart';
 /// A climbing route or boulder problem
 @JsonSerializable()
 class Route {
-
   /// Creates a new [Route] instance
   Route({
     required this.id,
@@ -31,6 +30,7 @@ class Route {
 
   /// Creates a [Route] from JSON
   factory Route.fromJson(Map<String, dynamic> json) => _$RouteFromJson(json);
+
   /// Unique identifier
   final int id;
 
@@ -86,23 +86,19 @@ class Route {
 /// First ascent information
 @JsonSerializable()
 class FirstAscent {
-
   /// Creates a new [FirstAscent] instance
-  FirstAscent({
-    this.climberName,
-    this.date,
-    this.notes,
-  });
+  FirstAscent({this.climberName, this.date, this.notes});
 
   /// Creates a [FirstAscent] from JSON
   factory FirstAscent.fromJson(Map<String, dynamic> json) =>
       _$FirstAscentFromJson(json);
+
   /// Name of the first ascensionist
   final String? climberName;
-  
+
   /// Date of first ascent
   final String? date;
-  
+
   /// Additional notes
   final String? notes;
 

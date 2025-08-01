@@ -11,6 +11,7 @@ import 'cldf_archive.dart';
 class CLDFWriter {
   /// Creates a new [CLDFWriter] instance
   CLDFWriter();
+
   /// Write a CLDF archive to a file
   Future<void> writeFile(String filePath, CLDFArchive archive) async {
     final bytes = await writeBytes(archive);
@@ -32,94 +33,58 @@ class CLDFWriter {
     );
 
     // Add locations (required)
-    await _addJsonFile(
-      zipArchive,
-      'locations.json',
-      {
-        'locations': archive.locations.map((l) => l.toJson()).toList(),
-      },
-      checksums,
-    );
+    await _addJsonFile(zipArchive, 'locations.json', {
+      'locations': archive.locations.map((l) => l.toJson()).toList(),
+    }, checksums);
 
     // Add optional files
     if (archive.hasSectors) {
-      await _addJsonFile(
-        zipArchive,
-        'sectors.json',
-        {
-          'sectors': archive.sectors!.map((s) => s.toJson()).toList(),
-        },
-        checksums,
-      );
+      await _addJsonFile(zipArchive, 'sectors.json', {
+        'sectors': archive.sectors!.map((s) => s.toJson()).toList(),
+      }, checksums);
     }
 
     if (archive.hasRoutes) {
-      await _addJsonFile(
-        zipArchive,
-        'routes.json',
-        {
-          'routes': archive.routes!.map((r) => r.toJson()).toList(),
-        },
-        checksums,
-      );
+      await _addJsonFile(zipArchive, 'routes.json', {
+        'routes': archive.routes!.map((r) => r.toJson()).toList(),
+      }, checksums);
     }
 
     if (archive.hasClimbs) {
-      await _addJsonFile(
-        zipArchive,
-        'climbs.json',
-        {
-          'climbs': archive.climbs!.map((c) => c.toJson()).toList(),
-        },
-        checksums,
-      );
+      await _addJsonFile(zipArchive, 'climbs.json', {
+        'climbs': archive.climbs!.map((c) => c.toJson()).toList(),
+      }, checksums);
     }
 
     if (archive.hasSessions) {
-      await _addJsonFile(
-        zipArchive,
-        'sessions.json',
-        {
-          'sessions': archive.sessions!.map((s) => s.toJson()).toList(),
-        },
-        checksums,
-      );
+      await _addJsonFile(zipArchive, 'sessions.json', {
+        'sessions': archive.sessions!.map((s) => s.toJson()).toList(),
+      }, checksums);
     }
 
     if (archive.hasTags) {
-      await _addJsonFile(
-        zipArchive,
-        'tags.json',
-        {
-          'tags': archive.tags!.map((t) => t.toJson()).toList(),
-        },
-        checksums,
-      );
+      await _addJsonFile(zipArchive, 'tags.json', {
+        'tags': archive.tags!.map((t) => t.toJson()).toList(),
+      }, checksums);
     }
 
     if (archive.hasMedia) {
-      await _addJsonFile(
-        zipArchive,
-        'media_metadata.json',
-        {
-          'media': archive.mediaItems!.map((m) => m.toJson()).toList(),
-        },
-        checksums,
-      );
+      await _addJsonFile(zipArchive, 'media_metadata.json', {
+        'media': archive.mediaItems!.map((m) => m.toJson()).toList(),
+      }, checksums);
     }
 
     // Add checksums file
-    final checksumsData = Checksums(
-      algorithm: 'SHA-256',
-      files: checksums,
-    );
+    final checksumsData = Checksums(algorithm: 'SHA-256', files: checksums);
 
     final checksumsJson = json.encode(checksumsData.toJson());
-    zipArchive.addFile(ArchiveFile(
-      'checksums.json',
-      checksumsJson.length,
-      utf8.encode(checksumsJson),
-    ));
+    zipArchive.addFile(
+      ArchiveFile(
+        'checksums.json',
+        checksumsJson.length,
+        utf8.encode(checksumsJson),
+      ),
+    );
 
     // Encode to zip
     return ZipEncoder().encode(zipArchive)!;
@@ -140,10 +105,6 @@ class CLDFWriter {
     checksums[filename] = digest.toString();
 
     // Add to archive
-    archive.addFile(ArchiveFile(
-      filename,
-      bytes.length,
-      bytes,
-    ));
+    archive.addFile(ArchiveFile(filename, bytes.length, bytes));
   }
 }

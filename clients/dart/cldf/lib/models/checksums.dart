@@ -5,16 +5,13 @@ part 'checksums.g.dart';
 /// Checksums for archive files
 @JsonSerializable()
 class Checksums {
-
   /// Creates a new [Checksums] instance
-  Checksums({
-    required this.algorithm,
-    this.files,
-  });
+  Checksums({required this.algorithm, this.files});
 
   /// Creates a [Checksums] from JSON
   factory Checksums.fromJson(Map<String, dynamic> json) =>
       _$ChecksumsFromJson(json);
+
   /// Algorithm used (e.g., SHA-256)
   final String algorithm;
 

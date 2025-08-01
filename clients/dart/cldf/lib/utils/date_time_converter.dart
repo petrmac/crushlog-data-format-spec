@@ -15,7 +15,8 @@ class FlexibleDateTimeConverter implements JsonConverter<DateTime?, String?> {
     // Check if it looks like a datetime (must have T separator)
     if (!trimmed.contains('T')) {
       throw FormatException(
-          'Cannot parse date string: $json - missing time component');
+        'Cannot parse date string: $json - missing time component',
+      );
     }
 
     // Try parsing as ISO 8601

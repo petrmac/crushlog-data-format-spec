@@ -14,7 +14,6 @@ String? _dateToJson(String? date) =>
 /// A climbing session
 @JsonSerializable()
 class Session {
-
   /// Creates a new [Session] instance
   Session({
     required this.id,
@@ -40,6 +39,7 @@ class Session {
   /// Creates a [Session] from JSON
   factory Session.fromJson(Map<String, dynamic> json) =>
       _$SessionFromJson(json);
+
   /// Unique identifier
   final int id;
 
@@ -102,27 +102,22 @@ class Session {
 /// Weather information
 @JsonSerializable()
 class Weather {
-
   /// Creates a new [Weather] instance
-  Weather({
-    this.conditions,
-    this.temperature,
-    this.humidity,
-    this.wind,
-  });
+  Weather({this.conditions, this.temperature, this.humidity, this.wind});
 
   /// Creates a [Weather] from JSON
   factory Weather.fromJson(Map<String, dynamic> json) =>
       _$WeatherFromJson(json);
+
   /// Weather conditions description
   final String? conditions;
-  
+
   /// Temperature in Celsius
   final double? temperature;
-  
+
   /// Humidity percentage
   final double? humidity;
-  
+
   /// Wind conditions
   final String? wind;
 

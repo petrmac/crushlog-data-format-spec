@@ -18,6 +18,7 @@ import 'cldf_archive.dart';
 class CLDFReader {
   /// Creates a new [CLDFReader] instance
   CLDFReader();
+
   /// Read a CLDF archive from a file
   Future<CLDFArchive> readFile(String filePath) async {
     final file = File(filePath);

@@ -67,8 +67,10 @@ void main() {
         for (final climbItem in archive.climbs!) {
           // All dates should be in ISO format after parsing
           expect(
-              RegExp(r'^\d{4}-\d{2}-\d{2}$').hasMatch(climbItem.date), isTrue,
-              reason: 'Date should be in ISO format: ${climbItem.date}');
+            RegExp(r'^\d{4}-\d{2}-\d{2}$').hasMatch(climbItem.date),
+            isTrue,
+            reason: 'Date should be in ISO format: ${climbItem.date}',
+          );
         }
       }
     });
@@ -86,7 +88,9 @@ void main() {
         if (archive.sessions != null) {
           for (final session in archive.sessions!) {
             expect(
-                RegExp(r'^\d{4}-\d{2}-\d{2}$').hasMatch(session.date), isTrue);
+              RegExp(r'^\d{4}-\d{2}-\d{2}$').hasMatch(session.date),
+              isTrue,
+            );
           }
         }
 
@@ -112,13 +116,16 @@ void main() {
 
         // Check route with all fields
         if (archive.routes != null && archive.routes!.isNotEmpty) {
-          final routeWithFA =
-              archive.routes!.where((r) => r.firstAscent != null);
+          final routeWithFA = archive.routes!.where(
+            (r) => r.firstAscent != null,
+          );
           if (routeWithFA.isNotEmpty) {
             final route = routeWithFA.first;
             expect(route.firstAscent?.climberName, isNotNull);
-            expect(route.firstAscent?.date,
-                matches(RegExp(r'^\d{4}-\d{2}-\d{2}$')));
+            expect(
+              route.firstAscent?.date,
+              matches(RegExp(r'^\d{4}-\d{2}-\d{2}$')),
+            );
           }
         }
 

@@ -10,7 +10,6 @@ import '../models/checksums.dart';
 
 /// Represents a complete CLDF archive
 class CLDFArchive {
-
   /// Creates a new [CLDFArchive] instance
   CLDFArchive({
     required this.manifest,
@@ -23,6 +22,7 @@ class CLDFArchive {
     this.mediaItems,
     this.checksums,
   });
+
   /// Archive metadata
   final Manifest manifest;
 

@@ -19,7 +19,6 @@ String? _dateToJson(String? date) =>
 /// A single climbing attempt or completion
 @JsonSerializable()
 class Climb {
-
   /// Creates a new [Climb] instance
   Climb({
     required this.id,
@@ -54,6 +53,7 @@ class Climb {
 
   /// Creates a [Climb] from JSON
   factory Climb.fromJson(Map<String, dynamic> json) => _$ClimbFromJson(json);
+
   /// Unique identifier
   final int id;
 
@@ -146,23 +146,19 @@ class Climb {
 /// Grade information
 @JsonSerializable()
 class GradeInfo {
-
   /// Creates a new [GradeInfo] instance
-  GradeInfo({
-    required this.system,
-    required this.grade,
-    this.conversions,
-  });
+  GradeInfo({required this.system, required this.grade, this.conversions});
 
   /// Creates a [GradeInfo] from JSON
   factory GradeInfo.fromJson(Map<String, dynamic> json) =>
       _$GradeInfoFromJson(json);
+
   /// The grading system used
   final GradeSystem system;
-  
+
   /// The grade value
   final String grade;
-  
+
   /// Grade conversions to other systems
   final Map<String, String>? conversions;
 
@@ -173,22 +169,18 @@ class GradeInfo {
 /// Media references
 @JsonSerializable()
 class Media {
-
   /// Creates a new [Media] instance
-  Media({
-    this.photos,
-    this.videos,
-    this.count,
-  });
+  Media({this.photos, this.videos, this.count});
 
   /// Creates a [Media] from JSON
   factory Media.fromJson(Map<String, dynamic> json) => _$MediaFromJson(json);
+
   /// List of photo references
   final List<String>? photos;
-  
+
   /// List of video references
   final List<String>? videos;
-  
+
   /// Total media count
   final int? count;
 

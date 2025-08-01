@@ -8,7 +8,6 @@ part 'location.g.dart';
 /// A climbing location (crag, gym, etc.)
 @JsonSerializable()
 class Location {
-
   /// Creates a new [Location] instance
   Location({
     required this.id,
@@ -29,6 +28,7 @@ class Location {
   /// Creates a [Location] from JSON
   factory Location.fromJson(Map<String, dynamic> json) =>
       _$LocationFromJson(json);
+
   /// Unique identifier
   final int id;
 
@@ -75,7 +75,6 @@ class Location {
 /// GPS coordinates
 @JsonSerializable()
 class Coordinates {
-
   /// Creates a new [Coordinates] instance
   Coordinates({
     required this.latitude,
@@ -86,12 +85,13 @@ class Coordinates {
   /// Creates a [Coordinates] from JSON
   factory Coordinates.fromJson(Map<String, dynamic> json) =>
       _$CoordinatesFromJson(json);
+
   /// Latitude coordinate
   final double latitude;
-  
+
   /// Longitude coordinate
   final double longitude;
-  
+
   /// Elevation in meters
   final double? elevation;
 

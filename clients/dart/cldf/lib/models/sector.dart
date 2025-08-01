@@ -7,7 +7,6 @@ part 'sector.g.dart';
 /// A sector within a climbing location
 @JsonSerializable()
 class Sector {
-
   /// Creates a new [Sector] instance
   Sector({
     required this.id,
@@ -21,6 +20,7 @@ class Sector {
 
   /// Creates a [Sector] from JSON
   factory Sector.fromJson(Map<String, dynamic> json) => _$SectorFromJson(json);
+
   /// Unique identifier
   final int id;
 

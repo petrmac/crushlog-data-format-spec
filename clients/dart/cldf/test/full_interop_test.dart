@@ -14,7 +14,7 @@ void main() {
           'format': 'CLDF',
           'creationDate': '2024-01-15T10:00:00Z',
           'platform': 'Desktop',
-          'appVersion': '1.0.0'
+          'appVersion': '1.0.0',
         },
         'locations': [
           {
@@ -22,21 +22,21 @@ void main() {
             'name': 'Test Crag',
             'country': 'Slovakia',
             'isIndoor': false,
-            'coordinates': {'latitude': 48.8566, 'longitude': 2.3522}
-          }
+            'coordinates': {'latitude': 48.8566, 'longitude': 2.3522},
+          },
         ],
         'routes': [
           {
             'id': '1',
             'locationId': '1',
             'name': 'Test Route',
-            'routeType': 'route'
-          }
+            'routeType': 'route',
+          },
         ],
         'sessions': [
           {'id': 1, 'date': '2024-01-15', 'locationId': 1},
           {'id': 2, 'date': '2024/01/16', 'locationId': 1},
-          {'id': 3, 'date': '01-17-2024', 'locationId': 1}
+          {'id': 3, 'date': '01-17-2024', 'locationId': 1},
         ],
         'climbs': [
           {
@@ -45,7 +45,7 @@ void main() {
             'sessionId': 1,
             'routeId': '1',
             'type': 'route',
-            'finishType': 'redpoint'
+            'finishType': 'redpoint',
           },
           {
             'id': 2,
@@ -53,11 +53,11 @@ void main() {
             'sessionId': 2,
             'routeId': '1',
             'type': 'route',
-            'finishType': 'flash'
-          }
+            'finishType': 'flash',
+          },
         ],
         'tags': [],
-        'checksums': {'algorithm': 'SHA-256'}
+        'checksums': {'algorithm': 'SHA-256'},
       };
 
       // Write test data to JSON file
@@ -70,19 +70,15 @@ void main() {
       final outputPath = 'test/dart-java-interop.cldf';
 
       print('Creating CLDF file using Java CLI...');
-      final result = await Process.run(
-        cliPath,
-        [
-          'create',
-          '--template',
-          'empty',
-          '--output',
-          outputPath,
-          '--from-json',
-          jsonFile.path
-        ],
-        workingDirectory: Directory.current.path,
-      );
+      final result = await Process.run(cliPath, [
+        'create',
+        '--template',
+        'empty',
+        '--output',
+        outputPath,
+        '--from-json',
+        jsonFile.path,
+      ], workingDirectory: Directory.current.path);
 
       if (result.exitCode != 0) {
         print('Failed to create CLDF file: ${result.stderr}');
@@ -109,14 +105,20 @@ void main() {
       print('Checking date formats...');
       for (final session in archive.sessions!) {
         print('Session ${session.id} date: ${session.date}');
-        expect(RegExp(r'^\d{4}-\d{2}-\d{2}$').hasMatch(session.date), isTrue,
-            reason: 'Session date should be in ISO format: ${session.date}');
+        expect(
+          RegExp(r'^\d{4}-\d{2}-\d{2}$').hasMatch(session.date),
+          isTrue,
+          reason: 'Session date should be in ISO format: ${session.date}',
+        );
       }
 
       for (final climb in archive.climbs!) {
         print('Climb ${climb.id} date: ${climb.date}');
-        expect(RegExp(r'^\d{4}-\d{2}-\d{2}$').hasMatch(climb.date), isTrue,
-            reason: 'Climb date should be in ISO format: ${climb.date}');
+        expect(
+          RegExp(r'^\d{4}-\d{2}-\d{2}$').hasMatch(climb.date),
+          isTrue,
+          reason: 'Climb date should be in ISO format: ${climb.date}',
+        );
       }
 
       // Clean up

@@ -9,7 +9,6 @@ part 'media_item.g.dart';
 /// A media item (photo or video)
 @JsonSerializable()
 class MediaItem {
-
   /// Creates a new [MediaItem] instance
   MediaItem({
     required this.id,
@@ -34,6 +33,7 @@ class MediaItem {
   /// Creates a [MediaItem] from JSON
   factory MediaItem.fromJson(Map<String, dynamic> json) =>
       _$MediaItemFromJson(json);
+
   /// Unique identifier
   final String id;
 
@@ -93,7 +93,6 @@ class MediaItem {
 /// GPS coordinates for media
 @JsonSerializable()
 class MediaCoordinates {
-
   /// Creates a new [MediaCoordinates] instance
   MediaCoordinates({
     required this.latitude,
@@ -104,12 +103,13 @@ class MediaCoordinates {
   /// Creates a [MediaCoordinates] from JSON
   factory MediaCoordinates.fromJson(Map<String, dynamic> json) =>
       _$MediaCoordinatesFromJson(json);
+
   /// Latitude coordinate
   final double latitude;
-  
+
   /// Longitude coordinate
   final double longitude;
-  
+
   /// Altitude in meters
   final double? altitude;
 

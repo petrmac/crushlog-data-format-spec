@@ -5,7 +5,6 @@ part 'tag.g.dart';
 /// A tag for categorization
 @JsonSerializable()
 class Tag {
-
   /// Creates a new [Tag] instance
   Tag({
     required this.id,
@@ -17,6 +16,7 @@ class Tag {
 
   /// Creates a [Tag] from JSON
   factory Tag.fromJson(Map<String, dynamic> json) => _$TagFromJson(json);
+
   /// Unique identifier
   final int id;
 
