@@ -102,15 +102,6 @@ public class CLDFReader {
     if (!fileContents.containsKey(MANIFEST_FILE)) {
       throw new IOException("Missing required file: " + MANIFEST_FILE);
     }
-    if (!fileContents.containsKey(LOCATIONS_FILE)) {
-      throw new IOException("Missing required file: " + LOCATIONS_FILE);
-    }
-    if (!fileContents.containsKey(CLIMBS_FILE)) {
-      throw new IOException("Missing required file: " + CLIMBS_FILE);
-    }
-    if (!fileContents.containsKey(SESSIONS_FILE)) {
-      throw new IOException("Missing required file: " + SESSIONS_FILE);
-    }
     if (!fileContents.containsKey(CHECKSUMS_FILE)) {
       throw new IOException("Missing required file: " + CHECKSUMS_FILE);
     }
@@ -118,10 +109,7 @@ public class CLDFReader {
     // Validate schemas if enabled
     if (validateSchemas) {
       // Validate all required files first
-      for (String filename :
-          new String[] {
-            MANIFEST_FILE, LOCATIONS_FILE, CLIMBS_FILE, SESSIONS_FILE, CHECKSUMS_FILE
-          }) {
+      for (String filename : new String[] {MANIFEST_FILE, LOCATIONS_FILE, CHECKSUMS_FILE}) {
         ValidationResult result =
             schemaValidator.validateWithResult(filename, fileContents.get(filename));
         if (!result.valid()) {
@@ -136,7 +124,14 @@ public class CLDFReader {
 
       // Validate optional files if present
       for (String filename :
-          new String[] {"routes.json", "sectors.json", "tags.json", "media-metadata.json"}) {
+          new String[] {
+            CLIMBS_FILE,
+            SESSIONS_FILE,
+            "routes.json",
+            "sectors.json",
+            "tags.json",
+            "media-metadata.json"
+          }) {
         if (fileContents.containsKey(filename)) {
           ValidationResult result =
               schemaValidator.validateWithResult(filename, fileContents.get(filename));
@@ -176,11 +171,16 @@ public class CLDFReader {
     LocationsFile locationsFile = parseJson(fileContents.get(LOCATIONS_FILE), LocationsFile.class);
     archive.setLocations(locationsFile.getLocations());
 
-    ClimbsFile climbsFile = parseJson(fileContents.get(CLIMBS_FILE), ClimbsFile.class);
-    archive.setClimbs(climbsFile.getClimbs());
+    // Parse optional climbs and sessions files
+    if (fileContents.containsKey(CLIMBS_FILE)) {
+      ClimbsFile climbsFile = parseJson(fileContents.get(CLIMBS_FILE), ClimbsFile.class);
+      archive.setClimbs(climbsFile.getClimbs());
+    }
 
-    SessionsFile sessionsFile = parseJson(fileContents.get(SESSIONS_FILE), SessionsFile.class);
-    archive.setSessions(sessionsFile.getSessions());
+    if (fileContents.containsKey(SESSIONS_FILE)) {
+      SessionsFile sessionsFile = parseJson(fileContents.get(SESSIONS_FILE), SessionsFile.class);
+      archive.setSessions(sessionsFile.getSessions());
+    }
 
     // Parse optional files
     if (fileContents.containsKey("routes.json")) {

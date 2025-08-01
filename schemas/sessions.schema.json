@@ -16,7 +16,7 @@
   "definitions": {
     "session": {
       "type": "object",
-      "required": ["id", "date", "location"],
+      "required": ["id", "date"],
       "properties": {
         "id": {
           "type": "integer",
