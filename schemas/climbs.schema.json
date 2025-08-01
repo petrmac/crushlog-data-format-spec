@@ -16,7 +16,7 @@
   "definitions": {
     "climb": {
       "type": "object",
-      "required": ["id", "date", "routeName", "type", "finishType"],
+      "required": ["id", "date", "type", "finishType"],
       "allOf": [
         {
           "if": {

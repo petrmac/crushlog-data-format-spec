@@ -33,6 +33,10 @@ sonar {
         property("sonar.java.target", "21")
         property("sonar.coverage.jacoco.xmlReportPaths", "**/build/reports/jacoco/test/jacocoTestReport.xml")
         property("sonar.junit.reportPaths", "**/build/test-results/test")
+        // Include Dart client in analysis
+        property("sonar.modules", "java,dart")
+        property("java.sonar.projectBaseDir", "clients/java")
+        property("dart.sonar.projectBaseDir", "clients/dart/cldf")
     }
 }
 

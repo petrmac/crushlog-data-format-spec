@@ -25,6 +25,11 @@ public class CLDFReader {
   private static final String CLIMBS_FILE = "climbs.json";
   private static final String SESSIONS_FILE = "sessions.json";
   private static final String CHECKSUMS_FILE = "checksums.json";
+  private static final String ROUTES_FILE = "routes.json";
+  private static final String SECTORS_FILE = "sectors.json";
+  private static final String TAGS_FILE = "tags.json";
+  private static final String MEDIA_METADATA_FILE = "media-metadata.json";
+  private static final String ALGORITHM = "SHA-256";
 
   private final ObjectMapper objectMapper;
   private final boolean validateChecksums;
@@ -102,15 +107,6 @@ public class CLDFReader {
     if (!fileContents.containsKey(MANIFEST_FILE)) {
       throw new IOException("Missing required file: " + MANIFEST_FILE);
     }
-    if (!fileContents.containsKey(LOCATIONS_FILE)) {
-      throw new IOException("Missing required file: " + LOCATIONS_FILE);
-    }
-    if (!fileContents.containsKey(CLIMBS_FILE)) {
-      throw new IOException("Missing required file: " + CLIMBS_FILE);
-    }
-    if (!fileContents.containsKey(SESSIONS_FILE)) {
-      throw new IOException("Missing required file: " + SESSIONS_FILE);
-    }
     if (!fileContents.containsKey(CHECKSUMS_FILE)) {
       throw new IOException("Missing required file: " + CHECKSUMS_FILE);
     }
@@ -118,10 +114,7 @@ public class CLDFReader {
     // Validate schemas if enabled
     if (validateSchemas) {
       // Validate all required files first
-      for (String filename :
-          new String[] {
-            MANIFEST_FILE, LOCATIONS_FILE, CLIMBS_FILE, SESSIONS_FILE, CHECKSUMS_FILE
-          }) {
+      for (String filename : new String[] {MANIFEST_FILE, LOCATIONS_FILE, CHECKSUMS_FILE}) {
         ValidationResult result =
             schemaValidator.validateWithResult(filename, fileContents.get(filename));
         if (!result.valid()) {
@@ -136,7 +129,9 @@ public class CLDFReader {
 
       // Validate optional files if present
       for (String filename :
-          new String[] {"routes.json", "sectors.json", "tags.json", "media-metadata.json"}) {
+          new String[] {
+            CLIMBS_FILE, SESSIONS_FILE, ROUTES_FILE, SECTORS_FILE, TAGS_FILE, MEDIA_METADATA_FILE
+          }) {
         if (fileContents.containsKey(filename)) {
           ValidationResult result =
               schemaValidator.validateWithResult(filename, fileContents.get(filename));
@@ -176,31 +171,36 @@ public class CLDFReader {
     LocationsFile locationsFile = parseJson(fileContents.get(LOCATIONS_FILE), LocationsFile.class);
     archive.setLocations(locationsFile.getLocations());
 
-    ClimbsFile climbsFile = parseJson(fileContents.get(CLIMBS_FILE), ClimbsFile.class);
-    archive.setClimbs(climbsFile.getClimbs());
+    // Parse optional climbs and sessions files
+    if (fileContents.containsKey(CLIMBS_FILE)) {
+      ClimbsFile climbsFile = parseJson(fileContents.get(CLIMBS_FILE), ClimbsFile.class);
+      archive.setClimbs(climbsFile.getClimbs());
+    }
 
-    SessionsFile sessionsFile = parseJson(fileContents.get(SESSIONS_FILE), SessionsFile.class);
-    archive.setSessions(sessionsFile.getSessions());
+    if (fileContents.containsKey(SESSIONS_FILE)) {
+      SessionsFile sessionsFile = parseJson(fileContents.get(SESSIONS_FILE), SessionsFile.class);
+      archive.setSessions(sessionsFile.getSessions());
+    }
 
     // Parse optional files
-    if (fileContents.containsKey("routes.json")) {
-      RoutesFile routesFile = parseJson(fileContents.get("routes.json"), RoutesFile.class);
+    if (fileContents.containsKey(ROUTES_FILE)) {
+      RoutesFile routesFile = parseJson(fileContents.get(ROUTES_FILE), RoutesFile.class);
       archive.setRoutes(routesFile.getRoutes());
     }
 
-    if (fileContents.containsKey("sectors.json")) {
-      SectorsFile sectorsFile = parseJson(fileContents.get("sectors.json"), SectorsFile.class);
+    if (fileContents.containsKey(SECTORS_FILE)) {
+      SectorsFile sectorsFile = parseJson(fileContents.get(SECTORS_FILE), SectorsFile.class);
       archive.setSectors(sectorsFile.getSectors());
     }
 
-    if (fileContents.containsKey("tags.json")) {
-      TagsFile tagsFile = parseJson(fileContents.get("tags.json"), TagsFile.class);
+    if (fileContents.containsKey(TAGS_FILE)) {
+      TagsFile tagsFile = parseJson(fileContents.get(TAGS_FILE), TagsFile.class);
       archive.setTags(tagsFile.getTags());
     }
 
-    if (fileContents.containsKey("media-metadata.json")) {
+    if (fileContents.containsKey(MEDIA_METADATA_FILE)) {
       MediaMetadataFile mediaFile =
-          parseJson(fileContents.get("media-metadata.json"), MediaMetadataFile.class);
+          parseJson(fileContents.get(MEDIA_METADATA_FILE), MediaMetadataFile.class);
       archive.setMediaItems(mediaFile.getMedia());
     }
 
@@ -224,7 +224,7 @@ public class CLDFReader {
 
   private void validateChecksums(Checksums checksums, Map<String, String> actualChecksums)
       throws IOException {
-    if (!"SHA-256".equals(checksums.getAlgorithm())) {
+    if (!ALGORITHM.equals(checksums.getAlgorithm())) {
       throw new IOException("Unsupported checksum algorithm: " + checksums.getAlgorithm());
     }
 
@@ -246,7 +246,7 @@ public class CLDFReader {
 
   private String calculateSHA256(byte[] data) throws IOException {
     try {
-      MessageDigest digest = MessageDigest.getInstance("SHA-256");
+      MessageDigest digest = MessageDigest.getInstance(ALGORITHM);
       byte[] hash = digest.digest(data);
       StringBuilder hexString = new StringBuilder();
       for (byte b : hash) {

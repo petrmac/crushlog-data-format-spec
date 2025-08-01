@@ -2,6 +2,8 @@ package io.cldf.tool.commands;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.*;
@@ -63,6 +65,17 @@ public class CreateCommand extends BaseCommand {
       description = "Read JSON data from stdin")
   private boolean readFromStdin;
 
+  @Option(
+      names = {"--media-dir"},
+      description = "Directory containing media files to include")
+  private File mediaDirectory;
+
+  @Option(
+      names = {"--media-strategy"},
+      description = "Media handling strategy: ${COMPLETION-CANDIDATES}",
+      defaultValue = "FULL")
+  private MediaStrategy mediaStrategy = MediaStrategy.FULL;
+
   private final ValidationService validationService;
 
   @Inject
@@ -107,6 +120,20 @@ public class CreateCommand extends BaseCommand {
 
     List<String> warnings = new ArrayList<>();
 
+    // Process media files if directory is specified
+    if (mediaDirectory != null) {
+      try {
+        processMediaFiles(archive);
+      } catch (IOException e) {
+        log.error("Failed to process media files", e);
+        return CommandResult.builder()
+            .success(false)
+            .message("Failed to process media files: " + e.getMessage())
+            .exitCode(1)
+            .build();
+      }
+    }
+
     if (validate) {
       logInfo("Validating archive...");
       var validationResult = validationService.validate(archive);
@@ -127,16 +154,13 @@ public class CreateCommand extends BaseCommand {
     CLDFWriter writer = new CLDFWriter(prettyPrint, validate);
     writer.write(archive, outputFile);
 
-    Map<String, Object> resultData =
-        Map.of(
-            "file", outputFile.getAbsolutePath(),
-            "stats",
-                Map.of(
-                    "locations",
-                        Optional.ofNullable(archive.getLocations()).map(List::size).orElse(0),
-                    "sessions",
-                        Optional.ofNullable(archive.getSessions()).map(List::size).orElse(0),
-                    "climbs", Optional.ofNullable(archive.getClimbs()).map(List::size).orElse(0)));
+    Map<String, Object> stats = new HashMap<>();
+    stats.put("locations", Optional.ofNullable(archive.getLocations()).map(List::size).orElse(0));
+    stats.put("sessions", Optional.ofNullable(archive.getSessions()).map(List::size).orElse(0));
+    stats.put("climbs", Optional.ofNullable(archive.getClimbs()).map(List::size).orElse(0));
+    stats.put("media", Optional.ofNullable(archive.getMediaItems()).map(List::size).orElse(0));
+
+    Map<String, Object> resultData = Map.of("file", outputFile.getAbsolutePath(), "stats", stats);
 
     return CommandResult.builder()
         .success(true)
@@ -442,5 +466,125 @@ public class CreateCommand extends BaseCommand {
     } else {
       throw new IllegalStateException("No JSON input source specified");
     }
+  }
+
+  private void processMediaFiles(CLDFArchive archive) throws IOException {
+    if (!mediaDirectory.exists() || !mediaDirectory.isDirectory()) {
+      throw new IOException("Media directory does not exist: " + mediaDirectory);
+    }
+
+    logInfo("Processing media files from: " + mediaDirectory);
+
+    // Supported media file extensions
+    Set<String> supportedExtensions =
+        Set.of(
+            ".jpg",
+            ".jpeg",
+            ".png",
+            ".gif",
+            ".bmp",
+            ".webp", // Images
+            ".mp4",
+            ".mov",
+            ".avi",
+            ".webm",
+            ".mkv" // Videos
+            );
+
+    // Build a map of climb IDs for matching
+    Set<String> climbIds = new HashSet<>();
+    if (archive.getClimbs() != null) {
+      archive.getClimbs().forEach(climb -> climbIds.add(climb.getId().toString()));
+    }
+
+    // Scan for media files
+    Map<String, byte[]> mediaFiles = new HashMap<>();
+    List<MediaItem> mediaItems = new ArrayList<>();
+
+    try (Stream<Path> paths = Files.walk(mediaDirectory.toPath())) {
+      List<Path> mediaFilePaths =
+          paths
+              .filter(Files::isRegularFile)
+              .filter(
+                  path -> {
+                    String name = path.getFileName().toString().toLowerCase();
+                    return supportedExtensions.stream().anyMatch(name::endsWith);
+                  })
+              .collect(Collectors.toList());
+
+      int mediaId = 1;
+      for (Path filePath : mediaFilePaths) {
+        String filename = filePath.getFileName().toString();
+
+        // Extract climb ID from filename (e.g., "climb1_photo.jpg" -> "climb1")
+        String climbId = extractClimbIdFromFilename(filename, climbIds);
+        if (climbId == null) {
+          logWarning("Skipping media file without matching climb ID: " + filename);
+          continue;
+        }
+
+        String relativePath = mediaDirectory.toPath().relativize(filePath).toString();
+        String mediaPath = "media/" + relativePath.replace(File.separatorChar, '/');
+
+        // Read file content for embedding
+        if (mediaStrategy == MediaStrategy.FULL) {
+          byte[] content = Files.readAllBytes(filePath);
+          mediaFiles.put(mediaPath, content);
+        }
+
+        // Create media metadata
+        MediaType type = determineMediaType(filename);
+
+        MediaItem item =
+            MediaItem.builder()
+                .id(mediaId++)
+                .climbId(climbId)
+                .type(type)
+                .source(MediaSource.LOCAL)
+                .filename(filename)
+                .embedded(mediaStrategy == MediaStrategy.FULL)
+                .build();
+
+        mediaItems.add(item);
+        logInfo("Added media: " + filename + " -> " + mediaPath);
+      }
+    }
+
+    // Update archive with media
+    if (!mediaItems.isEmpty()) {
+      archive.setMediaItems(mediaItems);
+      if (mediaStrategy == MediaStrategy.FULL && !mediaFiles.isEmpty()) {
+        archive.setMediaFiles(mediaFiles);
+      }
+      logInfo("Added " + mediaItems.size() + " media files to archive");
+    } else {
+      logInfo("No media files found in directory");
+    }
+  }
+
+  private String extractClimbIdFromFilename(String filename, Set<String> climbIds) {
+    // Try to match climb ID at the beginning of the filename
+    for (String climbId : climbIds) {
+      if (filename.startsWith(climbId + "_") || filename.startsWith(climbId + ".")) {
+        return climbId;
+      }
+    }
+
+    // Try to match climb ID anywhere in the filename
+    for (String climbId : climbIds) {
+      if (filename.contains(climbId)) {
+        return climbId;
+      }
+    }
+
+    return null;
+  }
+
+  private MediaType determineMediaType(String filename) {
+    String lower = filename.toLowerCase();
+    if (lower.matches(".*\\.(mp4|mov|avi|webm|mkv)$")) {
+      return MediaType.VIDEO;
+    }
+    return MediaType.PHOTO;
   }
 }

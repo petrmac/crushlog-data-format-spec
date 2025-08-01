@@ -1,0 +1,42 @@
+{
+  "manifest": {
+    "version": "1.0.0",
+    "format": "CLDF",
+    "creationDate": "2024-01-15T10:00:00Z",
+    "platform": "Desktop",
+    "appVersion": "2.5.0"
+  },
+  "locations": [{
+    "id": 1,
+    "name": "Full Data Crag",
+    "country": "Slovakia",
+    "isIndoor": false,
+    "coordinates": {
+      "latitude": 48.1486,
+      "longitude": 17.1077
+    }
+  }],
+  "routes": [{
+    "id": "1",
+    "locationId": "1",
+    "name": "Classic Route",
+    "routeType": "route"
+  }],
+  "sessions": [{
+    "id": 1,
+    "date": "2024-01-15",
+    "locationId": 1
+  }],
+  "climbs": [{
+    "id": 1,
+    "date": "2024-01-15",
+    "sessionId": 1,
+    "routeId": "1",
+    "type": "route",
+    "finishType": "redpoint"
+  }],
+  "tags": [],
+  "checksums": {
+    "algorithm": "SHA-256"
+  }
+}

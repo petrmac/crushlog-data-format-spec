@@ -21,7 +21,8 @@ import picocli.CommandLine.Command;
       io.cldf.tool.commands.QueryCommand.class,
       io.cldf.tool.commands.LoadCommand.class,
       io.cldf.tool.commands.GraphQueryCommand.class,
-      io.cldf.tool.commands.SchemaCommand.class
+      io.cldf.tool.commands.SchemaCommand.class,
+      io.cldf.tool.commands.TreeCommand.class
     })
 public class Application implements Runnable {
 

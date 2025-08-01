@@ -22,8 +22,9 @@ archive.getClimbs().forEach(climb ->
 ### Dart/Flutter
 ```dart
 // Read CLDF file
-final archive = await CLDF.readFile('climbs.cldf');
-for (final climb in archive.climbs) {
+final reader = CLDFReader();
+final archive = await reader.readFile('climbs.cldf');
+for (final climb in archive.climbs ?? []) {
   print('${climb.routeName} - ${climb.grades?.grade}');
 }
 ```
@@ -523,13 +524,37 @@ See [Enumerations Reference](enums.md) for complete enum definitions.
 
 ## Media Handling
 
-CLDF supports three media export strategies:
+CLDF supports comprehensive media file handling for photos and videos associated with climbing sessions. Media items must be associated with specific climbs to maintain context.
 
-1. **Reference** - Store only media identifiers
-2. **Thumbnails** - Include compressed thumbnails
-3. **Full** - Embed complete media files
+### Export Strategies
 
-See [Media Specification](media.md) for details.
+1. **Reference** - Store only media identifiers and metadata
+2. **Thumbnails** - Include compressed thumbnails (future enhancement)
+3. **Full** - Embed complete media files in the archive
+
+### Supported Formats
+
+- **Photos**: JPG, JPEG, PNG, GIF, BMP, WebP
+- **Videos**: MP4, MOV, AVI, WebM, MKV
+
+### Using Media
+
+```java
+// Java - Access embedded media
+if (archive.hasEmbeddedMedia()) {
+    Map<String, byte[]> mediaFiles = archive.getMediaFiles();
+    byte[] photoData = mediaFiles.get("media/photo.jpg");
+}
+```
+
+```dart
+// Dart - Access embedded media
+if (archive.hasEmbeddedMedia) {
+    final photoBytes = archive.getMediaFile('media/photo.jpg');
+}
+```
+
+See [Media Support Documentation](MEDIA_SUPPORT.md) for comprehensive details on using media features across all platforms.
 
 ## Security
 
@@ -599,27 +624,35 @@ See the [Java client documentation](clients/java/cldf-java/README.md) for more d
 
 #### Dart/Flutter
 
-The Dart client library provides type-safe models and full CLDF support for Dart and Flutter applications.
+The Dart client library provides type-safe models and full CLDF support for Dart and Flutter applications, including media file handling.
 
 **Installation:**
 ```yaml
 dependencies:
-  cldf_dart: ^1.0.0
+  cldf: ^1.0.0
 ```
 
 **Quick Example:**
 ```dart
-import 'package:cldf_dart/cldf_dart.dart';
+import 'package:cldf/cldf.dart';
 
 // Read CLDF archive
-final archive = await CLDF.readFile('climbing-data.cldf');
-print('Climbs: ${archive.climbs.length}');
+final reader = CLDFReader();
+final archive = await reader.readFile('climbing-data.cldf');
+print('Climbs: ${archive.climbs?.length ?? 0}');
+
+// Access embedded media
+if (archive.hasEmbeddedMedia) {
+  final photoBytes = archive.getMediaFile('media/photo.jpg');
+  // Process or save photo bytes
+}
 
 // Write CLDF archive
-await CLDF.writeFile(archive, 'output.cldf');
+final writer = CLDFWriter();
+await writer.writeFile('output.cldf', archive);
 ```
 
-See the [Dart client documentation](clients/dart/cldf_dart/README.md) for more details.
+See the [Dart client documentation](clients/dart/cldf/README.md) for more details.
 
 
 ### Tools

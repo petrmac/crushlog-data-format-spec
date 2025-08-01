@@ -51,6 +51,14 @@
           "type": "string",
           "description": "State or province"
         },
+        "city": {
+          "type": "string",
+          "description": "City or town name"
+        },
+        "address": {
+          "type": "string",
+          "description": "Street address"
+        },
         "isIndoor": {
           "type": "boolean",
           "description": "Whether this is an indoor climbing location"

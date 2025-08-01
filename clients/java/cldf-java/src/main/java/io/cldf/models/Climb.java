@@ -44,7 +44,6 @@ public class Climb {
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm:ss")
   private LocalTime time;
 
-  @JsonProperty(required = true)
   private String routeName;
 
   private GradeInfo grades;

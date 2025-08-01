@@ -1,0 +1,45 @@
+# Dart/Flutter related
+.dart_tool/
+.packages
+build/
+pubspec.lock
+doc/api/
+
+# Generated files
+*.g.dart
+*.freezed.dart
+*.mocks.dart
+
+# Coverage
+coverage/
+*.lcov
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+
+# Linux
+*~
+
+# Example output
+example/*.cldf
+example/cldf_example
+example/cldf_example.exe
+
+# Test artifacts
+test/*.cldf
+test/temp/
+
+# Temporary files
+*.tmp
+*.temp
+*.log

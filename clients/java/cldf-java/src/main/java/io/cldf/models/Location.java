@@ -35,6 +35,10 @@ public class Location {
 
   private String state;
 
+  private String city;
+
+  private String address;
+
   @Builder.Default private boolean starred = false;
 
   private RockType rockType;

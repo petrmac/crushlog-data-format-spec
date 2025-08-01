@@ -12,6 +12,12 @@
       },
       {
         "pattern": "META-INF/services/.*"
+      },
+      {
+        "pattern": "leap_second_dates.csv"
+      },
+      {
+        "pattern": "com/ethlo/time/.*"
       }
     ]
   }
