@@ -2,8 +2,8 @@
 
 [![Dart CI](https://github.com/crushlog/crushlog-data-format-spec/actions/workflows/dart-ci.yml/badge.svg)](https://github.com/crushlog/crushlog-data-format-spec/actions/workflows/dart-ci.yml)
 [![pub package](https://img.shields.io/pub/v/cldf.svg)](https://pub.dev/packages/cldf)
-[![Coverage Status](https://sonarcloud.io/api/project_badges/measure?project=petrmac_crushlog-data-format-spec_dart&metric=coverage)](https://sonarcloud.io/summary/new_code?id=petrmac_crushlog-data-format-spec_dart)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=petrmac_crushlog-data-format-spec_dart&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=petrmac_crushlog-data-format-spec_dart)
+[![Coverage Status](https://sonarcloud.io/api/project_badges/measure?project=petrmac_crushlog-data-format-spec&metric=coverage)](https://sonarcloud.io/summary/new_code?id=petrmac_crushlog-data-format-spec)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=petrmac_crushlog-data-format-spec&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=petrmac_crushlog-data-format-spec_dart)
 
 A Dart implementation of the Crushlog Data Format (CLDF) for climbing data exchange.
 
