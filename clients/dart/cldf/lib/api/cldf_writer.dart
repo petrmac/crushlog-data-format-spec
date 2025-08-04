@@ -102,7 +102,7 @@ class CLDFWriter {
     );
 
     // Encode to zip
-    return ZipEncoder().encode(zipArchive)!;
+    return ZipEncoder().encode(zipArchive);
   }
 
   /// Add a JSON file to the archive and calculate checksum
