@@ -15,6 +15,16 @@ A Dart implementation of the Crushlog Data Format (CLDF) for climbing data excha
 - Archive creation with automatic checksums
 - Validation support
 
+## Platform Support
+
+This package supports all platforms except Web/WASM because CLDF archives require file system access for reading and writing .cldf files. The package works on:
+- ✅ Android
+- ✅ iOS  
+- ✅ macOS
+- ✅ Windows
+- ✅ Linux
+- ❌ Web (file I/O not available)
+
 ## Installation
 
 Add this to your package's `pubspec.yaml` file:

@@ -492,9 +492,9 @@ public class CreateCommand extends BaseCommand {
             );
 
     // Build a map of climb IDs for matching
-    Set<String> climbIds = new HashSet<>();
+    Set<Integer> climbIds = new HashSet<>();
     if (archive.getClimbs() != null) {
-      archive.getClimbs().forEach(climb -> climbIds.add(climb.getId().toString()));
+      archive.getClimbs().forEach(climb -> climbIds.add(climb.getId()));
     }
 
     // Scan for media files
@@ -516,8 +516,8 @@ public class CreateCommand extends BaseCommand {
       for (Path filePath : mediaFilePaths) {
         String filename = filePath.getFileName().toString();
 
-        // Extract climb ID from filename (e.g., "climb1_photo.jpg" -> "climb1")
-        String climbId = extractClimbIdFromFilename(filename, climbIds);
+        // Extract climb ID from filename (e.g., "1_photo.jpg" -> 1)
+        Integer climbId = extractClimbIdFromFilename(filename, climbIds);
         if (climbId == null) {
           logWarning("Skipping media file without matching climb ID: " + filename);
           continue;
@@ -562,17 +562,18 @@ public class CreateCommand extends BaseCommand {
     }
   }
 
-  private String extractClimbIdFromFilename(String filename, Set<String> climbIds) {
+  private Integer extractClimbIdFromFilename(String filename, Set<Integer> climbIds) {
     // Try to match climb ID at the beginning of the filename
-    for (String climbId : climbIds) {
-      if (filename.startsWith(climbId + "_") || filename.startsWith(climbId + ".")) {
+    for (Integer climbId : climbIds) {
+      String climbIdStr = climbId.toString();
+      if (filename.startsWith(climbIdStr + "_") || filename.startsWith(climbIdStr + ".")) {
         return climbId;
       }
     }
 
     // Try to match climb ID anywhere in the filename
-    for (String climbId : climbIds) {
-      if (filename.contains(climbId)) {
+    for (Integer climbId : climbIds) {
+      if (filename.contains(climbId.toString())) {
         return climbId;
       }
     }

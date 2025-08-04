@@ -54,7 +54,7 @@ void main() {
       // Create media items with proper structure
       final mediaItems = [
         MediaItem(
-          id: '1',
+          id: 1,
           type: MediaType.photo,
           source: MediaSource.embedded,
           path: 'media/climb_photo.jpg',
@@ -65,7 +65,7 @@ void main() {
           height: 1080,
         ),
         MediaItem(
-          id: '2',
+          id: 2,
           type: MediaType.video,
           source: MediaSource.embedded,
           path: 'media/climb_video.mp4',
@@ -162,7 +162,7 @@ void main() {
       // Create media items without embedding (using reference)
       final mediaItems = [
         MediaItem(
-          id: '1',
+          id: 1,
           type: MediaType.photo,
           source: MediaSource.reference,
           path: 'photos/climb123.jpg',
@@ -236,7 +236,7 @@ void main() {
 
     test('should handle media metadata correctly', () async {
       final mediaItem = MediaItem(
-        id: '1',
+        id: 1,
         type: MediaType.photo,
         source: MediaSource.embedded,
         path: 'media/summit.jpg',
@@ -298,7 +298,7 @@ void main() {
 
     test('should serialize media to JSON correctly', () {
       final mediaItem = MediaItem(
-        id: '1',
+        id: 1,
         type: MediaType.video,
         source: MediaSource.external,
         path: 'https://example.com/video.mp4',
@@ -312,7 +312,7 @@ void main() {
 
       final json = mediaItem.toJson();
 
-      expect(json['id'], equals('1'));
+      expect(json['id'], equals(1));
       expect(json['climbId'], equals(1));
       expect(json['type'], equals('video'));
       expect(json['source'], equals('external'));
@@ -326,7 +326,7 @@ void main() {
 
     test('should deserialize media from JSON correctly', () {
       final json = {
-        'id': '42',
+        'id': 42,
         'climbId': 123,
         'type': 'photo',
         'source': 'embedded',
@@ -341,7 +341,7 @@ void main() {
 
       final mediaItem = MediaItem.fromJson(json);
 
-      expect(mediaItem.id, equals('42'));
+      expect(mediaItem.id, equals(42));
       expect(mediaItem.climbId, equals(123));
       expect(mediaItem.type, equals(MediaType.photo));
       expect(mediaItem.source, equals(MediaSource.embedded));
@@ -360,7 +360,7 @@ void main() {
 
     test('should handle missing optional fields', () {
       final json = {
-        'id': '1',
+        'id': 1,
         'type': 'photo',
         'source': 'reference',
         'path': '/photos/climb.jpg',
@@ -368,7 +368,7 @@ void main() {
 
       final mediaItem = MediaItem.fromJson(json);
 
-      expect(mediaItem.id, equals('1'));
+      expect(mediaItem.id, equals(1));
       expect(mediaItem.type, equals(MediaType.photo));
       expect(mediaItem.source, equals(MediaSource.reference));
       expect(mediaItem.path, equals('/photos/climb.jpg'));

@@ -2,6 +2,7 @@ import 'package:json_annotation/json_annotation.dart';
 
 import 'enums/protection_rating.dart';
 import 'enums/route_type.dart';
+import 'enums/route_characteristics.dart';
 
 part 'route.g.dart';
 
@@ -15,6 +16,7 @@ class Route {
     this.sectorId,
     required this.name,
     required this.routeType,
+    this.routeCharacteristics,
     this.grades,
     this.height,
     this.bolts,
@@ -24,6 +26,7 @@ class Route {
     this.popularity,
     this.qualityRating,
     this.beta,
+    this.gearNotes,
     this.tags,
     this.customFields,
   });
@@ -45,6 +48,9 @@ class Route {
 
   /// Type of route
   final RouteType routeType;
+
+  /// Route protection characteristics (trad, bolted)
+  final RouteCharacteristics? routeCharacteristics;
 
   /// Grades in different systems
   final Map<String, String>? grades;
@@ -72,6 +78,9 @@ class Route {
 
   /// Beta information
   final String? beta;
+
+  /// Specific gear requirements or protection notes
+  final String? gearNotes;
 
   /// Associated tags
   final List<String>? tags;

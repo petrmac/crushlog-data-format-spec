@@ -35,7 +35,7 @@ class MediaItem {
       _$MediaItemFromJson(json);
 
   /// Unique identifier
-  final String id;
+  final int id;
 
   /// Type of media
   final MediaType type;

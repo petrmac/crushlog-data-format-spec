@@ -1,0 +1,14 @@
+# Override .gitignore for publishing
+# By NOT listing *.g.dart here, they WILL be included in the package
+
+.dart_tool/
+.packages
+build/
+doc/api/
+coverage/
+.idea/
+.vscode/
+.DS_Store
+test/*.cldf
+example/*.cldf
+PUBLISHING.md

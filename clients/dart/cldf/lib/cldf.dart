@@ -22,6 +22,9 @@ export 'models/session.dart';
 export 'models/tag.dart';
 export 'models/media_item.dart';
 export 'models/checksums.dart';
+// Flexible media model exports
+export 'models/media/media.dart';
+export 'models/media/flexible_media_item.dart';
 
 // Enum exports
 export 'models/enums/platform.dart';
@@ -36,3 +39,4 @@ export 'models/enums/terrain_type.dart';
 export 'models/enums/media_type.dart';
 export 'models/enums/media_source.dart';
 export 'models/enums/protection_rating.dart';
+export 'models/enums/route_characteristics.dart';

@@ -2,17 +2,21 @@ import 'package:json_annotation/json_annotation.dart';
 
 @JsonEnum(valueField: 'value')
 enum RockType {
+  sandstone('sandstone'),
   limestone('limestone'),
   granite('granite'),
-  sandstone('sandstone'),
   basalt('basalt'),
-  conglomerate('conglomerate'),
   gneiss('gneiss'),
   quartzite('quartzite'),
-  rhyolite('rhyolite'),
+  conglomerate('conglomerate'),
   schist('schist'),
-  tuff('tuff'),
-  other('other');
+  dolomite('dolomite'),
+  slate('slate'),
+  rhyolite('rhyolite'),
+  gabbro('gabbro'),
+  volcanicTuff('volcanicTuff'),
+  andesite('andesite'),
+  chalk('chalk');
 
   final String value;
   const RockType(this.value);

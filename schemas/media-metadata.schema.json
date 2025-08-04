@@ -23,7 +23,7 @@
           "description": "Unique identifier for the media item"
         },
         "climbId": {
-          "type": "string",
+          "type": "integer",
           "description": "Reference to the associated climb"
         },
         "type": {

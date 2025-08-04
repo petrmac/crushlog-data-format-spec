@@ -32,6 +32,7 @@ class Session {
     this.terrainType,
     this.approachTime,
     this.departureTime,
+    this.isOngoing = false,
     this.tags,
     this.customFields,
   });
@@ -88,6 +89,9 @@ class Session {
 
   /// Departure time in minutes
   final int? departureTime;
+
+  /// Whether the session is currently ongoing
+  final bool isOngoing;
 
   /// Associated tags
   final List<String>? tags;

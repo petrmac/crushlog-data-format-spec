@@ -12,15 +12,17 @@ class Location {
   Location({
     required this.id,
     required this.name,
-    required this.country,
     required this.isIndoor,
+    this.country,
     this.state,
     this.city,
     this.address,
     this.coordinates,
+    this.starred = false,
     this.rockType,
     this.terrainType,
     this.accessInfo,
+    this.createdAt,
     this.tags,
     this.customFields,
   });
@@ -35,11 +37,11 @@ class Location {
   /// Location name
   final String name;
 
-  /// Country
-  final String country;
-
   /// Whether this is an indoor location
   final bool isIndoor;
+
+  /// Country
+  final String? country;
 
   /// State or province
   final String? state;
@@ -53,6 +55,9 @@ class Location {
   /// GPS coordinates
   final Coordinates? coordinates;
 
+  /// Whether this location is marked as favorite
+  final bool starred;
+
   /// Type of rock
   final RockType? rockType;
 
@@ -61,6 +66,9 @@ class Location {
 
   /// Access information
   final String? accessInfo;
+
+  /// Creation timestamp
+  final DateTime? createdAt;
 
   /// Associated tags
   final List<String>? tags;
