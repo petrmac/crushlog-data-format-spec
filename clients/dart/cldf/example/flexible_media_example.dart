@@ -12,7 +12,6 @@ void main() {
 
   final hasVideo = true;
   final videoPath = 'https://example.com/videos/send.mp4';
-  final videoAssetId = null; // External URL, no asset ID
 
   // Convert to CLDF flexible media
   final items = <FlexibleMediaItem>[];
@@ -24,7 +23,7 @@ void main() {
         path: photoPath,
         assetId: photoAssetId,
         thumbnailPath: photoThumbnailPath,
-        source: photoAssetId != null ? MediaSource.cloud : MediaSource.local,
+        source: MediaSource.cloud, // photoAssetId is never null in this example
         metadata: {'width': 3840, 'height': 2160, 'size': 2500000},
       ),
     );
