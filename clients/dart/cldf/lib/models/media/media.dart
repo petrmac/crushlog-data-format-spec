@@ -22,4 +22,3 @@ class Media {
   /// Converts this [Media] to JSON
   Map<String, dynamic> toJson() => _$MediaToJson(this);
 }
-

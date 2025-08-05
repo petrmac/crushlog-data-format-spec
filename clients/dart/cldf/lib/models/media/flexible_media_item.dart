@@ -43,4 +43,3 @@ class FlexibleMediaItem {
   /// Converts this [FlexibleMediaItem] to JSON
   Map<String, dynamic> toJson() => _$FlexibleMediaItemToJson(this);
 }
-
