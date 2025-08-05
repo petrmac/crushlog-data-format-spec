@@ -376,7 +376,7 @@ class CLDFArchiveSpec extends Specification {
 		return [
 			MediaItem.builder()
 			.id(1)
-			.climbId("1")
+			.climbId(1)
 			.filename("test.jpg")
 			.type(MediaType.PHOTO)
 			.createdAt(OffsetDateTime.now())

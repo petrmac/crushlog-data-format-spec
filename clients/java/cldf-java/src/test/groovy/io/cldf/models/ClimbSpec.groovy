@@ -13,6 +13,7 @@ import io.cldf.models.enums.FinishType
 import io.cldf.models.enums.GradeSystem
 import io.cldf.models.enums.RockType
 import io.cldf.models.enums.TerrainType
+import io.cldf.models.media.Media
 
 class ClimbSpec extends Specification {
 
@@ -81,11 +82,7 @@ class ClimbSpec extends Specification {
 				.notes("Epic send!")
 				.tags(["overhang", "endurance"])
 				.beta("Start with undercling")
-				.media(Climb.Media.builder()
-				.photos(["send1.jpg", "send2.jpg"])
-				.videos(["climb.mp4"])
-				.count(3)
-				.build())
+				.media(null) // Media now handled separately through mediaItems
 				.color("red")
 				.rockType(RockType.GRANITE)
 				.terrainType(TerrainType.NATURAL)
@@ -127,10 +124,8 @@ class ClimbSpec extends Specification {
 		climb.grades.system == GradeSystem.YDS
 		climb.grades.grade == "5.14a"
 
-		and: "media is correct"
-		climb.media.photos.size() == 2
-		climb.media.videos.size() == 1
-		climb.media.count == 3
+		and: "media is null (now handled separately)"
+		climb.media == null
 	}
 
 	def "should serialize climb to JSON"() {

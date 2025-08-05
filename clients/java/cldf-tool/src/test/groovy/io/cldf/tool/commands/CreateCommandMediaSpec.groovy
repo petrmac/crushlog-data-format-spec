@@ -186,7 +186,7 @@ class CreateCommandMediaSpec extends Specification {
         archive.mediaItems.size() == 1
         archive.mediaFiles == null
         archive.mediaItems[0].embedded == false
-        archive.mediaItems[0].climbId == "1"
+        archive.mediaItems[0].climbId == 1
     }
 
     def "should handle subdirectories in media folder"() {

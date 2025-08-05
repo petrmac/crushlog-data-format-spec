@@ -107,5 +107,4 @@ public class Climb {
 
     private Map<String, String> conversions;
   }
-
 }
