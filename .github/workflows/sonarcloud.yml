@@ -92,11 +92,21 @@ jobs:
         fi
     
     # Java Setup for SonarCloud scanner
-    - name: Set up JDK 17
+    - name: Set up JDK 21
       uses: actions/setup-java@v4
       with:
-        java-version: 17
+        java-version: 21
         distribution: 'temurin'
+    
+    - name: Cache Gradle packages
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-
     
     - name: Cache SonarQube packages
       uses: actions/cache@v4
@@ -105,27 +115,45 @@ jobs:
         key: ${{ runner.os }}-sonar
         restore-keys: ${{ runner.os }}-sonar
     
-    # Run SonarCloud analysis using the root configuration
-    - name: SonarCloud Scan
+    # Build Java project to generate binaries needed for analysis
+    - name: Build Java project
+      working-directory: clients/java
+      run: |
+        chmod +x gradlew
+        mkdir -p cldf-java/src/main/resources
+        rm -rf cldf-java/src/main/resources/schemas
+        cp -r ../../schemas cldf-java/src/main/resources/
+        ./gradlew build -x test
+    
+    # Run SonarCloud analysis using Gradle for Java only first
+    - name: Run SonarCloud Analysis for Java
+      working-directory: clients/java
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      run: |
+        ./gradlew sonar \
+          -Dsonar.projectKey=petrmac_crushlog-data-format-spec \
+          -Dsonar.organization=petrmacek \
+          -Dsonar.host.url=https://sonarcloud.io \
+          -Dsonar.projectName="CrushLog Data Format Specification" \
+          -Dsonar.projectVersion=1.1.1 \
+          --info
+    
+    # Run separate analysis for Dart using SonarScanner
+    - name: Analyze Dart with SonarCloud
       uses: SonarSource/sonarcloud-github-action@master
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       with:
+        projectBaseDir: clients/dart/cldf
         args: >
-          -Dsonar.verbose=true
-          -Dsonar.projectKey=petrmac_crushlog-data-format-spec
+          -Dsonar.projectKey=petrmac_crushlog-data-format-spec-dart
           -Dsonar.organization=petrmacek
-          -Dsonar.projectName="CrushLog Data Format Specification"
-          -Dsonar.modules=java,dart
-          -Djava.sonar.projectBaseDir=clients/java
-          -Djava.sonar.sources=cldf-java/src/main/java,cldf-tool/src/main/java
-          -Djava.sonar.tests=cldf-java/src/test,cldf-tool/src/test
-          -Djava.sonar.java.binaries=cldf-java/build/classes/java/main,cldf-tool/build/classes/java/main
-          -Djava.sonar.coverage.jacoco.xmlReportPaths=cldf-java/build/reports/jacoco/test/jacocoTestReport.xml,cldf-tool/build/reports/jacoco/test/jacocoTestReport.xml
-          -Ddart.sonar.projectBaseDir=clients/dart/cldf
-          -Ddart.sonar.sources=lib
-          -Ddart.sonar.tests=test
-          -Ddart.sonar.exclusions=**/*.g.dart,**/*.freezed.dart,**/*.mocks.dart,**/generated/**
-          -Ddart.sonar.language=dart
-          -Ddart.sonar.dart.coverage.reportPath=coverage/lcov.info
+          -Dsonar.projectName="CLDF Dart Client"
+          -Dsonar.sources=lib
+          -Dsonar.tests=test
+          -Dsonar.exclusions=**/*.g.dart,**/*.freezed.dart,**/*.mocks.dart,**/generated/**
+          -Dsonar.language=dart
+          -Dsonar.dart.coverage.reportPath=coverage/lcov.info
