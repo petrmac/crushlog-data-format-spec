@@ -23,7 +23,7 @@ public class MediaItem {
   private Integer id;
 
   @JsonProperty(required = true)
-  private String climbId;
+  private Integer climbId;
 
   @JsonProperty(required = true)
   private MediaType type;

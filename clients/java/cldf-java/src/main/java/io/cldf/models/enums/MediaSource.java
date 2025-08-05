@@ -5,9 +5,12 @@ import com.fasterxml.jackson.annotation.JsonValue;
 
 /** Source of media. */
 public enum MediaSource {
-  PHOTOS_LIBRARY("photos_library"),
   LOCAL("local"),
-  EMBEDDED("embedded");
+  CLOUD("cloud"),
+  REFERENCE("reference"),
+  EMBEDDED("embedded"),
+  // Legacy value for backward compatibility
+  PHOTOS_LIBRARY("photos_library");
 
   private final String value;
 

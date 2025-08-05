@@ -2,6 +2,7 @@ package io.cldf.api
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.cldf.models.*
+import io.cldf.models.media.Media
 import spock.lang.Specification
 import spock.lang.TempDir
 
@@ -255,14 +256,12 @@ class CLDFWriterSpec extends Specification {
 				.routeName("Photo Route")
 				.type(ClimbType.ROUTE)
 				.finishType(FinishType.REDPOINT)
-				.media(Climb.Media.builder()
-				.photos(["photo1.jpg", "photo2.jpg"])
-				.build())
+				.media(null) // Media now handled separately through mediaItems
 				.build()
 
 		def mediaItem = MediaItem.builder()
 				.id(1)
-				.climbId("1")
+				.climbId(1)
 				.filename("photo1.jpg")
 				.type(MediaType.PHOTO)
 				.createdAt(OffsetDateTime.now())
@@ -403,7 +402,7 @@ class CLDFWriterSpec extends Specification {
 		return [
 			MediaItem.builder()
 			.id(1)
-			.climbId("1")
+			.climbId(1)
 			.filename("test.jpg")
 			.type(MediaType.PHOTO)
 			.createdAt(OffsetDateTime.now())

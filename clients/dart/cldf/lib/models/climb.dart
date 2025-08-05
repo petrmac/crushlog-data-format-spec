@@ -7,6 +7,7 @@ import 'enums/finish_type.dart';
 import 'enums/grade_system.dart';
 import 'enums/rock_type.dart';
 import 'enums/terrain_type.dart';
+import 'media/media.dart';
 
 part 'climb.g.dart';
 
@@ -164,26 +165,4 @@ class GradeInfo {
 
   /// Converts this [GradeInfo] to JSON
   Map<String, dynamic> toJson() => _$GradeInfoToJson(this);
-}
-
-/// Media references
-@JsonSerializable()
-class Media {
-  /// Creates a new [Media] instance
-  Media({this.photos, this.videos, this.count});
-
-  /// Creates a [Media] from JSON
-  factory Media.fromJson(Map<String, dynamic> json) => _$MediaFromJson(json);
-
-  /// List of photo references
-  final List<String>? photos;
-
-  /// List of video references
-  final List<String>? videos;
-
-  /// Total media count
-  final int? count;
-
-  /// Converts this [Media] to JSON
-  Map<String, dynamic> toJson() => _$MediaToJson(this);
 }

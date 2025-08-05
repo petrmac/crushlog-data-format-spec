@@ -79,12 +79,14 @@ void main() async {
       Tag(
         id: 1,
         category: 'style',
+        isPredefined: false,
         name: 'crimpy',
         description: 'Routes with small crimpy holds',
       ),
       Tag(
         id: 2,
         category: 'style',
+        isPredefined: false,
         name: 'overhang',
         description: 'Overhanging routes',
       ),

@@ -14,6 +14,7 @@ import io.cldf.models.enums.FinishType;
 import io.cldf.models.enums.GradeSystem;
 import io.cldf.models.enums.RockType;
 import io.cldf.models.enums.TerrainType;
+import io.cldf.models.media.Media;
 import io.cldf.utils.FlexibleLocalDateDeserializer;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -105,16 +106,5 @@ public class Climb {
     private String grade;
 
     private Map<String, String> conversions;
-  }
-
-  /** Media references for a climb. */
-  @Data
-  @Builder
-  @NoArgsConstructor
-  @AllArgsConstructor
-  public static class Media {
-    private List<String> photos;
-    private List<String> videos;
-    private Integer count;
   }
 }

@@ -158,25 +158,7 @@
           "description": "Beta information for the climb"
         },
         "media": {
-          "type": "object",
-          "properties": {
-            "photos": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-            "videos": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-            "count": {
-              "type": "integer",
-              "minimum": 0
-            }
-          }
+          "$ref": "media.schema.json"
         },
         "color": {
           "type": "string",
