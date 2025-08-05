@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.1.1
+
+### Added
+- Example demonstrating flexible media model usage
+- Tests for enum helper methods (FinishType validation)
+- Tests for all model classes including Manifest, Route, and Session
+
+### Fixed
+- Flutter static analysis warnings in test files
+- Test coverage improved from 86.3% to 96.3%
+
 ## 1.1.0
 
 ### Added
