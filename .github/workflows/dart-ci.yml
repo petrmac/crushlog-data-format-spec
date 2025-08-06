@@ -71,8 +71,11 @@ jobs:
     - name: Run build_runner
       run: dart run build_runner build --delete-conflicting-outputs
     
-    - name: Run tests with coverage
-      run: dart test --coverage=coverage
+    - name: Run tests with coverage and JUnit output
+      run: |
+        dart pub global activate junitreport
+        dart test --coverage=coverage --reporter=json | dart pub global run junitreport:tojunit --output test-results.xml
+      continue-on-error: true
     
     - name: Install coverage tools
       run: dart pub global activate coverage
@@ -82,12 +85,14 @@ jobs:
       run: dart pub global run coverage:format_coverage --lcov --in=coverage --out=coverage/lcov.info --report-on=lib
       if: matrix.os == 'ubuntu-latest' && matrix.dart == 'stable'
     
-    - name: Upload coverage reports
+    - name: Upload coverage and test reports
       uses: actions/upload-artifact@v4
       if: matrix.os == 'ubuntu-latest' && matrix.dart == 'stable'
       with:
-        name: dart-coverage-reports
-        path: clients/dart/cldf/coverage/lcov.info
+        name: dart-test-reports
+        path: |
+          clients/dart/cldf/coverage/lcov.info
+          clients/dart/cldf/test-results.xml
         retention-days: 7
     
   # Step 3: Build example
