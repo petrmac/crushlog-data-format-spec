@@ -2,10 +2,10 @@ import 'package:json_annotation/json_annotation.dart';
 
 @JsonEnum(valueField: 'value')
 enum Platform {
-  desktop('Desktop'),
-  mobile('Mobile'),
+  iOS('iOS'),
+  android('Android'),
   web('Web'),
-  api('API');
+  desktop('Desktop');
 
   final String value;
   const Platform(this.value);

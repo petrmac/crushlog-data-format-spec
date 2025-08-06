@@ -7,14 +7,14 @@ void main() {
       final manifest = Manifest(
         version: '1.0.0',
         creationDate: DateTime(2024, 1, 15),
-        platform: Platform.mobile,
+        platform: Platform.iOS,
         appVersion: '1.0.0',
       );
 
       final json = manifest.toJson();
       expect(json['version'], '1.0.0');
       expect(json['format'], 'CLDF');
-      expect(json['platform'], 'Mobile');
+      expect(json['platform'], 'iOS');
     });
 
     test('Location can be created and serialized', () {
@@ -58,7 +58,7 @@ void main() {
         manifest: Manifest(
           version: '1.0.0',
           creationDate: DateTime.now(),
-          platform: Platform.mobile,
+          platform: Platform.iOS,
           appVersion: '1.0.0',
         ),
         locations: [

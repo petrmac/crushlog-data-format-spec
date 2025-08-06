@@ -189,7 +189,7 @@ void main() {
       final manifest = Manifest(
         version: '1.0.0',
         creationDate: DateTime.utc(2024, 1, 29, 12),
-        platform: Platform.mobile,
+        platform: Platform.iOS,
         appVersion: '1.0.0',
       );
 

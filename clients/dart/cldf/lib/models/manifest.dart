@@ -16,7 +16,9 @@ class Manifest {
     required this.platform,
     required this.appVersion,
     this.description,
-    this.creator,
+    this.author,
+    this.source,
+    this.stats,
     this.exportConfig,
   });
 
@@ -43,37 +45,43 @@ class Manifest {
   /// Optional description
   final String? description;
 
-  /// Creator information
-  final Creator? creator;
+  /// Author information
+  final Author? author;
+
+  /// Source application or system that created the export
+  final String? source;
+
+  /// Statistics about exported data
+  final Stats? stats;
 
   /// Export configuration
+  @JsonKey(name: 'exportOptions')
   final ExportConfig? exportConfig;
 
   /// Converts this [Manifest] to JSON
   Map<String, dynamic> toJson() => _$ManifestToJson(this);
 }
 
-/// Creator information
+/// Author information
 @JsonSerializable()
-class Creator {
-  /// Creates a new [Creator] instance
-  Creator({this.name, this.email, this.userId});
+class Author {
+  /// Creates a new [Author] instance
+  Author({this.name, this.email, this.website});
 
-  /// Creates a [Creator] from JSON
-  factory Creator.fromJson(Map<String, dynamic> json) =>
-      _$CreatorFromJson(json);
+  /// Creates an [Author] from JSON
+  factory Author.fromJson(Map<String, dynamic> json) => _$AuthorFromJson(json);
 
-  /// Name of the creator
+  /// Name of the author
   final String? name;
 
-  /// Email of the creator
+  /// Email of the author
   final String? email;
 
-  /// User ID of the creator
-  final String? userId;
+  /// Website URL of the author
+  final String? website;
 
-  /// Converts this [Creator] to JSON
-  Map<String, dynamic> toJson() => _$CreatorToJson(this);
+  /// Converts this [Author] to JSON
+  Map<String, dynamic> toJson() => _$AuthorToJson(this);
 }
 
 /// Export configuration
@@ -85,6 +93,7 @@ class ExportConfig {
     this.mediaStrategy,
     this.mediaQuality,
     this.anonymized,
+    this.dateRange,
   });
 
   /// Creates a [ExportConfig] from JSON
@@ -103,6 +112,71 @@ class ExportConfig {
   /// Whether data is anonymized
   final bool? anonymized;
 
+  /// Date range for filtered exports
+  final DateRange? dateRange;
+
   /// Converts this [ExportConfig] to JSON
   Map<String, dynamic> toJson() => _$ExportConfigToJson(this);
+}
+
+/// Date range for filtered exports
+@JsonSerializable()
+class DateRange {
+  /// Creates a new [DateRange] instance
+  DateRange({required this.start, required this.end});
+
+  /// Creates a [DateRange] from JSON
+  factory DateRange.fromJson(Map<String, dynamic> json) =>
+      _$DateRangeFromJson(json);
+
+  /// Start date
+  final String start;
+
+  /// End date
+  final String end;
+
+  /// Converts this [DateRange] to JSON
+  Map<String, dynamic> toJson() => _$DateRangeToJson(this);
+}
+
+/// Statistics about exported data
+@JsonSerializable()
+class Stats {
+  /// Creates a new [Stats] instance
+  Stats({
+    this.climbsCount,
+    this.sessionsCount,
+    this.locationsCount,
+    this.routesCount,
+    this.sectorsCount,
+    this.tagsCount,
+    this.mediaCount,
+  });
+
+  /// Creates a [Stats] from JSON
+  factory Stats.fromJson(Map<String, dynamic> json) => _$StatsFromJson(json);
+
+  /// Number of climbs in the export
+  final int? climbsCount;
+
+  /// Number of sessions in the export
+  final int? sessionsCount;
+
+  /// Number of locations in the export
+  final int? locationsCount;
+
+  /// Number of routes in the export
+  final int? routesCount;
+
+  /// Number of sectors in the export
+  final int? sectorsCount;
+
+  /// Number of tags in the export
+  final int? tagsCount;
+
+  /// Number of media items in the export
+  final int? mediaCount;
+
+  /// Converts this [Stats] to JSON
+  Map<String, dynamic> toJson() => _$StatsToJson(this);
 }

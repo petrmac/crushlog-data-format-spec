@@ -6,10 +6,10 @@ void main() async {
     manifest: Manifest(
       version: '1.0.0',
       creationDate: DateTime.now(),
-      platform: Platform.mobile,
+      platform: Platform.iOS,
       appVersion: '1.0.0',
       description: 'Sample climbing data export',
-      creator: Creator(name: 'John Climber', email: 'john@example.com'),
+      author: Author(name: 'John Climber', email: 'john@example.com'),
     ),
     locations: [
       Location(

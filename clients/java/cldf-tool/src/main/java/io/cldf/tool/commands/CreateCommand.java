@@ -134,6 +134,12 @@ public class CreateCommand extends BaseCommand {
       }
     }
 
+    // Calculate and set stats if not already present
+    if (archive.getManifest() != null && archive.getManifest().getStats() == null) {
+      logInfo("Calculating archive statistics...");
+      archive.getManifest().setStats(calculateStats(archive));
+    }
+
     if (validate) {
       logInfo("Validating archive...");
       var validationResult = validationService.validate(archive);
@@ -156,8 +162,11 @@ public class CreateCommand extends BaseCommand {
 
     Map<String, Object> stats = new HashMap<>();
     stats.put("locations", Optional.ofNullable(archive.getLocations()).map(List::size).orElse(0));
+    stats.put("sectors", Optional.ofNullable(archive.getSectors()).map(List::size).orElse(0));
+    stats.put("routes", Optional.ofNullable(archive.getRoutes()).map(List::size).orElse(0));
     stats.put("sessions", Optional.ofNullable(archive.getSessions()).map(List::size).orElse(0));
     stats.put("climbs", Optional.ofNullable(archive.getClimbs()).map(List::size).orElse(0));
+    stats.put("tags", Optional.ofNullable(archive.getTags()).map(List::size).orElse(0));
     stats.put("media", Optional.ofNullable(archive.getMediaItems()).map(List::size).orElse(0));
 
     Map<String, Object> resultData = Map.of("file", outputFile.getAbsolutePath(), "stats", stats);
@@ -310,24 +319,26 @@ public class CreateCommand extends BaseCommand {
                 .isIndoor(true)
                 .build());
 
-    Manifest manifest =
-        Manifest.builder()
-            .version("1.0.0")
-            .format("CLDF")
-            .creationDate(OffsetDateTime.now())
-            .appVersion("1.0.0")
-            .platform(Platform.DESKTOP)
-            .stats(
-                Manifest.Stats.builder().locationsCount(1).sessionsCount(1).climbsCount(2).build())
+    CLDFArchive archive =
+        CLDFArchive.builder()
+            .manifest(
+                Manifest.builder()
+                    .version("1.0.0")
+                    .format("CLDF")
+                    .creationDate(OffsetDateTime.now())
+                    .appVersion("1.0.0")
+                    .platform(Platform.DESKTOP)
+                    .build())
+            .locations(List.of(location))
+            .sessions(List.of(session))
+            .climbs(climbs)
+            .checksums(Checksums.builder().algorithm(ALGORITHM).build())
             .build();
 
-    return CLDFArchive.builder()
-        .manifest(manifest)
-        .locations(List.of(location))
-        .sessions(List.of(session))
-        .climbs(climbs)
-        .checksums(Checksums.builder().algorithm(ALGORITHM).build())
-        .build();
+    // Set stats using the helper method
+    archive.getManifest().setStats(calculateStats(archive));
+
+    return archive;
   }
 
   private CLDFArchive createDemoTemplate() {
@@ -352,6 +363,24 @@ public class CreateCommand extends BaseCommand {
                 .rockType(RockType.SANDSTONE)
                 .coordinates(
                     Location.Coordinates.builder().latitude(39.9308).longitude(-105.2925).build())
+                .createdAt(OffsetDateTime.now())
+                .build());
+
+    // Create sectors for outdoor location
+    List<Sector> sectors =
+        List.of(
+            Sector.builder()
+                .id(1)
+                .locationId(2)
+                .name("The Bastille")
+                .isDefault(true)
+                .createdAt(OffsetDateTime.now())
+                .build(),
+            Sector.builder()
+                .id(2)
+                .locationId(2)
+                .name("Wind Tower")
+                .approach("15 minute hike from parking")
                 .createdAt(OffsetDateTime.now())
                 .build());
 
@@ -430,28 +459,34 @@ public class CreateCommand extends BaseCommand {
     List<Climb> climbs =
         Stream.concat(gymClimbs.stream(), Stream.of(outdoorClimb)).collect(Collectors.toList());
 
-    Manifest manifest =
-        Manifest.builder()
-            .version("1.0.0")
-            .format("CLDF")
-            .creationDate(OffsetDateTime.now())
-            .appVersion("1.0.0")
-            .platform(Platform.DESKTOP)
-            .stats(
-                Manifest.Stats.builder()
-                    .locationsCount(locations.size())
-                    .sessionsCount(sessions.size())
-                    .climbsCount(climbs.size())
+    // Create some tags for the demo
+    List<Tag> tags =
+        List.of(
+            Tag.builder().id(1).name("project").color("#FF5733").isPredefined(true).build(),
+            Tag.builder().id(2).name("onsight").color("#33FF57").isPredefined(true).build());
+
+    CLDFArchive archive =
+        CLDFArchive.builder()
+            .manifest(
+                Manifest.builder()
+                    .version("1.0.0")
+                    .format("CLDF")
+                    .creationDate(OffsetDateTime.now())
+                    .appVersion("1.0.0")
+                    .platform(Platform.DESKTOP)
                     .build())
+            .locations(locations)
+            .sectors(sectors)
+            .sessions(sessions)
+            .climbs(climbs)
+            .tags(tags)
+            .checksums(Checksums.builder().algorithm(ALGORITHM).build())
             .build();
 
-    return CLDFArchive.builder()
-        .manifest(manifest)
-        .locations(locations)
-        .sessions(sessions)
-        .climbs(climbs)
-        .checksums(Checksums.builder().algorithm(ALGORITHM).build())
-        .build();
+    // Set stats using the helper method
+    archive.getManifest().setStats(calculateStats(archive));
+
+    return archive;
   }
 
   private CLDFArchive createFromJson() throws IOException {
@@ -587,5 +622,17 @@ public class CreateCommand extends BaseCommand {
       return MediaType.VIDEO;
     }
     return MediaType.PHOTO;
+  }
+
+  private Manifest.Stats calculateStats(CLDFArchive archive) {
+    return Manifest.Stats.builder()
+        .climbsCount(Optional.ofNullable(archive.getClimbs()).map(List::size).orElse(0))
+        .sessionsCount(Optional.ofNullable(archive.getSessions()).map(List::size).orElse(0))
+        .locationsCount(Optional.ofNullable(archive.getLocations()).map(List::size).orElse(0))
+        .routesCount(Optional.ofNullable(archive.getRoutes()).map(List::size).orElse(0))
+        .sectorsCount(Optional.ofNullable(archive.getSectors()).map(List::size).orElse(0))
+        .tagsCount(Optional.ofNullable(archive.getTags()).map(List::size).orElse(0))
+        .mediaCount(Optional.ofNullable(archive.getMediaItems()).map(List::size).orElse(0))
+        .build();
   }
 }

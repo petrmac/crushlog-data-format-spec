@@ -66,6 +66,7 @@ public class Manifest {
     private Integer sessionsCount;
     private Integer locationsCount;
     private Integer routesCount;
+    private Integer sectorsCount;
     private Integer tagsCount;
     private Integer mediaCount;
   }

@@ -255,7 +255,7 @@ void main() {
         format: 'CLDF',
         creationDate: DateTime.now(),
         appVersion: '1.0.0',
-        platform: Platform.mobile,
+        platform: Platform.iOS,
       );
 
       final location = Location(

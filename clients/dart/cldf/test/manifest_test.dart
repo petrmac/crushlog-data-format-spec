@@ -8,26 +8,26 @@ void main() {
       final manifest = Manifest(
         version: '1.0.0',
         creationDate: now,
-        platform: Platform.mobile,
+        platform: Platform.iOS,
         appVersion: '2.3.4',
       );
 
       expect(manifest.version, equals('1.0.0'));
       expect(manifest.format, equals('CLDF'));
       expect(manifest.creationDate, equals(now));
-      expect(manifest.platform, equals(Platform.mobile));
+      expect(manifest.platform, equals(Platform.iOS));
       expect(manifest.appVersion, equals('2.3.4'));
       expect(manifest.description, isNull);
-      expect(manifest.creator, isNull);
+      expect(manifest.author, isNull);
       expect(manifest.exportConfig, isNull);
     });
 
     test('should create Manifest with all fields', () {
       final now = DateTime.now();
-      final creator = Creator(
+      final author = Author(
         name: 'John Doe',
         email: 'john@example.com',
-        userId: 'user123',
+        website: 'https://example.com',
       );
       final exportConfig = ExportConfig(
         includeMedia: true,
@@ -40,16 +40,16 @@ void main() {
         version: '1.0.0',
         format: 'CLDF',
         creationDate: now,
-        platform: Platform.mobile,
+        platform: Platform.iOS,
         appVersion: '3.0.0',
         description: 'Test export',
-        creator: creator,
+        author: author,
         exportConfig: exportConfig,
       );
 
       expect(manifest.description, equals('Test export'));
-      expect(manifest.creator, isNotNull);
-      expect(manifest.creator!.name, equals('John Doe'));
+      expect(manifest.author, isNotNull);
+      expect(manifest.author!.name, equals('John Doe'));
       expect(manifest.exportConfig, isNotNull);
       expect(manifest.exportConfig!.includeMedia, isTrue);
     });
@@ -59,7 +59,7 @@ void main() {
       final manifest = Manifest(
         version: '1.0.0',
         creationDate: now,
-        platform: Platform.mobile,
+        platform: Platform.iOS,
         appVersion: '2.3.4',
         description: 'Test manifest',
       );
@@ -79,40 +79,40 @@ void main() {
     });
   });
 
-  group('Creator Model Tests', () {
-    test('should create Creator with all fields', () {
-      final creator = Creator(
+  group('Author Model Tests', () {
+    test('should create Author with all fields', () {
+      final author = Author(
         name: 'Jane Doe',
         email: 'jane@example.com',
-        userId: 'user456',
+        website: 'https://janedoe.com',
       );
 
-      expect(creator.name, equals('Jane Doe'));
-      expect(creator.email, equals('jane@example.com'));
-      expect(creator.userId, equals('user456'));
+      expect(author.name, equals('Jane Doe'));
+      expect(author.email, equals('jane@example.com'));
+      expect(author.website, equals('https://janedoe.com'));
     });
 
-    test('should create Creator with optional fields', () {
-      final creator = Creator(name: 'John');
+    test('should create Author with optional fields', () {
+      final author = Author(name: 'John');
 
-      expect(creator.name, equals('John'));
-      expect(creator.email, isNull);
-      expect(creator.userId, isNull);
+      expect(author.name, equals('John'));
+      expect(author.email, isNull);
+      expect(author.website, isNull);
     });
 
-    test('should serialize and deserialize Creator', () {
-      final creator = Creator(
+    test('should serialize and deserialize Author', () {
+      final author = Author(
         name: 'Test User',
         email: 'test@example.com',
-        userId: 'test123',
+        website: 'https://testuser.com',
       );
 
-      final json = creator.toJson();
-      final deserialized = Creator.fromJson(json);
+      final json = author.toJson();
+      final deserialized = Author.fromJson(json);
 
-      expect(deserialized.name, equals(creator.name));
-      expect(deserialized.email, equals(creator.email));
-      expect(deserialized.userId, equals(creator.userId));
+      expect(deserialized.name, equals(author.name));
+      expect(deserialized.email, equals(author.email));
+      expect(deserialized.website, equals(author.website));
     });
   });
 

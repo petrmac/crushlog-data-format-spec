@@ -1,5 +1,33 @@
 # Changelog
 
+## 1.2.0
+
+### Added
+- `Stats` class to Manifest for export statistics (matching schema and Java implementation)
+  - Includes counts for: climbs, sessions, locations, routes, sectors, tags, media
+- `DateRange` class for ExportConfig to support date-filtered exports
+- `source` field to Manifest for tracking the source application
+- `website` field to Author class (previously Creator)
+- Comprehensive Platform enum tests with validation
+
+### Changed
+- Renamed `Creator` class to `Author` to match schema and Java implementation
+- `ExportConfig` now includes `dateRange` field for date-filtered exports
+- `exportConfig` field in Manifest now maps to JSON property `exportOptions` to match schema
+
+### Fixed
+- Platform enum values updated to match schema specification exactly
+  - Changed from: `desktop`, `mobile`, `web`, `api`  
+  - Changed to: `iOS`, `Android`, `Web`, `Desktop`
+- All references to `Platform.mobile` updated to `Platform.iOS` in tests and examples
+
+### Breaking Changes
+- **Major version bump due to breaking changes in Platform enum and Creator/Author rename**
+- `Creator` class renamed to `Author` - update all references
+- `Platform.mobile` has been removed - use `Platform.iOS` or `Platform.android` instead
+- `Platform.api` has been removed - not part of the schema specification
+- Author class no longer has `userId` field (not in schema)
+
 ## 1.1.1
 
 ### Added
