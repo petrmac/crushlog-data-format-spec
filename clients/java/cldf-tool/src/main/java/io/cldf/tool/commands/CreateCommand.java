@@ -134,11 +134,7 @@ public class CreateCommand extends BaseCommand {
       }
     }
 
-    // Calculate and set stats if not already present
-    if (archive.getManifest() != null && archive.getManifest().getStats() == null) {
-      logInfo("Calculating archive statistics...");
-      archive.getManifest().setStats(calculateStats(archive));
-    }
+    // Stats are now calculated automatically by CLDFWriter
 
     if (validate) {
       logInfo("Validating archive...");
@@ -335,9 +331,6 @@ public class CreateCommand extends BaseCommand {
             .checksums(Checksums.builder().algorithm(ALGORITHM).build())
             .build();
 
-    // Set stats using the helper method
-    archive.getManifest().setStats(calculateStats(archive));
-
     return archive;
   }
 
@@ -483,9 +476,6 @@ public class CreateCommand extends BaseCommand {
             .checksums(Checksums.builder().algorithm(ALGORITHM).build())
             .build();
 
-    // Set stats using the helper method
-    archive.getManifest().setStats(calculateStats(archive));
-
     return archive;
   }
 
@@ -624,15 +614,4 @@ public class CreateCommand extends BaseCommand {
     return MediaType.PHOTO;
   }
 
-  private Manifest.Stats calculateStats(CLDFArchive archive) {
-    return Manifest.Stats.builder()
-        .climbsCount(Optional.ofNullable(archive.getClimbs()).map(List::size).orElse(0))
-        .sessionsCount(Optional.ofNullable(archive.getSessions()).map(List::size).orElse(0))
-        .locationsCount(Optional.ofNullable(archive.getLocations()).map(List::size).orElse(0))
-        .routesCount(Optional.ofNullable(archive.getRoutes()).map(List::size).orElse(0))
-        .sectorsCount(Optional.ofNullable(archive.getSectors()).map(List::size).orElse(0))
-        .tagsCount(Optional.ofNullable(archive.getTags()).map(List::size).orElse(0))
-        .mediaCount(Optional.ofNullable(archive.getMediaItems()).map(List::size).orElse(0))
-        .build();
-  }
 }

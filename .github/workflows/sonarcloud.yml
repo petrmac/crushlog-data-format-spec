@@ -99,11 +99,7 @@ jobs:
             echo "Moved coverage/lcov.info to clients/dart/cldf/coverage/"
           fi
           
-          # Check for test results
-          if [ -f temp-dart-coverage/test-results.xml ]; then
-            cp temp-dart-coverage/test-results.xml clients/dart/cldf/
-            echo "Moved test-results.xml to clients/dart/cldf/"
-          fi
+          # Note: test-results.xml is optional and not required for SonarCloud
           
           if [ -f clients/dart/cldf/coverage/lcov.info ]; then
             echo "lcov.info successfully placed, first 10 lines:"
@@ -182,5 +178,4 @@ jobs:
           -Dsonar.exclusions=**/*.g.dart,**/*.freezed.dart,**/*.mocks.dart,**/generated/**
           -Dsonar.language=dart
           -Dsonar.dart.lcov.reportPaths=coverage/lcov.info
-          -Dsonar.testExecutionReportPaths=test-results.xml
           -Dsonar.verbose=true

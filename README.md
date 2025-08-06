@@ -72,14 +72,23 @@ example.cldf/
 Contains metadata about the export, version information, and statistics.
 
 **Required fields:**
-- `version` (string): CLDF specification version
+- `version` (string): CLDF specification version (semantic versioning)
 - `format` (string): Must be "CLDF"
-- `exportDate` (string): ISO 8601 timestamp
+- `creationDate` (string): ISO 8601 timestamp of export creation
 - `appVersion` (string): Exporting application version
-- `platform` (string): Platform identifier (e.g., "iOS", "Android")
+- `platform` (string): Platform identifier ("iOS", "Android", "Web", or "Desktop")
 
 **Optional fields:**
-- `stats` (object): Count statistics for exported data
+- `author` (object): Author information (name, email, website)
+- `source` (string): Source application or system that created the export
+- `stats` (object): Statistics about exported data
+  - `climbsCount` (integer): Number of climbs
+  - `sessionsCount` (integer): Number of sessions
+  - `locationsCount` (integer): Number of locations
+  - `routesCount` (integer): Number of routes
+  - `sectorsCount` (integer): Number of sectors
+  - `tagsCount` (integer): Number of tags
+  - `mediaCount` (integer): Number of media items
 - `exportOptions` (object): Options used during export
 
 [Full schema →](schemas/manifest.schema.json)
@@ -209,11 +218,13 @@ References to media files (photos/videos).
 - `type` (string): "photo" or "video"
 
 **Optional fields:**
+- `source` (string): Source of media ("photos_library", "local", or "embedded")
+- `assetId` (string): Platform-specific asset identifier
 - `filename` (string): Original filename
-- `path` (string): Path within archive
-- `caption` (string): Media caption
-- `timestamp` (string): ISO 8601 timestamp
-- `location` (object): GPS coordinates
+- `thumbnailPath` (string): Path to thumbnail within archive
+- `embedded` (boolean): Whether full media file is included
+- `createdAt` (string): ISO 8601 timestamp
+- `metadata` (object): Additional metadata (width, height, size, etc.)
 
 [Full schema →](schemas/media-metadata.schema.json)
 
@@ -335,11 +346,13 @@ classDiagram
         +int id
         +int climbId
         +string type
+        +string source
+        +string assetId
         +string filename
-        +string path
-        +string caption
-        +datetime timestamp
-        +object location
+        +string thumbnailPath
+        +bool embedded
+        +datetime createdAt
+        +object metadata
     }
     
     Location "1" --> "0..*" Sector : contains
@@ -357,8 +370,8 @@ classDiagram
 
 ```mermaid
 classDiagram
-    class MediaMetadata {
-        +string id
+    class MediaItem {
+        +int id
         +int climbId
         +string type
         +string source
@@ -370,12 +383,14 @@ classDiagram
         +object metadata
     }
     
-    class MediaFile {
+    class MediaMetadata {
         +int width
         +int height
         +int size
         +float latitude
         +float longitude
+        +string mimeType
+        +int duration
     }
     
     class Climb {
@@ -383,8 +398,8 @@ classDiagram
         +object media
     }
     
-    MediaMetadata --> MediaFile : contains
-    Climb "1" --> "0..*" MediaMetadata : references
+    MediaItem --> MediaMetadata : contains
+    Climb "1" --> "0..*" MediaItem : references
 ```
 
 #### Grade System Model
@@ -436,9 +451,11 @@ classDiagram
     class Manifest {
         +string version
         +string format
-        +datetime exportDate
+        +datetime creationDate
         +string appVersion
         +string platform
+        +object author
+        +string source
         +object stats
         +object exportOptions
     }
@@ -556,6 +573,35 @@ if (archive.hasEmbeddedMedia) {
 
 See [Media Support Documentation](MEDIA_SUPPORT.md) for comprehensive details on using media features across all platforms.
 
+## Features
+
+### Automatic Statistics Calculation
+
+Both Java and Dart implementations automatically calculate archive statistics when writing CLDF files. If the manifest doesn't include stats, they will be calculated based on the actual content:
+
+```java
+// Java - Stats are calculated automatically
+CLDFArchive archive = createArchive();
+// No need to set stats manually
+CLDF.write(archive, new File("output.cldf"));
+```
+
+```dart
+// Dart - Stats are calculated automatically
+final archive = createArchive();
+// No need to set stats manually
+await writer.writeFile('output.cldf', archive);
+```
+
+The following statistics are automatically calculated:
+- `climbsCount`: Number of climbs in the archive
+- `sessionsCount`: Number of sessions
+- `locationsCount`: Number of locations
+- `routesCount`: Number of routes
+- `sectorsCount`: Number of sectors
+- `tagsCount`: Number of tags
+- `mediaCount`: Number of media items
+
 ## Security
 
 ### Checksum Verification
@@ -598,13 +644,13 @@ The Java client library provides full support for reading and writing CLDF archi
 <dependency>
     <groupId>io.cldf</groupId>
     <artifactId>cldf-java</artifactId>
-    <version>1.0.0</version>
+    <version>1.2.0</version>
 </dependency>
 ```
 
 **Installation (Gradle):**
 ```gradle
-implementation 'io.cldf:cldf-java:1.0.0'
+implementation 'io.cldf:cldf-java:1.2.0'
 ```
 
 **Quick Example:**
@@ -629,7 +675,7 @@ The Dart client library provides type-safe models and full CLDF support for Dart
 **Installation:**
 ```yaml
 dependencies:
-  cldf: ^1.0.0
+  cldf: ^1.2.0
 ```
 
 **Quick Example:**

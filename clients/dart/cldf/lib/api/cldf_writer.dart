@@ -5,6 +5,7 @@ import 'package:archive/archive.dart';
 import 'package:crypto/crypto.dart';
 
 import '../models/checksums.dart';
+import '../models/manifest.dart';
 import 'cldf_archive.dart';
 
 /// Writes CLDF archives
@@ -24,11 +25,17 @@ class CLDFWriter {
     final zipArchive = Archive();
     final checksums = <String, String>{};
 
+    // Calculate and set stats if not already present
+    final manifestData = archive.manifest.toJson();
+    if (archive.manifest.stats == null) {
+      manifestData['stats'] = _calculateStats(archive).toJson();
+    }
+
     // Add manifest
     await _addJsonFile(
       zipArchive,
       'manifest.json',
-      archive.manifest.toJson(),
+      manifestData,
       checksums,
     );
 
@@ -103,6 +110,19 @@ class CLDFWriter {
 
     // Encode to zip
     return ZipEncoder().encode(zipArchive);
+  }
+
+  /// Calculate statistics for the archive
+  Stats _calculateStats(CLDFArchive archive) {
+    return Stats(
+      climbsCount: archive.climbs?.length ?? 0,
+      sessionsCount: archive.sessions?.length ?? 0,
+      locationsCount: archive.locations.length,
+      routesCount: archive.routes?.length ?? 0,
+      sectorsCount: archive.sectors?.length ?? 0,
+      tagsCount: archive.tags?.length ?? 0,
+      mediaCount: archive.mediaItems?.length ?? 0,
+    );
   }
 
   /// Add a JSON file to the archive and calculate checksum

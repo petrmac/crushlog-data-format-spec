@@ -6,7 +6,9 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.OffsetDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -105,6 +107,12 @@ public class CLDFWriter {
     if (archive.getManifest() == null) {
       throw new IllegalArgumentException("Manifest is required");
     }
+    
+    // Calculate and set stats if not already present
+    if (archive.getManifest().getStats() == null) {
+      archive.getManifest().setStats(calculateStats(archive));
+    }
+    
     byte[] manifestBytes = serializeToJson(archive.getManifest());
     fileContents.put(MANIFEST_FILE, manifestBytes);
     checksums.put(MANIFEST_FILE, calculateSHA256(manifestBytes));
@@ -256,5 +264,17 @@ public class CLDFWriter {
     } catch (NoSuchAlgorithmException e) {
       throw new IOException("SHA-256 algorithm not available", e);
     }
+  }
+
+  private Manifest.Stats calculateStats(CLDFArchive archive) {
+    return Manifest.Stats.builder()
+        .climbsCount(Optional.ofNullable(archive.getClimbs()).map(List::size).orElse(0))
+        .sessionsCount(Optional.ofNullable(archive.getSessions()).map(List::size).orElse(0))
+        .locationsCount(Optional.ofNullable(archive.getLocations()).map(List::size).orElse(0))
+        .routesCount(Optional.ofNullable(archive.getRoutes()).map(List::size).orElse(0))
+        .sectorsCount(Optional.ofNullable(archive.getSectors()).map(List::size).orElse(0))
+        .tagsCount(Optional.ofNullable(archive.getTags()).map(List::size).orElse(0))
+        .mediaCount(Optional.ofNullable(archive.getMediaItems()).map(List::size).orElse(0))
+        .build();
   }
 }

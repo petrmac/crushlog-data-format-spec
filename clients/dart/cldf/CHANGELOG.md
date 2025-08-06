@@ -10,6 +10,11 @@
 - `website` field to Author class (previously Creator)
 - Comprehensive Platform enum tests with validation
 
+### Enhanced
+- CLDFWriter now automatically calculates stats when writing archives if stats are not already provided
+  - Counts for: climbs, sessions, locations, routes, sectors, tags, media
+  - Preserves existing stats if already present in the manifest
+
 ### Changed
 - Renamed `Creator` class to `Author` to match schema and Java implementation
 - `ExportConfig` now includes `dateRange` field for date-filtered exports
