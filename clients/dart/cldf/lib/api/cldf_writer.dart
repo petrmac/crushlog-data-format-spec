@@ -32,12 +32,7 @@ class CLDFWriter {
     }
 
     // Add manifest
-    await _addJsonFile(
-      zipArchive,
-      'manifest.json',
-      manifestData,
-      checksums,
-    );
+    await _addJsonFile(zipArchive, 'manifest.json', manifestData, checksums);
 
     // Add locations (required)
     await _addJsonFile(zipArchive, 'locations.json', {

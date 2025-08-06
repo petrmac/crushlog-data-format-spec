@@ -20,25 +20,11 @@ void main() {
     test('should automatically calculate stats when not provided', () async {
       // Create test data
       final locations = [
-        Location(
-          id: 1,
-          name: 'Test Gym',
-          isIndoor: true,
-        ),
-        Location(
-          id: 2,
-          name: 'Outdoor Crag',
-          isIndoor: false,
-        ),
+        Location(id: 1, name: 'Test Gym', isIndoor: true),
+        Location(id: 2, name: 'Outdoor Crag', isIndoor: false),
       ];
 
-      final sectors = [
-        Sector(
-          id: 1,
-          locationId: 2,
-          name: 'Main Wall',
-        ),
-      ];
+      final sectors = [Sector(id: 1, locationId: 2, name: 'Main Wall')];
 
       final routes = [
         Route(
@@ -76,10 +62,7 @@ void main() {
           type: ClimbType.boulder,
           finishType: FinishType.top,
           attempts: 3,
-          grades: GradeInfo(
-            system: GradeSystem.vScale,
-            grade: 'V4',
-          ),
+          grades: GradeInfo(system: GradeSystem.vScale, grade: 'V4'),
           isIndoor: true,
         ),
         Climb(
@@ -90,21 +73,13 @@ void main() {
           type: ClimbType.boulder,
           finishType: FinishType.flash,
           attempts: 1,
-          grades: GradeInfo(
-            system: GradeSystem.vScale,
-            grade: 'V3',
-          ),
+          grades: GradeInfo(system: GradeSystem.vScale, grade: 'V3'),
           isIndoor: true,
         ),
       ];
 
       final tags = [
-        Tag(
-          id: 1,
-          name: 'project',
-          color: '#FF5733',
-          isPredefined: true,
-        ),
+        Tag(id: 1, name: 'project', color: '#FF5733', isPredefined: true),
       ];
 
       final mediaItems = [
@@ -171,11 +146,7 @@ void main() {
     test('should preserve existing stats when provided', () async {
       // Create test data with minimal content
       final locations = [
-        Location(
-          id: 1,
-          name: 'Test Location',
-          isIndoor: true,
-        ),
+        Location(id: 1, name: 'Test Location', isIndoor: true),
       ];
 
       // Create manifest with custom stats (different from actual counts)
@@ -199,10 +170,7 @@ void main() {
       );
 
       // Create archive with minimal data
-      final archive = CLDFArchive(
-        manifest: manifest,
-        locations: locations,
-      );
+      final archive = CLDFArchive(manifest: manifest, locations: locations);
 
       // Write archive
       final writer = CLDFWriter();

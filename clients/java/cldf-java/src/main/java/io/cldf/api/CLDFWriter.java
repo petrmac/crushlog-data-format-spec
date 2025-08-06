@@ -107,12 +107,12 @@ public class CLDFWriter {
     if (archive.getManifest() == null) {
       throw new IllegalArgumentException("Manifest is required");
     }
-    
+
     // Calculate and set stats if not already present
     if (archive.getManifest().getStats() == null) {
       archive.getManifest().setStats(calculateStats(archive));
     }
-    
+
     byte[] manifestBytes = serializeToJson(archive.getManifest());
     fileContents.put(MANIFEST_FILE, manifestBytes);
     checksums.put(MANIFEST_FILE, calculateSHA256(manifestBytes));

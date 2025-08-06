@@ -613,5 +613,4 @@ public class CreateCommand extends BaseCommand {
     }
     return MediaType.PHOTO;
   }
-
 }
