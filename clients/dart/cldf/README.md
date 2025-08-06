@@ -1,9 +1,9 @@
 # CLDF - Crushlog Data Format for Dart
 
-[![Dart CI](https://github.com/petrmac/crushlog-data-format-spec/actions/workflows/dart-ci.yml/badge.svg)](https://github.com/crushlog/crushlog-data-format-spec/actions/workflows/dart-ci.yml)
+[![Dart CI](https://github.com/petrmac/crushlog-data-format-spec/actions/workflows/dart-ci.yml/badge.svg)](https://github.com/petrmac/crushlog-data-format-spec/actions/workflows/dart-ci.yml)
 [![pub package](https://img.shields.io/pub/v/cldf.svg)](https://pub.dev/packages/cldf)
-[![Coverage Status](https://sonarcloud.io/api/project_badges/measure?project=petrmac_crushlog-data-format-spec&metric=coverage)](https://sonarcloud.io/summary/new_code?id=petrmac_crushlog-data-format-spec)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=petrmac_crushlog-data-format-spec&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=petrmac_crushlog-data-format-spec_dart)
+[![Coverage Status](https://sonarcloud.io/api/project_badges/measure?project=petrmac_crushlog-data-format-spec-dart&metric=coverage)](https://sonarcloud.io/summary/new_code?id=petrmac_crushlog-data-format-spec-dart)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=petrmac_crushlog-data-format-spec-dart&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=petrmac_crushlog-data-format-spec-dart)
 
 A Dart implementation of the Crushlog Data Format (CLDF) for climbing data exchange.
 
@@ -13,7 +13,9 @@ A Dart implementation of the Crushlog Data Format (CLDF) for climbing data excha
 - JSON serialization/deserialization for all CLDF models
 - Type-safe Dart models for all CLDF entities
 - Archive creation with automatic checksums
+- Automatic statistics calculation when writing archives
 - Validation support
+- Media file handling (embedded or referenced)
 
 ## Platform Support
 
@@ -31,7 +33,7 @@ Add this to your package's `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  cldf: ^1.0.0
+  cldf: ^1.2.0
 ```
 
 ## Usage
@@ -60,7 +62,7 @@ final archive = CLDFArchive(
     version: '1.0.0',
     format: 'CLDF',
     creationDate: DateTime.now(),
-    platform: Platform.mobile,
+    platform: Platform.iOS,
     appVersion: '1.0.0',
   ),
   locations: [
@@ -83,7 +85,7 @@ final archive = CLDFArchive(
   climbs: [
     Climb(
       id: 1,
-      date: DateTime.now(),
+      date: '2024-01-15',
       routeName: 'Classic Route',
       type: ClimbType.route,
       finishType: FinishType.redpoint,
@@ -94,6 +96,30 @@ final archive = CLDFArchive(
 
 final writer = CLDFWriter();
 await writer.writeFile('output.cldf', archive);
+```
+
+### Automatic Statistics
+
+When writing an archive, statistics are automatically calculated if not already present in the manifest:
+
+```dart
+// Stats will be calculated automatically
+final archive = CLDFArchive(
+  manifest: Manifest(
+    version: '1.0.0',
+    format: 'CLDF',
+    creationDate: DateTime.now(),
+    platform: Platform.android,
+    appVersion: '1.0.0',
+    // No stats provided - will be calculated automatically
+  ),
+  locations: locations,
+  climbs: climbs,
+  // ... other data
+);
+
+await writer.writeFile('output.cldf', archive);
+// The written archive will have stats populated with counts of all entities
 ```
 
 ### Working with JSON
@@ -112,13 +138,16 @@ final climb = Climb.fromJson(jsonData);
 
 The package provides models for all CLDF entities:
 
-- `Manifest` - Archive metadata
+- `Manifest` - Archive metadata with automatic statistics calculation
 - `Location` - Climbing locations
 - `Sector` - Sectors within locations
 - `Route` - Routes and boulders
 - `Climb` - Individual climb records
 - `Session` - Climbing sessions
 - `Tag` - Tags for categorization
+- `MediaItem` - Media references (photos/videos)
+- `Author` - Author information for exports
+- `Stats` - Statistics about the archive content
 
 ## Contributing
 
