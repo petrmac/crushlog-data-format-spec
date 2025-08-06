@@ -26,17 +26,13 @@ sonar {
         property("sonar.projectKey", "petrmac_crushlog-data-format-spec")
         property("sonar.organization", "petrmacek")
         property("sonar.host.url", "https://sonarcloud.io")
-        property("sonar.projectName", "CrushLog Data Format Spec")
+        property("sonar.projectName", "CrushLog Data Format - Java")
         property("sonar.projectVersion", version.toString())
         property("sonar.sourceEncoding", "UTF-8")
         property("sonar.java.source", "21")
         property("sonar.java.target", "21")
         property("sonar.coverage.jacoco.xmlReportPaths", "**/build/reports/jacoco/test/jacocoTestReport.xml")
         property("sonar.junit.reportPaths", "**/build/test-results/test")
-        // Include Dart client in analysis
-        property("sonar.modules", "java,dart")
-        property("java.sonar.projectBaseDir", "clients/java")
-        property("dart.sonar.projectBaseDir", "clients/dart/cldf")
     }
 }
 

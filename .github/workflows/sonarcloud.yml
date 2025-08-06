@@ -84,9 +84,27 @@ jobs:
     - name: Extract Dart coverage
       run: |
         if [ -f dart-coverage.zip ]; then
+          mkdir -p temp-dart-coverage
+          unzip -o dart-coverage.zip -d temp-dart-coverage/
+          echo "Dart coverage extracted to temp directory"
+          ls -la temp-dart-coverage/
+          
+          # Move lcov.info to the expected location
           mkdir -p clients/dart/cldf/coverage
-          unzip -o dart-coverage.zip -d clients/dart/cldf/coverage/
-          echo "Dart coverage extracted"
+          if [ -f temp-dart-coverage/lcov.info ]; then
+            cp temp-dart-coverage/lcov.info clients/dart/cldf/coverage/
+            echo "Moved lcov.info to clients/dart/cldf/coverage/"
+          elif [ -f temp-dart-coverage/coverage/lcov.info ]; then
+            cp temp-dart-coverage/coverage/lcov.info clients/dart/cldf/coverage/
+            echo "Moved coverage/lcov.info to clients/dart/cldf/coverage/"
+          fi
+          
+          if [ -f clients/dart/cldf/coverage/lcov.info ]; then
+            echo "lcov.info successfully placed, first 10 lines:"
+            head -10 clients/dart/cldf/coverage/lcov.info
+          else
+            echo "ERROR: lcov.info not found after extraction"
+          fi
         else
           echo "No Dart coverage to extract"
         fi
@@ -136,7 +154,7 @@ jobs:
           -Dsonar.projectKey=petrmac_crushlog-data-format-spec \
           -Dsonar.organization=petrmacek \
           -Dsonar.host.url=https://sonarcloud.io \
-          -Dsonar.projectName="CrushLog Data Format Specification" \
+          -Dsonar.projectName="CrushLog Data Format - Java" \
           -Dsonar.projectVersion=1.1.1 \
           --info
     
@@ -151,9 +169,10 @@ jobs:
         args: >
           -Dsonar.projectKey=petrmac_crushlog-data-format-spec-dart
           -Dsonar.organization=petrmacek
-          -Dsonar.projectName="CLDF Dart Client"
+          -Dsonar.projectName="CrushLog Data Format - Dart Client"
           -Dsonar.sources=lib
           -Dsonar.tests=test
           -Dsonar.exclusions=**/*.g.dart,**/*.freezed.dart,**/*.mocks.dart,**/generated/**
           -Dsonar.language=dart
-          -Dsonar.dart.coverage.reportPath=coverage/lcov.info
+          -Dsonar.coverage.lcov.reportPaths=coverage/lcov.info
+          -Dsonar.verbose=true
