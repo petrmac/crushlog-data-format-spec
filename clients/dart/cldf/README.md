@@ -33,7 +33,7 @@ Add this to your package's `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  cldf: ^1.2.0
+  cldf: ^1.2.1
 ```
 
 ## Usage

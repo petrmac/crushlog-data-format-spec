@@ -43,13 +43,13 @@ void main() {
         location: 'Yosemite',
         locationId: 100,
         isIndoor: false,
-        climbType: 'boulder',
+        climbType: ClimbType.boulder,
         sessionType: SessionType.bouldering,
         partners: ['Alex', 'Sam'],
         weather: weather,
         notes: 'Great conditions today',
-        rockType: 'granite',
-        terrainType: 'natural',
+        rockType: RockType.granite,
+        terrainType: TerrainType.natural,
         approachTime: 30,
         departureTime: 25,
         isOngoing: true,
@@ -62,13 +62,13 @@ void main() {
       expect(session.location, equals('Yosemite'));
       expect(session.locationId, equals(100));
       expect(session.isIndoor, isFalse);
-      expect(session.climbType, equals('boulder'));
+      expect(session.climbType, equals(ClimbType.boulder));
       expect(session.sessionType, equals(SessionType.bouldering));
       expect(session.partners, equals(['Alex', 'Sam']));
       expect(session.weather, isNotNull);
       expect(session.notes, equals('Great conditions today'));
-      expect(session.rockType, equals('granite'));
-      expect(session.terrainType, equals('natural'));
+      expect(session.rockType, equals(RockType.granite));
+      expect(session.terrainType, equals(TerrainType.natural));
       expect(session.approachTime, equals(30));
       expect(session.departureTime, equals(25));
       expect(session.isOngoing, isTrue);

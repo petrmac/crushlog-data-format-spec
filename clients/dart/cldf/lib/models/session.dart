@@ -1,7 +1,10 @@
 import 'package:json_annotation/json_annotation.dart';
 
 import '../utils/local_date_converter.dart';
+import 'enums/climb_type.dart';
+import 'enums/rock_type.dart';
 import 'enums/session_type.dart';
+import 'enums/terrain_type.dart';
 
 part 'session.g.dart';
 
@@ -64,7 +67,7 @@ class Session {
   final bool? isIndoor;
 
   /// Primary type of climbing
-  final String? climbType;
+  final ClimbType? climbType;
 
   /// Session type
   final SessionType? sessionType;
@@ -79,10 +82,10 @@ class Session {
   final String? notes;
 
   /// Rock type
-  final String? rockType;
+  final RockType? rockType;
 
   /// Terrain type
-  final String? terrainType;
+  final TerrainType? terrainType;
 
   /// Approach time in minutes
   final int? approachTime;

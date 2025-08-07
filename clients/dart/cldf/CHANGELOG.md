@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.2.1
+
+### Fixed
+- Session model now uses strongly typed enums instead of strings
+  - `climbType` now uses `ClimbType` enum
+  - `rockType` now uses `RockType` enum
+  - `terrainType` now uses `TerrainType` enum
+
 ## 1.2.0
 
 ### Added
