@@ -1,5 +1,21 @@
 # Changelog
 
+## 1.2.2
+
+### Added
+- Comprehensive logging for import and export operations
+  - Detailed progress tracking during CLDF archive reading
+  - Error logging with specific failure reasons for each parsing step
+  - Export operation logging with file sizes and checksums
+  - Summary statistics on successful import/export
+  - Fine-grained logging levels for debugging
+- Round-trip integration tests to ensure data integrity
+  - Tests for minimal archives with required data only
+  - Tests for complete archives with all optional data
+  - Tests for media file handling
+  - Tests for custom field preservation
+  - Tests for empty collection handling
+
 ## 1.2.1
 
 ### Fixed
