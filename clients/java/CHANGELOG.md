@@ -5,6 +5,31 @@ All notable changes to the CLDF Java client library and CLI tool will be documen
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.3] - 2025-01-11
+
+### Added
+- **Unified Media Model** - Complete overhaul of media support across all entities
+  - Media can now be attached to Route, Location, and Sector entities (in addition to Climb)
+  - New `MediaDesignation` enum for semantic categorization:
+    - TOPO - Route diagrams and maps
+    - BETA - How-to information and technique videos
+    - APPROACH - Access and trail information
+    - LOG - Climb documentation and send photos
+    - OVERVIEW - General views and panoramas
+    - CONDITIONS - Current state and conditions
+    - GEAR - Equipment and protection information
+    - DESCENT - Down-climb or rappel information
+    - OTHER - Unspecified purpose (default)
+  - Enhanced MediaItem with new fields:
+    - `designation` - Purpose/type of media content
+    - `caption` - User-provided description
+    - `timestamp` - When the media was created or taken
+  - Added EXTERNAL to MediaSource enum for external URLs
+
+### Changed
+- Route, Location, and Sector models now include optional `media` field
+- MediaSource enum enhanced with EXTERNAL value
+
 ## [Unreleased]
 
 ### Added

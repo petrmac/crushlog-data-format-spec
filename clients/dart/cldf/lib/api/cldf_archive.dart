@@ -5,7 +5,7 @@ import '../models/route.dart';
 import '../models/climb.dart';
 import '../models/session.dart';
 import '../models/tag.dart';
-import '../models/media_item.dart';
+import '../models/media_metadata_item.dart';
 import '../models/checksums.dart';
 
 /// Represents a complete CLDF archive
@@ -46,7 +46,7 @@ class CLDFArchive {
   final List<Tag>? tags;
 
   /// Media items
-  final List<MediaItem>? mediaItems;
+  final List<MediaMetadataItem>? mediaItems;
 
   /// Embedded media files (path -> bytes)
   final Map<String, List<int>>? mediaFiles;

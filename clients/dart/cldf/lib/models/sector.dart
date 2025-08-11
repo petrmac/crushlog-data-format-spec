@@ -1,6 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
 
 import 'location.dart' show Coordinates;
+import 'media/media.dart';
 
 part 'sector.g.dart';
 
@@ -16,6 +17,7 @@ class Sector {
     this.description,
     this.approach,
     this.coordinates,
+    this.media,
     this.createdAt,
     this.tags,
     this.customFields,
@@ -44,6 +46,9 @@ class Sector {
 
   /// GPS coordinates
   final Coordinates? coordinates;
+
+  /// Media associated with this sector (overview photos, approach maps, etc.)
+  final Media? media;
 
   /// Creation timestamp
   final DateTime? createdAt;

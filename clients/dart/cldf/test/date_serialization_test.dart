@@ -151,6 +151,25 @@ void main() {
       }
     });
 
+    test('should handle date-time strings by extracting date part', () {
+      final testCases = {
+        '2024-01-29T12:00:00Z': '2024-01-29',
+        '2024-01-29T12:00:00.000Z': '2024-01-29',
+        '2024-01-29T12:00:00+00:00': '2024-01-29',
+        '2024-01-29T23:59:59-05:00': '2024-01-29',
+        '2024-12-31T00:00:00': '2024-12-31',
+      };
+
+      for (final entry in testCases.entries) {
+        final result = converter.fromJson(entry.key);
+        expect(
+          result,
+          equals(entry.value),
+          reason: 'Failed for input: ${entry.key}',
+        );
+      }
+    });
+
     test('should handle null and empty strings', () {
       expect(converter.fromJson(null), isNull);
       expect(converter.fromJson(''), isNull);

@@ -3,6 +3,7 @@ import 'package:json_annotation/json_annotation.dart';
 import 'enums/protection_rating.dart';
 import 'enums/route_type.dart';
 import 'enums/route_characteristics.dart';
+import 'media/media.dart';
 
 part 'route.g.dart';
 
@@ -28,6 +29,7 @@ class Route {
     this.beta,
     this.gearNotes,
     this.tags,
+    this.media,
     this.customFields,
   });
 
@@ -84,6 +86,9 @@ class Route {
 
   /// Associated tags
   final List<String>? tags;
+
+  /// Media associated with this route (topos, beta videos, etc.)
+  final Media? media;
 
   /// Custom fields
   final Map<String, dynamic>? customFields;

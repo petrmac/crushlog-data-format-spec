@@ -9,6 +9,7 @@ public enum MediaSource {
   CLOUD("cloud"),
   REFERENCE("reference"),
   EMBEDDED("embedded"),
+  EXTERNAL("external"),
   // Legacy value for backward compatibility
   PHOTOS_LIBRARY("photos_library");
 

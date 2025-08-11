@@ -8,7 +8,7 @@ import '../models/checksums.dart';
 import '../models/climb.dart';
 import '../models/location.dart';
 import '../models/manifest.dart';
-import '../models/media_item.dart';
+import '../models/media_metadata_item.dart';
 import '../models/route.dart';
 import '../models/sector.dart';
 import '../models/session.dart';
@@ -175,7 +175,7 @@ class CLDFReader {
         files,
         'media_metadata.json',
         'media',
-        MediaItem.fromJson,
+        MediaMetadataItem.fromJson,
       );
 
       Checksums? checksums;

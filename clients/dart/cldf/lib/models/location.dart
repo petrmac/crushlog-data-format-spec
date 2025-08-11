@@ -2,6 +2,7 @@ import 'package:json_annotation/json_annotation.dart';
 
 import 'enums/rock_type.dart';
 import 'enums/terrain_type.dart';
+import 'media/media.dart';
 
 part 'location.g.dart';
 
@@ -22,6 +23,7 @@ class Location {
     this.rockType,
     this.terrainType,
     this.accessInfo,
+    this.media,
     this.createdAt,
     this.tags,
     this.customFields,
@@ -66,6 +68,9 @@ class Location {
 
   /// Access information
   final String? accessInfo;
+
+  /// Media associated with this location (overview, approach photos, etc.)
+  final Media? media;
 
   /// Creation timestamp
   final DateTime? createdAt;

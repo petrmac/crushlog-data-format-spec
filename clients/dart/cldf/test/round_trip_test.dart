@@ -249,7 +249,7 @@ void main() {
             Tag(id: 2, name: 'technical', isPredefined: false),
           ],
           mediaItems: [
-            MediaItem(
+            MediaMetadataItem(
               id: 1,
               filename: 'test.jpg',
               type: MediaType.photo,
@@ -362,7 +362,7 @@ void main() {
         ),
         locations: [Location(id: 1, name: 'Test Location', isIndoor: true)],
         mediaItems: [
-          MediaItem(
+          MediaMetadataItem(
             id: 1,
             filename: 'test-image.jpg',
             type: MediaType.photo,

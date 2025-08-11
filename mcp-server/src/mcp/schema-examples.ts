@@ -201,4 +201,64 @@ export const FIELD_REFERENCE = {
       belayType: 'enum: topRope, lead, autoBelay',
     },
   },
+  
+  withMedia: {
+    description: 'CLDF with media attached to entities',
+    data: {
+      manifest: {
+        version: '1.0.0',
+        format: 'CLDF',
+        platform: 'Desktop',
+        appVersion: '1.0.0',
+        creationDate: '2024-01-29T12:00:00Z',
+      },
+      locations: [
+        {
+          id: 1,
+          name: 'El Capitan',
+          country: 'USA',
+          isIndoor: false,
+          media: {
+            items: [
+              {
+                type: 'photo',
+                path: 'media/el_cap_overview.jpg',
+                designation: 'overview',
+                source: 'embedded',
+                caption: 'View from the valley floor'
+              }
+            ],
+            count: 1
+          }
+        },
+      ],
+      routes: [
+        {
+          id: 101,
+          locationId: 1,
+          name: 'The Dawn Wall',
+          routeType: 'route',
+          media: {
+            items: [
+              {
+                type: 'photo',
+                path: 'media/dawn_wall_topo.jpg',
+                designation: 'topo',
+                source: 'embedded',
+                caption: 'Full route topo with pitch breakdown'
+              },
+              {
+                type: 'video',
+                path: 'https://youtube.com/watch?v=example',
+                designation: 'beta',
+                source: 'external',
+                caption: 'Beta video from Tommy Caldwell'
+              }
+            ],
+            count: 2
+          }
+        }
+      ]
+    }
+  }
 };
