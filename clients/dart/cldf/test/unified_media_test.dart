@@ -18,10 +18,22 @@ void main() {
       });
 
       test('should parse from string value', () {
-        expect(MediaDesignation.fromValue('topo'), equals(MediaDesignation.topo));
-        expect(MediaDesignation.fromValue('beta'), equals(MediaDesignation.beta));
-        expect(MediaDesignation.fromValue(null), equals(MediaDesignation.other));
-        expect(MediaDesignation.fromValue('unknown'), equals(MediaDesignation.other));
+        expect(
+          MediaDesignation.fromValue('topo'),
+          equals(MediaDesignation.topo),
+        );
+        expect(
+          MediaDesignation.fromValue('beta'),
+          equals(MediaDesignation.beta),
+        );
+        expect(
+          MediaDesignation.fromValue(null),
+          equals(MediaDesignation.other),
+        );
+        expect(
+          MediaDesignation.fromValue('unknown'),
+          equals(MediaDesignation.other),
+        );
       });
     });
 
@@ -67,11 +79,8 @@ void main() {
           'source': 'embedded',
           'timestamp': '2024-02-01T08:00:00Z',
           'metadata': {
-            'coordinates': {
-              'latitude': 37.7340,
-              'longitude': -119.6378,
-            }
-          }
+            'coordinates': {'latitude': 37.7340, 'longitude': -119.6378},
+          },
         };
 
         final item = MediaItem.fromJson(json);
@@ -115,8 +124,14 @@ void main() {
         expect(route.media, isNotNull);
         expect(route.media?.count, equals(2));
         expect(route.media?.items?.length, equals(2));
-        expect(route.media?.items?[0].designation, equals(MediaDesignation.topo));
-        expect(route.media?.items?[1].designation, equals(MediaDesignation.beta));
+        expect(
+          route.media?.items?[0].designation,
+          equals(MediaDesignation.topo),
+        );
+        expect(
+          route.media?.items?[1].designation,
+          equals(MediaDesignation.beta),
+        );
       });
 
       test('should serialize route with media to JSON', () {
@@ -176,8 +191,14 @@ void main() {
 
         expect(location.media, isNotNull);
         expect(location.media?.count, equals(2));
-        expect(location.media?.items?[0].designation, equals(MediaDesignation.overview));
-        expect(location.media?.items?[1].designation, equals(MediaDesignation.approach));
+        expect(
+          location.media?.items?[0].designation,
+          equals(MediaDesignation.overview),
+        );
+        expect(
+          location.media?.items?[1].designation,
+          equals(MediaDesignation.approach),
+        );
       });
     });
 
@@ -205,8 +226,14 @@ void main() {
 
         expect(sector.media, isNotNull);
         expect(sector.media?.count, equals(1));
-        expect(sector.media?.items?[0].designation, equals(MediaDesignation.overview));
-        expect(sector.media?.items?[0].caption, equals('Sector map with route locations'));
+        expect(
+          sector.media?.items?[0].designation,
+          equals(MediaDesignation.overview),
+        );
+        expect(
+          sector.media?.items?[0].caption,
+          equals('Sector map with route locations'),
+        );
       });
     });
 
@@ -235,12 +262,16 @@ void main() {
           ),
         ];
 
-        final topos = items.where((item) => item.designation == MediaDesignation.topo).toList();
+        final topos = items
+            .where((item) => item.designation == MediaDesignation.topo)
+            .toList();
         expect(topos.length, equals(2));
         expect(topos[0].path, equals('topo1.jpg'));
         expect(topos[1].path, equals('topo2.jpg'));
 
-        final betas = items.where((item) => item.designation == MediaDesignation.beta).toList();
+        final betas = items
+            .where((item) => item.designation == MediaDesignation.beta)
+            .toList();
         expect(betas.length, equals(1));
         expect(betas[0].path, equals('beta1.mp4'));
       });

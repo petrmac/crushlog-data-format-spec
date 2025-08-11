@@ -2,7 +2,7 @@
 
 # CrushLog Data Format (CLDF) Specification
 
-Version 1.0.0
+Version 1.2.3
 
 ## Overview
 
@@ -59,10 +59,12 @@ example.cldf/
 ├── climbs.json           (required) - Individual climb records
 ├── tags.json             (optional) - Custom and predefined tags
 ├── checksums.json        (required) - SHA-256 hashes for validation
-├── media-metadata.json   (optional) - Media file references
+├── media-metadata.json   (optional) - Standalone media file metadata
 └── media/                (optional) - Embedded media files
-    ├── photos/
-    └── videos/
+    ├── climbs/           - Media for climbs
+    ├── routes/           - Media for routes (topos, beta)
+    ├── locations/        - Media for locations (overview, approach)
+    └── sectors/          - Media for sectors
 ```
 
 ## File Specifications
@@ -208,25 +210,58 @@ Defines custom and predefined tags for categorization.
 
 [Full schema →](schemas/tags.schema.json)
 
-### media-metadata.json
+### Media Support (v1.2.3+)
 
-References to media files (photos/videos).
+CLDF provides comprehensive media support with two models:
+
+#### Inline Media (for entities)
+Media can be attached directly to climbs, routes, locations, and sectors using the `media` field:
+
+```json
+{
+  "media": {
+    "items": [
+      {
+        "type": "photo",
+        "path": "media/route_topo.jpg",
+        "designation": "topo",
+        "caption": "Full route topo with pitch breakdown",
+        "source": "embedded"
+      }
+    ],
+    "count": 1
+  }
+}
+```
+
+**Media Designations:**
+- `topo` - Route diagrams and maps
+- `beta` - How-to information and videos
+- `approach` - Access and trail information
+- `log` - Climb documentation
+- `overview` - General views and panoramas
+- `conditions` - Current conditions
+- `gear` - Equipment information
+- `descent` - Down-climb information
+- `other` - Unspecified purpose
+
+**Media Sources:**
+- `embedded` - Files stored in the archive
+- `external` - External URLs (YouTube, etc.)
+- `cloud` - Cloud storage references
+- `local` - Device-local paths
+- `reference` - Path references only
+
+#### Standalone Media (media-metadata.json)
+For backward compatibility, standalone media file metadata:
 
 **Required fields:**
 - `id` (integer): Unique identifier
-- `climbId` (integer): Reference to climb
 - `type` (string): "photo" or "video"
+- `source` (string): Source of media
+- `path` (string): File path or URL
 
-**Optional fields:**
-- `source` (string): Source of media ("photos_library", "local", or "embedded")
-- `assetId` (string): Platform-specific asset identifier
-- `filename` (string): Original filename
-- `thumbnailPath` (string): Path to thumbnail within archive
-- `embedded` (boolean): Whether full media file is included
-- `createdAt` (string): ISO 8601 timestamp
-- `metadata` (object): Additional metadata (width, height, size, etc.)
-
-[Full schema →](schemas/media-metadata.schema.json)
+[Full schema →](schemas/media.schema.json)
 
 ## Data Model
 
@@ -366,40 +401,76 @@ classDiagram
     Route "0..*" --> "0..*" Tag : tagged
 ```
 
-#### Media Model
+#### Media Model (v1.2.3+)
 
 ```mermaid
 classDiagram
+    class Media {
+        +MediaItem[] items
+        +int count
+    }
+    
     class MediaItem {
-        +int id
-        +int climbId
         +string type
+        +string path
+        +string designation
+        +string caption
+        +string timestamp
         +string source
         +string assetId
-        +string filename
         +string thumbnailPath
-        +bool embedded
-        +datetime createdAt
         +object metadata
     }
     
-    class MediaMetadata {
-        +int width
-        +int height
-        +int size
-        +float latitude
-        +float longitude
-        +string mimeType
-        +int duration
+    class MediaDesignation {
+        <<enumeration>>
+        topo
+        beta
+        approach
+        log
+        overview
+        conditions
+        gear
+        descent
+        other
+    }
+    
+    class MediaSource {
+        <<enumeration>>
+        embedded
+        external
+        cloud
+        local
+        reference
+    }
+    
+    class Route {
+        +int id
+        +Media media
+    }
+    
+    class Location {
+        +int id
+        +Media media
+    }
+    
+    class Sector {
+        +int id
+        +Media media
     }
     
     class Climb {
         +int id
-        +object media
+        +Media media
     }
     
-    MediaItem --> MediaMetadata : contains
-    Climb "1" --> "0..*" MediaItem : references
+    Media --> MediaItem : contains
+    MediaItem --> MediaDesignation : uses
+    MediaItem --> MediaSource : uses
+    Route --> Media : has
+    Location --> Media : has
+    Sector --> Media : has
+    Climb --> Media : has
 ```
 
 #### Grade System Model
