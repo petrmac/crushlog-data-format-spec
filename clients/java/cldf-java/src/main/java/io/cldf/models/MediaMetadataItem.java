@@ -12,12 +12,12 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/** Represents a MediaItem in the CLDF archive. */
+/** Represents a MediaMetadataItem in the CLDF archive (for standalone media files). */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class MediaItem {
+public class MediaMetadataItem {
 
   @JsonProperty(required = true)
   private Integer id;

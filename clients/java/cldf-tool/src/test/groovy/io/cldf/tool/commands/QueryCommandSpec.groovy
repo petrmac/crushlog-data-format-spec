@@ -544,7 +544,7 @@ class QueryCommandSpec extends Specification {
         given: "an archive with media"
         command.selectType = QueryCommand.DataType.media
         def archiveWithMedia = Mock(CLDFArchive)
-        def mediaItems = [Mock(MediaItem)]
+        def mediaItems = [Mock(MediaMetadataItem)]
         
         archiveWithMedia.hasMedia() >> true
         archiveWithMedia.getMediaItems() >> mediaItems

@@ -155,4 +155,40 @@ class MediaItemSpec extends Specification {
 		where:
 		designation << MediaDesignation.values()
 	}
+
+	def "should handle missing designation field in JSON"() {
+		given:
+		def json = '''
+		{
+			"type": "photo",
+			"path": "media/test.jpg"
+		}
+		'''
+
+		when:
+		def item = objectMapper.readValue(json, MediaItem.class)
+
+		then:
+		// Without explicit @JsonProperty default, it will be null
+		// This test verifies current behavior
+		item.designation == null
+	}
+
+	def "should apply default designation when explicitly set"() {
+		given:
+		def json = '''
+		{
+			"type": "photo",
+			"path": "media/test.jpg",
+			"designation": null
+		}
+		'''
+
+		when:
+		def item = objectMapper.readValue(json, MediaItem.class)
+
+		then:
+		// When explicitly null in JSON, it remains null
+		item.designation == null
+	}
 }

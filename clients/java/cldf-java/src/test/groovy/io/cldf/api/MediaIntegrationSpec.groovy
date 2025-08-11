@@ -61,7 +61,7 @@ class MediaIntegrationSpec extends Specification {
 				.name("The Nose")
 				.routeType(RouteType.ROUTE)
 				.grades(Route.Grades.builder()
-				.yds("5.9 C2")
+				.yds("5.9")
 				.build())
 				.media(Media.builder()
 				.items([
@@ -93,7 +93,7 @@ class MediaIntegrationSpec extends Specification {
 
 		// Create climb with media
 		def climb = Climb.builder()
-				.id("1")
+				.id(1)
 				.date(LocalDate.of(2024, 1, 15))
 				.type(ClimbType.ROUTE)
 				.finishType(FinishType.REDPOINT)
@@ -117,11 +117,11 @@ class MediaIntegrationSpec extends Specification {
 
 		// Create session
 		def session = Session.builder()
-				.id("1")
+				.id(1)
 				.date(LocalDate.of(2024, 1, 15))
-				.type(SessionType.OUTDOOR)
+				.sessionType(SessionType.SPORT_CLIMBING)
 				.locationId(1)
-				.locationName("Yosemite Valley")
+				.location("Yosemite Valley")
 				.build()
 
 		// Create manifest
@@ -152,7 +152,7 @@ class MediaIntegrationSpec extends Specification {
 				.build()
 
 		when: "Writing and reading the archive"
-		CLDF.write(tempFile.toFile(), archive)
+		CLDF.write(archive, tempFile.toFile())
 		def readArchive = CLDF.read(tempFile.toFile())
 
 		then: "All media is correctly preserved"
@@ -222,7 +222,7 @@ class MediaIntegrationSpec extends Specification {
 				.build()
 
 		when:
-		CLDF.write(tempFile.toFile(), archive)
+		CLDF.write(archive, tempFile.toFile())
 		def readArchive = CLDF.read(tempFile.toFile())
 
 		then:

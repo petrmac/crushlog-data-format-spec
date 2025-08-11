@@ -27,7 +27,7 @@ public class CLDFArchive {
   private List<Route> routes;
   private List<Sector> sectors;
   private List<Tag> tags;
-  private List<MediaItem> mediaItems;
+  private List<MediaMetadataItem> mediaItems;
   private Map<String, byte[]> mediaFiles;
 
   /**

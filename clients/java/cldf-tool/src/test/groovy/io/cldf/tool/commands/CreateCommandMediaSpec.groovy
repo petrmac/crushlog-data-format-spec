@@ -1,12 +1,9 @@
 package io.cldf.tool.commands
 
-import io.cldf.api.CLDFArchive
-import io.cldf.api.CLDFWriter
-import io.cldf.models.MediaItem
+import io.cldf.models.MediaMetadataItem
 import io.cldf.models.enums.MediaStrategy
 import io.cldf.models.enums.MediaType
 import io.cldf.models.enums.MediaSource
-import io.cldf.tool.models.CommandResult
 import io.cldf.tool.services.ValidationService
 import io.cldf.tool.utils.OutputHandler
 import io.cldf.tool.utils.OutputFormat
@@ -291,11 +288,11 @@ class CreateCommandMediaSpec extends Specification {
         archive.mediaFiles == null
     }
 
-    private List<MediaItem> generateMediaItems(int count) {
+    private List<MediaMetadataItem> generateMediaItems(int count) {
         (1..count).collect { i ->
-            MediaItem.builder()
+            MediaMetadataItem.builder()
                 .id(i)
-                .climbId("$i")
+                .climbId(i)
                 .type(i % 2 == 0 ? MediaType.PHOTO : MediaType.VIDEO)
                 .source(MediaSource.LOCAL)
                 .filename("media${i}.jpg")

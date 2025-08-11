@@ -524,7 +524,7 @@ public class CreateCommand extends BaseCommand {
 
     // Scan for media files
     Map<String, byte[]> mediaFiles = new HashMap<>();
-    List<MediaItem> mediaItems = new ArrayList<>();
+    List<MediaMetadataItem> mediaItems = new ArrayList<>();
 
     try (Stream<Path> paths = Files.walk(mediaDirectory.toPath())) {
       List<Path> mediaFilePaths =
@@ -560,8 +560,8 @@ public class CreateCommand extends BaseCommand {
         // Create media metadata
         MediaType type = determineMediaType(filename);
 
-        MediaItem item =
-            MediaItem.builder()
+        MediaMetadataItem item =
+            MediaMetadataItem.builder()
                 .id(mediaId++)
                 .climbId(climbId)
                 .type(type)
