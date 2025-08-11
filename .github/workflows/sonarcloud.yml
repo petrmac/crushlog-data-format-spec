@@ -104,6 +104,8 @@ jobs:
           if [ -f clients/dart/cldf/coverage/lcov.info ]; then
             echo "lcov.info successfully placed, first 10 lines:"
             head -10 clients/dart/cldf/coverage/lcov.info
+            echo "Total lines in lcov.info:"
+            wc -l clients/dart/cldf/coverage/lcov.info
           else
             echo "ERROR: lcov.info not found after extraction"
           fi
@@ -159,6 +161,23 @@ jobs:
           -Dsonar.projectName="CrushLog Data Format - Java" \
           -Dsonar.projectVersion=1.1.1 \
           --info
+    
+    # Debug: Check coverage file before Sonar analysis
+    - name: Verify Dart coverage before SonarCloud
+      run: |
+        echo "Checking for coverage file..."
+        if [ -f clients/dart/cldf/coverage/lcov.info ]; then
+          echo "✓ Coverage file exists at clients/dart/cldf/coverage/lcov.info"
+          echo "File size: $(ls -lh clients/dart/cldf/coverage/lcov.info | awk '{print $5}')"
+          echo "First few SF entries (source files):"
+          grep "^SF:" clients/dart/cldf/coverage/lcov.info | head -5
+        else
+          echo "✗ Coverage file NOT found at clients/dart/cldf/coverage/lcov.info"
+          echo "Contents of clients/dart/cldf/:"
+          ls -la clients/dart/cldf/ || echo "Directory not found"
+          echo "Contents of clients/dart/cldf/coverage/:"
+          ls -la clients/dart/cldf/coverage/ || echo "Directory not found"
+        fi
     
     # Run separate analysis for Dart using the new SonarQube scan action
     - name: Analyze Dart with SonarCloud
