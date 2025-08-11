@@ -1,22 +1,21 @@
 package io.cldf.models.enums;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonValue;
 import java.util.Arrays;
 
-/**
- * Purpose or type of media content
- */
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
+
+/** Purpose or type of media content */
 public enum MediaDesignation {
-  TOPO("topo"),           // Route diagram/map
-  BETA("beta"),           // How-to information
-  APPROACH("approach"),   // Access/approach info
-  LOG("log"),             // Climb documentation
-  OVERVIEW("overview"),   // General view/panorama
+  TOPO("topo"), // Route diagram/map
+  BETA("beta"), // How-to information
+  APPROACH("approach"), // Access/approach info
+  LOG("log"), // Climb documentation
+  OVERVIEW("overview"), // General view/panorama
   CONDITIONS("conditions"), // Current conditions
-  GEAR("gear"),           // Gear placement/requirements
-  DESCENT("descent"),     // Descent information
-  OTHER("other");         // Unspecified purpose
+  GEAR("gear"), // Gear placement/requirements
+  DESCENT("descent"), // Descent information
+  OTHER("other"); // Unspecified purpose
 
   private final String value;
 

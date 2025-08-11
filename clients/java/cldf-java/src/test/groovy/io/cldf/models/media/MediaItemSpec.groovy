@@ -8,87 +8,87 @@ import io.cldf.models.enums.MediaDesignation
 
 class MediaItemSpec extends Specification {
 
-    def objectMapper = new ObjectMapper()
+	def objectMapper = new ObjectMapper()
 
-    def "should create media item with all fields"() {
-        given:
-        def metadata = [
-            width: 1920,
-            height: 1080,
-            size: 500000,
-            coordinates: [
-                latitude: 37.7340,
-                longitude: -119.6378
-            ]
-        ]
+	def "should create media item with all fields"() {
+		given:
+		def metadata = [
+			width: 1920,
+			height: 1080,
+			size: 500000,
+			coordinates: [
+				latitude: 37.7340,
+				longitude: -119.6378
+			]
+		]
 
-        when:
-        def item = MediaItem.builder()
-            .type(MediaType.PHOTO)
-            .path("media/route_topo.jpg")
-            .designation(MediaDesignation.TOPO)
-            .caption("Full route topo with pitch breakdown")
-            .timestamp("2024-01-15T10:30:00Z")
-            .source(MediaSource.EMBEDDED)
-            .assetId("PHAsset123")
-            .thumbnailPath("media/thumbs/route_topo_thumb.jpg")
-            .metadata(metadata)
-            .build()
+		when:
+		def item = MediaItem.builder()
+				.type(MediaType.PHOTO)
+				.path("media/route_topo.jpg")
+				.designation(MediaDesignation.TOPO)
+				.caption("Full route topo with pitch breakdown")
+				.timestamp("2024-01-15T10:30:00Z")
+				.source(MediaSource.EMBEDDED)
+				.assetId("PHAsset123")
+				.thumbnailPath("media/thumbs/route_topo_thumb.jpg")
+				.metadata(metadata)
+				.build()
 
-        then:
-        item.type == MediaType.PHOTO
-        item.path == "media/route_topo.jpg"
-        item.designation == MediaDesignation.TOPO
-        item.caption == "Full route topo with pitch breakdown"
-        item.timestamp == "2024-01-15T10:30:00Z"
-        item.source == MediaSource.EMBEDDED
-        item.assetId == "PHAsset123"
-        item.thumbnailPath == "media/thumbs/route_topo_thumb.jpg"
-        item.metadata == metadata
-    }
+		then:
+		item.type == MediaType.PHOTO
+		item.path == "media/route_topo.jpg"
+		item.designation == MediaDesignation.TOPO
+		item.caption == "Full route topo with pitch breakdown"
+		item.timestamp == "2024-01-15T10:30:00Z"
+		item.source == MediaSource.EMBEDDED
+		item.assetId == "PHAsset123"
+		item.thumbnailPath == "media/thumbs/route_topo_thumb.jpg"
+		item.metadata == metadata
+	}
 
-    def "should create media item with minimal fields"() {
-        when:
-        def item = MediaItem.builder()
-            .type(MediaType.VIDEO)
-            .path("https://youtube.com/watch?v=example")
-            .build()
+	def "should create media item with minimal fields"() {
+		when:
+		def item = MediaItem.builder()
+				.type(MediaType.VIDEO)
+				.path("https://youtube.com/watch?v=example")
+				.build()
 
-        then:
-        item.type == MediaType.VIDEO
-        item.path == "https://youtube.com/watch?v=example"
-        item.designation == null
-        item.caption == null
-        item.source == null
-    }
+		then:
+		item.type == MediaType.VIDEO
+		item.path == "https://youtube.com/watch?v=example"
+		item.designation == null
+		item.caption == null
+		item.source == null
+	}
 
-    def "should serialize to JSON with new fields"() {
-        given:
-        def item = MediaItem.builder()
-            .type(MediaType.PHOTO)
-            .path("media/approach.jpg")
-            .designation(MediaDesignation.APPROACH)
-            .caption("Approach trail from parking")
-            .timestamp("2024-02-01T08:00:00Z")
-            .source(MediaSource.EMBEDDED)
-            .build()
+	def "should serialize to JSON with new fields"() {
+		given:
+		def item = MediaItem.builder()
+				.type(MediaType.PHOTO)
+				.path("media/approach.jpg")
+				.designation(MediaDesignation.APPROACH)
+				.caption("Approach trail from parking")
+				.timestamp("2024-02-01T08:00:00Z")
+				.source(MediaSource.EMBEDDED)
+				.build()
 
-        when:
-        def json = objectMapper.writeValueAsString(item)
-        def result = objectMapper.readValue(json, Map.class)
+		when:
+		def json = objectMapper.writeValueAsString(item)
+		def result = objectMapper.readValue(json, Map.class)
 
-        then:
-        result.type == "photo"
-        result.path == "media/approach.jpg"
-        result.designation == "approach"
-        result.caption == "Approach trail from parking"
-        result.timestamp == "2024-02-01T08:00:00Z"
-        result.source == "embedded"
-    }
+		then:
+		result.type == "photo"
+		result.path == "media/approach.jpg"
+		result.designation == "approach"
+		result.caption == "Approach trail from parking"
+		result.timestamp == "2024-02-01T08:00:00Z"
+		result.source == "embedded"
+	}
 
-    def "should deserialize from JSON with new fields"() {
-        given:
-        def json = '''
+	def "should deserialize from JSON with new fields"() {
+		given:
+		def json = '''
         {
             "type": "video",
             "path": "https://youtube.com/watch?v=example",
@@ -104,55 +104,55 @@ class MediaItemSpec extends Specification {
         }
         '''
 
-        when:
-        def item = objectMapper.readValue(json, MediaItem.class)
+		when:
+		def item = objectMapper.readValue(json, MediaItem.class)
 
-        then:
-        item.type == MediaType.VIDEO
-        item.path == "https://youtube.com/watch?v=example"
-        item.designation == MediaDesignation.BETA
-        item.caption == "Beta video showing the crux sequence"
-        item.timestamp == "2024-01-20T14:00:00Z"
-        item.source == MediaSource.EXTERNAL
-        item.metadata.duration == 120
-        item.metadata.width == 1920
-        item.metadata.height == 1080
-    }
+		then:
+		item.type == MediaType.VIDEO
+		item.path == "https://youtube.com/watch?v=example"
+		item.designation == MediaDesignation.BETA
+		item.caption == "Beta video showing the crux sequence"
+		item.timestamp == "2024-01-20T14:00:00Z"
+		item.source == MediaSource.EXTERNAL
+		item.metadata.duration == 120
+		item.metadata.width == 1920
+		item.metadata.height == 1080
+	}
 
-    def "should handle external source type"() {
-        given:
-        def item = MediaItem.builder()
-            .type(MediaType.VIDEO)
-            .path("https://vimeo.com/123456789")
-            .source(MediaSource.EXTERNAL)
-            .designation(MediaDesignation.BETA)
-            .build()
+	def "should handle external source type"() {
+		given:
+		def item = MediaItem.builder()
+				.type(MediaType.VIDEO)
+				.path("https://vimeo.com/123456789")
+				.source(MediaSource.EXTERNAL)
+				.designation(MediaDesignation.BETA)
+				.build()
 
-        when:
-        def json = objectMapper.writeValueAsString(item)
-        def result = objectMapper.readValue(json, MediaItem.class)
+		when:
+		def json = objectMapper.writeValueAsString(item)
+		def result = objectMapper.readValue(json, MediaItem.class)
 
-        then:
-        result.source == MediaSource.EXTERNAL
-        result.designation == MediaDesignation.BETA
-    }
+		then:
+		result.source == MediaSource.EXTERNAL
+		result.designation == MediaDesignation.BETA
+	}
 
-    def "should support all designation types"() {
-        given:
-        def item = MediaItem.builder()
-            .type(MediaType.PHOTO)
-            .path("media/test.jpg")
-            .designation(designation)
-            .build()
+	def "should support all designation types"() {
+		given:
+		def item = MediaItem.builder()
+				.type(MediaType.PHOTO)
+				.path("media/test.jpg")
+				.designation(designation)
+				.build()
 
-        when:
-        def json = objectMapper.writeValueAsString(item)
-        def result = objectMapper.readValue(json, MediaItem.class)
+		when:
+		def json = objectMapper.writeValueAsString(item)
+		def result = objectMapper.readValue(json, MediaItem.class)
 
-        then:
-        result.designation == designation
+		then:
+		result.designation == designation
 
-        where:
-        designation << MediaDesignation.values()
-    }
+		where:
+		designation << MediaDesignation.values()
+	}
 }
