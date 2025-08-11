@@ -3,9 +3,9 @@ import 'package:test/test.dart';
 
 void main() {
   group('Flexible Media Model Tests', () {
-    group('FlexibleMediaItem', () {
+    group('MediaItem', () {
       test('should create media item with required fields', () {
-        final item = FlexibleMediaItem(
+        final item = MediaItem(
           type: MediaType.photo,
           path: '/path/to/photo.jpg',
         );
@@ -21,7 +21,7 @@ void main() {
       test('should create media item with all fields', () {
         final metadata = {'width': 1920, 'height': 1080, 'size': 500000};
 
-        final item = FlexibleMediaItem(
+        final item = MediaItem(
           type: MediaType.video,
           path: 'https://example.com/video.mp4',
           assetId: 'PHAsset123',
@@ -39,7 +39,7 @@ void main() {
       });
 
       test('should serialize to JSON', () {
-        final item = FlexibleMediaItem(
+        final item = MediaItem(
           type: MediaType.photo,
           path: 'media/climb_photo.jpg',
           source: MediaSource.embedded,
@@ -65,7 +65,7 @@ void main() {
           'metadata': {'duration': 45.5, 'width': 1280, 'height': 720},
         };
 
-        final item = FlexibleMediaItem.fromJson(json);
+        final item = MediaItem.fromJson(json);
         expect(item.type, equals(MediaType.video));
         expect(item.path, equals('/videos/send.mp4'));
         expect(item.assetId, equals('asset-456'));
@@ -85,8 +85,8 @@ void main() {
 
       test('should create media with items', () {
         final items = [
-          FlexibleMediaItem(type: MediaType.photo, path: 'photo1.jpg'),
-          FlexibleMediaItem(type: MediaType.video, path: 'video1.mp4'),
+          MediaItem(type: MediaType.photo, path: 'photo1.jpg'),
+          MediaItem(type: MediaType.video, path: 'video1.mp4'),
         ];
 
         final media = Media(items: items, count: 2);
@@ -100,7 +100,7 @@ void main() {
       test('should serialize to JSON', () {
         final media = Media(
           items: [
-            FlexibleMediaItem(
+            MediaItem(
               type: MediaType.photo,
               path: 'IMG_1234.jpg',
               source: MediaSource.reference,
@@ -169,7 +169,7 @@ void main() {
       test('should create climb with media', () {
         final media = Media(
           items: [
-            FlexibleMediaItem(
+            MediaItem(
               type: MediaType.photo,
               path: 'climbs/send_photo.jpg',
               source: MediaSource.local,
@@ -200,7 +200,7 @@ void main() {
           routeName: 'Test Route',
           media: Media(
             items: [
-              FlexibleMediaItem(
+              MediaItem(
                 type: MediaType.video,
                 path: 'videos/send.mp4',
                 thumbnailPath: 'thumbs/send_thumb.jpg',
@@ -233,11 +233,11 @@ void main() {
         final videoThumbnailPath = '/thumbs/climb123_video_thumb.jpg';
 
         // Convert to CLDF Media
-        final items = <FlexibleMediaItem>[];
+        final items = <MediaItem>[];
 
         if (hasPhoto) {
           items.add(
-            FlexibleMediaItem(
+            MediaItem(
               type: MediaType.photo,
               path: photoPath,
               assetId: photoAssetId,
@@ -251,7 +251,7 @@ void main() {
 
         if (hasVideo) {
           items.add(
-            FlexibleMediaItem(
+            MediaItem(
               type: MediaType.video,
               path: videoPath,
               assetId: videoAssetId,
@@ -277,7 +277,7 @@ void main() {
         // Simple case - just photo references
         final media = Media(
           items: [
-            FlexibleMediaItem(
+            MediaItem(
               type: MediaType.photo,
               path: 'IMG_1234.jpg',
               source: MediaSource.reference,

@@ -372,9 +372,9 @@ class CLDFArchiveSpec extends Specification {
 		]
 	}
 
-	private List<MediaItem> createMediaMetadata() {
+	private List<MediaMetadataItem> createMediaMetadata() {
 		return [
-			MediaItem.builder()
+			MediaMetadataItem.builder()
 			.id(1)
 			.climbId(1)
 			.filename("test.jpg")

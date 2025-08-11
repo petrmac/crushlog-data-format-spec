@@ -365,7 +365,7 @@ class ValidateCommandSpec extends Specification {
         archive.hasTags() >> true
         archive.getTags() >> [Mock(Tag), Mock(Tag), Mock(Tag)]
         archive.hasMedia() >> true
-        archive.getMediaItems() >> [Mock(MediaItem)]
+        archive.getMediaItems() >> [Mock(MediaMetadataItem)]
         
         def validationResult = ValidationResult.builder()
             .valid(true)

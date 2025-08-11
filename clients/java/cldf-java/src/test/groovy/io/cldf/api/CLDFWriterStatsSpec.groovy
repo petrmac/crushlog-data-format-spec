@@ -113,14 +113,14 @@ class CLDFWriterStatsSpec extends Specification {
 		]
 
 		def mediaItems = [
-			MediaItem.builder()
+			MediaMetadataItem.builder()
 			.id(1)
 			.climbId(1)
 			.type(MediaType.PHOTO)
 			.source(MediaSource.LOCAL)
 			.filename("climb1.jpg")
 			.build(),
-			MediaItem.builder()
+			MediaMetadataItem.builder()
 			.id(2)
 			.climbId(2)
 			.type(MediaType.VIDEO)

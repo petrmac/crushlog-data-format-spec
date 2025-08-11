@@ -32,6 +32,20 @@ class FlexibleLocalDateConverter implements JsonConverter<String?, String?> {
       throw FormatException('Invalid date: $json');
     }
 
+    // Handle ISO date-time format (extract date part)
+    if (RegExp(r'^\d{4}-\d{2}-\d{2}T').hasMatch(trimmed)) {
+      try {
+        // Extract just the date part from the string
+        final datePart = trimmed.substring(0, 10);
+        if (datePart.isValidIsoDate) {
+          return datePart;
+        }
+        throw FormatException('Invalid date in date-time: $json');
+      } catch (_) {
+        throw FormatException('Invalid date-time format: $json');
+      }
+    }
+
     // Handle compact format (YYYYMMDD) specially
     if (RegExp(r'^\d{8}$').hasMatch(trimmed)) {
       try {

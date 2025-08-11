@@ -3,6 +3,7 @@ package io.cldf.models.media;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.cldf.models.enums.MediaDesignation;
 import io.cldf.models.enums.MediaSource;
 import io.cldf.models.enums.MediaType;
 import lombok.AllArgsConstructor;
@@ -33,6 +34,15 @@ public class MediaItem {
 
   /** Source of the media */
   private MediaSource source;
+
+  /** Purpose or type of media content */
+  private MediaDesignation designation;
+
+  /** User-provided description or caption */
+  private String caption;
+
+  /** When the media was created or taken */
+  private String timestamp;
 
   /** Additional metadata */
   private Map<String, Object> metadata;

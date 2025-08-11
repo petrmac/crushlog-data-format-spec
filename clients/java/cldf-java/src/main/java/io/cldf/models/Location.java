@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import io.cldf.models.enums.RockType;
 import io.cldf.models.enums.TerrainType;
+import io.cldf.models.media.Media;
 import io.cldf.utils.FlexibleDateTimeDeserializer;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -46,6 +47,9 @@ public class Location {
   private TerrainType terrainType;
 
   private String accessInfo;
+
+  /** Media associated with this location (overview, approach photos, etc.) */
+  private Media media;
 
   @JsonDeserialize(using = FlexibleDateTimeDeserializer.class)
   private OffsetDateTime createdAt;

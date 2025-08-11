@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://cldf.io/schemas/media.schema.json",
   "title": "CLDF Media",
-  "description": "Media references for climbs",
+  "description": "Media references for entities (climbs, routes, locations, sectors)",
   "type": "object",
   "properties": {
     "items": {
@@ -41,10 +41,36 @@
         "source": {
           "$ref": "#/definitions/mediaSource"
         },
+        "designation": {
+          "$ref": "#/definitions/mediaDesignation"
+        },
+        "caption": {
+          "type": "string",
+          "description": "User-provided description or caption"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the media was created or taken"
+        },
         "metadata": {
           "type": "object",
           "description": "Additional metadata",
-          "additionalProperties": true
+          "additionalProperties": true,
+          "properties": {
+            "width": {"type": "integer"},
+            "height": {"type": "integer"},
+            "size": {"type": "integer"},
+            "duration": {"type": "number"},
+            "coordinates": {
+              "type": "object",
+              "properties": {
+                "latitude": {"type": "number"},
+                "longitude": {"type": "number"},
+                "altitude": {"type": "number"}
+              }
+            }
+          }
         }
       }
     },
@@ -55,8 +81,14 @@
     },
     "mediaSource": {
       "type": "string",
-      "enum": ["local", "cloud", "reference", "embedded"],
+      "enum": ["local", "cloud", "reference", "embedded", "external"],
       "description": "Source of the media"
+    },
+    "mediaDesignation": {
+      "type": "string",
+      "enum": ["topo", "beta", "approach", "log", "overview", "conditions", "gear", "descent", "other"],
+      "description": "Purpose or type of media content",
+      "default": "other"
     }
   }
 }

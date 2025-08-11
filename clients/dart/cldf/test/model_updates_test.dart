@@ -181,9 +181,9 @@ void main() {
       });
     });
 
-    group('MediaItem Model', () {
+    group('MediaMetadataItem Model', () {
       test('should have int id and int climbId', () {
-        final mediaItem = MediaItem(
+        final mediaItem = MediaMetadataItem(
           id: 123,
           type: MediaType.photo,
           source: MediaSource.embedded,
@@ -198,7 +198,7 @@ void main() {
       });
 
       test('should handle media without climbId', () {
-        final mediaItem = MediaItem(
+        final mediaItem = MediaMetadataItem(
           id: 1,
           type: MediaType.video,
           source: MediaSource.external,

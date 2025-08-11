@@ -1,6 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 
-import 'flexible_media_item.dart';
+import 'media_item.dart';
 
 part 'media.g.dart';
 
@@ -14,7 +14,7 @@ class Media {
   factory Media.fromJson(Map<String, dynamic> json) => _$MediaFromJson(json);
 
   /// List of media items
-  final List<FlexibleMediaItem>? items;
+  final List<MediaItem>? items;
 
   /// Total media count
   final int? count;

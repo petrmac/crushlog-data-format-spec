@@ -4,13 +4,14 @@ import '../utils/date_time_converter.dart';
 import 'enums/media_source.dart';
 import 'enums/media_type.dart';
 
-part 'media_item.g.dart';
+part 'media_metadata_item.g.dart';
 
-/// A media item (photo or video)
+/// A standalone media item for media-metadata.json file
+/// This is different from FlexibleMediaItem which is used inline in climbs
 @JsonSerializable()
-class MediaItem {
-  /// Creates a new [MediaItem] instance
-  MediaItem({
+class MediaMetadataItem {
+  /// Creates a new [MediaMetadataItem] instance
+  MediaMetadataItem({
     required this.id,
     required this.type,
     required this.source,
@@ -30,9 +31,9 @@ class MediaItem {
     this.tags,
   });
 
-  /// Creates a [MediaItem] from JSON
-  factory MediaItem.fromJson(Map<String, dynamic> json) =>
-      _$MediaItemFromJson(json);
+  /// Creates a [MediaMetadataItem] from JSON
+  factory MediaMetadataItem.fromJson(Map<String, dynamic> json) =>
+      _$MediaMetadataItemFromJson(json);
 
   /// Unique identifier
   final int id;
@@ -86,8 +87,8 @@ class MediaItem {
   /// Associated tags
   final List<String>? tags;
 
-  /// Converts this [MediaItem] to JSON
-  Map<String, dynamic> toJson() => _$MediaItemToJson(this);
+  /// Converts this [MediaMetadataItem] to JSON
+  Map<String, dynamic> toJson() => _$MediaMetadataItemToJson(this);
 }
 
 /// GPS coordinates for media

@@ -53,7 +53,7 @@ void main() {
 
       // Create media items with proper structure
       final mediaItems = [
-        MediaItem(
+        MediaMetadataItem(
           id: 1,
           type: MediaType.photo,
           source: MediaSource.embedded,
@@ -64,7 +64,7 @@ void main() {
           width: 1920,
           height: 1080,
         ),
-        MediaItem(
+        MediaMetadataItem(
           id: 2,
           type: MediaType.video,
           source: MediaSource.embedded,
@@ -161,7 +161,7 @@ void main() {
 
       // Create media items without embedding (using reference)
       final mediaItems = [
-        MediaItem(
+        MediaMetadataItem(
           id: 1,
           type: MediaType.photo,
           source: MediaSource.reference,
@@ -235,7 +235,7 @@ void main() {
     });
 
     test('should handle media metadata correctly', () async {
-      final mediaItem = MediaItem(
+      final mediaItem = MediaMetadataItem(
         id: 1,
         type: MediaType.photo,
         source: MediaSource.embedded,
@@ -297,7 +297,7 @@ void main() {
     });
 
     test('should serialize media to JSON correctly', () {
-      final mediaItem = MediaItem(
+      final mediaItem = MediaMetadataItem(
         id: 1,
         type: MediaType.video,
         source: MediaSource.external,
@@ -339,7 +339,7 @@ void main() {
         'coordinates': {'latitude': 37.7749, 'longitude': -122.4194},
       };
 
-      final mediaItem = MediaItem.fromJson(json);
+      final mediaItem = MediaMetadataItem.fromJson(json);
 
       expect(mediaItem.id, equals(42));
       expect(mediaItem.climbId, equals(123));
@@ -366,7 +366,7 @@ void main() {
         'path': '/photos/climb.jpg',
       };
 
-      final mediaItem = MediaItem.fromJson(json);
+      final mediaItem = MediaMetadataItem.fromJson(json);
 
       expect(mediaItem.id, equals(1));
       expect(mediaItem.type, equals(MediaType.photo));

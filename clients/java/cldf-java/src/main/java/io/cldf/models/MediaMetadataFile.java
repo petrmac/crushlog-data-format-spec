@@ -13,5 +13,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 /** Container for MediaMetadataFile data in CLDF archive. */
 public class MediaMetadataFile {
-  private List<MediaItem> media;
+  private List<MediaMetadataItem> media;
 }

@@ -14,11 +14,11 @@ void main() {
   final videoPath = 'https://example.com/videos/send.mp4';
 
   // Convert to CLDF flexible media
-  final items = <FlexibleMediaItem>[];
+  final items = <MediaItem>[];
 
   if (hasPhoto) {
     items.add(
-      FlexibleMediaItem(
+      MediaItem(
         type: MediaType.photo,
         path: photoPath,
         assetId: photoAssetId,
@@ -31,7 +31,7 @@ void main() {
 
   if (hasVideo) {
     items.add(
-      FlexibleMediaItem(
+      MediaItem(
         type: MediaType.video,
         path: videoPath,
         source: MediaSource.reference, // External URL
@@ -65,7 +65,7 @@ void main() {
   // Example of media-only reference (no embedded files)
   final referenceOnlyMedia = Media(
     items: [
-      FlexibleMediaItem(
+      MediaItem(
         type: MediaType.photo,
         path: 'DCIM/Camera/IMG_2024.jpg',
         source: MediaSource.reference,

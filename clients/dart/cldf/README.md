@@ -15,7 +15,11 @@ A Dart implementation of the Crushlog Data Format (CLDF) for climbing data excha
 - Archive creation with automatic checksums
 - Automatic statistics calculation when writing archives
 - Validation support
-- Media file handling (embedded or referenced)
+- **Enhanced Media Support (v1.2.3+)**
+  - Media attachments for routes, locations, sectors, and climbs
+  - Semantic media designation (topo, beta, approach, etc.)
+  - Support for embedded files and external URLs
+  - Captions and timestamps for media items
 
 ## Platform Support
 
@@ -33,7 +37,7 @@ Add this to your package's `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  cldf: ^1.2.1
+  cldf: ^1.2.3
 ```
 
 ## Usage
@@ -121,6 +125,49 @@ final archive = CLDFArchive(
 await writer.writeFile('output.cldf', archive);
 // The written archive will have stats populated with counts of all entities
 ```
+
+### Media Support (v1.2.3+)
+
+Attach media to any entity with semantic designation:
+
+```dart
+final route = Route(
+  id: 101,
+  locationId: 1,
+  name: 'The Dawn Wall',
+  routeType: RouteType.route,
+  media: Media(
+    items: [
+      MediaItem(
+        type: MediaType.photo,
+        path: 'media/dawn_wall_topo.jpg',
+        designation: MediaDesignation.topo,
+        caption: 'Full route topo with pitch breakdown',
+        source: MediaSource.embedded,
+      ),
+      MediaItem(
+        type: MediaType.video,
+        path: 'https://youtube.com/watch?v=example',
+        designation: MediaDesignation.beta,
+        caption: 'Beta video from Tommy Caldwell',
+        source: MediaSource.external,
+      ),
+    ],
+    count: 2,
+  ),
+);
+```
+
+**Available Designations:**
+- `topo` - Route diagrams
+- `beta` - How-to information
+- `approach` - Access info
+- `log` - Climb documentation
+- `overview` - General views
+- `conditions` - Current state
+- `gear` - Equipment info
+- `descent` - Down-climb info
+- `other` - Unspecified
 
 ### Working with JSON
 

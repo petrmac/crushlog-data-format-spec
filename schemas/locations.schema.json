@@ -78,6 +78,10 @@
           "type": "string",
           "description": "Access information and directions"
         },
+        "media": {
+          "$ref": "media.schema.json",
+          "description": "Media associated with this location (overview, approach photos, etc.)"
+        },
         "createdAt": {
           "type": "string",
           "format": "date-time"

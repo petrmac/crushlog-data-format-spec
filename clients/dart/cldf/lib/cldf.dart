@@ -20,11 +20,11 @@ export 'models/route.dart';
 export 'models/climb.dart';
 export 'models/session.dart';
 export 'models/tag.dart';
-export 'models/media_item.dart';
+export 'models/media_metadata_item.dart';
 export 'models/checksums.dart';
-// Flexible media model exports
+// Media model exports (for inline climb media)
 export 'models/media/media.dart';
-export 'models/media/flexible_media_item.dart';
+export 'models/media/media_item.dart';
 
 // Enum exports
 export 'models/enums/platform.dart';
@@ -38,5 +38,6 @@ export 'models/enums/rock_type.dart';
 export 'models/enums/terrain_type.dart';
 export 'models/enums/media_type.dart';
 export 'models/enums/media_source.dart';
+export 'models/enums/media_designation.dart';
 export 'models/enums/protection_rating.dart';
 export 'models/enums/route_characteristics.dart';

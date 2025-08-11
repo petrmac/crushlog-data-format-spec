@@ -61,6 +61,10 @@
           "required": ["latitude", "longitude"],
           "description": "GPS coordinates of the sector"
         },
+        "media": {
+          "$ref": "media.schema.json",
+          "description": "Media associated with this sector (overview photos, approach maps, etc.)"
+        },
         "createdAt": {
           "type": "string",
           "format": "date-time"

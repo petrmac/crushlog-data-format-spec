@@ -259,13 +259,13 @@ class CLDFWriterSpec extends Specification {
 				.media(null) // Media now handled separately through mediaItems
 				.build()
 
-		def mediaItem = MediaItem.builder()
+		def mediaItem = MediaMetadataItem.builder()
 				.id(1)
 				.climbId(1)
 				.filename("photo1.jpg")
 				.type(MediaType.PHOTO)
 				.createdAt(OffsetDateTime.now())
-				.metadata(MediaItem.Metadata.builder()
+				.metadata(MediaMetadataItem.Metadata.builder()
 				.width(1920)
 				.height(1080)
 				.size(1024000)
@@ -398,9 +398,9 @@ class CLDFWriterSpec extends Specification {
 		]
 	}
 
-	private List<MediaItem> createMediaMetadata() {
+	private List<MediaMetadataItem> createMediaMetadata() {
 		return [
-			MediaItem.builder()
+			MediaMetadataItem.builder()
 			.id(1)
 			.climbId(1)
 			.filename("test.jpg")

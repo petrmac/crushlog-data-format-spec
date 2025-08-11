@@ -83,7 +83,7 @@ void main() {
       ];
 
       final mediaItems = [
-        MediaItem(
+        MediaMetadataItem(
           id: 1,
           climbId: 1,
           type: MediaType.photo,
@@ -91,7 +91,7 @@ void main() {
           path: 'media/climb1.jpg',
           filename: 'climb1.jpg',
         ),
-        MediaItem(
+        MediaMetadataItem(
           id: 2,
           climbId: 2,
           type: MediaType.video,

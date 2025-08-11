@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import io.cldf.models.enums.ProtectionRating;
 import io.cldf.models.enums.RouteCharacteristics;
 import io.cldf.models.enums.RouteType;
+import io.cldf.models.media.Media;
 import io.cldf.utils.FlexibleDateTimeDeserializer;
 import io.cldf.utils.FlexibleLocalDateDeserializer;
 import lombok.AllArgsConstructor;
@@ -55,6 +56,9 @@ public class Route {
 
   private String gearNotes;
   private List<String> tags;
+
+  /** Media associated with this route (topos, beta videos, etc.) */
+  private Media media;
 
   @JsonDeserialize(using = FlexibleDateTimeDeserializer.class)
   private OffsetDateTime createdAt;

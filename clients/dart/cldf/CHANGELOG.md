@@ -1,5 +1,37 @@
 # Changelog
 
+## 1.2.3
+
+### Added
+- **Unified Media Model** - Complete overhaul of media support across all entities
+  - Media can now be attached to routes, locations, and sectors (in addition to climbs)
+  - New `MediaDesignation` enum for semantic categorization of media purpose:
+    - `topo` - Route diagrams and maps
+    - `beta` - How-to information and technique videos
+    - `approach` - Access and trail information
+    - `log` - Climb documentation and send photos
+    - `overview` - General views and panoramas
+    - `conditions` - Current state and conditions
+    - `gear` - Equipment and protection information
+    - `descent` - Down-climb or rappel information
+    - `other` - Unspecified purpose (default)
+  - New fields in `MediaItem`:
+    - `designation` - Purpose/type of media content
+    - `caption` - User-provided description
+    - `timestamp` - When the media was created or taken
+  - Added `external` to `MediaSource` enum for external URLs (YouTube, etc.)
+  - Enhanced metadata structure with coordinate support
+
+### Changed
+- Renamed `FlexibleMediaItem` to `MediaItem` for consistency with Java implementation
+- Renamed old `MediaItem` to `MediaMetadataItem` to clarify its use for standalone media files
+- Media model is now consistent across Java and Dart implementations
+
+### Enhanced
+- Route, Location, and Sector models now include optional `media` field
+- Schema validation updated to support media on all entity types
+- Comprehensive test coverage for new media functionality
+
 ## 1.2.2
 
 ### Added
@@ -15,6 +47,10 @@
   - Tests for media file handling
   - Tests for custom field preservation
   - Tests for empty collection handling
+- Support for date-time strings in date fields
+  - `FlexibleLocalDateConverter` now accepts ISO date-time strings (e.g., "2024-01-29T12:00:00Z")
+  - Extracts the date part from date-time strings for fields that require date-only values
+  - Maintains compatibility with all existing date formats
 
 ## 1.2.1
 

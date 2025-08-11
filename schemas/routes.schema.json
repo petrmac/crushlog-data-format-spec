@@ -121,6 +121,10 @@
           },
           "description": "Array of tag names associated with the route"
         },
+        "media": {
+          "$ref": "media.schema.json",
+          "description": "Media associated with this route (topos, beta videos, etc.)"
+        },
         "createdAt": {
           "type": "string",
           "format": "date-time"
