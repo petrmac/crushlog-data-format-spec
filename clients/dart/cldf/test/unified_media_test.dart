@@ -38,11 +38,8 @@ void main() {
 
       test('should handle missing designation in JSON', () {
         // Test that when designation is not present in JSON, it's null
-        final json = {
-          'type': 'photo',
-          'path': 'media/test.jpg',
-        };
-        
+        final json = {'type': 'photo', 'path': 'media/test.jpg'};
+
         final item = MediaItem.fromJson(json);
         // In Dart, if field is not present in JSON, it will be null
         expect(item.designation, isNull);
@@ -54,7 +51,7 @@ void main() {
           'path': 'media/test.jpg',
           'designation': null,
         };
-        
+
         final item = MediaItem.fromJson(json);
         expect(item.designation, isNull);
       });
