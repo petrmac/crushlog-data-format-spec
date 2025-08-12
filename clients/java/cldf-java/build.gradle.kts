@@ -130,10 +130,29 @@ java {
 }
 
 signing {
-    val signingKey: String? by project
-    val signingPassword: String? by project
-    useInMemoryPgpKeys(signingKey, signingPassword)
-    sign(publishing.publications["maven"])
+    // Get signing credentials from environment or project properties
+    val signingKey: String? = System.getenv("MAVEN_GPG_PRIVATE_KEY") 
+        ?: project.findProperty("signingKey") as String?
+    val signingPassword: String? = System.getenv("MAVEN_GPG_PASSPHRASE") 
+        ?: project.findProperty("signingPassword") as String?
+    
+    // Only configure signing if credentials are available
+    if (signingKey != null && signingPassword != null) {
+        useInMemoryPgpKeys(signingKey, signingPassword)
+        sign(publishing.publications["maven"])
+    }
+}
+
+// Make signing required only when publishing to Sonatype (not for local publishing)
+tasks.withType<Sign> {
+    onlyIf {
+        // Only sign when actually publishing to Sonatype, not for publishToMavenLocal
+        !gradle.taskGraph.hasTask(":publishToMavenLocal") &&
+        !gradle.taskGraph.hasTask(":cldf-java:publishToMavenLocal") &&
+        (gradle.taskGraph.hasTask(":publishToSonatype") || 
+         gradle.taskGraph.hasTask(":cldf-java:publishMavenPublicationToSonatypeRepository") ||
+         gradle.taskGraph.hasTask(":cldf-java:publishAllPublicationsToSonatypeRepository"))
+    }
 }
 
 spotless {
