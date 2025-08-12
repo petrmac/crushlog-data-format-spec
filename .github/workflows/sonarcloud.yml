@@ -196,5 +196,5 @@ jobs:
           -Dsonar.tests=test
           -Dsonar.exclusions=**/*.g.dart,**/*.freezed.dart,**/*.mocks.dart,**/generated/**
           -Dsonar.language=dart
-          -Dsonar.dart.lcov.reportPaths=coverage/lcov.info
+          -Dsonar.coverage.lcov.reportPaths=coverage/lcov.info
           -Dsonar.verbose=true
