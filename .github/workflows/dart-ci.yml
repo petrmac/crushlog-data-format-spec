@@ -84,10 +84,8 @@ jobs:
     - name: Format coverage
       run: |
         dart pub global run coverage:format_coverage --lcov --in=coverage --out=coverage/lcov.info --report-on=lib
-        # Fix paths to be relative for SonarCloud - keep lib/ prefix
-        sed -i "s|SF:.*/clients/dart/cldf/|SF:|g" coverage/lcov.info
-        echo "Coverage file first few lines after path fix:"
-        head -5 coverage/lcov.info
+        # Fix paths to be relative for SonarCloud
+        sed -i "s|SF:.*clients/dart/cldf/|SF:|g" coverage/lcov.info
       if: matrix.os == 'ubuntu-latest' && matrix.dart == 'stable'
     
     - name: Upload coverage and test reports
