@@ -10,7 +10,7 @@ class StringUtils {
         .replaceAll(RegExp(r'-+'), '-')
         .replaceAll(RegExp(r'^-|-$'), '');
   }
-  
+
   /// Standardize grade format
   static String standardizeGrade(String grade) {
     return grade.replaceAll(RegExp(r'\s'), '').toLowerCase();

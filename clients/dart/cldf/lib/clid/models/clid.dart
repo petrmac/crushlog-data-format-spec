@@ -8,7 +8,7 @@ class CLID {
   final String fullId;
   final String shortForm;
   final String url;
-  
+
   const CLID({
     required this.namespace,
     required this.type,
@@ -17,10 +17,10 @@ class CLID {
     required this.shortForm,
     required this.url,
   });
-  
+
   @override
   String toString() => fullId;
-  
+
   Map<String, dynamic> toJson() => {
     'namespace': namespace,
     'type': type.value,
@@ -29,14 +29,14 @@ class CLID {
     'shortForm': shortForm,
     'url': url,
   };
-  
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is CLID &&
           runtimeType == other.runtimeType &&
           fullId == other.fullId;
-  
+
   @override
   int get hashCode => fullId.hashCode;
 }

@@ -5,7 +5,7 @@ class Route {
   final RouteType type;
   final FirstAscent? firstAscent;
   final double? height;
-  
+
   const Route({
     required this.name,
     required this.grade,
@@ -13,7 +13,7 @@ class Route {
     this.firstAscent,
     this.height,
   });
-  
+
   Map<String, dynamic> toJson() => {
     'name': name,
     'grade': grade,
@@ -21,13 +21,13 @@ class Route {
     if (firstAscent != null) 'firstAscent': firstAscent!.toJson(),
     if (height != null) 'height': height,
   };
-  
+
   factory Route.fromJson(Map<String, dynamic> json) {
     return Route(
       name: json['name'] as String,
       grade: json['grade'] as String,
       type: RouteType.fromString(json['type'] as String),
-      firstAscent: json['firstAscent'] != null 
+      firstAscent: json['firstAscent'] != null
           ? FirstAscent.fromJson(json['firstAscent'] as Map<String, dynamic>)
           : null,
       height: json['height'] as double?,
@@ -42,10 +42,10 @@ enum RouteType {
   boulder('boulder'),
   ice('ice'),
   mixed('mixed');
-  
+
   final String value;
   const RouteType(this.value);
-  
+
   static RouteType fromString(String value) {
     return RouteType.values.firstWhere(
       (type) => type.value == value,
@@ -58,17 +58,14 @@ enum RouteType {
 class FirstAscent {
   final int? year;
   final String? name;
-  
-  const FirstAscent({
-    this.year,
-    this.name,
-  });
-  
+
+  const FirstAscent({this.year, this.name});
+
   Map<String, dynamic> toJson() => {
     if (year != null) 'year': year,
     if (name != null) 'name': name,
   };
-  
+
   factory FirstAscent.fromJson(Map<String, dynamic> json) {
     return FirstAscent(
       year: json['year'] as int?,

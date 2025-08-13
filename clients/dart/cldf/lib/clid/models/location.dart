@@ -8,7 +8,7 @@ class Location {
   final String name;
   final Coordinates coordinates;
   final bool isIndoor;
-  
+
   const Location({
     required this.country,
     this.state,
@@ -17,7 +17,7 @@ class Location {
     required this.coordinates,
     required this.isIndoor,
   });
-  
+
   factory Location.outdoor({
     required String country,
     String? state,
@@ -35,7 +35,7 @@ class Location {
       isIndoor: false,
     );
   }
-  
+
   factory Location.indoor({
     required String country,
     String? state,
@@ -53,7 +53,7 @@ class Location {
       isIndoor: true,
     );
   }
-  
+
   Map<String, dynamic> toJson() => {
     'country': country,
     if (state != null) 'state': state,
@@ -62,14 +62,16 @@ class Location {
     'coordinates': coordinates.toJson(),
     'isIndoor': isIndoor,
   };
-  
+
   factory Location.fromJson(Map<String, dynamic> json) {
     return Location(
       country: json['country'] as String,
       state: json['state'] as String?,
       city: json['city'] as String?,
       name: json['name'] as String,
-      coordinates: Coordinates.fromJson(json['coordinates'] as Map<String, dynamic>),
+      coordinates: Coordinates.fromJson(
+        json['coordinates'] as Map<String, dynamic>,
+      ),
       isIndoor: json['isIndoor'] as bool,
     );
   }

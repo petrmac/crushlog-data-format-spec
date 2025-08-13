@@ -12,16 +12,17 @@ import 'utils/string_utils.dart';
 /// Based on UUID v5 for deterministic IDs and UUID v4 for random IDs
 class CLIDGenerator {
   /// CrushLog namespace UUID (registered for climbing data)
-  static const String crushlogNamespace = '6ba7b810-9dad-11d1-80b4-00c04fd430c8';
-  
+  static const String crushlogNamespace =
+      '6ba7b810-9dad-11d1-80b4-00c04fd430c8';
+
   static final Uuid _uuid = const Uuid();
-  
+
   /// UUID validation pattern
   static final RegExp _uuidPattern = RegExp(
     r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$',
     caseSensitive: false,
   );
-  
+
   /// Generate a deterministic CLID for a location
   static String generateLocationCLID(Location location) {
     // Validate required fields
@@ -31,7 +32,7 @@ class CLIDGenerator {
         'Invalid location data: ${validation.errors.join(', ')}',
       );
     }
-    
+
     // Build deterministic components
     final components = [
       location.country.toUpperCase(),
@@ -42,13 +43,13 @@ class CLIDGenerator {
       location.coordinates.lon.toStringAsFixed(6),
       location.isIndoor ? 'indoor' : 'outdoor',
     ];
-    
+
     final input = components.where((s) => s.isNotEmpty).join(':');
     final uuid = _uuid.v5(crushlogNamespace, input);
-    
+
     return 'clid:location:$uuid';
   }
-  
+
   /// Generate a deterministic CLID for a route
   static String generateRouteCLID(String locationCLID, Route route) {
     // Validate required fields
@@ -58,71 +59,73 @@ class CLIDGenerator {
         'Invalid route data: ${validation.errors.join(', ')}',
       );
     }
-    
+
     // Extract location UUID (remove prefix)
     final locationUuid = locationCLID.replaceFirst('clid:location:', '');
-    
+
     // Build deterministic components
     final components = [
       locationUuid,
       StringUtils.normalize(route.name),
       StringUtils.standardizeGrade(route.grade),
       route.firstAscent?.year?.toString() ?? '',
-      route.firstAscent?.name != null 
-          ? StringUtils.normalize(route.firstAscent!.name!) : '',
+      route.firstAscent?.name != null
+          ? StringUtils.normalize(route.firstAscent!.name!)
+          : '',
       route.height?.toStringAsFixed(1) ?? '',
       route.type.value,
     ];
-    
+
     final input = components.join(':');
     final uuid = _uuid.v5(crushlogNamespace, input);
-    
+
     return 'clid:route:$uuid';
   }
-  
+
   /// Generate a deterministic CLID for a sector
   static String generateSectorCLID(String locationCLID, Sector sector) {
     // Extract location UUID
     final locationUuid = locationCLID.replaceFirst('clid:location:', '');
-    
+
     final components = [
       locationUuid,
       StringUtils.normalize(sector.name),
       sector.order?.toString() ?? '0',
     ];
-    
+
     final input = components.join(':');
     final uuid = _uuid.v5(crushlogNamespace, input);
-    
+
     return 'clid:sector:$uuid';
   }
-  
+
   /// Generate a random UUID v4 for user content
   static String generateRandomCLID(EntityType type) {
     final uuid = _uuid.v4();
     return 'clid:${type.value}:$uuid';
   }
-  
+
   /// Parse a CLID into its components
   static CLID parse(String clid) {
     final parts = clid.split(':');
-    
+
     if (parts.length != 3 || parts[0] != 'clid') {
       throw ArgumentError('Invalid CLID format: $clid');
     }
-    
+
     final entityType = EntityType.fromString(parts[1]);
-    
+
     return CLID(
       namespace: parts[0],
       type: entityType,
       uuid: parts[2],
       fullId: clid,
       shortForm: parts[2].substring(0, parts[2].length.clamp(0, 8)),
-      url: 'https://crushlog.pro/g/${parts[2].substring(0, parts[2].length.clamp(0, 8))}',
+      url:
+          'https://crushlog.pro/g/${parts[2].substring(0, parts[2].length.clamp(0, 8))}',
     );
   }
-  
+
   /// Validate a CLID
   static bool validate(String clid) {
     try {
@@ -132,66 +135,60 @@ class CLIDGenerator {
       return false;
     }
   }
-  
+
   /// Generate a short URL-safe version of the CLID
   static String toShortForm(String clid) {
     final parsed = parse(clid);
     return parsed.shortForm;
   }
-  
+
   /// Validate location data
   static ValidationResult _validateLocation(Location location) {
     final errors = <String>[];
     final warnings = <String>[];
-    
+
     if (location.country.length != 2) {
       errors.add('Country must be ISO 3166-1 alpha-2 code');
     }
-    
+
     if (location.name.trim().isEmpty) {
       errors.add('Location name is required');
     }
-    
+
     if (location.coordinates.lat.abs() > 90) {
       errors.add('Latitude must be between -90 and 90');
     }
-    
+
     if (location.coordinates.lon.abs() > 180) {
       errors.add('Longitude must be between -180 and 180');
     }
-    
-    return ValidationResult(
-      errors: errors,
-      warnings: warnings,
-    );
+
+    return ValidationResult(errors: errors, warnings: warnings);
   }
-  
+
   /// Validate route data
   static ValidationResult _validateRoute(Route route) {
     final errors = <String>[];
     final warnings = <String>[];
-    
+
     if (route.name.trim().isEmpty) {
       errors.add('Route name is required');
     }
-    
+
     if (route.grade.trim().isEmpty) {
       errors.add('Route grade is required');
     }
-    
+
     // Warnings for optional but recommended fields
     if (route.firstAscent == null && route.type != RouteType.boulder) {
       warnings.add('First ascent year recommended for historical routes');
     }
-    
+
     if (route.height == null && route.type != RouteType.boulder) {
       warnings.add('Route height recommended for rope routes');
     }
-    
-    return ValidationResult(
-      errors: errors,
-      warnings: warnings,
-    );
+
+    return ValidationResult(errors: errors, warnings: warnings);
   }
 }
 
@@ -203,10 +200,10 @@ enum EntityType {
   climb('climb'),
   session('session'),
   media('media');
-  
+
   final String value;
   const EntityType(this.value);
-  
+
   static EntityType fromString(String value) {
     return EntityType.values.firstWhere(
       (type) => type.value == value,
