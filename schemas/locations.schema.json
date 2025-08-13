@@ -20,7 +20,12 @@
       "properties": {
         "id": {
           "type": "integer",
-          "description": "Unique identifier for the location"
+          "description": "Unique identifier for the location (legacy)"
+        },
+        "clid": {
+          "type": "string",
+          "pattern": "^clid:location:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "description": "CrushLog ID - globally unique identifier (v1.3.0+)"
         },
         "name": {
           "type": "string",

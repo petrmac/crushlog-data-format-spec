@@ -20,7 +20,12 @@
       "properties": {
         "id": {
           "type": "integer",
-          "description": "Unique identifier for the route"
+          "description": "Unique identifier for the route (legacy)"
+        },
+        "clid": {
+          "type": "string",
+          "pattern": "^clid:route:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "description": "CrushLog ID - globally unique identifier (v1.3.0+)"
         },
         "locationId": {
           "type": "integer",
@@ -124,6 +129,34 @@
         "media": {
           "$ref": "media.schema.json",
           "description": "Media associated with this route (topos, beta videos, etc.)"
+        },
+        "qrCode": {
+          "type": "object",
+          "description": "QR code data for physical route marking (v1.3.0+)",
+          "properties": {
+            "data": {
+              "type": "string",
+              "description": "Generated QR code data string"
+            },
+            "url": {
+              "type": "string",
+              "format": "uri",
+              "description": "Public URL for the route"
+            },
+            "ipfsHash": {
+              "type": "string",
+              "description": "IPFS hash for CLDF archive reference"
+            },
+            "blockchainTx": {
+              "type": "string",
+              "description": "Blockchain transaction hash for permanent record"
+            },
+            "generatedAt": {
+              "type": "string",
+              "format": "date-time",
+              "description": "When the QR code was generated"
+            }
+          }
         },
         "createdAt": {
           "type": "string",
