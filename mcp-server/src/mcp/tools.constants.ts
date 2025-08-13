@@ -101,15 +101,37 @@ export const TOOL_DEFINITIONS = [
         },
         dataType: {
           type: 'string',
-          enum: ['locations', 'climbs', 'sessions', 'media', 'all'],
+          enum: ['locations', 'climbs', 'sessions', 'routes', 'sectors', 'media', 'all'],
           description: 'Type of data to query',
         },
         filter: {
           type: 'string',
           description: 'Optional filter expression',
         },
+        clid: {
+          type: 'string',
+          description: 'Search for a specific CLID (CrushLog ID)',
+        },
       },
       required: ['filePath', 'dataType'],
+    },
+  },
+  {
+    name: 'cldf_search_by_clid',
+    description: 'Search for an entity by its CLID (CrushLog ID) across all data types',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        filePath: {
+          type: 'string',
+          description: 'Path to the CLDF archive',
+        },
+        clid: {
+          type: 'string',
+          description: 'The CLID to search for (e.g., clid:route:550e8400-e29b-41d4-a716-446655440000)',
+        },
+      },
+      required: ['filePath', 'clid'],
     },
   },
   {

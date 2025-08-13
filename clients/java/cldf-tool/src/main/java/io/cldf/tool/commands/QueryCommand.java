@@ -67,6 +67,11 @@ public class QueryCommand extends BaseCommand {
       description = "Comma-separated list of fields to include")
   private String fields;
 
+  @Option(
+      names = {"--clid"},
+      description = "Search for a specific CLID (CrushLog ID)")
+  private String clid;
+
   private final CLDFService cldfService;
   private final QueryService queryService;
 
@@ -185,55 +190,63 @@ public class QueryCommand extends BaseCommand {
     List<Object> allItems = new ArrayList<>();
     List<Object> filteredItems;
 
-    // Select data based on type
-    switch (selectType) {
-      case climbs:
-        allItems.addAll(
-            archive.getClimbs() != null ? archive.getClimbs() : Collections.emptyList());
-        break;
-      case sessions:
-        allItems.addAll(
-            archive.getSessions() != null ? archive.getSessions() : Collections.emptyList());
-        break;
-      case locations:
-        allItems.addAll(
-            archive.getLocations() != null ? archive.getLocations() : Collections.emptyList());
-        break;
-      case routes:
-        if (archive.hasRoutes()) {
-          allItems.addAll(archive.getRoutes());
-        }
-        break;
-      case sectors:
-        if (archive.hasSectors()) {
-          allItems.addAll(archive.getSectors());
-        }
-        break;
-      case tags:
-        if (archive.hasTags()) {
-          allItems.addAll(archive.getTags());
-        }
-        break;
-      case media:
-        if (archive.hasMedia()) {
-          allItems.addAll(archive.getMediaItems());
-        }
-        break;
-      case manifest:
-        allItems.add(archive.getManifest());
-        break;
-      case all:
-      default:
-        // Return summary of all data
-        Map<String, Object> summary = new HashMap<>();
-        summary.put("manifest", archive.getManifest());
-        summary.put(
-            "locationsCount", archive.getLocations() != null ? archive.getLocations().size() : 0);
-        summary.put(
-            "sessionsCount", archive.getSessions() != null ? archive.getSessions().size() : 0);
-        summary.put("climbsCount", archive.getClimbs() != null ? archive.getClimbs().size() : 0);
-        allItems.add(summary);
-        break;
+    // If searching by CLID, find the specific item
+    if (clid != null && !clid.isEmpty()) {
+      Object item = findByCLID(archive, clid);
+      if (item != null) {
+        allItems.add(item);
+      }
+    } else {
+      // Select data based on type
+      switch (selectType) {
+        case climbs:
+          allItems.addAll(
+              archive.getClimbs() != null ? archive.getClimbs() : Collections.emptyList());
+          break;
+        case sessions:
+          allItems.addAll(
+              archive.getSessions() != null ? archive.getSessions() : Collections.emptyList());
+          break;
+        case locations:
+          allItems.addAll(
+              archive.getLocations() != null ? archive.getLocations() : Collections.emptyList());
+          break;
+        case routes:
+          if (archive.hasRoutes()) {
+            allItems.addAll(archive.getRoutes());
+          }
+          break;
+        case sectors:
+          if (archive.hasSectors()) {
+            allItems.addAll(archive.getSectors());
+          }
+          break;
+        case tags:
+          if (archive.hasTags()) {
+            allItems.addAll(archive.getTags());
+          }
+          break;
+        case media:
+          if (archive.hasMedia()) {
+            allItems.addAll(archive.getMediaItems());
+          }
+          break;
+        case manifest:
+          allItems.add(archive.getManifest());
+          break;
+        case all:
+        default:
+          // Return summary of all data
+          Map<String, Object> summary = new HashMap<>();
+          summary.put("manifest", archive.getManifest());
+          summary.put(
+              "locationsCount", archive.getLocations() != null ? archive.getLocations().size() : 0);
+          summary.put(
+              "sessionsCount", archive.getSessions() != null ? archive.getSessions().size() : 0);
+          summary.put("climbsCount", archive.getClimbs() != null ? archive.getClimbs().size() : 0);
+          allItems.add(summary);
+          break;
+      }
     }
 
     // Apply filter if provided
@@ -280,6 +293,7 @@ public class QueryCommand extends BaseCommand {
   private Map<String, Object> buildQueryInfo() {
     Map<String, Object> queryInfo = new HashMap<>();
     queryInfo.put("select", selectType.name());
+    if (clid != null) queryInfo.put("clid", clid);
     if (filter != null) queryInfo.put("filter", filter);
     if (sortBy != null) queryInfo.put("sort", sortBy);
     if (limit != null) queryInfo.put("limit", limit);
@@ -333,6 +347,45 @@ public class QueryCommand extends BaseCommand {
       sb.append(location.getIsIndoor() ? " (Indoor)" : " (Outdoor)");
       output.write(sb.toString());
     }
+  }
+
+  private Object findByCLID(CLDFArchive archive, String clid) {
+    // Search in locations
+    Optional<Location> location =
+        Optional.ofNullable(archive.getLocations()).orElse(Collections.emptyList()).stream()
+            .filter(l -> clid.equals(l.getClid()))
+            .findFirst();
+    if (location.isPresent()) return location.get();
+
+    // Search in routes
+    Optional<Route> route =
+        archive.hasRoutes()
+            ? archive.getRoutes().stream().filter(r -> clid.equals(r.getClid())).findFirst()
+            : Optional.empty();
+    if (route.isPresent()) return route.get();
+
+    // Search in sectors
+    Optional<Sector> sector =
+        archive.hasSectors()
+            ? archive.getSectors().stream().filter(s -> clid.equals(s.getClid())).findFirst()
+            : Optional.empty();
+    if (sector.isPresent()) return sector.get();
+
+    // Search in climbs
+    Optional<Climb> climb =
+        Optional.ofNullable(archive.getClimbs()).orElse(Collections.emptyList()).stream()
+            .filter(c -> clid.equals(c.getClid()))
+            .findFirst();
+    if (climb.isPresent()) return climb.get();
+
+    // Search in sessions
+    Optional<Session> session =
+        Optional.ofNullable(archive.getSessions()).orElse(Collections.emptyList()).stream()
+            .filter(s -> clid.equals(s.getClid()))
+            .findFirst();
+    if (session.isPresent()) return session.get();
+
+    return null;
   }
 
   @lombok.Data

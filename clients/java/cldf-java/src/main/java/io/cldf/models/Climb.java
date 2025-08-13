@@ -34,6 +34,9 @@ public class Climb {
   @JsonProperty(required = true)
   private Integer id;
 
+  /** CrushLog ID - globally unique identifier (v1.3.0+) */
+  private String clid;
+
   private Integer sessionId;
 
   private Integer routeId;

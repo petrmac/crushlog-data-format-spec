@@ -51,6 +51,9 @@ export class ToolHandlersService {
         case 'cldf_extract_media':
           result = await this.handleExtractMedia(args);
           break;
+        case 'cldf_search_by_clid':
+          result = await this.handleSearchByCLID(args);
+          break;
         default:
           throw new Error(`Unknown tool: ${name}`);
       }
@@ -365,9 +368,12 @@ Use cldf_schema_info with component="commonMistakes" for more details.
   }
 
   private async handleQuery(args: any) {
-    const { filePath, dataType, filter } = args;
+    const { filePath, dataType, filter, clid } = args;
 
     let command = `${this.cldfService.getCliPath()} query "${filePath}" --select ${dataType} --json json`;
+    if (clid) {
+      command += ` --clid "${clid}"`;
+    }
     if (filter) {
       command += ` --filter "${filter}"`;
     }
@@ -587,6 +593,72 @@ Use cldf_schema_info with component="commonMistakes" for more details.
           {
             type: 'text',
             text: stdout || 'Media extraction completed',
+          },
+        ],
+      };
+    }
+  }
+
+  private async handleSearchByCLID(args: any) {
+    const { filePath, clid } = args;
+
+    const command = `${this.cldfService.getCliPath()} query "${filePath}" --select all --clid "${clid}" --json json`;
+    
+    const { stdout, stderr } = await this.cldfService.executeCommand(command);
+
+    if (stderr && !stdout) {
+      throw new Error(stderr);
+    }
+
+    try {
+      const result = JSON.parse(stdout);
+      const data = result.data || {};
+      
+      // Check if any results were found
+      const foundItem = data.results && data.results.length > 0 ? data.results[0] : null;
+      
+      if (foundItem) {
+        // Determine the type of the found item
+        let itemType = 'unknown';
+        if (foundItem.routeType !== undefined) itemType = 'route';
+        else if (foundItem.isIndoor !== undefined && foundItem.coordinates) itemType = 'location';
+        else if (foundItem.locationId !== undefined && foundItem.name && !foundItem.routeType) itemType = 'sector';
+        else if (foundItem.finishType !== undefined) itemType = 'climb';
+        else if (foundItem.date !== undefined && foundItem.startTime !== undefined) itemType = 'session';
+        
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify({
+                found: true,
+                type: itemType,
+                clid: clid,
+                data: foundItem,
+              }, null, 2),
+            },
+          ],
+        };
+      } else {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify({
+                found: false,
+                clid: clid,
+                message: `No entity found with CLID: ${clid}`,
+              }, null, 2),
+            },
+          ],
+        };
+      }
+    } catch (error) {
+      return {
+        content: [
+          {
+            type: 'text',
+            text: stdout || `Error searching for CLID: ${clid}`,
           },
         ],
       };

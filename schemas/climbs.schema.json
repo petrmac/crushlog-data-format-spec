@@ -52,6 +52,11 @@
           "type": "integer",
           "description": "Unique identifier for the climb"
         },
+        "clid": {
+          "type": "string",
+          "pattern": "^clid:climb:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "description": "CrushLog ID - globally unique identifier (v1.3.0+)"
+        },
         "sessionId": {
           "type": "integer",
           "description": "Reference to the session this climb belongs to"

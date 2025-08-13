@@ -43,6 +43,7 @@ class QueryCommandSpec extends Specification {
         command.outputFormat = OutputFormat.text
         command.quiet = false
         command.output = new OutputHandler(OutputFormat.text, false)
+        command.selectType = QueryCommand.DataType.all // Set default select type
         
         inputFile = tempDir.resolve("test.cldf").toFile()
         inputFile.createNewFile()
@@ -920,5 +921,272 @@ class QueryCommandSpec extends Specification {
         summary["locationsCount"] == 0
         summary["sessionsCount"] == 0
         summary["climbsCount"] == 0
+    }
+
+    // CLID Search Tests
+    def "should find location by CLID"() {
+        given: "archive with location having CLID"
+        def location = Location.builder()
+            .id(1)
+            .clid("clid:location:550e8400-e29b-41d4-a716-446655440001")
+            .name("Test Crag")
+            .country("US")
+            .isIndoor(false)
+            .build()
+        
+        def archiveWithCLID = CLDFArchive.builder()
+            .manifest(testArchive.manifest)
+            .locations([location])
+            .build()
+        
+        command.clid = "clid:location:550e8400-e29b-41d4-a716-446655440001"
+        cldfService.read(inputFile) >> archiveWithCLID
+
+        when: "searching by CLID"
+        def result = command.execute()
+
+        then: "location is found"
+        result.success
+        result.data["count"] == 1
+        def results = result.data["results"] as List
+        results.size() == 1
+        results[0] instanceof Location
+        (results[0] as Location).clid == "clid:location:550e8400-e29b-41d4-a716-446655440001"
+        (results[0] as Location).name == "Test Crag"
+    }
+
+    def "should find route by CLID"() {
+        given: "archive with route having CLID"
+        def route = Route.builder()
+            .id(1)
+            .clid("clid:route:660e8400-e29b-41d4-a716-446655440002")
+            .locationId(1)
+            .name("Test Route")
+            .routeType(io.cldf.models.enums.RouteType.ROUTE)
+            .build()
+        
+        def archiveWithCLID = CLDFArchive.builder()
+            .manifest(testArchive.manifest)
+            .routes([route])
+            .build()
+        
+        command.clid = "clid:route:660e8400-e29b-41d4-a716-446655440002"
+        cldfService.read(inputFile) >> archiveWithCLID
+
+        when: "searching by CLID"
+        def result = command.execute()
+
+        then: "route is found"
+        result.success
+        result.data["count"] == 1
+        def results = result.data["results"] as List
+        results.size() == 1
+        results[0] instanceof Route
+        (results[0] as Route).clid == "clid:route:660e8400-e29b-41d4-a716-446655440002"
+        (results[0] as Route).name == "Test Route"
+    }
+
+    def "should find sector by CLID"() {
+        given: "archive with sector having CLID"
+        def sector = Sector.builder()
+            .id(1)
+            .clid("clid:sector:770e8400-e29b-41d4-a716-446655440003")
+            .locationId(1)
+            .name("Test Sector")
+            .build()
+        
+        def archiveWithCLID = CLDFArchive.builder()
+            .manifest(testArchive.manifest)
+            .sectors([sector])
+            .build()
+        
+        command.clid = "clid:sector:770e8400-e29b-41d4-a716-446655440003"
+        cldfService.read(inputFile) >> archiveWithCLID
+
+        when: "searching by CLID"
+        def result = command.execute()
+
+        then: "sector is found"
+        result.success
+        result.data["count"] == 1
+        def results = result.data["results"] as List
+        results.size() == 1
+        results[0] instanceof Sector
+        (results[0] as Sector).clid == "clid:sector:770e8400-e29b-41d4-a716-446655440003"
+        (results[0] as Sector).name == "Test Sector"
+    }
+
+    def "should find climb by CLID"() {
+        given: "archive with climb having CLID"
+        def climb = Climb.builder()
+            .id(1)
+            .clid("clid:climb:880e8400-e29b-41d4-a716-446655440004")
+            .routeId(1)
+            .date(LocalDate.now())
+            .type(ClimbType.ROUTE)
+            .finishType(FinishType.REDPOINT)
+            .attempts(2)
+            .build()
+        
+        def archiveWithCLID = CLDFArchive.builder()
+            .manifest(testArchive.manifest)
+            .climbs([climb])
+            .build()
+        
+        command.clid = "clid:climb:880e8400-e29b-41d4-a716-446655440004"
+        cldfService.read(inputFile) >> archiveWithCLID
+
+        when: "searching by CLID"
+        def result = command.execute()
+
+        then: "climb is found"
+        result.success
+        result.data["count"] == 1
+        def results = result.data["results"] as List
+        results.size() == 1
+        results[0] instanceof Climb
+        (results[0] as Climb).clid == "clid:climb:880e8400-e29b-41d4-a716-446655440004"
+        (results[0] as Climb).attempts == 2
+    }
+
+    def "should find session by CLID"() {
+        given: "archive with session having CLID"
+        def session = Session.builder()
+            .id(1)
+            .clid("clid:session:990e8400-e29b-41d4-a716-446655440005")
+            .date(LocalDate.now())
+            .location("Test Gym")
+            .build()
+        
+        def archiveWithCLID = CLDFArchive.builder()
+            .manifest(testArchive.manifest)
+            .sessions([session])
+            .build()
+        
+        command.clid = "clid:session:990e8400-e29b-41d4-a716-446655440005"
+        cldfService.read(inputFile) >> archiveWithCLID
+
+        when: "searching by CLID"
+        def result = command.execute()
+
+        then: "session is found"
+        result.success
+        result.data["count"] == 1
+        def results = result.data["results"] as List
+        results.size() == 1
+        results[0] instanceof Session
+        (results[0] as Session).clid == "clid:session:990e8400-e29b-41d4-a716-446655440005"
+        (results[0] as Session).location == "Test Gym"
+    }
+
+    def "should return empty result when CLID not found"() {
+        given: "archive without matching CLID"
+        command.clid = "clid:route:nonexistent-id"
+        cldfService.read(inputFile) >> testArchive
+
+        when: "searching by non-existent CLID"
+        def result = command.execute()
+
+        then: "empty result is returned"
+        result.success
+        result.data["count"] == 0
+        def results = result.data["results"] as List
+        results.size() == 0
+    }
+
+    def "should search across all entity types with CLID"() {
+        given: "archive with multiple entities having CLIDs"
+        def location = Location.builder()
+            .id(1)
+            .clid("clid:location:550e8400-e29b-41d4-a716-446655440001")
+            .name("Test Location")
+            .country("US")
+            .isIndoor(false)
+            .build()
+        
+        def route = Route.builder()
+            .id(1)
+            .clid("clid:route:660e8400-e29b-41d4-a716-446655440002")
+            .locationId(1)
+            .name("Test Route")
+            .routeType(io.cldf.models.enums.RouteType.ROUTE)
+            .build()
+        
+        def archiveWithMultiple = CLDFArchive.builder()
+            .manifest(testArchive.manifest)
+            .locations([location])
+            .routes([route])
+            .build()
+        
+        cldfService.read(inputFile) >> archiveWithMultiple
+
+        when: "searching for route CLID"
+        command.clid = "clid:route:660e8400-e29b-41d4-a716-446655440002"
+        def routeResult = command.execute()
+
+        then: "only route is found"
+        routeResult.success
+        routeResult.data["count"] == 1
+        (routeResult.data["results"] as List)[0] instanceof Route
+
+        when: "searching for location CLID"
+        command.clid = "clid:location:550e8400-e29b-41d4-a716-446655440001"
+        def locationResult = command.execute()
+
+        then: "only location is found"
+        locationResult.success
+        locationResult.data["count"] == 1
+        (locationResult.data["results"] as List)[0] instanceof Location
+    }
+
+    def "should handle null CLID fields gracefully"() {
+        given: "archive with entities having null CLIDs"
+        def locationWithoutCLID = Location.builder()
+            .id(1)
+            .clid(null)
+            .name("No CLID Location")
+            .country("US")
+            .isIndoor(false)
+            .build()
+        
+        def locationWithCLID = Location.builder()
+            .id(2)
+            .clid("clid:location:550e8400-e29b-41d4-a716-446655440001")
+            .name("Has CLID Location")
+            .country("US")
+            .isIndoor(false)
+            .build()
+        
+        def archiveWithMixed = CLDFArchive.builder()
+            .manifest(testArchive.manifest)
+            .locations([locationWithoutCLID, locationWithCLID])
+            .build()
+        
+        command.clid = "clid:location:550e8400-e29b-41d4-a716-446655440001"
+        cldfService.read(inputFile) >> archiveWithMixed
+
+        when: "searching by CLID"
+        def result = command.execute()
+
+        then: "only matching entity is found"
+        result.success
+        result.data["count"] == 1
+        def results = result.data["results"] as List
+        results.size() == 1
+        (results[0] as Location).name == "Has CLID Location"
+    }
+
+    def "should include CLID in query info"() {
+        given: "a CLID search"
+        command.clid = "clid:route:test-id"
+        cldfService.read(inputFile) >> testArchive
+
+        when: "executing query"
+        def result = command.execute()
+
+        then: "query info includes CLID"
+        result.success
+        def queryInfo = result.data["query"] as Map
+        queryInfo["clid"] == "clid:route:test-id"
     }
 }
