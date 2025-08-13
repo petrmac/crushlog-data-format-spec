@@ -1,6 +1,7 @@
 package io.cldf.tool.commands
 
 import io.cldf.api.CLDFArchive
+import io.cldf.api.CLDFReader
 import io.cldf.api.CLDFWriter
 import io.cldf.models.*
 import io.cldf.models.enums.ClimbType
@@ -70,7 +71,7 @@ class CreateCommandSpec extends Specification {
         outputFile.exists()
 
         when:
-        def archive = new io.cldf.api.CLDFReader().read(outputFile)
+        def archive = new CLDFReader().read(outputFile)
 
         then:
         archive != null
@@ -99,13 +100,13 @@ class CreateCommandSpec extends Specification {
         outputFile.exists()
 
         when:
-        def archive = new io.cldf.api.CLDFReader().read(outputFile)
+        def archive = new CLDFReader().read(outputFile)
 
         then:
         archive != null
         archive.locations.size() == 1
         archive.locations[0].name == "Local Climbing Gym"
-        archive.locations[0].country == "United States"
+        archive.locations[0].country == "US"
         archive.locations[0].state == "California"
         archive.sessions.size() == 1
         archive.climbs.size() == 2
@@ -129,7 +130,7 @@ class CreateCommandSpec extends Specification {
         outputFile.exists()
 
         when:
-        def archive = new io.cldf.api.CLDFReader().read(outputFile)
+        def archive = new CLDFReader().read(outputFile)
 
         then:
         archive != null
@@ -232,7 +233,7 @@ class CreateCommandSpec extends Specification {
         outputFile.exists()
         
         // The archive should still be valid
-        def archive = new io.cldf.api.CLDFReader().read(outputFile)
+        def archive = new CLDFReader().read(outputFile)
         archive != null
         archive.climbs.size() == 1  // Empty template now includes one climb
     }
@@ -409,7 +410,7 @@ class CreateCommandSpec extends Specification {
         outputFile.exists()
         
         when:
-        def archive = new io.cldf.api.CLDFReader().read(outputFile)
+        def archive = new CLDFReader().read(outputFile)
         
         then:
         archive != null
@@ -513,7 +514,7 @@ class CreateCommandSpec extends Specification {
         result.success
         
         when:
-        def archive = new io.cldf.api.CLDFReader().read(outputFile)
+        def archive = new CLDFReader().read(outputFile)
         
         then:
         // Should have JSON data, not demo template data

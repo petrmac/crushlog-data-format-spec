@@ -13,6 +13,7 @@ import java.util.Optional;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import io.cldf.domain.CLIDService;
 import io.cldf.models.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
@@ -36,9 +37,11 @@ public class CLDFWriter {
   private static final String MEDIA_METADATA_FILE = "media-metadata.json";
 
   private final ObjectMapper objectMapper;
-  private final boolean prettyPrint;
   private final boolean validateSchemas;
   private final SchemaValidator schemaValidator;
+  private final CLIDService clidService;
+  private boolean autoGenerateCLIDs = true;
+  private boolean validateCLIDs = true;
 
   /**
    * Creates a CLDFWriter with default settings (pretty printing enabled, schema validation
@@ -64,9 +67,9 @@ public class CLDFWriter {
    * @param validateSchemas whether to validate JSON schemas before writing
    */
   public CLDFWriter(boolean prettyPrint, boolean validateSchemas) {
-    this.prettyPrint = prettyPrint;
     this.validateSchemas = validateSchemas;
     this.schemaValidator = validateSchemas ? new SchemaValidator() : null;
+    this.clidService = new CLIDService();
     this.objectMapper = new ObjectMapper();
     this.objectMapper.registerModule(new JavaTimeModule());
     this.objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
@@ -75,6 +78,23 @@ public class CLDFWriter {
     if (prettyPrint) {
       this.objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
     }
+  }
+
+  /**
+   * Sets whether to automatically generate CLIDs for entities that don't have them. Default is
+   * true.
+   */
+  public CLDFWriter withAutoGenerateCLIDs(boolean autoGenerate) {
+    this.autoGenerateCLIDs = autoGenerate;
+    return this;
+  }
+
+  /**
+   * Sets whether to validate existing CLIDs for correct format and type matching. Default is true.
+   */
+  public CLDFWriter withValidateCLIDs(boolean validate) {
+    this.validateCLIDs = validate;
+    return this;
   }
 
   /**
@@ -98,7 +118,24 @@ public class CLDFWriter {
    * @throws IOException if an I/O error occurs
    */
   public void write(CLDFArchive archive, OutputStream outputStream) throws IOException {
+    log.debug(
+        "Writing CLDF archive with settings: autoGenerateCLIDs={}, validateCLIDs={}, validateSchemas={}",
+        autoGenerateCLIDs,
+        validateCLIDs,
+        validateSchemas);
+
     validateArchive(archive);
+
+    // Process CLIDs - generate missing ones and validate existing ones
+    if (autoGenerateCLIDs || validateCLIDs) {
+      log.info("Processing CLIDs: autoGenerate={}, validate={}", autoGenerateCLIDs, validateCLIDs);
+      try {
+        clidService.processArchiveCLIDs(archive, autoGenerateCLIDs, validateCLIDs);
+      } catch (CLIDService.CLIDValidationException e) {
+        log.error("CLID validation failed: {}", e.getMessage());
+        throw new IOException("CLID validation failed: " + e.getMessage(), e);
+      }
+    }
 
     Map<String, byte[]> fileContents = new HashMap<>();
     Map<String, String> checksums = new HashMap<>();
@@ -110,6 +147,7 @@ public class CLDFWriter {
 
     // Calculate and set stats if not already present
     if (archive.getManifest().getStats() == null) {
+      log.debug("Calculating archive statistics");
       archive.getManifest().setStats(calculateStats(archive));
     }
 
@@ -190,6 +228,7 @@ public class CLDFWriter {
 
     // Validate schemas if enabled
     if (validateSchemas) {
+      log.debug("Validating schemas for {} files", fileContents.size());
       for (Map.Entry<String, byte[]> entry : fileContents.entrySet()) {
         // Skip media files
         if (!entry.getKey().startsWith("media/")) {
@@ -204,10 +243,15 @@ public class CLDFWriter {
             for (ValidationResult.ValidationError error : result.errors()) {
               errorMessage.append("  - ").append(error.message()).append("\n");
             }
+            log.error(
+                "Schema validation failed for {}: {} errors found",
+                entry.getKey(),
+                result.errors().size());
             throw new IOException(errorMessage.toString());
           }
         }
       }
+      log.debug("Schema validation passed for all files");
     }
 
     // Write ZIP archive
@@ -223,6 +267,8 @@ public class CLDFWriter {
 
       zos.finish();
     }
+
+    log.info("Successfully wrote CLDF archive with {} files", fileContents.size());
   }
 
   private void validateArchive(CLDFArchive archive) {

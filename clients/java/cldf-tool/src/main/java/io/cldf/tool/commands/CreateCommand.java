@@ -274,7 +274,7 @@ public class CreateCommand extends BaseCommand {
             .id(1)
             .name("Local Climbing Gym")
             .isIndoor(true)
-            .country("United States")
+            .country("US")
             .state("California")
             .createdAt(OffsetDateTime.now())
             .build();
@@ -342,7 +342,7 @@ public class CreateCommand extends BaseCommand {
                 .id(1)
                 .name("Movement Climbing Gym")
                 .isIndoor(true)
-                .country("United States")
+                .country("US")
                 .state("Colorado")
                 .starred(true)
                 .createdAt(OffsetDateTime.now())
@@ -351,7 +351,7 @@ public class CreateCommand extends BaseCommand {
                 .id(2)
                 .name("Eldorado Canyon")
                 .isIndoor(false)
-                .country("United States")
+                .country("US")
                 .state("Colorado")
                 .rockType(RockType.SANDSTONE)
                 .coordinates(

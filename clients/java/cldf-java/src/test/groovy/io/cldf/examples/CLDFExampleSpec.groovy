@@ -83,7 +83,7 @@ class CLDFExampleSpec extends Specification {
 		archive.locations.size() == 2
 		archive.locations[0].name == "The Spot Bouldering Gym"
 		archive.locations[0].isIndoor == true
-		archive.locations[0].country == "USA"
+		archive.locations[0].country == "US"
 		archive.locations[0].state == "Colorado"
 		archive.locations[0].terrainType == TerrainType.ARTIFICIAL
 		archive.locations[0].starred == true

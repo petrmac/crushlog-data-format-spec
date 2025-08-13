@@ -71,7 +71,7 @@ public class CLDFExample {
                 .id(1)
                 .name("The Spot Bouldering Gym")
                 .isIndoor(true)
-                .country("USA")
+                .country("US")
                 .state("Colorado")
                 .coordinates(
                     Location.Coordinates.builder().latitude(40.0170).longitude(-105.2830).build())
@@ -82,8 +82,10 @@ public class CLDFExample {
                 .id(2)
                 .name("Clear Creek Canyon")
                 .isIndoor(false)
-                .country("USA")
+                .country("US")
                 .state("Colorado")
+                .coordinates(
+                    Location.Coordinates.builder().latitude(39.7416).longitude(-105.5080).build())
                 .rockType(RockType.GRANITE)
                 .terrainType(TerrainType.NATURAL)
                 .accessInfo("Park at pullout mile marker 269")

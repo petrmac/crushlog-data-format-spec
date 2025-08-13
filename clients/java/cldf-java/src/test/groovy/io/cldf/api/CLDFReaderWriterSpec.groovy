@@ -156,7 +156,7 @@ class CLDFReaderWriterSpec extends Specification {
 				.id(1)
 				.name("Test Crag")
 				.isIndoor(false)
-				.country("USA")
+				.country("US")
 				.state("Colorado")
 				.coordinates(Location.Coordinates.builder()
 				.latitude(40.0)

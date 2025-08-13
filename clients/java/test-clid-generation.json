@@ -1,0 +1,48 @@
+{
+  "manifest": {
+    "version": "1.3.0",
+    "format": "CLDF",
+    "source": "CLID Generation Test",
+    "appVersion": "1.0.0",
+    "creationDate": "2025-01-14T10:00:00Z",
+    "author": {
+      "name": "Test User",
+      "email": "test@example.com"
+    },
+    "platform": "Desktop"
+  },
+  "locations": [
+    {
+      "id": 1,
+      "name": "Test Location Without CLID",
+      "country": "US",
+      "state": "CA",
+      "isIndoor": false,
+      "coordinates": {
+        "latitude": 37.734,
+        "longitude": -119.637
+      }
+    }
+  ],
+  "routes": [
+    {
+      "id": 1,
+      "locationId": 1,
+      "name": "Route Without CLID",
+      "routeType": "route",
+      "grades": {
+        "yds": "5.10a"
+      }
+    },
+    {
+      "id": 2,
+      "locationId": 1,
+      "name": "Route With Wrong Type CLID",
+      "clid": "clid:location:660e8400-e29b-41d4-a716-446655440002",
+      "routeType": "route",
+      "grades": {
+        "yds": "5.11b"
+      }
+    }
+  ]
+}

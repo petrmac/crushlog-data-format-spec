@@ -48,13 +48,12 @@ class CLIDGeneratorSpec extends Specification {
 		def locationCLID = CLIDGenerator.generateLocationCLID(elCapitan)
 
 		and: "The Nose route data"
-		def theNose = Route.builder()
-				.name("The Nose")
-				.grade("5.14a")
-				.type(RouteType.TRAD)
-				.firstAscent(new FirstAscent(1958, "Warren Harding"))
-				.height(900.0)
-				.build()
+		def theNose = new RouteModel.Route(
+				"The Nose",
+				"5.14a",
+				RouteModel.RouteType.TRAD,
+				new RouteModel.FirstAscent("Warren Harding", 1958),
+				900.0)
 
 		when: "generating route CLID"
 		def routeCLID = CLIDGenerator.generateRouteCLID(locationCLID, theNose)
@@ -113,12 +112,12 @@ class CLIDGeneratorSpec extends Specification {
 		def locationCLID = CLIDGenerator.generateLocationCLID(location)
 
 		and: "route data"
-		def route = Route.builder()
-				.name(routeName)
-				.grade(grade)
-				.type(routeType)
-				.height(height)
-				.build()
+		def route = new RouteModel.Route(
+				routeName,
+				grade,
+				routeType,
+				null,  // no first ascent
+				height)
 
 		when: "generating route CLID"
 		def routeCLID = CLIDGenerator.generateRouteCLID(locationCLID, route)
@@ -129,11 +128,11 @@ class CLIDGeneratorSpec extends Specification {
 
 		where:
 		routeName        | grade  | routeType          | height
-		"Test Sport"     | "5.12a"| RouteType.SPORT    | 30.0
-		"Test Trad"      | "5.10c"| RouteType.TRAD     | 100.0
-		"Test Boulder"   | "V8"   | RouteType.BOULDER  | null
-		"Ice Route"      | "WI4"  | RouteType.ICE      | 50.0
-		"Mixed Route"    | "M7"   | RouteType.MIXED    | 75.0
+		"Test Sport"     | "5.12a"| RouteModel.RouteType.SPORT    | 30.0
+		"Test Trad"      | "5.10c"| RouteModel.RouteType.TRAD     | 100.0
+		"Test Boulder"   | "V8"   | RouteModel.RouteType.BOULDER  | null
+		"Ice Route"      | "WI4"  | RouteModel.RouteType.ICE      | 50.0
+		"Mixed Route"    | "M7"   | RouteModel.RouteType.MIXED    | 75.0
 	}
 
 	def "should generate sector CLID"() {
@@ -260,11 +259,12 @@ class CLIDGeneratorSpec extends Specification {
 		def locationCLID = CLIDGenerator.generateLocationCLID(location)
 
 		and: "invalid route"
-		def route = Route.builder()
-				.name(name)
-				.grade(grade)
-				.type(type)
-				.build()
+		def route = new RouteModel.Route(
+				name,
+				grade,
+				type,
+				null,  // no first ascent
+				null)  // no height
 
 		when: "generating CLID"
 		CLIDGenerator.generateRouteCLID(locationCLID, route)
@@ -275,10 +275,10 @@ class CLIDGeneratorSpec extends Specification {
 
 		where:
 		scenario       | name     | grade    | type              | expectedMessage
-		"empty name"   | ""       | "5.10"   | RouteType.SPORT   | "Route name is required"
-		"null name"    | null     | "5.10"   | RouteType.SPORT   | "Route name is required"
-		"empty grade"  | "Test"   | ""       | RouteType.SPORT   | "Route grade is required"
-		"null grade"   | "Test"   | null     | RouteType.SPORT   | "Route grade is required"
+		"empty name"   | ""       | "5.10"   | RouteModel.RouteType.SPORT   | "Route name is required"
+		"null name"    | null     | "5.10"   | RouteModel.RouteType.SPORT   | "Route name is required"
+		"empty grade"  | "Test"   | ""       | RouteModel.RouteType.SPORT   | "Route grade is required"
+		"null grade"   | "Test"   | null     | RouteModel.RouteType.SPORT   | "Route grade is required"
 		"null type"    | "Test"   | "5.10"   | null              | "Route type is required"
 	}
 
@@ -310,12 +310,12 @@ class CLIDGeneratorSpec extends Specification {
 				.build()
 		def locationCLID = CLIDGenerator.generateLocationCLID(location)
 
-		def boulder = Route.builder()
-				.name("Rainbow Rocket")
-				.grade("8A")
-				.type(RouteType.BOULDER)
-				// No height specified
-				.build()
+		def boulder = new RouteModel.Route(
+				"Rainbow Rocket",
+				"8A",
+				RouteModel.RouteType.BOULDER,
+				null,  // no first ascent
+				null)  // no height
 
 		when: "generating CLID"
 		def routeCLID = CLIDGenerator.generateRouteCLID(locationCLID, boulder)

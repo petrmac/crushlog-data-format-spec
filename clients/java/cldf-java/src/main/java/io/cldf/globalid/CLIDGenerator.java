@@ -6,9 +6,9 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import io.cldf.globalid.RouteModel.*;
 import lombok.Getter;
 
 /**
@@ -20,12 +20,6 @@ public class CLIDGenerator {
   // CrushLog namespace UUID (registered for climbing data)
   public static final UUID CRUSHLOG_NAMESPACE =
       UUID.fromString("6ba7b810-9dad-11d1-80b4-00c04fd430c8");
-
-  // UUID validation pattern
-  private static final Pattern UUID_PATTERN =
-      Pattern.compile(
-          "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
-          Pattern.CASE_INSENSITIVE);
 
   // Valid entity types
   @Getter
@@ -81,7 +75,7 @@ public class CLIDGenerator {
   }
 
   /** Generate a deterministic CLID for a route */
-  public static String generateRouteCLID(String locationCLID, Route route) {
+  public static String generateRouteCLID(String locationCLID, RouteModel.Route route) {
     // Validate required fields
     ValidationResult validation = validateRoute(route);
     if (!validation.isValid()) {
@@ -133,7 +127,7 @@ public class CLIDGenerator {
   /** Generate a random UUID v4 for user content */
   public static String generateRandomCLID(EntityType type) {
     UUID uuid = UUID.randomUUID();
-    return "clid:%s:%s".formatted(type.getValue(), uuid);
+    return "clid:%s:%s".formatted(type.value, uuid);
   }
 
   /** Parse a CLID into its components */
@@ -156,7 +150,7 @@ public class CLIDGenerator {
   private static UUID generateUUIDv5(String input) {
     try {
       MessageDigest md = MessageDigest.getInstance("SHA-1");
-      md.update(toBytes(CRUSHLOG_NAMESPACE));
+      md.update(toBytes());
       byte[] hash = md.digest(input.getBytes(StandardCharsets.UTF_8));
 
       // Set version (5) and variant bits
@@ -170,7 +164,8 @@ public class CLIDGenerator {
   }
 
   /** Convert UUID to byte array */
-  private static byte[] toBytes(UUID uuid) {
+  private static byte[] toBytes() {
+    UUID uuid = CRUSHLOG_NAMESPACE;
     long msb = uuid.getMostSignificantBits();
     long lsb = uuid.getLeastSignificantBits();
     byte[] buffer = new byte[16];
@@ -241,7 +236,7 @@ public class CLIDGenerator {
   }
 
   /** Validate route data */
-  private static ValidationResult validateRoute(Route route) {
+  private static ValidationResult validateRoute(RouteModel.Route route) {
     ValidationResult result = new ValidationResult();
 
     if (route.name() == null || route.name().trim().isEmpty()) {
