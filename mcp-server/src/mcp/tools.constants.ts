@@ -261,4 +261,50 @@ export const TOOL_DEFINITIONS = [
       required: ['filePath', 'outputDir'],
     },
   },
+  {
+    name: 'cldf_generate_qr',
+    description: 'Generate QR code for a route or location by CLID',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        filePath: {
+          type: 'string',
+          description: 'Path to the CLDF archive',
+        },
+        clid: {
+          type: 'string',
+          description: 'CLID of the route or location',
+        },
+        outputPath: {
+          type: 'string',
+          description: 'Path where the QR code image will be saved',
+        },
+        size: {
+          type: 'number',
+          description: 'QR code size in pixels',
+          default: 256,
+        },
+        baseUrl: {
+          type: 'string',
+          description: 'Base URL for QR code links',
+          default: 'https://crushlog.pro',
+        },
+      },
+      required: ['filePath', 'clid', 'outputPath'],
+    },
+  },
+  {
+    name: 'cldf_scan_qr',
+    description: 'Scan and parse QR code from an image',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        imagePath: {
+          type: 'string',
+          description: 'Path to the QR code image',
+        },
+      },
+      required: ['imagePath'],
+    },
+  },
 ];

@@ -22,7 +22,8 @@ import picocli.CommandLine.Command;
       app.crushlog.cldf.tool.commands.LoadCommand.class,
       app.crushlog.cldf.tool.commands.GraphQueryCommand.class,
       app.crushlog.cldf.tool.commands.SchemaCommand.class,
-      app.crushlog.cldf.tool.commands.TreeCommand.class
+      app.crushlog.cldf.tool.commands.TreeCommand.class,
+      app.crushlog.cldf.tool.commands.QRCommand.class
     })
 public class Application implements Runnable {
 

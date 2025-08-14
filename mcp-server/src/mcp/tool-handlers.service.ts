@@ -54,6 +54,12 @@ export class ToolHandlersService {
         case 'cldf_search_by_clid':
           result = await this.handleSearchByCLID(args);
           break;
+        case 'cldf_generate_qr':
+          result = await this.handleGenerateQR(args);
+          break;
+        case 'cldf_scan_qr':
+          result = await this.handleScanQR(args);
+          break;
         default:
           throw new Error(`Unknown tool: ${name}`);
       }
@@ -681,6 +687,102 @@ Use cldf_schema_info with component="commonMistakes" for more details.
           {
             type: 'text',
             text: stdout || `Error searching for CLID: ${clid}`,
+          },
+        ],
+      };
+    }
+  }
+
+  private async handleGenerateQR(args: any) {
+    const { filePath, clid, outputPath, size = 256, baseUrl = 'https://crushlog.pro' } = args;
+
+    try {
+      const { stdout, stderr } = await this.cldfService.runCLDFTool([
+        'qr',
+        'generate',
+        filePath,
+        clid,
+        '-o',
+        outputPath,
+        '-s',
+        size.toString(),
+        '--base-url',
+        baseUrl,
+      ]);
+
+      if (stderr && !stdout) {
+        throw new Error(stderr);
+      }
+
+      return {
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              success: true,
+              message: `QR code generated successfully at ${outputPath}`,
+              clid: clid,
+              outputPath: outputPath,
+              size: size,
+              baseUrl: baseUrl,
+            }, null, 2),
+          },
+        ],
+      };
+    } catch (error) {
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Error generating QR code: ${error.message}`,
+          },
+        ],
+      };
+    }
+  }
+
+  private async handleScanQR(args: any) {
+    const { imagePath } = args;
+
+    try {
+      const { stdout, stderr } = await this.cldfService.runCLDFTool([
+        'qr',
+        'scan',
+        imagePath,
+        '--output',
+        'json',
+      ]);
+
+      if (stderr && !stdout) {
+        throw new Error(stderr);
+      }
+
+      // Parse the output to get QR data
+      let qrData;
+      try {
+        qrData = JSON.parse(stdout);
+      } catch {
+        qrData = { rawOutput: stdout };
+      }
+
+      return {
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              success: true,
+              data: qrData,
+              imagePath: imagePath,
+            }, null, 2),
+          },
+        ],
+      };
+    } catch (error) {
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Error scanning QR code: ${error.message}`,
           },
         ],
       };
