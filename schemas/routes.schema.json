@@ -145,11 +145,13 @@
             },
             "ipfsHash": {
               "type": "string",
-              "description": "IPFS hash for CLDF archive reference"
+              "description": "IPFS hash for CLDF archive reference",
+              "pattern": "^(Qm[1-9A-HJ-NP-Za-km-z]{44}|bafy[a-z2-7]{50,})$"
             },
             "blockchainTx": {
               "type": "string",
-              "description": "Blockchain transaction hash for permanent record"
+              "description": "Blockchain transaction hash for permanent record",
+              "pattern": "^(0x)?[a-fA-F0-9]{64}$"
             },
             "generatedAt": {
               "type": "string",

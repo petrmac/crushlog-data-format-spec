@@ -618,13 +618,35 @@ Use cldf_schema_info with component="commonMistakes" for more details.
       const foundItem = data.results && data.results.length > 0 ? data.results[0] : null;
       
       if (foundItem) {
-        // Determine the type of the found item
+        // Determine the type using CLID prefix for robust identification
         let itemType = 'unknown';
-        if (foundItem.routeType !== undefined) itemType = 'route';
-        else if (foundItem.isIndoor !== undefined && foundItem.coordinates) itemType = 'location';
-        else if (foundItem.locationId !== undefined && foundItem.name && !foundItem.routeType) itemType = 'sector';
-        else if (foundItem.finishType !== undefined) itemType = 'climb';
-        else if (foundItem.date !== undefined && foundItem.startTime !== undefined) itemType = 'session';
+        if (typeof clid === 'string' && clid.includes(':')) {
+          const [prefix, type] = clid.split(':');
+          if (prefix === 'clid') {
+            // CLID format is clid:type:uuid
+            switch(type) {
+              case 'route': itemType = 'route'; break;
+              case 'location': itemType = 'location'; break;
+              case 'sector': itemType = 'sector'; break;
+              case 'climb': itemType = 'climb'; break;
+              case 'session': itemType = 'session'; break;
+              default: 
+                // Fallback to field-based detection if CLID type is unknown
+                if (foundItem.routeType !== undefined) itemType = 'route';
+                else if (foundItem.isIndoor !== undefined && foundItem.coordinates) itemType = 'location';
+                else if (foundItem.locationId !== undefined && foundItem.name && !foundItem.routeType) itemType = 'sector';
+                else if (foundItem.finishType !== undefined) itemType = 'climb';
+                else if (foundItem.date !== undefined && foundItem.startTime !== undefined) itemType = 'session';
+            }
+          }
+        } else {
+          // Fallback to field-based detection for non-CLID searches
+          if (foundItem.routeType !== undefined) itemType = 'route';
+          else if (foundItem.isIndoor !== undefined && foundItem.coordinates) itemType = 'location';
+          else if (foundItem.locationId !== undefined && foundItem.name && !foundItem.routeType) itemType = 'sector';
+          else if (foundItem.finishType !== undefined) itemType = 'climb';
+          else if (foundItem.date !== undefined && foundItem.startTime !== undefined) itemType = 'session';
+        }
         
         return {
           content: [
