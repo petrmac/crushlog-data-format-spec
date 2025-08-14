@@ -9,7 +9,7 @@
         <appender-ref ref="STDOUT" />
     </root>
     
-    <logger name="io.cldf" level="info" />
+    <logger name="app.crushlog.cldf" level="info" />
     
     <!-- Suppress noisy loggers that might conflict -->
     <logger name="org.neo4j" level="WARN" />

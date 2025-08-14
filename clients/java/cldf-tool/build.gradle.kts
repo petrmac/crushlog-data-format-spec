@@ -101,7 +101,7 @@ dependencies {
 }
 
 application {
-    mainClass.set("io.cldf.tool.Application")
+    mainClass.set("app.crushlog.cldf.tool.Application")
 }
 
 micronaut {
@@ -109,7 +109,7 @@ micronaut {
     testRuntime("junit5")
     processing {
         incremental(true)
-        annotations("io.cldf.tool.*")
+        annotations("app.crushlog.cldf.tool.*")
     }
 }
 
@@ -117,7 +117,7 @@ graalvmNative {
     binaries {
         named("main") {
             imageName.set("cldf")
-            mainClass.set("io.cldf.tool.Application")
+            mainClass.set("app.crushlog.cldf.tool.Application")
             buildArgs.add("--no-fallback")
             buildArgs.add("--enable-http")
             buildArgs.add("--enable-https")
@@ -161,7 +161,7 @@ tasks.register<Jar>("fatJar") {
     
     manifest {
         attributes(
-            "Main-Class" to "io.cldf.tool.Application",
+            "Main-Class" to "app.crushlog.cldf.tool.Application",
             "Multi-Release" to "true"
         )
     }

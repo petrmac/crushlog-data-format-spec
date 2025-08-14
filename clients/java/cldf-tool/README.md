@@ -197,7 +197,7 @@ If you encounter issues building the native image:
 
 ```
 cldf-tool/
-├── src/main/java/io/cldf/tool/
+├── src/main/java/app/crushlog/cldf/tool/
 │   ├── Application.java           # Main entry point
 │   ├── commands/                  # CLI commands
 │   ├── services/                  # Business logic

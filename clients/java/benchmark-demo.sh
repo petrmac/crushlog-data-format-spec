@@ -34,7 +34,7 @@ echo ""
 # Check if we can show a sample
 echo "Sample benchmark code (SimpleBenchmark.java):"
 echo "--------------------------------------------"
-head -60 cldf-tool/src/test/java/io/cldf/tool/benchmark/SimpleBenchmark.java | tail -20
+head -60 cldf-tool/src/test/java/app/crushlog/cldf/tool/benchmark/SimpleBenchmark.java | tail -20
 
 echo ""
 echo "The benchmarks compare performance between:"

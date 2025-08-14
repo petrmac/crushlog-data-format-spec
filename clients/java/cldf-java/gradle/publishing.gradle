@@ -13,7 +13,7 @@ publishing {
         maven(MavenPublication) {
             from components.java
             
-            groupId = 'io.cldf'
+            groupId = 'app.crushlog.cldf'
             artifactId = 'cldf-java'
             
             pom {
