@@ -1,5 +1,6 @@
-package app.crushlog.cldf.globalid
+package app.crushlog.cldf.clid
 
+import app.crushlog.cldf.clid.*
 import spock.lang.Specification
 import spock.lang.Unroll
 

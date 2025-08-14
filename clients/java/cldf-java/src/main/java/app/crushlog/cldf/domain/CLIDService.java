@@ -6,9 +6,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import app.crushlog.cldf.api.CLDFArchive;
-import app.crushlog.cldf.globalid.CLID;
-import app.crushlog.cldf.globalid.CLIDGenerator;
-import app.crushlog.cldf.globalid.RouteModel;
+import app.crushlog.cldf.clid.CLID;
+import app.crushlog.cldf.clid.CLIDGenerator;
+import app.crushlog.cldf.clid.RouteModel;
 import app.crushlog.cldf.models.*;
 import lombok.Builder;
 import lombok.Data;
@@ -253,13 +253,13 @@ public class CLIDService {
       return CLIDGenerator.generateRandomCLID(CLIDGenerator.EntityType.LOCATION);
     }
 
-    app.crushlog.cldf.globalid.Location genLocation =
-        new app.crushlog.cldf.globalid.Location(
+    app.crushlog.cldf.clid.Location genLocation =
+        new app.crushlog.cldf.clid.Location(
             location.getCountry(),
             location.getState(),
             location.getCity(),
             location.getName(),
-            new app.crushlog.cldf.globalid.Coordinates(
+            new app.crushlog.cldf.clid.Coordinates(
                 location.getCoordinates().getLatitude(), location.getCoordinates().getLongitude()),
             location.getIsIndoor());
     return CLIDGenerator.generateLocationCLID(genLocation);
@@ -310,8 +310,8 @@ public class CLIDService {
       return CLIDGenerator.generateRandomCLID(CLIDGenerator.EntityType.SECTOR);
     }
 
-    app.crushlog.cldf.globalid.Sector genSector =
-        new app.crushlog.cldf.globalid.Sector(
+    app.crushlog.cldf.clid.Sector genSector =
+        new app.crushlog.cldf.clid.Sector(
             sector.getName(), null // Sector doesn't have order in the model
             );
     return CLIDGenerator.generateSectorCLID(locationCLID, genSector);

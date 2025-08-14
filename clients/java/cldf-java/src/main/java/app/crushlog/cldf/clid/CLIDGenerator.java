@@ -1,4 +1,4 @@
-package app.crushlog.cldf.globalid;
+package app.crushlog.cldf.clid;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import app.crushlog.cldf.globalid.RouteModel.*;
+import app.crushlog.cldf.clid.RouteModel.*;
 import lombok.Getter;
 
 /**

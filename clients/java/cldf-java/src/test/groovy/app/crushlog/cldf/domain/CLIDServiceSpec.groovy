@@ -1,7 +1,7 @@
 package app.crushlog.cldf.domain
 
 import app.crushlog.cldf.api.CLDFArchive
-import app.crushlog.cldf.globalid.CLIDGenerator
+import app.crushlog.cldf.clid.CLIDGenerator
 import app.crushlog.cldf.models.*
 import app.crushlog.cldf.models.enums.*
 import spock.lang.Specification

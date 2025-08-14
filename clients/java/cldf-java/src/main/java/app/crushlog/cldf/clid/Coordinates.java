@@ -1,4 +1,4 @@
-package app.crushlog.cldf.globalid;
+package app.crushlog.cldf.clid;
 
 import lombok.Builder;
 import lombok.NonNull;

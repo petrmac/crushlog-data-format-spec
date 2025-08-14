@@ -1,4 +1,4 @@
-package app.crushlog.cldf.globalid;
+package app.crushlog.cldf.clid;
 
 /** Route-related models for CLID generation */
 public class RouteModel {
