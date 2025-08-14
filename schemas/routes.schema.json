@@ -20,7 +20,7 @@
       "properties": {
         "id": {
           "type": "integer",
-          "description": "Unique identifier for the route (legacy)"
+          "description": "Unique identifier for the route"
         },
         "clid": {
           "type": "string",
