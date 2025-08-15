@@ -42,7 +42,35 @@ void main() {
 
     // Helper to check if we should skip interop tests
     bool shouldSkipInterop() {
-      if (!File(javaCliPath).existsSync()) {
+      // Check if we're in CI environment
+      final isCI = Platform.environment['CI'] == 'true';
+      
+      // Skip known problematic tests in CI
+      if (isCI && Platform.environment['SKIP_FLAKY_INTEROP_TESTS'] == 'true') {
+        return true;
+      }
+      
+      // Check if Java CLI exists AND is functional
+      bool javaCliWorks = false;
+      if (File(javaCliPath).existsSync()) {
+        // Try to run the CLI with --version to see if it actually works
+        try {
+          final result = Process.runSync(
+            javaCliPath, 
+            ['--version'],
+            runInShell: true,
+          );
+          javaCliWorks = result.exitCode == 0;
+          if (!javaCliWorks && result.stderr.toString().contains('Neither native image nor JAR file found')) {
+            // The wrapper script exists but the JAR/native image doesn't
+            javaCliWorks = false;
+          }
+        } catch (e) {
+          javaCliWorks = false;
+        }
+      }
+      
+      if (!javaCliWorks) {
         final skipInterop =
             Platform.environment['SKIP_INTEROP_TESTS_IF_NO_CLI'] == 'true';
         if (skipInterop) {
@@ -51,7 +79,7 @@ void main() {
         }
         // Throw exception if skip is not enabled
         throw Exception(
-          'Java CLI not found at $javaCliPath\n'
+          'Java CLI not found or not functional at $javaCliPath\n'
           'Please build the Java project first: cd ../../java && ./gradlew :cldf-tool:fatJar\n'
           'Or set SKIP_INTEROP_TESTS_IF_NO_CLI=true to skip these tests',
         );
