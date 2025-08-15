@@ -41,9 +41,15 @@ void main() {
         final skipInterop =
             Platform.environment['SKIP_INTEROP_TESTS_IF_NO_CLI'] == 'true';
         if (skipInterop) {
-          print('Skipping: Java CLI not available');
+          // Silent skip when environment variable is set
           return true;
         }
+        // Throw exception if skip is not enabled
+        throw Exception(
+          'Java CLI not found at $javaCliPath\n'
+          'Please build the Java project first: cd ../../../java && ./gradlew :cldf-tool:fatJar\n'
+          'Or set SKIP_INTEROP_TESTS_IF_NO_CLI=true to skip these tests',
+        );
       }
       return false;
     }
@@ -52,21 +58,6 @@ void main() {
       // Create test resources directory
       if (!testResourcesDir.existsSync()) {
         testResourcesDir.createSync(recursive: true);
-      }
-
-      // Check if Java CLI is available
-      if (!File(javaCliPath).existsSync()) {
-        final skipInterop =
-            Platform.environment['SKIP_INTEROP_TESTS_IF_NO_CLI'] == 'true';
-        if (skipInterop) {
-          print('Java CLI not found at $javaCliPath - skipping interop tests');
-          return;
-        }
-        throw Exception(
-          'Java CLI not found at $javaCliPath\n'
-          'Please build the Java project first: cd ../../../java && ./gradlew :cldf-tool:fatJar\n'
-          'Or set SKIP_INTEROP_TESTS_IF_NO_CLI=true to skip these tests',
-        );
       }
     });
 
