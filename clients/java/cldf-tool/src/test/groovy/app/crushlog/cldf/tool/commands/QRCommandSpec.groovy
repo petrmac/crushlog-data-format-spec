@@ -1,5 +1,6 @@
 package app.crushlog.cldf.tool.commands
 
+import picocli.CommandLine
 import spock.lang.Specification
 import app.crushlog.cldf.tool.services.CLDFService
 import app.crushlog.cldf.tool.utils.OutputHandler
@@ -14,11 +15,9 @@ class QRCommandSpec extends Specification {
     def "QRCommand should display help"() {
         given:
         def command = new QRCommand()
-        command.parent = Mock(BaseCommand) {
-            getSpec() >> Mock(picocli.CommandLine.Model.CommandSpec) {
-                commandLine() >> Mock(picocli.CommandLine) {
-                    usage(_ as PrintStream) >> {}
-                }
+        command.spec = Mock(CommandLine.Model.CommandSpec) {
+            commandLine() >> Mock(CommandLine) {
+                usage(_ as PrintStream) >> {}
             }
         }
 
@@ -32,8 +31,7 @@ class QRCommandSpec extends Specification {
     def "GenerateCommand should generate QR for route"() {
         given:
         def cldfService = Mock(CLDFService)
-        def outputHandler = Mock(OutputHandler)
-        def command = new QRCommand.GenerateCommand(cldfService, outputHandler)
+        def command = new QRCommand.GenerateCommand(cldfService)
         
         def route = new Route().tap {
             clid = "clid:route:test-uuid"
@@ -46,7 +44,7 @@ class QRCommandSpec extends Specification {
         }
         
         command.archivePath = Paths.get("test.cldf")
-        command.clid = "clid:route:test-uuid"
+        command.archiveClid = "clid:route:test-uuid"
         command.outputPath = Paths.get("test.png")
         command.baseUrl = "https://test.com"
         command.size = 256
@@ -56,15 +54,13 @@ class QRCommandSpec extends Specification {
 
         then:
         1 * cldfService.read(_) >> archive
-        1 * outputHandler.writeInfo(_ as String)
         result == 0
     }
     
     def "GenerateCommand should handle entity not found"() {
         given:
         def cldfService = Mock(CLDFService)
-        def outputHandler = Mock(OutputHandler)
-        def command = new QRCommand.GenerateCommand(cldfService, outputHandler)
+        def command = new QRCommand.GenerateCommand(cldfService)
         
         def archive = Mock(CLDFArchive) {
             getRoutes() >> []
@@ -72,7 +68,7 @@ class QRCommandSpec extends Specification {
         }
         
         command.archivePath = Paths.get("test.cldf")
-        command.clid = "clid:route:nonexistent"
+        command.archiveClid = "clid:route:nonexistent"
         command.outputPath = Paths.get("test.png")
 
         when:
@@ -80,14 +76,13 @@ class QRCommandSpec extends Specification {
 
         then:
         1 * cldfService.read(_) >> archive
-        1 * outputHandler.writeError("Entity not found with CLID: clid:route:nonexistent")
         result == 1
     }
     
-    def "ScanCommand should display error for null outputHandler"() {
+    def "ScanCommand should handle missing image file"() {
         given:
         def command = new QRCommand.ScanCommand()
-        command.imagePath = Paths.get("test.png")
+        command.imagePath = Paths.get("nonexistent.png")
 
         when:
         def result = command.call()

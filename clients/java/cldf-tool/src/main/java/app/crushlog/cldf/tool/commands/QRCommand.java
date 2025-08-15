@@ -11,6 +11,7 @@ import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 
 import app.crushlog.cldf.api.CLDFArchive;
+import app.crushlog.cldf.clid.RouteModel;
 import app.crushlog.cldf.models.Location;
 import app.crushlog.cldf.models.Route;
 import app.crushlog.cldf.qr.*;
@@ -58,11 +59,104 @@ public class QRCommand implements Callable<Integer> {
   @Command(name = "generate", description = "Generate QR code for a route or location")
   static class GenerateCommand implements Callable<Integer> {
 
-    @Parameters(index = "0", description = "Path to CLDF archive")
+    // Archive mode parameters
+    @Parameters(
+        index = "0",
+        arity = "0..1",
+        description = "Path to CLDF archive (for archive mode)")
     private Path archivePath;
 
-    @Parameters(index = "1", description = "CLID of the route or location")
-    private String clid;
+    @Parameters(
+        index = "1",
+        arity = "0..1",
+        description = "CLID of the route or location (for archive mode)")
+    private String archiveClid;
+
+    // Direct mode parameters
+    @Option(
+        names = {"--clid"},
+        description = "CLID for direct generation mode")
+    private String directClid;
+
+    @Option(
+        names = {"--type"},
+        description = "Entity type (route or location)")
+    private String entityType;
+
+    @Option(
+        names = {"--name"},
+        description = "Name of the route or location")
+    private String name;
+
+    @Option(
+        names = {"--grade"},
+        description = "Grade (for routes)")
+    private String grade;
+
+    @Option(
+        names = {"--route-type"},
+        description = "Route type (sport, boulder, trad, etc.)")
+    private String routeType;
+
+    @Option(
+        names = {"--location-id"},
+        description = "Location ID (for routes)")
+    private Integer locationId;
+
+    @Option(
+        names = {"--location-name"},
+        description = "Location name (for routes without archive)")
+    private String locationName;
+
+    @Option(
+        names = {"--location-clid"},
+        description = "Location CLID (for routes without archive)")
+    private String locationClid;
+
+    @Option(
+        names = {"--country"},
+        description = "Country (for locations)")
+    private String country;
+
+    @Option(
+        names = {"--state"},
+        description = "State/Province (for locations)")
+    private String state;
+
+    @Option(
+        names = {"--city"},
+        description = "City (for locations)")
+    private String city;
+
+    @Option(
+        names = {"--latitude"},
+        description = "Latitude (for locations)")
+    private Double latitude;
+
+    @Option(
+        names = {"--longitude"},
+        description = "Longitude (for locations)")
+    private Double longitude;
+
+    @Option(
+        names = {"--indoor"},
+        description = "Is indoor location")
+    private boolean indoor;
+
+    @Option(
+        names = {"--height"},
+        description = "Height in meters (for routes)")
+    private Double height;
+
+    @Option(
+        names = {"--first-ascent-name"},
+        description = "First ascent climber name")
+    private String firstAscentName;
+
+    @Option(
+        names = {"--first-ascent-year"},
+        description = "First ascent year")
+    private Integer firstAscentYear;
 
     @Option(
         names = {"-o", "--output"},
@@ -121,21 +215,18 @@ public class QRCommand implements Callable<Integer> {
       OutputHandler outputHandler = new OutputHandler(OutputFormat.text, verbose);
 
       try {
-        CLDFArchive archive = cldfService.read(archivePath.toFile());
-        Object entity = findEntity(archive, clid);
-
-        if (entity == null) {
-          outputHandler.writeError("Entity not found with CLID: " + clid);
+        // Determine which mode to use
+        if (archivePath != null && archiveClid != null) {
+          // Archive mode
+          return generateFromArchive(outputHandler);
+        } else if (entityType != null) {
+          // Direct mode
+          return generateDirect(outputHandler);
+        } else {
+          outputHandler.writeError(
+              "Either provide archive path with CLID, or use --type with entity parameters");
           return 1;
         }
-
-        String qrContent = generateQRContent(entity, outputHandler);
-        if (qrContent == null) {
-          return 1;
-        }
-
-        return saveQRCode(qrContent, outputHandler);
-
       } catch (Exception e) {
         outputHandler.writeError("Failed to generate QR code: " + e.getMessage());
         if (verbose) {
@@ -143,6 +234,193 @@ public class QRCommand implements Callable<Integer> {
         }
         return 1;
       }
+    }
+
+    private Integer generateFromArchive(OutputHandler outputHandler) throws Exception {
+      CLDFArchive archive = cldfService.read(archivePath.toFile());
+      Object entity = findEntity(archive, archiveClid);
+
+      if (entity == null) {
+        outputHandler.writeError("Entity not found with CLID: " + archiveClid);
+        return 1;
+      }
+
+      String qrContent = generateQRContent(entity, outputHandler);
+      if (qrContent == null) {
+        return 1;
+      }
+
+      return saveQRCode(qrContent, outputHandler);
+    }
+
+    private Integer generateDirect(OutputHandler outputHandler) throws Exception {
+      // Validate required fields
+      if (name == null || name.isEmpty()) {
+        outputHandler.writeError("Name is required for direct generation");
+        return 1;
+      }
+
+      Object entity;
+      String generatedClid = directClid;
+
+      if ("route".equalsIgnoreCase(entityType)) {
+        entity = createRouteForDirectMode();
+        if (generatedClid == null) {
+          generatedClid = generateRouteCLIDDirect();
+        }
+      } else if ("location".equalsIgnoreCase(entityType)) {
+        entity = createLocationForDirectMode();
+        if (generatedClid == null) {
+          generatedClid = generateLocationCLIDDirect();
+        }
+      } else {
+        outputHandler.writeError("Invalid entity type. Must be 'route' or 'location'");
+        return 1;
+      }
+
+      if (entity == null) {
+        outputHandler.writeError("Failed to create entity for QR generation");
+        return 1;
+      }
+
+      // Set the CLID on the entity
+      if (entity instanceof Route) {
+        ((Route) entity).setClid(generatedClid);
+      } else if (entity instanceof Location) {
+        ((Location) entity).setClid(generatedClid);
+      }
+
+      outputHandler.writeInfo("Generated CLID: " + generatedClid);
+
+      String qrContent = generateQRContent(entity, outputHandler);
+      if (qrContent == null) {
+        return 1;
+      }
+
+      return saveQRCode(qrContent, outputHandler);
+    }
+
+    private Route createRouteForDirectMode() {
+      Route route = new Route();
+      route.setName(name);
+
+      if (locationId != null) {
+        route.setLocationId(locationId);
+      }
+
+      if (grade != null) {
+        Route.Grades grades = new Route.Grades();
+        // Try to determine grade system from format
+        if (grade.matches("5\\..*")) {
+          grades.setYds(grade);
+        } else if (grade.matches("V\\d+.*")) {
+          grades.setVScale(grade);
+        } else if (grade.matches("\\d+[abc]?\\+?")) {
+          grades.setFrench(grade);
+        } else {
+          // Default to YDS
+          grades.setYds(grade);
+        }
+        route.setGrades(grades);
+      }
+
+      if (routeType != null) {
+        try {
+          if (routeType.equalsIgnoreCase("boulder")) {
+            route.setRouteType(app.crushlog.cldf.models.enums.RouteType.BOULDER);
+          } else {
+            route.setRouteType(app.crushlog.cldf.models.enums.RouteType.ROUTE);
+          }
+        } catch (Exception e) {
+          // Default to route
+          route.setRouteType(app.crushlog.cldf.models.enums.RouteType.ROUTE);
+        }
+      }
+
+      if (height != null) {
+        route.setHeight(height);
+      }
+
+      if (firstAscentName != null || firstAscentYear != null) {
+        Route.FirstAscent fa = new Route.FirstAscent();
+        fa.setName(firstAscentName);
+        if (firstAscentYear != null) {
+          fa.setDate(java.time.LocalDate.of(firstAscentYear, 1, 1));
+        }
+        route.setFirstAscent(fa);
+      }
+
+      return route;
+    }
+
+    private Location createLocationForDirectMode() {
+      if (country == null || latitude == null || longitude == null) {
+        return null;
+      }
+
+      Location location = new Location();
+      location.setName(name);
+      location.setCountry(country);
+      location.setState(state);
+      location.setCity(city);
+      location.setIsIndoor(indoor);
+
+      Location.Coordinates coords = new Location.Coordinates();
+      coords.setLatitude(latitude);
+      coords.setLongitude(longitude);
+      location.setCoordinates(coords);
+
+      return location;
+    }
+
+    private String generateRouteCLIDDirect() {
+      // For direct mode route CLID generation
+      if (locationClid != null && grade != null) {
+        // Create minimal route model for CLID generation
+        RouteModel.RouteType type = RouteModel.RouteType.SPORT;
+        if (routeType != null) {
+          try {
+            if (routeType.equalsIgnoreCase("boulder")) {
+              type = RouteModel.RouteType.BOULDER;
+            }
+          } catch (Exception e) {
+            // Use default
+          }
+        }
+
+        RouteModel.FirstAscent fa = null;
+        if (firstAscentName != null || firstAscentYear != null) {
+          fa = new RouteModel.FirstAscent(firstAscentName, firstAscentYear);
+        }
+
+        RouteModel.Route routeModel = new RouteModel.Route(name, grade, type, fa, height);
+
+        return app.crushlog.cldf.clid.CLIDGenerator.generateRouteCLID(locationClid, routeModel);
+      }
+
+      // Fallback to random CLID
+      return app.crushlog.cldf.clid.CLIDGenerator.generateRandomCLID(
+          app.crushlog.cldf.clid.CLIDGenerator.EntityType.ROUTE);
+    }
+
+    private String generateLocationCLIDDirect() {
+      // For direct mode location CLID generation
+      if (country != null && latitude != null && longitude != null) {
+        app.crushlog.cldf.clid.Location locModel =
+            new app.crushlog.cldf.clid.Location(
+                country,
+                state,
+                city,
+                name,
+                new app.crushlog.cldf.clid.Coordinates(latitude, longitude),
+                indoor);
+
+        return app.crushlog.cldf.clid.CLIDGenerator.generateLocationCLID(locModel);
+      }
+
+      // Fallback to random CLID
+      return app.crushlog.cldf.clid.CLIDGenerator.generateRandomCLID(
+          app.crushlog.cldf.clid.CLIDGenerator.EntityType.LOCATION);
     }
 
     private String generateQRContent(Object entity, OutputHandler outputHandler) {

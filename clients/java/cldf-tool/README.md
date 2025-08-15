@@ -9,6 +9,7 @@ A command-line interface (CLI) tool for creating, validating, and manipulating C
 - **Extract** - Extract contents from CLDF archives
 - **Merge** - Merge multiple CLDF archives with conflict resolution
 - **Convert** - Convert CLDF to other formats (CSV, GPX, TCX)
+- **QR Code** - Generate QR codes for routes/locations directly or from archives, scan and parse QR codes
 
 ## Installation
 
@@ -116,6 +117,91 @@ cldf convert my-climbs.cldf --format gpx -o locations.gpx
 
 # Convert to JSON (pretty printed)
 cldf convert my-climbs.cldf --format json -o climbs.json
+```
+
+#### QR Code
+
+Generate, scan, and parse QR codes for routes and locations:
+
+##### Generate QR Code
+
+Three modes are available for QR code generation:
+
+**1. Archive Mode** - Generate from existing CLDF archive:
+```bash
+# Generate QR for a route from archive
+cldf qr generate my-climbs.cldf clid:route:550e8400... -o route-qr.png
+
+# Generate as SVG with custom size
+cldf qr generate my-climbs.cldf clid:location:123abc... -o location-qr.svg --size 512
+```
+
+**2. Direct Mode with Auto-Generated CLID** - Generate without archive:
+```bash
+# Generate QR for route (minimal)
+cldf qr generate --type route --name "Midnight Lightning" --grade "V8" \
+  --location-clid clid:location:abc123... -o qr.png
+
+# Generate QR for route with full details
+cldf qr generate --type route --name "The Nose" --grade "5.14a" \
+  --route-type sport --height 900 \
+  --location-clid clid:location:abc123... \
+  --first-ascent-name "Lynn Hill" --first-ascent-year 1993 \
+  -o nose-qr.png
+
+# Generate QR for location
+cldf qr generate --type location --name "Yosemite Valley" \
+  --country "USA" --state "California" --city "Yosemite" \
+  --latitude 37.7456 --longitude -119.5936 \
+  -o yosemite-qr.png
+```
+
+**3. Direct Mode with Explicit CLID** - Provide your own CLID:
+```bash
+# Generate with specific CLID
+cldf qr generate --clid clid:route:custom-uuid-here \
+  --type route --name "Dawn Wall" --grade "5.14d" \
+  -o dawn-wall-qr.png
+```
+
+Options:
+- `-o, --output` - Output file path (PNG or SVG)
+- `-s, --size` - QR code size in pixels (default: 256)
+- `--base-url` - Base URL for QR links (default: https://crushlog.pro)
+- `--include-ipfs` - Include IPFS hash if available
+- `--ipfs-hash` - Specific IPFS hash to include
+
+##### Scan QR Code
+
+Extract data from QR code images:
+
+```bash
+# Scan QR code from image
+cldf qr scan qr-code.png
+
+# Output as JSON
+cldf qr scan qr-code.png -o json
+
+# Extract route data
+cldf qr scan qr-code.png --extract-route
+
+# Extract location data
+cldf qr scan qr-code.png --extract-location
+```
+
+##### Parse QR Code
+
+Parse QR code data from text:
+
+```bash
+# Parse QR data string
+cldf qr parse "cldf://route/550e8400..."
+
+# Parse from file
+cldf qr parse qr-data.txt
+
+# Extract entities
+cldf qr parse qr-data.txt --extract-route --extract-location
 ```
 
 ## Templates
