@@ -9,19 +9,65 @@ import 'package:cldf/models/enums/route_type.dart';
 void main() {
   group('QR Code Java-Dart Interoperability', () {
     // Use the wrapper script which automatically falls back to JAR if native is not available
-    const javaCliPath =
-        '/Users/petrmacek/git-mirrors/crushlog-data-format-spec/clients/java/cldf-tool/cldf';
+    // Try to find the Java CLI tool - check multiple possible locations
+    String findJavaCli() {
+      // For CI environment - use relative path from dart test directory
+      final relativePath = '../../../java/cldf-tool/cldf';
+      final absolutePath = '/Users/petrmacek/git-mirrors/crushlog-data-format-spec/clients/java/cldf-tool/cldf';
+      
+      // Check relative path first (for CI)
+      if (File(relativePath).existsSync()) {
+        print('Using Java CLI at relative path: $relativePath');
+        return relativePath;
+      }
+      // Fall back to absolute path (for local development)
+      if (File(absolutePath).existsSync()) {
+        print('Using Java CLI at absolute path: $absolutePath');
+        return absolutePath;
+      }
+      
+      // If neither exists, return the relative path and let the test fail with a clear message
+      print('Expected CLI path: $relativePath');
+      return relativePath;
+    }
+    
+    final javaCliPath = findJavaCli();
     final testResourcesDir = Directory('test/qr-test-resources');
+    
+    // Helper to check if we should skip interop tests
+    bool shouldSkipInterop() {
+      if (!File(javaCliPath).existsSync()) {
+        final skipInterop = Platform.environment['SKIP_INTEROP_TESTS_IF_NO_CLI'] == 'true';
+        if (skipInterop) {
+          print('Skipping: Java CLI not available');
+          return true;
+        }
+      }
+      return false;
+    }
 
     setUpAll(() async {
       // Create test resources directory
       if (!testResourcesDir.existsSync()) {
         testResourcesDir.createSync(recursive: true);
       }
+      
+      // Check if Java CLI is available
+      if (!File(javaCliPath).existsSync()) {
+        final skipInterop = Platform.environment['SKIP_INTEROP_TESTS_IF_NO_CLI'] == 'true';
+        if (skipInterop) {
+          print('Java CLI not found at $javaCliPath - skipping interop tests');
+          return;
+        }
+        throw Exception('Java CLI not found at $javaCliPath\n'
+            'Please build the Java project first: cd ../../../java && ./gradlew :cldf-tool:fatJar\n'
+            'Or set SKIP_INTEROP_TESTS_IF_NO_CLI=true to skip these tests');
+      }
     });
 
     group('Generate QR codes with Java, scan with Dart', () {
       test('Java generates route QR (JSON format) -> Dart scans', () async {
+        if (shouldSkipInterop()) return;
         // Generate QR with Java
         final result = await Process.run(javaCliPath, [
           'qr',
@@ -83,6 +129,7 @@ void main() {
       });
 
       test('Java generates location QR (JSON format) -> Dart scans', () async {
+        if (shouldSkipInterop()) return;
         // Generate QR with Java
         final result = await Process.run(javaCliPath, [
           'qr',
@@ -137,6 +184,7 @@ void main() {
       });
 
       test('Java generates route QR (URL format) -> Dart scans', () async {
+        if (shouldSkipInterop()) return;
         // Generate QR with Java (URL format)
         final result = await Process.run(javaCliPath, [
           'qr',
@@ -190,6 +238,7 @@ void main() {
 
     group('Generate QR codes with Dart, scan with Java', () {
       test('Dart generates route QR (JSON format) -> Java scans', () async {
+        if (shouldSkipInterop()) return;
         // Create test route
         final route = Route(
           id: 123,
@@ -254,6 +303,7 @@ void main() {
       });
 
       test('Dart generates location QR (JSON format) -> Java scans', () async {
+        if (shouldSkipInterop()) return;
         // Create test location
         final location = Location(
           id: 789,
@@ -307,6 +357,7 @@ void main() {
       });
 
       test('Dart generates compact QR -> Java scans', () async {
+        if (shouldSkipInterop()) return;
         // Generate compact QR with Dart
         final generator = QRGenerator();
 

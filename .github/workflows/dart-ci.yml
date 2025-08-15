@@ -76,6 +76,9 @@ jobs:
         dart pub global activate junitreport
         dart test --coverage=coverage --reporter=json | dart pub global run junitreport:tojunit --output test-results.xml
       continue-on-error: true
+      env:
+        # Skip interop tests in regular Dart CI since Java CLI is not built
+        SKIP_INTEROP_TESTS_IF_NO_CLI: 'true'
     
     - name: Install coverage tools
       run: dart pub global activate coverage
