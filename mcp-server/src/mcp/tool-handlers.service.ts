@@ -490,6 +490,72 @@ Use cldf_schema_info with component="commonMistakes" for more details.
     }
   }
 
+  /**
+   * Parse a CLID string and extract its components
+   * @param clid The CLID string to parse (format: clid:v1:type:uuid)
+   * @returns Parsed CLID components or null if invalid
+   */
+  private parseClid(clid: string): { version: string; type: string; uuid: string } | null {
+    if (!clid || typeof clid !== 'string' || !clid.startsWith('clid:')) {
+      return null;
+    }
+
+    const parts = clid.split(':');
+    if (parts.length !== 4) {
+      this.logger.warn(`Invalid CLID format: ${clid} - expected format: clid:version:type:uuid`);
+      return null;
+    }
+
+    const [prefix, version, type, uuid] = parts;
+
+    // Validate version format (v1, v2, etc.)
+    if (!version.match(/^v\d+$/)) {
+      this.logger.warn(`Invalid CLID version: ${version} in CLID: ${clid}`);
+      return null;
+    }
+
+    // Validate UUID exists (basic check - just ensure it's not empty)
+    if (!uuid || uuid.length < 3) {
+      this.logger.warn(`Invalid UUID in CLID: ${clid}`);
+      return null;
+    }
+
+    return { version, type, uuid };
+  }
+
+  /**
+   * Determine the entity type from CLID or field-based detection
+   * @param clid Optional CLID string
+   * @param item The item to check for type detection
+   * @returns The detected entity type
+   */
+  private determineEntityType(clid: string | undefined, item: any): string {
+    // First try CLID-based detection if CLID is provided
+    if (clid) {
+      const parsedClid = this.parseClid(clid);
+      if (parsedClid) {
+        const validTypes = ['route', 'location', 'sector', 'climb', 'session'];
+        if (validTypes.includes(parsedClid.type)) {
+          return parsedClid.type;
+        }
+        this.logger.warn(`Unknown CLID type: ${parsedClid.type} in CLID: ${clid}`);
+        return 'unknown';
+      }
+    }
+
+    // Fallback to field-based detection only when no CLID is provided
+    // This is less reliable but necessary for non-CLID searches
+    if (!clid && item) {
+      if (item.routeType !== undefined) return 'route';
+      if (item.isIndoor !== undefined && item.coordinates) return 'location';
+      if (item.locationId !== undefined && item.name && !item.routeType) return 'sector';
+      if (item.finishType !== undefined) return 'climb';
+      if (item.date !== undefined && item.startTime !== undefined) return 'session';
+    }
+
+    return 'unknown';
+  }
+
   private async handleQueryMedia(args: any) {
     const { filePath, includeEmbedded = true, mediaType = 'all' } = args;
 
@@ -624,48 +690,8 @@ Use cldf_schema_info with component="commonMistakes" for more details.
       const foundItem = data.results && data.results.length > 0 ? data.results[0] : null;
       
       if (foundItem) {
-        // Determine the type using CLID prefix for robust identification
-        let itemType = 'unknown';
-        
-        // Parse CLID properly (format: clid:v1:type:uuid)
-        if (typeof clid === 'string' && clid.startsWith('clid:')) {
-          const clidParts = clid.split(':');
-          if (clidParts.length === 4) {
-            // New versioned format: clid:v1:type:uuid
-            const version = clidParts[1];
-            const type = clidParts[2]; // Get the type part
-            
-            // Validate version format
-            if (!version.match(/^v\d+$/)) {
-              this.logger.warn(`Invalid CLID version: ${version} in CLID: ${clid}`);
-              itemType = 'unknown';
-            } else {
-              switch(type) {
-                case 'route': itemType = 'route'; break;
-                case 'location': itemType = 'location'; break;
-                case 'sector': itemType = 'sector'; break;
-                case 'climb': itemType = 'climb'; break;
-                case 'session': itemType = 'session'; break;
-                default: 
-                  // Unknown CLID type - don't fallback to heuristics
-                  itemType = 'unknown';
-                  this.logger.warn(`Unknown CLID type: ${type} in CLID: ${clid}`);
-              }
-            }
-          } else {
-            // Invalid CLID format
-            this.logger.warn(`Invalid CLID format: ${clid} - expected format: clid:version:type:uuid`);
-            itemType = 'unknown';
-          }
-        } else if (!clid) {
-          // No CLID provided - use field-based detection only for non-CLID queries
-          // This is less reliable but necessary for non-CLID searches
-          if (foundItem.routeType !== undefined) itemType = 'route';
-          else if (foundItem.isIndoor !== undefined && foundItem.coordinates) itemType = 'location';
-          else if (foundItem.locationId !== undefined && foundItem.name && !foundItem.routeType) itemType = 'sector';
-          else if (foundItem.finishType !== undefined) itemType = 'climb';
-          else if (foundItem.date !== undefined && foundItem.startTime !== undefined) itemType = 'session';
-        }
+        // Determine the type using our robust parsing functions
+        const itemType = this.determineEntityType(clid, foundItem);
         
         return {
           content: [

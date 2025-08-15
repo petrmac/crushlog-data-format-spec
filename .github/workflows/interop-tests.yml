@@ -39,6 +39,14 @@ jobs:
       with:
         sdk: stable
     
+    # Copy schemas to resources (required for build)
+    - name: Copy schemas to resources
+      working-directory: clients/java
+      run: |
+        mkdir -p cldf-java/src/main/resources
+        rm -rf cldf-java/src/main/resources/schemas
+        cp -r ../../schemas cldf-java/src/main/resources/
+    
     # Build Java fat JAR (required for QR interop tests)
     - name: Build Java fat JAR
       working-directory: clients/java
