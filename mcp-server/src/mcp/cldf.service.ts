@@ -79,14 +79,14 @@ export class CldfService {
   async runCLDFTool(
     args: string[],
   ): Promise<{ stdout: string; stderr: string }> {
-    const quotedArgs = args.map(arg => {
+    const quotedArgs = args.map((arg) => {
       // Quote arguments that contain spaces or special characters
       if (arg.includes(' ') || arg.includes('"') || arg.includes('$')) {
         return `"${arg.replace(/"/g, '\\"')}"`;
       }
       return arg;
     });
-    
+
     const command = `${this.CLDF_CLI} ${quotedArgs.join(' ')}`;
     return this.executeCommand(command);
   }

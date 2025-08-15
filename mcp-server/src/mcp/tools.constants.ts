@@ -101,7 +101,15 @@ export const TOOL_DEFINITIONS = [
         },
         dataType: {
           type: 'string',
-          enum: ['locations', 'climbs', 'sessions', 'routes', 'sectors', 'media', 'all'],
+          enum: [
+            'locations',
+            'climbs',
+            'sessions',
+            'routes',
+            'sectors',
+            'media',
+            'all',
+          ],
           description: 'Type of data to query',
         },
         filter: {
@@ -118,7 +126,8 @@ export const TOOL_DEFINITIONS = [
   },
   {
     name: 'cldf_search_by_clid',
-    description: 'Search for an entity by its CLID (CrushLog ID) across all data types',
+    description:
+      'Search for an entity by its CLID (CrushLog ID) across all data types',
     inputSchema: {
       type: 'object',
       properties: {
@@ -128,7 +137,8 @@ export const TOOL_DEFINITIONS = [
         },
         clid: {
           type: 'string',
-          description: 'The CLID to search for (e.g., clid:v1:route:550e8400-e29b-41d4-a716-446655440000)',
+          description:
+            'The CLID to search for (e.g., clid:v1:route:550e8400-e29b-41d4-a716-446655440000)',
         },
       },
       required: ['filePath', 'clid'],
@@ -215,7 +225,8 @@ export const TOOL_DEFINITIONS = [
   },
   {
     name: 'cldf_query_media',
-    description: 'Query media information from a CLDF archive, including metadata and embedded file details',
+    description:
+      'Query media information from a CLDF archive, including metadata and embedded file details',
     inputSchema: {
       type: 'object',
       properties: {

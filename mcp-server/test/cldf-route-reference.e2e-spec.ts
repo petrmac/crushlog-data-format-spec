@@ -19,9 +19,10 @@ describe('CLDF Route Reference Tests', () => {
 
     // Set the CLDF CLI path for testing if not already set
     if (!process.env.CLDF_CLI) {
-      process.env.CLDF_CLI = '/Users/petrmacek/git-mirrors/crushlog-data-format-spec/clients/java/cldf-tool/build/native/nativeCompile/cldf';
+      process.env.CLDF_CLI =
+        '/Users/petrmacek/git-mirrors/crushlog-data-format-spec/clients/java/cldf-tool/build/native/nativeCompile/cldf';
     }
-    
+
     const moduleRef = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
@@ -44,8 +45,11 @@ describe('CLDF Route Reference Tests', () => {
         console.log('Skipping test - CLDF CLI not available');
         return;
       }
-      const outputPath = path.join(tmpdir(), `cldf-routename-with-routes-${Date.now()}.cldf`);
-      
+      const outputPath = path.join(
+        tmpdir(),
+        `cldf-routename-with-routes-${Date.now()}.cldf`,
+      );
+
       try {
         const testData = {
           manifest: {
@@ -81,7 +85,7 @@ describe('CLDF Route Reference Tests', () => {
             {
               id: 1,
               date: '2025-01-15',
-              routeName: 'Classic Corner',  // Using name reference
+              routeName: 'Classic Corner', // Using name reference
               type: 'route',
               finishType: 'redpoint',
               attempts: 2,
@@ -89,7 +93,7 @@ describe('CLDF Route Reference Tests', () => {
             {
               id: 2,
               date: '2025-01-15',
-              routeName: 'Power Boulder',  // Using name reference
+              routeName: 'Power Boulder', // Using name reference
               type: 'boulder',
               finishType: 'top',
               attempts: 5,
@@ -127,7 +131,6 @@ describe('CLDF Route Reference Tests', () => {
         expect(climbsData.data?.results?.[1].routeName).toBe('Power Boulder');
 
         console.log('✓ Successfully handled climbs with routeName references');
-
       } finally {
         await fs.unlink(outputPath).catch(() => {});
       }
@@ -139,7 +142,7 @@ describe('CLDF Route Reference Tests', () => {
         return;
       }
       const outputPath = path.join(tmpdir(), `cldf-routeid-${Date.now()}.cldf`);
-      
+
       try {
         const testData = {
           manifest: {
@@ -174,8 +177,8 @@ describe('CLDF Route Reference Tests', () => {
           climbs: [
             {
               id: 1,
-              routeId: 1,  // Integer ID reference
-              routeName: 'Blue Circuit',  // Include name for validation
+              routeId: 1, // Integer ID reference
+              routeName: 'Blue Circuit', // Include name for validation
               date: '2025-01-20',
               type: 'route',
               finishType: 'onsight',
@@ -183,8 +186,8 @@ describe('CLDF Route Reference Tests', () => {
             },
             {
               id: 2,
-              routeId: 2,  // Integer ID reference
-              routeName: 'Red Problem',  // Include name for validation
+              routeId: 2, // Integer ID reference
+              routeName: 'Red Problem', // Include name for validation
               date: '2025-01-20',
               type: 'boulder',
               finishType: 'flash',
@@ -219,15 +222,16 @@ describe('CLDF Route Reference Tests', () => {
         const climbsData = JSON.parse(climbsResult.content[0].text);
         expect(climbsData.data?.count).toBe(2);
         expect(climbsData.data?.results?.length).toBe(2);
-        
+
         // Verify integer routeId references
         expect(climbsData.data?.results?.[0].routeId).toBe(1);
         expect(climbsData.data?.results?.[1].routeId).toBe(2);
         expect(typeof climbsData.data?.results?.[0].routeId).toBe('number');
         expect(typeof climbsData.data?.results?.[1].routeId).toBe('number');
 
-        console.log('✓ Successfully handled climbs with integer routeId references');
-
+        console.log(
+          '✓ Successfully handled climbs with integer routeId references',
+        );
       } finally {
         await fs.unlink(outputPath).catch(() => {});
       }
@@ -238,8 +242,11 @@ describe('CLDF Route Reference Tests', () => {
         console.log('Skipping test - CLDF CLI not available');
         return;
       }
-      const outputPath = path.join(tmpdir(), `cldf-perf-routes-${Date.now()}.cldf`);
-      
+      const outputPath = path.join(
+        tmpdir(),
+        `cldf-perf-routes-${Date.now()}.cldf`,
+      );
+
       try {
         // Generate large dataset
         const locations = Array.from({ length: 10 }, (_, i) => ({
@@ -251,15 +258,15 @@ describe('CLDF Route Reference Tests', () => {
 
         const routes = Array.from({ length: 1000 }, (_, i) => ({
           id: i + 1,
-          locationId: ((i % 10) + 1),
+          locationId: (i % 10) + 1,
           name: `Route ${i + 1}`,
           routeType: i % 2 === 0 ? 'boulder' : 'route',
         }));
 
         const climbs = Array.from({ length: 1000 }, (_, i) => ({
           id: i + 1,
-          routeId: i + 1,  // Direct mapping to routes
-          routeName: `Route ${i + 1}`,  // Include for validation
+          routeId: i + 1, // Direct mapping to routes
+          routeName: `Route ${i + 1}`, // Include for validation
           date: '2025-01-01',
           type: i % 2 === 0 ? 'boulder' : 'route',
           finishType: i % 2 === 0 ? 'top' : 'redpoint',
@@ -305,7 +312,6 @@ describe('CLDF Route Reference Tests', () => {
         console.log(`  - Archive creation: ${createTime}ms`);
         console.log(`  - Climb query: ${queryTime}ms`);
         console.log(`  - All climbs have integer routeId references`);
-
       } finally {
         await fs.unlink(outputPath).catch(() => {});
       }

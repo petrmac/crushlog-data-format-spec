@@ -31,7 +31,9 @@ describe('ToolHandlersService', () => {
 
   describe('parseClid', () => {
     it('should parse valid v1 CLID', () => {
-      const result = (service as any).parseClid('clid:v1:route:550e8400-e29b-41d4-a716');
+      const result = (service as any).parseClid(
+        'clid:v1:route:550e8400-e29b-41d4-a716',
+      );
       expect(result).toEqual({
         version: 'v1',
         type: 'route',
@@ -53,8 +55,10 @@ describe('ToolHandlersService', () => {
 
     it('should handle all entity types', () => {
       const types = ['route', 'location', 'sector', 'climb', 'session'];
-      types.forEach(type => {
-        const result = (service as any).parseClid(`clid:v1:${type}:test-uuid-123`);
+      types.forEach((type) => {
+        const result = (service as any).parseClid(
+          `clid:v1:${type}:test-uuid-123`,
+        );
         expect(result).toEqual({
           version: 'v1',
           type: type,
@@ -66,26 +70,57 @@ describe('ToolHandlersService', () => {
 
   describe('determineEntityType', () => {
     it('should determine type from valid CLID', () => {
-      expect((service as any).determineEntityType('clid:v1:route:123', {})).toBe('route');
-      expect((service as any).determineEntityType('clid:v1:location:456', {})).toBe('location');
-      expect((service as any).determineEntityType('clid:v1:sector:789', {})).toBe('sector');
+      expect(
+        (service as any).determineEntityType('clid:v1:route:123', {}),
+      ).toBe('route');
+      expect(
+        (service as any).determineEntityType('clid:v1:location:456', {}),
+      ).toBe('location');
+      expect(
+        (service as any).determineEntityType('clid:v1:sector:789', {}),
+      ).toBe('sector');
     });
 
     it('should return unknown for invalid CLID type', () => {
-      expect((service as any).determineEntityType('clid:v1:invalid:123', {})).toBe('unknown');
+      expect(
+        (service as any).determineEntityType('clid:v1:invalid:123', {}),
+      ).toBe('unknown');
     });
 
     it('should fallback to field detection when no CLID provided', () => {
-      expect((service as any).determineEntityType(undefined, { routeType: 'sport' })).toBe('route');
-      expect((service as any).determineEntityType(undefined, { isIndoor: true, coordinates: {} })).toBe('location');
-      expect((service as any).determineEntityType(undefined, { locationId: 1, name: 'Test' })).toBe('sector');
-      expect((service as any).determineEntityType(undefined, { finishType: 'top' })).toBe('climb');
-      expect((service as any).determineEntityType(undefined, { date: '2024-01-01', startTime: '10:00' })).toBe('session');
+      expect(
+        (service as any).determineEntityType(undefined, { routeType: 'sport' }),
+      ).toBe('route');
+      expect(
+        (service as any).determineEntityType(undefined, {
+          isIndoor: true,
+          coordinates: {},
+        }),
+      ).toBe('location');
+      expect(
+        (service as any).determineEntityType(undefined, {
+          locationId: 1,
+          name: 'Test',
+        }),
+      ).toBe('sector');
+      expect(
+        (service as any).determineEntityType(undefined, { finishType: 'top' }),
+      ).toBe('climb');
+      expect(
+        (service as any).determineEntityType(undefined, {
+          date: '2024-01-01',
+          startTime: '10:00',
+        }),
+      ).toBe('session');
     });
 
     it('should not use field detection when CLID is provided', () => {
       // Even with route fields, should return 'unknown' for invalid CLID
-      expect((service as any).determineEntityType('clid:invalid', { routeType: 'sport' })).toBe('unknown');
+      expect(
+        (service as any).determineEntityType('clid:invalid', {
+          routeType: 'sport',
+        }),
+      ).toBe('unknown');
     });
   });
 

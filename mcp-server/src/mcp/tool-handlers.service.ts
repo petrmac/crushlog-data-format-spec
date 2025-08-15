@@ -495,18 +495,22 @@ Use cldf_schema_info with component="commonMistakes" for more details.
    * @param clid The CLID string to parse (format: clid:v1:type:uuid)
    * @returns Parsed CLID components or null if invalid
    */
-  private parseClid(clid: string): { version: string; type: string; uuid: string } | null {
+  private parseClid(
+    clid: string,
+  ): { version: string; type: string; uuid: string } | null {
     if (!clid || typeof clid !== 'string' || !clid.startsWith('clid:')) {
       return null;
     }
 
     const parts = clid.split(':');
     if (parts.length !== 4) {
-      this.logger.warn(`Invalid CLID format: ${clid} - expected format: clid:version:type:uuid`);
+      this.logger.warn(
+        `Invalid CLID format: ${clid} - expected format: clid:version:type:uuid`,
+      );
       return null;
     }
 
-    const [prefix, version, type, uuid] = parts;
+    const [, version, type, uuid] = parts; // Skip prefix, we already validated it starts with 'clid:'
 
     // Validate version format (v1, v2, etc.)
     if (!version.match(/^v\d+$/)) {
@@ -538,7 +542,9 @@ Use cldf_schema_info with component="commonMistakes" for more details.
         if (validTypes.includes(parsedClid.type)) {
           return parsedClid.type;
         }
-        this.logger.warn(`Unknown CLID type: ${parsedClid.type} in CLID: ${clid}`);
+        this.logger.warn(
+          `Unknown CLID type: ${parsedClid.type} in CLID: ${clid}`,
+        );
         return 'unknown';
       }
     }
@@ -548,9 +554,11 @@ Use cldf_schema_info with component="commonMistakes" for more details.
     if (!clid && item) {
       if (item.routeType !== undefined) return 'route';
       if (item.isIndoor !== undefined && item.coordinates) return 'location';
-      if (item.locationId !== undefined && item.name && !item.routeType) return 'sector';
+      if (item.locationId !== undefined && item.name && !item.routeType)
+        return 'sector';
       if (item.finishType !== undefined) return 'climb';
-      if (item.date !== undefined && item.startTime !== undefined) return 'session';
+      if (item.date !== undefined && item.startTime !== undefined)
+        return 'session';
     }
 
     return 'unknown';
@@ -560,7 +568,7 @@ Use cldf_schema_info with component="commonMistakes" for more details.
     const { filePath, includeEmbedded = true, mediaType = 'all' } = args;
 
     // First query media metadata
-    let command = `${this.cldfService.getCliPath()} query "${filePath}" --select all --json json`;
+    const command = `${this.cldfService.getCliPath()} query "${filePath}" --select all --json json`;
     const { stdout, stderr } = await this.cldfService.executeCommand(command);
 
     if (stderr && !stdout) {
@@ -570,8 +578,8 @@ Use cldf_schema_info with component="commonMistakes" for more details.
     try {
       const result = JSON.parse(stdout);
       const data = result.data || {};
-      
-      let mediaInfo: any = {
+
+      const mediaInfo: any = {
         metadata: data.media || [],
         embedded: [],
         stats: {
@@ -585,27 +593,37 @@ Use cldf_schema_info with component="commonMistakes" for more details.
 
       // Filter by media type if specified
       if (mediaType !== 'all' && mediaInfo.metadata.length > 0) {
-        mediaInfo.metadata = mediaInfo.metadata.filter((item: any) => 
-          mediaType === 'photo' ? item.type === 'PHOTO' : item.type === 'VIDEO'
+        mediaInfo.metadata = mediaInfo.metadata.filter((item: any) =>
+          mediaType === 'photo' ? item.type === 'PHOTO' : item.type === 'VIDEO',
         );
       }
 
       // Calculate stats
       mediaInfo.stats.total = mediaInfo.metadata.length;
-      mediaInfo.stats.photos = mediaInfo.metadata.filter((m: any) => m.type === 'PHOTO').length;
-      mediaInfo.stats.videos = mediaInfo.metadata.filter((m: any) => m.type === 'VIDEO').length;
-      mediaInfo.stats.embedded = mediaInfo.metadata.filter((m: any) => m.embedded).length;
-      mediaInfo.stats.external = mediaInfo.stats.total - mediaInfo.stats.embedded;
+      mediaInfo.stats.photos = mediaInfo.metadata.filter(
+        (m: any) => m.type === 'PHOTO',
+      ).length;
+      mediaInfo.stats.videos = mediaInfo.metadata.filter(
+        (m: any) => m.type === 'VIDEO',
+      ).length;
+      mediaInfo.stats.embedded = mediaInfo.metadata.filter(
+        (m: any) => m.embedded,
+      ).length;
+      mediaInfo.stats.external =
+        mediaInfo.stats.total - mediaInfo.stats.embedded;
 
       // Get embedded file info if requested
       if (includeEmbedded && mediaInfo.stats.embedded > 0) {
         const extractCommand = `${this.cldfService.getCliPath()} extract "${filePath}" --files media --json json`;
         try {
-          const extractResult = await this.cldfService.executeCommand(extractCommand);
+          const extractResult =
+            await this.cldfService.executeCommand(extractCommand);
           if (extractResult.stdout) {
             const extractData = JSON.parse(extractResult.stdout);
             if (extractData.files) {
-              mediaInfo.embedded = extractData.files.filter((f: string) => f.startsWith('media/'));
+              mediaInfo.embedded = extractData.files.filter((f: string) =>
+                f.startsWith('media/'),
+              );
             }
           }
         } catch (error) {
@@ -631,7 +649,7 @@ Use cldf_schema_info with component="commonMistakes" for more details.
     const { filePath, outputDir, preserveStructure = true } = args;
 
     let command = `${this.cldfService.getCliPath()} extract "${filePath}" --output "${outputDir}" --files media`;
-    
+
     if (!preserveStructure) {
       command += ' --no-preserve-structure';
     }
@@ -644,18 +662,23 @@ Use cldf_schema_info with component="commonMistakes" for more details.
 
     try {
       const result = JSON.parse(stdout);
-      const mediaFiles = result.files?.filter((f: string) => f.startsWith('media/')) || [];
-      
+      const mediaFiles =
+        result.files?.filter((f: string) => f.startsWith('media/')) || [];
+
       return {
         content: [
           {
             type: 'text',
-            text: JSON.stringify({
-              success: true,
-              message: `Extracted ${mediaFiles.length} media files`,
-              outputDirectory: outputDir,
-              files: mediaFiles,
-            }, null, 2),
+            text: JSON.stringify(
+              {
+                success: true,
+                message: `Extracted ${mediaFiles.length} media files`,
+                outputDirectory: outputDir,
+                files: mediaFiles,
+              },
+              null,
+              2,
+            ),
           },
         ],
       };
@@ -675,7 +698,7 @@ Use cldf_schema_info with component="commonMistakes" for more details.
     const { filePath, clid } = args;
 
     const command = `${this.cldfService.getCliPath()} query "${filePath}" --select all --clid "${clid}" --json json`;
-    
+
     const { stdout, stderr } = await this.cldfService.executeCommand(command);
 
     if (stderr && !stdout) {
@@ -685,24 +708,29 @@ Use cldf_schema_info with component="commonMistakes" for more details.
     try {
       const result = JSON.parse(stdout);
       const data = result.data || {};
-      
+
       // Check if any results were found
-      const foundItem = data.results && data.results.length > 0 ? data.results[0] : null;
-      
+      const foundItem =
+        data.results && data.results.length > 0 ? data.results[0] : null;
+
       if (foundItem) {
         // Determine the type using our robust parsing functions
         const itemType = this.determineEntityType(clid, foundItem);
-        
+
         return {
           content: [
             {
               type: 'text',
-              text: JSON.stringify({
-                found: true,
-                type: itemType,
-                clid: clid,
-                data: foundItem,
-              }, null, 2),
+              text: JSON.stringify(
+                {
+                  found: true,
+                  type: itemType,
+                  clid: clid,
+                  data: foundItem,
+                },
+                null,
+                2,
+              ),
             },
           ],
         };
@@ -711,11 +739,15 @@ Use cldf_schema_info with component="commonMistakes" for more details.
           content: [
             {
               type: 'text',
-              text: JSON.stringify({
-                found: false,
-                clid: clid,
-                message: `No entity found with CLID: ${clid}`,
-              }, null, 2),
+              text: JSON.stringify(
+                {
+                  found: false,
+                  clid: clid,
+                  message: `No entity found with CLID: ${clid}`,
+                },
+                null,
+                2,
+              ),
             },
           ],
         };
@@ -733,7 +765,13 @@ Use cldf_schema_info with component="commonMistakes" for more details.
   }
 
   private async handleGenerateQR(args: any) {
-    const { filePath, clid, outputPath, size = 256, baseUrl = 'https://crushlog.pro' } = args;
+    const {
+      filePath,
+      clid,
+      outputPath,
+      size = 256,
+      baseUrl = 'https://crushlog.pro',
+    } = args;
 
     try {
       const { stdout, stderr } = await this.cldfService.runCLDFTool([
@@ -757,14 +795,18 @@ Use cldf_schema_info with component="commonMistakes" for more details.
         content: [
           {
             type: 'text',
-            text: JSON.stringify({
-              success: true,
-              message: `QR code generated successfully at ${outputPath}`,
-              clid: clid,
-              outputPath: outputPath,
-              size: size,
-              baseUrl: baseUrl,
-            }, null, 2),
+            text: JSON.stringify(
+              {
+                success: true,
+                message: `QR code generated successfully at ${outputPath}`,
+                clid: clid,
+                outputPath: outputPath,
+                size: size,
+                baseUrl: baseUrl,
+              },
+              null,
+              2,
+            ),
           },
         ],
       };
@@ -808,11 +850,15 @@ Use cldf_schema_info with component="commonMistakes" for more details.
         content: [
           {
             type: 'text',
-            text: JSON.stringify({
-              success: true,
-              data: qrData,
-              imagePath: imagePath,
-            }, null, 2),
+            text: JSON.stringify(
+              {
+                success: true,
+                data: qrData,
+                imagePath: imagePath,
+              },
+              null,
+              2,
+            ),
           },
         ],
       };
