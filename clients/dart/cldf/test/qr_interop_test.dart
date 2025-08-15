@@ -11,18 +11,22 @@ void main() {
     // Use the wrapper script which automatically falls back to JAR if native is not available
     // Try to find the Java CLI tool - check multiple possible locations
     String findJavaCli() {
+      // Determine the appropriate wrapper script based on platform
+      final isWindows = Platform.isWindows;
+      final wrapperName = isWindows ? 'cldf.bat' : 'cldf';
+      
       // For CI environment - use relative path from dart test directory
-      final relativePath = '../../../java/cldf-tool/cldf';
+      final relativePath = '../../../java/cldf-tool/$wrapperName';
       final absolutePath =
-          '/Users/petrmacek/git-mirrors/crushlog-data-format-spec/clients/java/cldf-tool/cldf';
+          '/Users/petrmacek/git-mirrors/crushlog-data-format-spec/clients/java/cldf-tool/$wrapperName';
 
       // Check relative path first (for CI)
       if (File(relativePath).existsSync()) {
         print('Using Java CLI at relative path: $relativePath');
         return relativePath;
       }
-      // Fall back to absolute path (for local development)
-      if (File(absolutePath).existsSync()) {
+      // Fall back to absolute path (for local development on macOS/Linux)
+      if (!isWindows && File(absolutePath).existsSync()) {
         print('Using Java CLI at absolute path: $absolutePath');
         return absolutePath;
       }

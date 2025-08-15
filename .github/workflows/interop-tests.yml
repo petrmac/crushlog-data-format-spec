@@ -55,6 +55,18 @@ jobs:
         chmod +x gradlew
         ./gradlew :cldf-tool:fatJar
     
+    # Verify JAR was built
+    - name: Verify JAR exists
+      working-directory: clients/java/cldf-tool
+      shell: bash
+      run: |
+        ls -la build/libs/
+        if [ ! -f "build/libs/cldf-tool-1.0.0-standalone.jar" ]; then
+          echo "ERROR: Fat JAR not found!"
+          exit 1
+        fi
+        echo "Fat JAR built successfully"
+    
     # Make wrapper script executable
     - name: Make wrapper script executable
       working-directory: clients/java/cldf-tool
@@ -69,8 +81,17 @@ jobs:
       run: |
         @'
         @echo off
-        java -jar "%~dp0\build\libs\cldf-tool-1.0.0-standalone.jar" %*
+        java -jar "%~dp0build\libs\cldf-tool-1.0.0-standalone.jar" %*
         '@ | Out-File -FilePath cldf.bat -Encoding ASCII
+        
+        # Verify the batch file was created
+        if (Test-Path cldf.bat) {
+          Write-Host "Windows wrapper created successfully"
+          Get-Content cldf.bat
+        } else {
+          Write-Error "Failed to create Windows wrapper"
+          exit 1
+        }
     
     # Prepare Dart tests
     - name: Install Dart dependencies
@@ -78,6 +99,35 @@ jobs:
       run: |
         dart pub get
         dart run build_runner build --delete-conflicting-outputs
+    
+    # Verify CLI is accessible from Dart test directory
+    - name: Verify CLI accessibility
+      working-directory: clients/dart/cldf
+      shell: bash
+      run: |
+        echo "Current directory: $(pwd)"
+        echo "Checking for Java CLI wrapper..."
+        if [[ "$RUNNER_OS" == "Windows" ]]; then
+          if [ -f "../../../java/cldf-tool/cldf.bat" ]; then
+            echo "✓ Found Windows wrapper: ../../../java/cldf-tool/cldf.bat"
+            # Test if it works
+            ../../../java/cldf-tool/cldf.bat --version || echo "Note: wrapper test may fail if Java is not in PATH"
+          else
+            echo "✗ Windows wrapper not found!"
+            ls -la ../../../java/cldf-tool/
+            exit 1
+          fi
+        else
+          if [ -f "../../../java/cldf-tool/cldf" ]; then
+            echo "✓ Found Unix wrapper: ../../../java/cldf-tool/cldf"
+            # Test if it works
+            ../../../java/cldf-tool/cldf --version || echo "Note: wrapper test may fail"
+          else
+            echo "✗ Unix wrapper not found!"
+            ls -la ../../../java/cldf-tool/
+            exit 1
+          fi
+        fi
     
     # Run Java tests first (to ensure Java implementation works)
     - name: Run Java tests
