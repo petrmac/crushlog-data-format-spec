@@ -203,8 +203,11 @@ class ApplicationSpec extends Specification {
         when:
         // We need to test that main() sets properties and calls PicocliRunner.execute
         // Since System.exit prevents direct testing, we'll verify through a subprocess
+        def javaExecutable = System.getProperty("os.name").toLowerCase().contains("windows") 
+            ? System.getProperty("java.home") + "/bin/java.exe"
+            : System.getProperty("java.home") + "/bin/java"
         def process = new ProcessBuilder(
-            System.getProperty("java.home") + "/bin/java",
+            javaExecutable,
             "-cp", System.getProperty("java.class.path"),
             "app.crushlog.cldf.tool.Application",
             "invalid-command"
@@ -242,8 +245,11 @@ class ApplicationSpec extends Specification {
         
         when:
         // Test with --version which should exit with 0
+        def javaExecutable = System.getProperty("os.name").toLowerCase().contains("windows") 
+            ? System.getProperty("java.home") + "/bin/java.exe"
+            : System.getProperty("java.home") + "/bin/java"
         def process = new ProcessBuilder(
-            System.getProperty("java.home") + "/bin/java",
+            javaExecutable,
             "-cp", System.getProperty("java.class.path"),
             "app.crushlog.cldf.tool.Application",
             "--version"

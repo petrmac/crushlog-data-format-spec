@@ -44,24 +44,25 @@ void main() {
     bool shouldSkipInterop() {
       // Check if we're in CI environment
       final isCI = Platform.environment['CI'] == 'true';
-      
+
       // Skip known problematic tests in CI
       if (isCI && Platform.environment['SKIP_FLAKY_INTEROP_TESTS'] == 'true') {
         return true;
       }
-      
+
       // Check if Java CLI exists AND is functional
       bool javaCliWorks = false;
       if (File(javaCliPath).existsSync()) {
         // Try to run the CLI with --version to see if it actually works
         try {
-          final result = Process.runSync(
-            javaCliPath, 
-            ['--version'],
-            runInShell: true,
-          );
+          final result = Process.runSync(javaCliPath, [
+            '--version',
+          ], runInShell: true);
           javaCliWorks = result.exitCode == 0;
-          if (!javaCliWorks && result.stderr.toString().contains('Neither native image nor JAR file found')) {
+          if (!javaCliWorks &&
+              result.stderr.toString().contains(
+                'Neither native image nor JAR file found',
+              )) {
             // The wrapper script exists but the JAR/native image doesn't
             javaCliWorks = false;
           }
@@ -69,7 +70,7 @@ void main() {
           javaCliWorks = false;
         }
       }
-      
+
       if (!javaCliWorks) {
         final skipInterop =
             Platform.environment['SKIP_INTEROP_TESTS_IF_NO_CLI'] == 'true';

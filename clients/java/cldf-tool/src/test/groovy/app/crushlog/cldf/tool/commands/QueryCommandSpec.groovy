@@ -161,7 +161,8 @@ class QueryCommandSpec extends Specification {
 
     def "should fail when input file does not exist"() {
         given:
-        command.inputFile = new File("/non/existent/file.cldf")
+        def nonExistentFile = new File("/non/existent/file.cldf")
+        command.inputFile = nonExistentFile
         command.selectType = QueryCommand.DataType.all
 
         when:
@@ -169,7 +170,7 @@ class QueryCommandSpec extends Specification {
 
         then:
         !result.success
-        result.message == "File not found: /non/existent/file.cldf"
+        result.message == "File not found: ${nonExistentFile.absolutePath}"
         result.exitCode == 1
     }
 
