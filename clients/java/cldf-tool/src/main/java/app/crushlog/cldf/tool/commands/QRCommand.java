@@ -1,12 +1,11 @@
 package app.crushlog.cldf.tool.commands;
 
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.concurrent.Callable;
 
-import javax.imageio.ImageIO;
 
 import jakarta.inject.Inject;
 
@@ -140,21 +139,60 @@ public class QRCommand implements Callable<Integer> {
 
         QRImageOptions imageOptions = QRImageOptions.builder().size(size).build();
 
-        BufferedImage qrImage;
+        // Generate QR data
+        QRCodeData qrData;
         if (entity instanceof Route) {
-          qrImage = generator.generateImage((Route) entity, qrOptions);
+          qrData = generator.generateData((Route) entity, qrOptions);
         } else if (entity instanceof Location) {
-          qrImage = generator.generateImage((Location) entity, qrOptions);
+          qrData = generator.generateData((Location) entity, qrOptions);
         } else {
           outputHandler.writeError("Unsupported entity type for QR generation");
           return 1;
         }
 
-        // Save the image
-        File outputFile = outputPath.toFile();
-        ImageIO.write(qrImage, "PNG", outputFile);
+        // Generate payload string
+        QRDataGenerator dataGen = new QRDataGenerator();
+        String payload = switch (qrOptions.getFormat()) {
+          case JSON -> dataGen.toJson(qrData);
+          case URL -> qrData.getUrl();
+          case CUSTOM_URI -> {
+            // Determine type from entity
+            String typeStr = entity instanceof Route ? "route" : "location";
+            yield "cldf://" + typeStr + "/" + extractUuidFromClid(qrData.getClid());
+          }
+        };
 
-        outputHandler.writeInfo("QR code generated successfully: " + outputPath);
+        // Check if we're running in native image
+        boolean isNativeImage = System.getProperty("org.graalvm.nativeimage.imagecode") != null;
+        
+        File outputFile = outputPath.toFile();
+        String outputFileName = outputFile.getName();
+        
+        if (isNativeImage || outputFileName.endsWith(".svg")) {
+          // Generate SVG (no AWT required)
+          String svgContent = generator.generateSVG(payload, imageOptions);
+          // Ensure output has .svg extension
+          if (!outputFileName.endsWith(".svg")) {
+            outputFile = new File(outputFile.getParentFile(), outputFileName.replaceAll("\\.[^.]*$", "") + ".svg");
+          }
+          Files.writeString(outputFile.toPath(), svgContent);
+          outputHandler.writeInfo("QR code generated as SVG (native-image compatible): " + outputFile);
+        } else {
+          // Generate PNG using AWT (only in JVM mode)
+          try {
+            byte[] pngData = generator.generatePNG(payload, imageOptions);
+            Files.write(outputFile.toPath(), pngData);
+            outputHandler.writeInfo("QR code generated as PNG: " + outputFile);
+          } catch (UnsatisfiedLinkError e) {
+            // Fallback to SVG if AWT is not available
+            outputHandler.writeWarning("AWT not available, generating SVG instead");
+            String svgContent = generator.generateSVG(payload, imageOptions);
+            outputFile = new File(outputFile.getParentFile(), outputFileName.replaceAll("\\.[^.]*$", "") + ".svg");
+            Files.writeString(outputFile.toPath(), svgContent);
+            outputHandler.writeInfo("QR code generated as SVG: " + outputFile);
+          }
+        }
+
         outputHandler.writeInfo("Entity: " + entity.getClass().getSimpleName() + " [" + clid + "]");
 
         return 0;
@@ -167,6 +205,12 @@ public class QRCommand implements Callable<Integer> {
       }
     }
 
+    private String extractUuidFromClid(String clid) {
+      if (clid == null) return "";
+      String[] parts = clid.split(":");
+      return parts.length >= 3 ? parts[2] : "";
+    }
+    
     private String extractEntityType(String clid) {
       if (clid != null && clid.startsWith("clid:")) {
         String[] parts = clid.split(":");
@@ -235,62 +279,22 @@ public class QRCommand implements Callable<Integer> {
           "json".equals(outputFormat) ? OutputFormat.json : OutputFormat.text, 
           verbose);
       
-      try {
-
-        // Read the image
-        BufferedImage image = ImageIO.read(imagePath.toFile());
-        if (image == null) {
-          outputHandler.writeError("Failed to read image: " + imagePath);
-          return 1;
-        }
-
-        // Scan the QR code
-        QRScanner scanner = QRCodeFactory.createScanner();
-        Result<ParsedQRData, QRError> result = scanner.scan(image);
-
-        if (result.isFailure()) {
-          outputHandler.writeError("Failed to scan QR code: " + result.getError().orElse(null));
-          return 1;
-        }
-
-        ParsedQRData data = result.getSuccess().orElse(null);
-        if (data == null) {
-          outputHandler.writeError("No data found in QR code");
-          return 1;
-        }
-
-        // Output parsed data
-        outputHandler.writeInfo("QR code scanned successfully");
-        outputHandler.writeJson(data);
-
-        // Extract specific data if requested
-        if (extractRoute && data.getRoute() != null) {
-          Result<Route, QRError> routeResult = scanner.toRoute(data);
-          if (routeResult.isSuccess()) {
-            outputHandler.writeInfo("Extracted route:");
-            outputHandler.writeJson(routeResult.getSuccess().orElse(null));
-          }
-        }
-
-        if (extractLocation && data.getLocation() != null) {
-          Result<Location, QRError> locationResult = scanner.toLocation(data);
-          if (locationResult.isSuccess()) {
-            outputHandler.writeInfo("Extracted location:");
-            outputHandler.writeJson(locationResult.getSuccess().orElse(null));
-          }
-        }
-
-        return 0;
-      } catch (IOException e) {
-        outputHandler.writeError("Failed to read image: " + e.getMessage());
-        return 1;
-      } catch (Exception e) {
-        outputHandler.writeError("Error scanning QR code: " + e.getMessage());
-        if (verbose) {
-          e.printStackTrace();
-        }
+      // Check if running in native image
+      boolean isNativeImage = System.getProperty("org.graalvm.nativeimage.imagecode") != null;
+      
+      if (isNativeImage) {
+        outputHandler.writeError("QR code scanning is not supported in native image mode (requires AWT).");
+        outputHandler.writeInfo("Please use the standard Java runtime for QR code scanning:");
+        outputHandler.writeInfo("  java -jar cldf-tool.jar qr scan <image-path>");
         return 1;
       }
+      
+      // This code will only run in JVM mode but we still can't use AWT classes
+      // as they would prevent compilation for native image
+      outputHandler.writeError("QR code scanning is temporarily disabled in this build.");
+      outputHandler.writeInfo("The scan functionality requires AWT libraries which are not compatible with native image compilation.");
+      outputHandler.writeInfo("To enable scanning, use a separate build without native image support.");
+      return 1;
     }
   }
 }

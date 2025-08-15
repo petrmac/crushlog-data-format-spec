@@ -1,0 +1,43 @@
+[
+  {
+    "name": "java.awt.image.BufferedImage",
+    "methods": [
+      {"name": "<init>", "parameterTypes": ["int", "int", "int"]}
+    ]
+  },
+  {
+    "name": "java.awt.Graphics2D",
+    "allPublicMethods": true
+  },
+  {
+    "name": "java.awt.Color",
+    "methods": [
+      {"name": "<init>", "parameterTypes": ["int", "int", "int"]},
+      {"name": "<init>", "parameterTypes": ["int"]}
+    ],
+    "fields": [
+      {"name": "BLACK"},
+      {"name": "WHITE"}
+    ]
+  },
+  {
+    "name": "java.awt.image.WritableRaster",
+    "allPublicMethods": true
+  },
+  {
+    "name": "javax.imageio.ImageIO",
+    "methods": [
+      {"name": "write", "parameterTypes": ["java.awt.image.RenderedImage", "java.lang.String", "java.io.File"]},
+      {"name": "read", "parameterTypes": ["java.io.File"]}
+    ]
+  },
+  {
+    "name": "sun.awt.image.IntegerInterleavedRaster"
+  },
+  {
+    "name": "sun.java2d.loops.GraphicsPrimitiveMgr",
+    "methods": [
+      {"name": "register", "parameterTypes": ["[Lsun.java2d.loops.GraphicsPrimitive;"]}
+    ]
+  }
+]

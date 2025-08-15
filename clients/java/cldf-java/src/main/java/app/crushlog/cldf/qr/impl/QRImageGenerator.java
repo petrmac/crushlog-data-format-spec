@@ -233,7 +233,7 @@ public class QRImageGenerator {
     return svg.toString();
   }
 
-  private String toHexColor(Color color) {
-    return String.format("#%02x%02x%02x", color.getRed(), color.getGreen(), color.getBlue());
+  private String toHexColor(app.crushlog.cldf.qr.QRColor color) {
+    return color.toHex();
   }
 }

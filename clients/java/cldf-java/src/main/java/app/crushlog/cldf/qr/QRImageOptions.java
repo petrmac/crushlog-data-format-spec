@@ -1,7 +1,5 @@
 package app.crushlog.cldf.qr;
 
-import java.awt.Color;
-
 import lombok.Builder;
 import lombok.Data;
 
@@ -15,9 +13,9 @@ public class QRImageOptions {
 
   @Builder.Default private ErrorCorrectionLevel errorCorrectionLevel = ErrorCorrectionLevel.M;
 
-  @Builder.Default private Color foregroundColor = Color.BLACK;
+  @Builder.Default private QRColor foregroundColor = QRColor.BLACK;
 
-  @Builder.Default private Color backgroundColor = Color.WHITE;
+  @Builder.Default private QRColor backgroundColor = QRColor.WHITE;
 
   private String logoPath;
 
