@@ -42,6 +42,7 @@ jobs:
     # Copy schemas to resources (required for build)
     - name: Copy schemas to resources
       working-directory: clients/java
+      shell: bash
       run: |
         mkdir -p cldf-java/src/main/resources
         rm -rf cldf-java/src/main/resources/schemas
