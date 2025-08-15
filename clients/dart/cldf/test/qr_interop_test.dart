@@ -15,8 +15,9 @@ void main() {
       final isWindows = Platform.isWindows;
       final wrapperName = isWindows ? 'cldf.bat' : 'cldf';
 
-      // For CI environment - use relative path from dart test directory
-      final relativePath = '../../../java/cldf-tool/$wrapperName';
+      // For CI environment - use relative path from dart/cldf directory
+      // From clients/dart/cldf to clients/java/cldf-tool
+      final relativePath = '../../java/cldf-tool/$wrapperName';
       final absolutePath =
           '/Users/petrmacek/git-mirrors/crushlog-data-format-spec/clients/java/cldf-tool/$wrapperName';
 
@@ -51,7 +52,7 @@ void main() {
         // Throw exception if skip is not enabled
         throw Exception(
           'Java CLI not found at $javaCliPath\n'
-          'Please build the Java project first: cd ../../../java && ./gradlew :cldf-tool:fatJar\n'
+          'Please build the Java project first: cd ../../java && ./gradlew :cldf-tool:fatJar\n'
           'Or set SKIP_INTEROP_TESTS_IF_NO_CLI=true to skip these tests',
         );
       }

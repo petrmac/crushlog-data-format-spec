@@ -106,25 +106,31 @@ jobs:
       shell: bash
       run: |
         echo "Current directory: $(pwd)"
+        echo "Repository root: $(pwd)/../../.."
+        echo "Checking directory structure..."
+        ls -la ../../.. || true
+        echo "Checking Java directory..."
+        ls -la ../../java/ || true
+        echo "Checking Java cldf-tool directory..."
+        ls -la ../../java/cldf-tool/ || true
+        
         echo "Checking for Java CLI wrapper..."
         if [[ "$RUNNER_OS" == "Windows" ]]; then
-          if [ -f "../../../java/cldf-tool/cldf.bat" ]; then
-            echo "✓ Found Windows wrapper: ../../../java/cldf-tool/cldf.bat"
+          if [ -f "../../java/cldf-tool/cldf.bat" ]; then
+            echo "✓ Found Windows wrapper: ../../java/cldf-tool/cldf.bat"
             # Test if it works
-            ../../../java/cldf-tool/cldf.bat --version || echo "Note: wrapper test may fail if Java is not in PATH"
+            ../../java/cldf-tool/cldf.bat --version || echo "Note: wrapper test may fail if Java is not in PATH"
           else
-            echo "✗ Windows wrapper not found!"
-            ls -la ../../../java/cldf-tool/
+            echo "✗ Windows wrapper not found at ../../java/cldf-tool/cldf.bat"
             exit 1
           fi
         else
-          if [ -f "../../../java/cldf-tool/cldf" ]; then
-            echo "✓ Found Unix wrapper: ../../../java/cldf-tool/cldf"
+          if [ -f "../../java/cldf-tool/cldf" ]; then
+            echo "✓ Found Unix wrapper: ../../java/cldf-tool/cldf"
             # Test if it works
-            ../../../java/cldf-tool/cldf --version || echo "Note: wrapper test may fail"
+            ../../java/cldf-tool/cldf --version || echo "Note: wrapper test may fail"
           else
-            echo "✗ Unix wrapper not found!"
-            ls -la ../../../java/cldf-tool/
+            echo "✗ Unix wrapper not found at ../../java/cldf-tool/cldf"
             exit 1
           fi
         fi
