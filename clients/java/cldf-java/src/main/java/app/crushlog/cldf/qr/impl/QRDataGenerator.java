@@ -300,16 +300,13 @@ public class QRDataGenerator {
       String uuid = parsed.uuid();
       return uuid.substring(0, Math.min(8, uuid.length()));
     } catch (Exception e) {
-      // Fallback for old or malformed CLIDs
-      String[] parts = clid.split(":");
-      if (parts.length == 3) {
-        // Old format: clid:type:uuid
-        String uuid = parts[2];
-        return uuid.substring(0, Math.min(8, uuid.length()));
-      } else if (parts.length == 4) {
-        // New format: clid:v1:type:uuid
-        String uuid = parts[3];
-        return uuid.substring(0, Math.min(8, uuid.length()));
+      // Fallback: Try to extract UUID part manually for v1 format
+      if (clid != null && clid.startsWith("clid:v1:")) {
+        String[] parts = clid.split(":");
+        if (parts.length == 4) {
+          String uuid = parts[3];
+          return uuid.substring(0, Math.min(8, uuid.length()));
+        }
       }
       log.error("Failed to extract short CLID from: {}", clid, e);
       return clid;

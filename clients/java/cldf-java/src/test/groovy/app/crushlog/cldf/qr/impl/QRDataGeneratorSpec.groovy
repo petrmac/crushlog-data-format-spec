@@ -142,7 +142,7 @@ class QRDataGeneratorSpec extends Specification {
 		given:
 		def location = Location.builder()
 				.id(1)
-				.clid("clid:location:loc12345-e29b-41d4-a716-446655440000")
+				.clid("clid:v1:location:loc12345-e29b-41d4-a716-446655440000")
 				.name("El Capitan")
 				.country("US")
 				.state("CA")
@@ -160,7 +160,7 @@ class QRDataGeneratorSpec extends Specification {
 		then:
 		data != null
 		data.version == 1
-		data.clid == "clid:location:loc12345-e29b-41d4-a716-446655440000"
+		data.clid == "clid:v1:location:loc12345-e29b-41d4-a716-446655440000"
 		data.url != null
 		data.url.contains("/l/loc12345")
 		data.locationData != null
@@ -175,7 +175,7 @@ class QRDataGeneratorSpec extends Specification {
 		given:
 		def location = Location.builder()
 				.id(1)
-				.clid("clid:location:loc12345-e29b-41d4-a716-446655440000")
+				.clid("clid:v1:location:loc12345-e29b-41d4-a716-446655440000")
 				.name("Test Gym")
 				.isIndoor(true)
 				.build()

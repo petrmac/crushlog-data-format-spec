@@ -21,6 +21,7 @@ import app.crushlog.cldf.qr.impl.QRDataGenerator;
 import app.crushlog.cldf.qr.result.QRError;
 import app.crushlog.cldf.qr.result.Result;
 import app.crushlog.cldf.tool.services.CLDFService;
+import app.crushlog.cldf.tool.utils.CLIDUtils;
 import app.crushlog.cldf.tool.utils.OutputFormat;
 import app.crushlog.cldf.tool.utils.OutputHandler;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -482,9 +483,9 @@ public class QRCommand implements Callable<Integer> {
     }
 
     private String createCustomUri(QRCodeData qrData) {
-      String typeStr = determineEntityType(qrData.getClid());
-      String uuid = extractUuid(qrData.getClid());
-      return "cldf://" + typeStr + "/" + uuid;
+      return CLIDUtils.toCustomUri(qrData.getClid())
+          .orElseThrow(
+              () -> new IllegalArgumentException("Invalid CLID format: " + qrData.getClid()));
     }
 
     private int saveQRCode(String payload, OutputHandler outputHandler) throws IOException {
@@ -528,12 +529,14 @@ public class QRCommand implements Callable<Integer> {
     }
 
     private Object findEntity(CLDFArchive archive, String clid) {
-      String entityType = determineEntityType(clid);
+      Optional<String> entityType = CLIDUtils.extractEntityType(clid);
 
-      if ("route".equals(entityType)) {
-        return findRoute(archive, clid).orElse(null);
-      } else if ("location".equals(entityType)) {
-        return findLocation(archive, clid).orElse(null);
+      if (entityType.isPresent()) {
+        if ("route".equals(entityType.get())) {
+          return findRoute(archive, clid).orElse(null);
+        } else if ("location".equals(entityType.get())) {
+          return findLocation(archive, clid).orElse(null);
+        }
       }
       return null;
     }
@@ -550,22 +553,6 @@ public class QRCommand implements Callable<Integer> {
         return Optional.empty();
       }
       return archive.getLocations().stream().filter(l -> clid.equals(l.getClid())).findFirst();
-    }
-
-    private String determineEntityType(String clid) {
-      if (clid != null && clid.startsWith("clid:")) {
-        String[] parts = clid.split(":");
-        if (parts.length >= 2) {
-          return parts[1];
-        }
-      }
-      return null;
-    }
-
-    private String extractUuid(String clid) {
-      if (clid == null) return "";
-      String[] parts = clid.split(":");
-      return parts.length >= 3 ? parts[2] : "";
     }
   }
 

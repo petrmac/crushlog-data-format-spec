@@ -34,7 +34,7 @@ class QRCommandSpec extends Specification {
         def command = new QRCommand.GenerateCommand(cldfService)
         
         def route = new Route().tap {
-            clid = "clid:route:test-uuid"
+            clid = "clid:v1:route:test-uuid"
             name = "Test Route"
         }
         
@@ -44,9 +44,10 @@ class QRCommandSpec extends Specification {
         }
         
         command.archivePath = Paths.get("test.cldf")
-        command.archiveClid = "clid:route:test-uuid"
+        command.archiveClid = "clid:v1:route:test-uuid"
         command.outputPath = Paths.get("test.png")
         command.baseUrl = "https://test.com"
+        command.format = "json"
         command.size = 256
 
         when:
@@ -68,8 +69,9 @@ class QRCommandSpec extends Specification {
         }
         
         command.archivePath = Paths.get("test.cldf")
-        command.archiveClid = "clid:route:nonexistent"
+        command.archiveClid = "clid:v1:route:nonexistent"
         command.outputPath = Paths.get("test.png")
+        command.format = "json"
 
         when:
         def result = command.call()

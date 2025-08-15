@@ -71,15 +71,7 @@ public interface QRCodeGenerator {
       app.crushlog.cldf.clid.CLID parsed = app.crushlog.cldf.clid.CLID.fromString(clid);
       return parsed.uuid();
     } catch (Exception e) {
-      // Fallback for malformed CLIDs
-      String[] parts = clid.split(":");
-      if (parts.length == 4) {
-        // New format: clid:v1:type:uuid
-        return parts[3];
-      } else if (parts.length == 3) {
-        // Old format: clid:type:uuid
-        return parts[2];
-      }
+      // Return empty string for malformed CLIDs
       return "";
     }
   }
