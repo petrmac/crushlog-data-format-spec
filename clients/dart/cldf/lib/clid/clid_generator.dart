@@ -47,7 +47,7 @@ class CLIDGenerator {
     final input = components.where((s) => s.isNotEmpty).join(':');
     final uuid = _uuid.v5(crushlogNamespace, input);
 
-    return 'clid:location:$uuid';
+    return 'clid:v1:location:$uuid';
   }
 
   /// Generate a deterministic CLID for a route
@@ -79,13 +79,13 @@ class CLIDGenerator {
     final input = components.join(':');
     final uuid = _uuid.v5(crushlogNamespace, input);
 
-    return 'clid:route:$uuid';
+    return 'clid:v1:route:$uuid';
   }
 
   /// Generate a deterministic CLID for a sector
   static String generateSectorCLID(String locationCLID, Sector sector) {
     // Extract location UUID
-    final locationUuid = locationCLID.replaceFirst('clid:location:', '');
+    final locationUuid = locationCLID.replaceFirst('clid:v1:location:', '');
 
     final components = [
       locationUuid,
@@ -96,33 +96,39 @@ class CLIDGenerator {
     final input = components.join(':');
     final uuid = _uuid.v5(crushlogNamespace, input);
 
-    return 'clid:sector:$uuid';
+    return 'clid:v1:sector:$uuid';
   }
 
   /// Generate a random UUID v4 for user content
   static String generateRandomCLID(EntityType type) {
     final uuid = _uuid.v4();
-    return 'clid:${type.value}:$uuid';
+    return 'clid:v1:${type.value}:$uuid';
   }
 
   /// Parse a CLID into its components
   static CLID parse(String clid) {
     final parts = clid.split(':');
 
-    if (parts.length != 3 || parts[0] != 'clid') {
-      throw ArgumentError('Invalid CLID format: $clid');
+    // Only support v1 format (clid:v1:type:uuid)
+    if (parts.length != 4 || parts[0] != 'clid' || parts[1] != 'v1') {
+      throw ArgumentError('Invalid CLID format. Expected clid:v1:type:uuid, got: $clid');
     }
 
-    final entityType = EntityType.fromString(parts[1]);
-
+    final type = EntityType.values.firstWhere(
+      (e) => e.value == parts[2],
+      orElse: () => throw ArgumentError('Unknown entity type: ${parts[2]}'),
+    );
+    
+    final uuid = parts[3];
+    final shortForm = uuid.substring(0, uuid.length.clamp(0, 8));
+    
     return CLID(
-      namespace: parts[0],
-      type: entityType,
-      uuid: parts[2],
+      namespace: 'clid',
+      type: type,
+      uuid: uuid,
       fullId: clid,
-      shortForm: parts[2].substring(0, parts[2].length.clamp(0, 8)),
-      url:
-          'https://crushlog.pro/g/${parts[2].substring(0, parts[2].length.clamp(0, 8))}',
+      shortForm: shortForm,
+      url: 'https://crushlog.pro/g/$shortForm',
     );
   }
 

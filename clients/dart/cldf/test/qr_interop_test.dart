@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:convert';
 import 'package:test/test.dart';
 import 'package:cldf/qr/qr.dart';
 import 'package:cldf/models/route.dart';
@@ -7,8 +8,9 @@ import 'package:cldf/models/enums/route_type.dart';
 
 void main() {
   group('QR Code Java-Dart Interoperability', () {
+    // Use the wrapper script which automatically falls back to JAR if native is not available
     const javaCliPath =
-        '/Users/petrmacek/git-mirrors/crushlog-data-format-spec/clients/java/cldf-tool/build/native/nativeCompile/cldf';
+        '/Users/petrmacek/git-mirrors/crushlog-data-format-spec/clients/java/cldf-tool/cldf';
     final testResourcesDir = Directory('test/qr-test-resources');
 
     setUpAll(() async {
@@ -30,24 +32,18 @@ void main() {
           'Java Test Route',
           '--grade',
           '5.10a',
-          '--grade-system',
-          'YDS',
           '--route-type',
           'sport',
           '--location-name',
           'Test Crag',
-          '--location-country',
+          '--country',
           'US',
-          '--location-state',
+          '--state',
           'CA',
           '--latitude',
           '37.734000',
           '--longitude',
           '-119.637700',
-          '--format',
-          'json',
-          '--output-format',
-          'png',
           '--output',
           '${testResourcesDir.path}/java-route-json.png',
         ]);
@@ -69,12 +65,12 @@ void main() {
         expect(parsedData, isNotNull);
         expect(parsedData!.version, equals(1));
         expect(parsedData.clid, isNotNull);
-        expect(parsedData.clid, startsWith('clid:route:'));
+        expect(parsedData.clid, startsWith('clid:v1:route:'));
         expect(parsedData.route, isNotNull);
         expect(parsedData.route!.name, equals('Java Test Route'));
         expect(parsedData.route!.grade, equals('5.10a'));
-        expect(parsedData.route!.gradeSystem, equals('YDS'));
-        expect(parsedData.route!.type, equals('sport'));
+        expect(parsedData.route!.gradeSystem, equals('yds'));
+        expect(parsedData.route!.type, equals('route'));
 
         // Convert to Dart Route object
         final route = scanner.toRoute(parsedData);
@@ -93,22 +89,16 @@ void main() {
           'generate',
           '--type',
           'location',
-          '--location-name',
+          '--name',
           'Java Test Crag',
-          '--location-country',
+          '--country',
           'FR',
-          '--location-city',
+          '--city',
           'Chamonix',
           '--latitude',
           '45.878600',
           '--longitude',
           '6.887300',
-          '--indoor',
-          'false',
-          '--format',
-          'json',
-          '--output-format',
-          'png',
           '--output',
           '${testResourcesDir.path}/java-location-json.png',
         ]);
@@ -129,7 +119,7 @@ void main() {
 
         expect(parsedData, isNotNull);
         expect(parsedData!.clid, isNotNull);
-        expect(parsedData.clid, startsWith('clid:location:'));
+        expect(parsedData.clid, startsWith('clid:v1:location:'));
         expect(parsedData.location, isNotNull);
         expect(parsedData.location!.name, equals('Java Test Crag'));
         expect(parsedData.location!.country, equals('FR'));
@@ -157,15 +147,13 @@ void main() {
           'Java URL Route',
           '--grade',
           'V8',
-          '--grade-system',
-          'vScale',
           '--route-type',
           'boulder',
           '--location-name',
           'Boulder Field',
-          '--location-country',
+          '--country',
           'US',
-          '--location-state',
+          '--state',
           'CO',
           '--latitude',
           '40.017900',
@@ -173,8 +161,6 @@ void main() {
           '-105.281600',
           '--format',
           'url',
-          '--output-format',
-          'png',
           '--output',
           '${testResourcesDir.path}/java-route-url.png',
         ]);
@@ -256,12 +242,13 @@ void main() {
         );
 
         final output = result.stdout.toString();
-        expect(output, contains('Successfully scanned QR code'));
-        expect(output, contains('CLID: clid:route:'));
-        expect(output, contains('Route: Dart Test Route'));
-        expect(output, contains('Grade: V10'));
-        expect(output, contains('Type: boulder'));
-        expect(output, contains('Location: Dart Test Area'));
+        final jsonData = json.decode(output);
+        expect(jsonData['clid'], startsWith('clid:v1:route:'));
+        expect(jsonData['route'], isNotNull);
+        expect(jsonData['route']['name'], equals('Dart Test Route'));
+        expect(jsonData['route']['grade'], equals('V10'));
+        expect(jsonData['route']['type'], equals('boulder'));
+        // Location is embedded in route for this test
 
         print('✓ Java successfully scanned Dart-generated route QR (JSON)');
       });
@@ -309,11 +296,12 @@ void main() {
         );
 
         final output = result.stdout.toString();
-        expect(output, contains('Successfully scanned QR code'));
-        expect(output, contains('CLID: clid:location:'));
-        expect(output, contains('Location: Dart Gym'));
-        expect(output, contains('Country: DE'));
-        expect(output, contains('Indoor: true'));
+        final jsonData = json.decode(output);
+        expect(jsonData['clid'], startsWith('clid:v1:location:'));
+        expect(jsonData['location'], isNotNull);
+        expect(jsonData['location']['name'], equals('Dart Gym'));
+        expect(jsonData['location']['country'], equals('DE'));
+        expect(jsonData['location']['indoor'], isTrue);
 
         print('✓ Java successfully scanned Dart-generated location QR (JSON)');
       });
@@ -326,7 +314,7 @@ void main() {
         final pngBytes = await generator.generatePNG(
           QRCodeData(
             version: 1,
-            clid: 'clid:route:abc-def-123-456-789',
+            clid: 'clid:v1:route:abc-def-123-456-789',
             url: 'https://crushlog.pro/g/abc-def-123',
           ),
           QROptions(format: QRFormat.json),

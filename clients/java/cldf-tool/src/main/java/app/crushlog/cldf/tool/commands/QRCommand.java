@@ -187,6 +187,12 @@ public class QRCommand implements Callable<Integer> {
     private String ipfsHash;
 
     @Option(
+        names = {"--format"},
+        description = "QR code data format (json, url, uri)",
+        defaultValue = "json")
+    private String format;
+
+    @Option(
         names = {"-v", "--verbose"},
         description = "Verbose output")
     private boolean verbose;
@@ -442,10 +448,17 @@ public class QRCommand implements Callable<Integer> {
     }
 
     private QROptions buildQROptions() {
+      QROptions.QRDataFormat dataFormat = switch (format.toLowerCase()) {
+        case "url" -> QROptions.QRDataFormat.URL;
+        case "uri" -> QROptions.QRDataFormat.CUSTOM_URI;
+        default -> QROptions.QRDataFormat.JSON;
+      };
+      
       return QROptions.builder()
           .baseUrl(baseUrl)
           .includeIPFS(includeIPFS)
           .ipfsHash(ipfsHash)
+          .format(dataFormat)
           .build();
     }
 

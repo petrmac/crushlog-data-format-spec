@@ -97,7 +97,9 @@ class QRGenerator {
         : null;
 
     // Generate short CLID (first 8 chars of UUID) for URL
-    final shortClid = clid.split(':')[2].substring(0, 8);
+    final clidParts = clid.split(':');
+    final uuid = clidParts.length == 4 ? clidParts[3] : clidParts[2]; // v1 format has UUID at index 3
+    final shortClid = uuid.substring(0, 8);
 
     return QRCodeData(
       version: 1,
@@ -142,7 +144,9 @@ class QRGenerator {
         : null;
 
     // Generate short CLID (first 8 chars of UUID) for URL
-    final shortClid = clid.split(':')[2].substring(0, 8);
+    final clidParts = clid.split(':');
+    final uuid = clidParts.length == 4 ? clidParts[3] : clidParts[2]; // v1 format has UUID at index 3
+    final shortClid = uuid.substring(0, 8);
 
     return QRCodeData(
       version: 1,

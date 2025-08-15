@@ -23,7 +23,7 @@ void main() {
       final clid2 = CLIDGenerator.generateLocationCLID(elCapitan);
 
       expect(clid, isNotNull);
-      expect(clid, startsWith('clid:location:'));
+      expect(clid, startsWith('clid:v1:location:'));
       expect(
         clid,
         equals(clid2),
@@ -68,7 +68,7 @@ void main() {
       final routeCLID2 = CLIDGenerator.generateRouteCLID(locationCLID, theNose);
 
       expect(routeCLID, isNotNull);
-      expect(routeCLID, startsWith('clid:route:'));
+      expect(routeCLID, startsWith('clid:v1:route:'));
       expect(
         routeCLID,
         equals(routeCLID2),
@@ -96,7 +96,7 @@ void main() {
       final gymCLID = CLIDGenerator.generateLocationCLID(gym);
 
       expect(gymCLID, isNotNull);
-      expect(gymCLID, startsWith('clid:location:'));
+      expect(gymCLID, startsWith('clid:v1:location:'));
       expect(CLIDGenerator.validate(gymCLID), isTrue);
     });
 
@@ -118,7 +118,7 @@ void main() {
       );
 
       expect(sectorCLID, isNotNull);
-      expect(sectorCLID, startsWith('clid:sector:'));
+      expect(sectorCLID, startsWith('clid:v1:sector:'));
       expect(CLIDGenerator.validate(sectorCLID), isTrue);
     });
 
@@ -128,8 +128,8 @@ void main() {
 
       expect(climbCLID1, isNotNull);
       expect(climbCLID2, isNotNull);
-      expect(climbCLID1, startsWith('clid:climb:'));
-      expect(climbCLID2, startsWith('clid:climb:'));
+      expect(climbCLID1, startsWith('clid:v1:climb:'));
+      expect(climbCLID2, startsWith('clid:v1:climb:'));
       expect(
         climbCLID1,
         isNot(equals(climbCLID2)),
@@ -141,7 +141,7 @@ void main() {
     });
 
     test('Parse and validate CLID', () {
-      const testCLID = 'clid:route:550e8400-e29b-41d4-a716-446655440000';
+      const testCLID = 'clid:v1:route:550e8400-e29b-41d4-a716-446655440000';
 
       final parsed = CLIDGenerator.parse(testCLID);
 

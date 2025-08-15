@@ -257,7 +257,7 @@ public class DefaultGraphService implements GraphService {
   @PreDestroy
   @Override
   public void shutdown() {
-    log.info("Shutting down Neo4j database");
+    log.debug("Shutting down Neo4j database");
     if (managementService != null) {
       try {
         managementService.shutdown();
