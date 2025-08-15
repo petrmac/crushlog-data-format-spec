@@ -150,8 +150,13 @@
             },
             "blockchainTx": {
               "type": "string",
-              "description": "Blockchain transaction hash for permanent record (supports 32-128 hex chars, optionally prefixed with 0x; e.g., Ethereum, Bitcoin, and other networks)",
-              "pattern": "^(0x)?[a-fA-F0-9]{32,128}$"
+              "description": "Blockchain transaction hash for permanent record. Supports multiple blockchain formats: Bitcoin/Ethereum (64 hex chars), some L2 chains (32 hex chars), and future formats up to 128 hex chars. May be prefixed with '0x' for EVM-compatible chains.",
+              "pattern": "^(0x)?[a-fA-F0-9]{32,128}$",
+              "examples": [
+                "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+                "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                "12345678901234567890123456789012"
+              ]
             },
             "generatedAt": {
               "type": "string",

@@ -11,6 +11,15 @@ import {
 @Injectable()
 export class ToolHandlersService {
   private readonly logger = new Logger(ToolHandlersService.name);
+  
+  // Valid CLID entity types
+  private static readonly VALID_ENTITY_TYPES = [
+    'route',
+    'location', 
+    'sector',
+    'climb',
+    'session'
+  ] as const;
 
   constructor(private readonly cldfService: CldfService) {}
 
@@ -538,8 +547,7 @@ Use cldf_schema_info with component="commonMistakes" for more details.
     if (clid) {
       const parsedClid = this.parseClid(clid);
       if (parsedClid) {
-        const validTypes = ['route', 'location', 'sector', 'climb', 'session'];
-        if (validTypes.includes(parsedClid.type)) {
+        if (ToolHandlersService.VALID_ENTITY_TYPES.includes(parsedClid.type as any)) {
           return parsedClid.type;
         }
         this.logger.warn(

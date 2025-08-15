@@ -54,6 +54,7 @@ describe('ToolHandlersService', () => {
     });
 
     it('should handle all entity types', () => {
+      // Use the same types as the service
       const types = ['route', 'location', 'sector', 'climb', 'session'];
       types.forEach((type) => {
         const result = (service as any).parseClid(

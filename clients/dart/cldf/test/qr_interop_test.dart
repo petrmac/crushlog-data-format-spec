@@ -14,7 +14,7 @@ void main() {
       // Determine the appropriate wrapper script based on platform
       final isWindows = Platform.isWindows;
       final wrapperName = isWindows ? 'cldf.bat' : 'cldf';
-      
+
       // For CI environment - use relative path from dart test directory
       final relativePath = '../../../java/cldf-tool/$wrapperName';
       final absolutePath =
