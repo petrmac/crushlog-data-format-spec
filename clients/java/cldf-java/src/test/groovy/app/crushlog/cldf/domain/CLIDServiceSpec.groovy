@@ -56,18 +56,18 @@ class CLIDServiceSpec extends Specification {
 
 		then: "CLIDs are generated for all entities"
 		location.getClid() != null
-		location.getClid().startsWith("clid:location:")
+		location.getClid().startsWith("clid:v1:location:")
 		climb.getClid() != null
-		climb.getClid().startsWith("clid:climb:")
+		climb.getClid().startsWith("clid:v1:climb:")
 		session.getClid() != null
-		session.getClid().startsWith("clid:session:")
+		session.getClid().startsWith("clid:v1:session:")
 	}
 
 	def "should validate existing CLIDs when validation is enabled"() {
 		given: "an archive with valid existing CLIDs"
 		def location = Location.builder()
 				.id(1)
-				.clid("clid:location:550e8400-e29b-41d4-a716-446655440000")
+				.clid("clid:v1:location:550e8400-e29b-41d4-a716-446655440000")
 				.name("Test Gym")
 				.isIndoor(true)
 				.build()
@@ -138,7 +138,7 @@ class CLIDServiceSpec extends Specification {
 
 		then: "the same CLID is generated both times"
 		clid1 == clid2
-		clid1.startsWith("clid:location:")
+		clid1.startsWith("clid:v1:location:")
 	}
 
 	def "should generate random CLID for location with incomplete data"() {
@@ -164,15 +164,15 @@ class CLIDServiceSpec extends Specification {
 
 		then: "different CLIDs are generated each time"
 		clid1 != clid2
-		clid1.startsWith("clid:location:")
-		clid2.startsWith("clid:location:")
+		clid1.startsWith("clid:v1:location:")
+		clid2.startsWith("clid:v1:location:")
 	}
 
 	def "should generate CLID for route with location reference"() {
 		given: "a route and its parent location"
 		def location = Location.builder()
 				.id(1)
-				.clid("clid:location:550e8400-e29b-41d4-a716-446655440000")
+				.clid("clid:v1:location:550e8400-e29b-41d4-a716-446655440000")
 				.name("Test Crag")
 				.isIndoor(false)
 				.build()
@@ -197,14 +197,14 @@ class CLIDServiceSpec extends Specification {
 
 		then: "route gets a CLID"
 		route.getClid() != null
-		route.getClid().startsWith("clid:route:")
+		route.getClid().startsWith("clid:v1:route:")
 	}
 
 	def "should generate CLID for sector with location reference"() {
 		given: "a sector and its parent location"
 		def location = Location.builder()
 				.id(1)
-				.clid("clid:location:550e8400-e29b-41d4-a716-446655440000")
+				.clid("clid:v1:location:550e8400-e29b-41d4-a716-446655440000")
 				.name("Test Crag")
 				.isIndoor(false)
 				.build()
@@ -225,7 +225,7 @@ class CLIDServiceSpec extends Specification {
 
 		then: "sector gets a CLID"
 		sector.getClid() != null
-		sector.getClid().startsWith("clid:sector:")
+		sector.getClid().startsWith("clid:v1:sector:")
 	}
 
 	// Tags don't have CLIDs in the current implementation
@@ -251,7 +251,7 @@ class CLIDServiceSpec extends Specification {
 
 	def "should preserve existing CLIDs when generation is enabled"() {
 		given: "an archive with some existing CLIDs"
-		def existingClid = "clid:location:existing-123-456"
+		def existingClid = "clid:v1:location:existing-123-456"
 		def location = Location.builder()
 				.id(1)
 				.clid(existingClid)
@@ -299,7 +299,7 @@ class CLIDServiceSpec extends Specification {
 		given: "a route with all data for deterministic generation"
 		def location = Location.builder()
 				.id(1)
-				.clid("clid:location:test-location")
+				.clid("clid:v1:location:test-location")
 				.name("Test Crag")
 				.build()
 
@@ -328,14 +328,14 @@ class CLIDServiceSpec extends Specification {
 
 		then: "route gets a deterministic CLID"
 		route.getClid() != null
-		route.getClid().startsWith("clid:route:")
+		route.getClid().startsWith("clid:v1:route:")
 	}
 
 	def "should generate random route CLID without grades"() {
 		given: "a route without grades"
 		def location = Location.builder()
 				.id(1)
-				.clid("clid:location:test-location")
+				.clid("clid:v1:location:test-location")
 				.name("Test Crag")
 				.build()
 
@@ -361,15 +361,15 @@ class CLIDServiceSpec extends Specification {
 
 		then: "different random CLIDs are generated"
 		clid1 != clid2
-		clid1.startsWith("clid:route:")
-		clid2.startsWith("clid:route:")
+		clid1.startsWith("clid:v1:route:")
+		clid2.startsWith("clid:v1:route:")
 	}
 
 	def "should handle route with multiple grade systems"() {
 		given: "a route with multiple grade systems"
 		def location = Location.builder()
 				.id(1)
-				.clid("clid:location:test-location")
+				.clid("clid:v1:location:test-location")
 				.name("Test Crag")
 				.build()
 
@@ -395,14 +395,14 @@ class CLIDServiceSpec extends Specification {
 
 		then: "route gets a CLID using first available grade"
 		route.getClid() != null
-		route.getClid().startsWith("clid:route:")
+		route.getClid().startsWith("clid:v1:route:")
 	}
 
 	def "should handle boulder routes specially"() {
 		given: "a boulder route"
 		def location = Location.builder()
 				.id(1)
-				.clid("clid:location:test-location")
+				.clid("clid:v1:location:test-location")
 				.name("Test Boulder Area")
 				.build()
 
@@ -426,6 +426,6 @@ class CLIDServiceSpec extends Specification {
 
 		then: "boulder route gets a CLID"
 		route.getClid() != null
-		route.getClid().startsWith("clid:route:")
+		route.getClid().startsWith("clid:v1:route:")
 	}
 }

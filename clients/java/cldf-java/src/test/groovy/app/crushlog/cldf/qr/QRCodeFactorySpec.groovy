@@ -54,7 +54,7 @@ class QRCodeFactorySpec extends Specification {
 		def jsonData = """
         {
             "v": 1,
-            "clid": "clid:route:test",
+            "clid": "clid:v1:route:test",
             "route": {
                 "name": "Test Route"
             }
@@ -67,7 +67,7 @@ class QRCodeFactorySpec extends Specification {
 		then: "result is successful"
 		result.isSuccess()
 		result.getSuccess().present
-		result.getSuccess().get().clid == "clid:route:test"
+		result.getSuccess().get().clid == "clid:v1:route:test"
 	}
 
 	def "should create default options"() {

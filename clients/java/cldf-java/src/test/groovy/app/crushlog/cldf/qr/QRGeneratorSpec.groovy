@@ -17,7 +17,7 @@ class QRGeneratorSpec extends Specification {
 		def route = Route.builder()
 				.id(1)
 				.locationId(100)
-				.clid("clid:route:550e8400-e29b-41d4-a716-446655440000")
+				.clid("clid:v1:route:550e8400-e29b-41d4-a716-446655440000")
 				.name("The Nose")
 				.grades(Route.Grades.builder()
 				.yds("5.14a")
@@ -37,7 +37,7 @@ class QRGeneratorSpec extends Specification {
 
 		then: "QR data contains all expected fields"
 		json.get("v").asInt() == 1
-		json.get("clid").asText() == "clid:route:550e8400-e29b-41d4-a716-446655440000"
+		json.get("clid").asText() == "clid:v1:route:550e8400-e29b-41d4-a716-446655440000"
 		json.get("url").asText() == "https://crushlog.pro/g/550e8400"
 		json.get("cldf").asText() == "QmXk9abc123"
 		json.get("route").get("name").asText() == "The Nose"
@@ -66,7 +66,7 @@ class QRGeneratorSpec extends Specification {
 
 		then: "QR data contains generated CLID"
 		json.get("v").asInt() == 1
-		json.get("clid").asText().startsWith("clid:route:")
+		json.get("clid").asText().startsWith("clid:v1:route:")
 		json.get("url").asText().startsWith("https://crushlog.pro/g/")
 		json.get("route").get("name").asText() == "Test Boulder"
 		json.get("route").get("grade").asText() == "V8"
@@ -76,7 +76,7 @@ class QRGeneratorSpec extends Specification {
 	def "should generate simple URL QR code"() {
 		given: "a route with CLID"
 		def route = Route.builder()
-				.clid("clid:route:12345678-e29b-41d4-a716-446655440000")
+				.clid("clid:v1:route:12345678-e29b-41d4-a716-446655440000")
 				.name("Test Route")
 				.build()
 
@@ -105,7 +105,7 @@ class QRGeneratorSpec extends Specification {
 	def "should generate custom URI for mobile apps"() {
 		given: "a route with CLID"
 		def route = Route.builder()
-				.clid("clid:route:abc12345-e29b-41d4-a716-446655440000")
+				.clid("clid:v1:route:abc12345-e29b-41d4-a716-446655440000")
 				.name("Test Route")
 				.grades(Route.Grades.builder()
 				.french("7a")
@@ -131,7 +131,7 @@ class QRGeneratorSpec extends Specification {
 		given: "a location with CLID"
 		def location = Location.builder()
 				.id(1)
-				.clid("clid:location:loc12345-e29b-41d4-a716-446655440000")
+				.clid("clid:v1:location:loc12345-e29b-41d4-a716-446655440000")
 				.name("El Capitan")
 				.country("US")
 				.state("CA")
@@ -145,7 +145,7 @@ class QRGeneratorSpec extends Specification {
 
 		then: "QR data contains location information"
 		json.get("v").asInt() == 1
-		json.get("clid").asText() == "clid:location:loc12345-e29b-41d4-a716-446655440000"
+		json.get("clid").asText() == "clid:v1:location:loc12345-e29b-41d4-a716-446655440000"
 		json.get("url").asText() == "https://crushlog.pro/l/loc12345"
 		json.get("location").get("name").asText() == "El Capitan"
 		json.get("location").get("country").asText() == "US"
@@ -158,7 +158,7 @@ class QRGeneratorSpec extends Specification {
 		given: "a route and location"
 		def location = Location.builder()
 				.id(100)
-				.clid("clid:location:loc12345-e29b-41d4-a716-446655440000")
+				.clid("clid:v1:location:loc12345-e29b-41d4-a716-446655440000")
 				.name("Test Crag")
 				.country("US")
 				.isIndoor(false)
@@ -167,7 +167,7 @@ class QRGeneratorSpec extends Specification {
 		def route = Route.builder()
 				.id(1)
 				.locationId(100)
-				.clid("clid:route:550e8400-e29b-41d4-a716-446655440000")
+				.clid("clid:v1:route:550e8400-e29b-41d4-a716-446655440000")
 				.name("Test Route")
 				.routeType(RouteType.ROUTE)
 				.build()
@@ -183,7 +183,7 @@ class QRGeneratorSpec extends Specification {
 		def json = objectMapper.readTree(qrData)
 
 		then: "QR data contains location information"
-		json.get("loc").get("clid").asText() == "clid:location:loc12345-e29b-41d4-a716-446655440000"
+		json.get("loc").get("clid").asText() == "clid:v1:location:loc12345-e29b-41d4-a716-446655440000"
 		json.get("loc").get("name").asText() == "Test Crag"
 		json.get("loc").get("country").asText() == "US"
 		json.get("loc").get("indoor").asBoolean() == false
@@ -222,7 +222,7 @@ class QRGeneratorSpec extends Specification {
 
 		def route = Route.builder()
 				.id(1)
-				.clid("clid:route:test")
+				.clid("clid:v1:route:test")
 				.name("Test")
 				.grades(grades.build())
 				.routeType(routeType)
@@ -255,7 +255,7 @@ class QRGeneratorSpec extends Specification {
 
 		def route = Route.builder()
 				.id(1)
-				.clid("clid:route:test")
+				.clid("clid:v1:route:test")
 				.name("Outdoor Route")
 				.build()
 
@@ -281,7 +281,7 @@ class QRGeneratorSpec extends Specification {
 
 		def route = Route.builder()
 				.id(1)
-				.clid("clid:route:test")
+				.clid("clid:v1:route:test")
 				.name("Indoor Route")
 				.build()
 

@@ -16,13 +16,13 @@ class QRDataGeneratorSpec extends Specification {
 		given:
 		def location = Location.builder()
 				.id(100)
-				.clid("clid:location:123")
+				.clid("clid:v1:location:123")
 				.name("Test Location")
 				.isIndoor(false) // Required for blockchain to be added
 				.build()
 		def route = Route.builder()
 				.id(1)
-				.clid("clid:route:550e8400-e29b-41d4-a716-446655440000")
+				.clid("clid:v1:route:550e8400-e29b-41d4-a716-446655440000")
 				.name("Test Route")
 				.grades(Route.Grades.builder()
 				.yds("5.14a")
@@ -48,7 +48,7 @@ class QRDataGeneratorSpec extends Specification {
 		then:
 		data != null
 		data.version == 1
-		data.clid == "clid:route:550e8400-e29b-41d4-a716-446655440000"
+		data.clid == "clid:v1:route:550e8400-e29b-41d4-a716-446655440000"
 		data.url != null
 		data.url.contains("crushlog.pro")
 		data.ipfsHash == "QmXk9abc123"
@@ -67,7 +67,7 @@ class QRDataGeneratorSpec extends Specification {
 		given:
 		def route = Route.builder()
 				.id(1)
-				.clid("clid:route:550e8400-e29b-41d4-a716-446655440000")
+				.clid("clid:v1:route:550e8400-e29b-41d4-a716-446655440000")
 				.name("Test Route")
 				.build()
 
@@ -90,7 +90,7 @@ class QRDataGeneratorSpec extends Specification {
 		given:
 		def route = Route.builder()
 				.id(1)
-				.clid("clid:route:550e8400-e29b-41d4-a716-446655440000")
+				.clid("clid:v1:route:550e8400-e29b-41d4-a716-446655440000")
 				.name("Test Route")
 				.grades(Route.Grades.builder().vScale("V10").build())
 				.routeType(RouteType.BOULDER)
@@ -134,7 +134,7 @@ class QRDataGeneratorSpec extends Specification {
 		then:
 		data != null
 		data.clid != null
-		data.clid.startsWith("clid:route:")
+		data.clid.startsWith("clid:v1:route:")
 		data.url != null
 	}
 

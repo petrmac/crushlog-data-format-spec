@@ -10,7 +10,7 @@ class IntegrationTest extends Specification {
 		DefaultQRCodeGenerator generator = new DefaultQRCodeGenerator()
 		DefaultQRScanner scanner = new DefaultQRScanner()
 
-		String testData = '{"version": 1, "clid": "clid:route:test", "route": {"name": "Test Route"}}'
+		String testData = '{"version": 1, "clid": "clid:v1:route:test", "route": {"name": "Test Route"}}'
 
 		when:
 		// Generate QR code PNG
@@ -22,7 +22,7 @@ class IntegrationTest extends Specification {
 		then:
 		result.isSuccess()
 		def parsed = result.getSuccess().get()
-		parsed.clid == "clid:route:test"
+		parsed.clid == "clid:v1:route:test"
 		parsed.route.name == "Test Route"
 	}
 }

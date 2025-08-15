@@ -269,15 +269,22 @@ public class QRGenerator {
 
   private static String extractShortClid(String clid) {
     try {
-      // Extract UUID part from CLID
+      // Parse CLID to extract UUID
+      CLID parsed = CLID.fromString(clid);
+      String uuid = parsed.uuid();
+      // Take first 8 chars of UUID
+      return uuid.substring(0, Math.min(8, uuid.length()));
+    } catch (Exception e) {
+      // Fallback for legacy format (clid:type:uuid)
       String[] parts = clid.split(":");
-      if (parts.length >= 3) {
+      if (parts.length == 3) {
         String uuid = parts[2];
-        // Take first 8 chars of UUID
+        return uuid.substring(0, Math.min(8, uuid.length()));
+      } else if (parts.length == 4) {
+        // New format (clid:v1:type:uuid)
+        String uuid = parts[3];
         return uuid.substring(0, Math.min(8, uuid.length()));
       }
-      return clid; // Return full CLID as fallback
-    } catch (Exception e) {
       log.error("Failed to extract short CLID from: {}", clid, e);
       return clid; // Return full CLID as fallback
     }

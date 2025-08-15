@@ -8,6 +8,7 @@ import lombok.NonNull;
 /** Represents a parsed CLID (CrushLog ID) */
 public record CLID(
     @NonNull String namespace,
+    @NonNull String version,
     @NonNull CLIDGenerator.EntityType type,
     @NonNull String uuid,
     @NonNull String fullId,
@@ -28,9 +29,9 @@ public record CLID(
 
     String[] parts = clid.split(":");
 
-    if (parts.length != 3) {
+    if (parts.length != 4) {
       throw new IllegalArgumentException(
-          "Invalid CLID format '%s'. Expected format: namespace:type:uuid".formatted(clid));
+          "Invalid CLID format '%s'. Expected format: namespace:version:type:uuid".formatted(clid));
     }
 
     // Validate namespace
@@ -39,18 +40,25 @@ public record CLID(
           "Invalid namespace '%s'. Expected '%s'".formatted(parts[0], EXPECTED_NAMESPACE));
     }
 
+    // Validate version
+    String version = parts[1];
+    if (!version.matches("^v\\d+$")) {
+      throw new IllegalArgumentException(
+          "Invalid version '%s'. Expected format: v<number> (e.g., v1)".formatted(version));
+    }
+
     // Validate entity type
     CLIDGenerator.EntityType entityType;
     try {
-      entityType = CLIDGenerator.EntityType.fromString(parts[1]);
+      entityType = CLIDGenerator.EntityType.fromString(parts[2]);
     } catch (IllegalArgumentException e) {
       throw new IllegalArgumentException(
           "Invalid entity type '%s'. Valid types: %s"
-              .formatted(parts[1], java.util.Arrays.toString(CLIDGenerator.EntityType.values())));
+              .formatted(parts[2], java.util.Arrays.toString(CLIDGenerator.EntityType.values())));
     }
 
     // Validate UUID format
-    String uuidStr = parts[2];
+    String uuidStr = parts[3];
     if (!UUID_PATTERN.matcher(uuidStr).matches()) {
       throw new IllegalArgumentException("Invalid UUID format '%s'".formatted(uuidStr));
     }
@@ -66,6 +74,7 @@ public record CLID(
     final String substring = uuidStr.substring(0, Math.min(uuidStr.length(), 8));
     return new CLID(
         parts[0],
+        version,
         entityType,
         uuidStr,
         clid,

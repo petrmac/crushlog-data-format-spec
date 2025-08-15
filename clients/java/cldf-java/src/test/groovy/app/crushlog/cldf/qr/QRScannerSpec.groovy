@@ -11,7 +11,7 @@ class QRScannerSpec extends Specification {
 		def jsonData = """
         {
             "v": 1,
-            "clid": "clid:route:550e8400-e29b-41d4-a716-446655440000",
+            "clid": "clid:v1:route:550e8400-e29b-41d4-a716-446655440000",
             "url": "https://crushlog.pro/g/550e8400",
             "cldf": "QmXk9abc123",
             "route": {
@@ -22,7 +22,7 @@ class QRScannerSpec extends Specification {
                 "height": 900.0
             },
             "loc": {
-                "clid": "clid:location:660e8400-e29b-41d4-a716-446655440000",
+                "clid": "clid:v1:location:660e8400-e29b-41d4-a716-446655440000",
                 "name": "El Capitan",
                 "country": "US",
                 "state": "CA",
@@ -39,7 +39,7 @@ class QRScannerSpec extends Specification {
 
 		then: "data is correctly parsed"
 		data.version == 1
-		data.clid == "clid:route:550e8400-e29b-41d4-a716-446655440000"
+		data.clid == "clid:v1:route:550e8400-e29b-41d4-a716-446655440000"
 		data.url == "https://crushlog.pro/g/550e8400"
 		data.ipfsHash == "QmXk9abc123"
 		data.hasOfflineData == true
@@ -52,7 +52,7 @@ class QRScannerSpec extends Specification {
 		data.route.height == 900.0
 
 		and: "location info is correct"
-		data.location.clid == "clid:location:660e8400-e29b-41d4-a716-446655440000"
+		data.location.clid == "clid:v1:location:660e8400-e29b-41d4-a716-446655440000"
 		data.location.name == "El Capitan"
 		data.location.country == "US"
 		data.location.state == "CA"
@@ -82,7 +82,7 @@ class QRScannerSpec extends Specification {
 
 		then: "data is correctly parsed"
 		data.version == 1
-		data.clid == "clid:route:550e8400-e29b-41d4-a716-446655440000"
+		data.clid == "clid:v1:route:550e8400-e29b-41d4-a716-446655440000"
 		data.ipfsHash == "QmTest"
 		data.hasOfflineData == true
 		data.route.name == "Test Route"
@@ -94,7 +94,7 @@ class QRScannerSpec extends Specification {
 		def jsonData = """
         {
             "v": 1,
-            "clid": "clid:route:test-uuid",
+            "clid": "clid:v1:route:test-uuid",
             "route": {
                 "name": "Simple Route"
             }
@@ -106,7 +106,7 @@ class QRScannerSpec extends Specification {
 
 		then: "data is correctly parsed"
 		data.version == 1
-		data.clid == "clid:route:test-uuid"
+		data.clid == "clid:v1:route:test-uuid"
 		data.route.name == "Simple Route"
 		data.hasOfflineData == true
 		data.blockchainVerified == false
@@ -115,7 +115,7 @@ class QRScannerSpec extends Specification {
 	def "should convert QR data to Route object"() {
 		given: "parsed QR data"
 		def qrData = ParsedQRData.builder()
-				.clid("clid:route:test-uuid")
+				.clid("clid:v1:route:test-uuid")
 				.route(ParsedQRData.RouteInfo.builder()
 				.id(1)
 				.name("Test Route")
@@ -135,7 +135,7 @@ class QRScannerSpec extends Specification {
 		then: "Route is created correctly"
 		routeOpt.isPresent()
 		def route = routeOpt.get()
-		route.clid == "clid:route:test-uuid"
+		route.clid == "clid:v1:route:test-uuid"
 		route.id == 1
 		route.name == "Test Route"
 		route.grades.yds == "5.12a"  // Grade is detected as YDS
@@ -148,7 +148,7 @@ class QRScannerSpec extends Specification {
 		given: "parsed QR data"
 		def qrData = ParsedQRData.builder()
 				.location(ParsedQRData.LocationInfo.builder()
-				.clid("clid:location:test-uuid")
+				.clid("clid:v1:location:test-uuid")
 				.id(100)
 				.name("Test Crag")
 				.country("US")
@@ -164,7 +164,7 @@ class QRScannerSpec extends Specification {
 		then: "Location is created correctly"
 		locationOpt.isPresent()
 		def location = locationOpt.get()
-		location.clid == "clid:location:test-uuid"
+		location.clid == "clid:v1:location:test-uuid"
 		location.id == 100
 		location.name == "Test Crag"
 		location.country == "US"
@@ -176,7 +176,7 @@ class QRScannerSpec extends Specification {
 	def "should return empty Optional when no route data"() {
 		given: "QR data without route"
 		def qrData = ParsedQRData.builder()
-				.clid("clid:location:test")
+				.clid("clid:v1:location:test")
 				.build()
 
 		when: "converting to Route"
@@ -189,7 +189,7 @@ class QRScannerSpec extends Specification {
 	def "should return empty Optional when no location data"() {
 		given: "QR data without location"
 		def qrData = ParsedQRData.builder()
-				.clid("clid:route:test")
+				.clid("clid:v1:route:test")
 				.build()
 
 		when: "converting to Location"
@@ -264,7 +264,7 @@ class QRScannerSpec extends Specification {
 		def jsonData = """
         {
             "v": 1,
-            "clid": "clid:route:test",
+            "clid": "clid:v1:route:test",
             "location": {
                 "name": "Test Location"
             }

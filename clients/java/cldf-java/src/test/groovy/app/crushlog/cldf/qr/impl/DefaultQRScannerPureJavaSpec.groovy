@@ -17,7 +17,7 @@ class DefaultQRScannerPureJavaSpec extends Specification {
 
 	def "should scan QR code from PNG bytes without AWT"() {
 		given: "A QR code PNG generated with pure Java"
-		String testData = '{"version":2,"clid":"clid:route:abc123","url":"https://crushlog.pro/route/abc123"}'
+		String testData = '{"version":2,"clid":"clid:v1:route:abc123","url":"https://crushlog.pro/route/abc123"}'
 		QRImageOptions options = QRImageOptions.builder()
 				.size(256)
 				.build()
@@ -33,7 +33,7 @@ class DefaultQRScannerPureJavaSpec extends Specification {
 		and: "Data is correctly parsed"
 		ParsedQRData parsed = result.getSuccess().get()
 		parsed.version == 2
-		parsed.clid == "clid:route:abc123"
+		parsed.clid == "clid:v1:route:abc123"
 		parsed.url == "https://crushlog.pro/route/abc123"
 	}
 
@@ -41,7 +41,7 @@ class DefaultQRScannerPureJavaSpec extends Specification {
 		given: "A QR code containing route information"
 		String routeData = '''{
             "version": 2,
-            "clid": "clid:route:test-route",
+            "clid": "clid:v1:route:test-route",
             "route": {
                 "id": 123,
                 "name": "Test Route",
@@ -70,7 +70,7 @@ class DefaultQRScannerPureJavaSpec extends Specification {
 		given: "A QR code containing location information"
 		String locationData = '''{
             "version": 2,
-            "clid": "clid:location:test-loc",
+            "clid": "clid:v1:location:test-loc",
             "location": {
                 "id": 456,
                 "name": "Test Crag",
@@ -98,7 +98,7 @@ class DefaultQRScannerPureJavaSpec extends Specification {
 
 	def "should handle colored QR codes"() {
 		given: "A QR code with custom colors"
-		String data = '{"version":1,"clid":"clid:route:colored"}'
+		String data = '{"version":1,"clid":"clid:v1:route:colored"}'
 		QRImageOptions options = QRImageOptions.builder()
 				.size(200)
 				.foregroundColor(new QRColor(0, 0, 255))  // Blue
@@ -112,12 +112,12 @@ class DefaultQRScannerPureJavaSpec extends Specification {
 		then: "QR code is decoded despite custom colors"
 		result.isSuccess()
 		ParsedQRData parsed = result.getSuccess().get()
-		parsed.clid == "clid:route:colored"
+		parsed.clid == "clid:v1:route:colored"
 	}
 
 	def "should handle different QR code sizes"() {
 		given: "QR codes of various sizes"
-		String data = '{"version":1,"clid":"clid:route:size-test"}'
+		String data = '{"version":1,"clid":"clid:v1:route:size-test"}'
 
 		when: "Scanning QR codes of different sizes"
 		def results = []
@@ -129,7 +129,7 @@ class DefaultQRScannerPureJavaSpec extends Specification {
 
 		then: "All sizes are successfully scanned"
 		results.every { it.isSuccess() }
-		results.every { it.getSuccess().get().clid == "clid:route:size-test" }
+		results.every { it.getSuccess().get().clid == "clid:v1:route:size-test" }
 	}
 
 	def "should handle URLs in QR codes"() {
@@ -212,7 +212,7 @@ class DefaultQRScannerPureJavaSpec extends Specification {
 		given: "Complex nested JSON structure"
 		String complexData = '''{
             "version": 3,
-            "clid": "clid:route:complex",
+            "clid": "clid:v1:route:complex",
             "url": "https://crushlog.pro/route/complex",
             "ipfsHash": "QmTest123",
             "route": {
@@ -244,7 +244,7 @@ class DefaultQRScannerPureJavaSpec extends Specification {
 		result.isSuccess()
 		ParsedQRData parsed = result.getSuccess().get()
 		parsed.version == 3
-		parsed.clid == "clid:route:complex"
+		parsed.clid == "clid:v1:route:complex"
 		parsed.ipfsHash == "QmTest123"
 		parsed.blockchainVerified
 		parsed.route != null
@@ -256,7 +256,7 @@ class DefaultQRScannerPureJavaSpec extends Specification {
 		given: "Original data to encode"
 		String originalData = '''{
             "version": 2,
-            "clid": "clid:route:integrity-test",
+            "clid": "clid:v1:route:integrity-test",
             "route": {
                 "id": 12345,
                 "name": "Integrity Test Route",
@@ -272,7 +272,7 @@ class DefaultQRScannerPureJavaSpec extends Specification {
 		then: "Data remains intact"
 		result.isSuccess()
 		ParsedQRData parsed = result.getSuccess().get()
-		parsed.clid == "clid:route:integrity-test"
+		parsed.clid == "clid:v1:route:integrity-test"
 		parsed.route.name == "Integrity Test Route"
 		parsed.route.grade == "5.12d"
 		parsed.route.gradeSystem == "YDS"

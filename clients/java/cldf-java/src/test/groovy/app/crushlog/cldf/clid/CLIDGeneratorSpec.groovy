@@ -23,7 +23,7 @@ class CLIDGeneratorSpec extends Specification {
 
 		then: "the same CLID is generated"
 		clid1 != null
-		clid1.startsWith("clid:location:")
+		clid1.startsWith("clid:v1:location:")
 		clid1 == clid2
 
 		and: "the CLID is valid"
@@ -62,7 +62,7 @@ class CLIDGeneratorSpec extends Specification {
 
 		then: "deterministic CLID is generated"
 		routeCLID != null
-		routeCLID.startsWith("clid:route:")
+		routeCLID.startsWith("clid:v1:route:")
 		routeCLID == routeCLID2
 
 		and: "CLID is valid"
@@ -89,7 +89,7 @@ class CLIDGeneratorSpec extends Specification {
 		def clid = CLIDGenerator.generateLocationCLID(location)
 
 		then: "valid CLID is generated"
-		clid.startsWith("clid:location:")
+		clid.startsWith("clid:v1:location:")
 		CLIDGenerator.validate(clid)
 
 		where:
@@ -124,7 +124,7 @@ class CLIDGeneratorSpec extends Specification {
 		def routeCLID = CLIDGenerator.generateRouteCLID(locationCLID, route)
 
 		then: "valid CLID is generated"
-		routeCLID.startsWith("clid:route:")
+		routeCLID.startsWith("clid:v1:route:")
 		CLIDGenerator.validate(routeCLID)
 
 		where:
@@ -152,7 +152,7 @@ class CLIDGeneratorSpec extends Specification {
 		def sectorCLID = CLIDGenerator.generateSectorCLID(locationCLID, sector)
 
 		then: "valid CLID is generated"
-		sectorCLID.startsWith("clid:sector:")
+		sectorCLID.startsWith("clid:v1:sector:")
 		CLIDGenerator.validate(sectorCLID)
 	}
 
@@ -167,9 +167,9 @@ class CLIDGeneratorSpec extends Specification {
 		clid1 != clid3
 		clid2 != clid3
 
-		clid1.startsWith("clid:climb:")
-		clid2.startsWith("clid:climb:")
-		clid3.startsWith("clid:session:")
+		clid1.startsWith("clid:v1:climb:")
+		clid2.startsWith("clid:v1:climb:")
+		clid3.startsWith("clid:v1:session:")
 
 		CLIDGenerator.validate(clid1)
 		CLIDGenerator.validate(clid2)
@@ -191,9 +191,9 @@ class CLIDGeneratorSpec extends Specification {
 
 		where:
 		clid                                                    | expectedNamespace | expectedType                      | expectedUuid
-		"clid:route:550e8400-e29b-41d4-a716-446655440000"      | "clid"           | CLIDGenerator.EntityType.ROUTE    | "550e8400-e29b-41d4-a716-446655440000"
-		"clid:location:660e8400-e29b-41d4-a716-446655440000"   | "clid"           | CLIDGenerator.EntityType.LOCATION | "660e8400-e29b-41d4-a716-446655440000"
-		"clid:climb:770e8400-e29b-41d4-a716-446655440000"      | "clid"           | CLIDGenerator.EntityType.CLIMB    | "770e8400-e29b-41d4-a716-446655440000"
+		"clid:v1:route:550e8400-e29b-41d4-a716-446655440000"      | "clid"           | CLIDGenerator.EntityType.ROUTE    | "550e8400-e29b-41d4-a716-446655440000"
+		"clid:v1:location:660e8400-e29b-41d4-a716-446655440000"   | "clid"           | CLIDGenerator.EntityType.LOCATION | "660e8400-e29b-41d4-a716-446655440000"
+		"clid:v1:climb:770e8400-e29b-41d4-a716-446655440000"      | "clid"           | CLIDGenerator.EntityType.CLIMB    | "770e8400-e29b-41d4-a716-446655440000"
 	}
 
 	@Unroll
@@ -217,10 +217,10 @@ class CLIDGeneratorSpec extends Specification {
 		"invalid-id"                          | "wrong format"
 		"route:123"                           | "missing namespace"
 		"cldf:route:123"                      | "wrong namespace"
-		"clid:invalid:123"                    | "invalid entity type"
-		"clid:route:not-a-uuid"              | "invalid UUID"
-		"clid:route"                          | "missing UUID part"
-		"clid:route:550e8400:extra"           | "too many parts"
+		"clid:v1:invalid:123"                 | "invalid entity type"
+		"clid:v1:route:not-a-uuid"           | "invalid UUID"
+		"clid:v1:route"                       | "missing UUID part"
+		"clid:route:550e8400"                 | "missing version"
 	}
 
 	@Unroll

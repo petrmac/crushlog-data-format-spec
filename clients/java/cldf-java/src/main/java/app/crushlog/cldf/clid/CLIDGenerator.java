@@ -17,6 +17,9 @@ import lombok.Getter;
  */
 public class CLIDGenerator {
 
+  // Current CLID version
+  public static final String CURRENT_VERSION = "v1";
+
   // CrushLog namespace UUID (registered for climbing data)
   public static final UUID CRUSHLOG_NAMESPACE =
       UUID.fromString("6ba7b810-9dad-11d1-80b4-00c04fd430c8");
@@ -47,6 +50,26 @@ public class CLIDGenerator {
     }
   }
 
+  /**
+   * Format a CLID with the current version
+   * @param type Entity type
+   * @param uuid UUID string
+   * @return Formatted CLID string
+   */
+  private static String formatCLID(EntityType type, UUID uuid) {
+    return "clid:%s:%s:%s".formatted(CURRENT_VERSION, type.value, uuid);
+  }
+
+  /**
+   * Format a CLID with the current version using type string
+   * @param typeStr Entity type string
+   * @param uuid UUID string
+   * @return Formatted CLID string
+   */
+  private static String formatCLID(String typeStr, UUID uuid) {
+    return "clid:%s:%s:%s".formatted(CURRENT_VERSION, typeStr, uuid);
+  }
+
   /** Generate a deterministic CLID for a location */
   public static String generateLocationCLID(Location location) {
     // Validate required fields
@@ -71,7 +94,7 @@ public class CLIDGenerator {
 
     UUID uuid = generateUUIDv5(input);
 
-    return "clid:location:%s".formatted(uuid);
+    return formatCLID(EntityType.LOCATION, uuid);
   }
 
   /** Generate a deterministic CLID for a route */
@@ -84,7 +107,10 @@ public class CLIDGenerator {
     }
 
     // Extract location UUID (remove prefix)
-    String locationUuid = locationCLID.replace("clid:location:", "");
+    // Handle both v1 format and potential legacy format
+    String locationUuid = locationCLID.contains(":location:") 
+        ? locationCLID.substring(locationCLID.lastIndexOf(':') + 1)
+        : locationCLID;
 
     // Build deterministic components
     List<String> components =
@@ -104,13 +130,15 @@ public class CLIDGenerator {
     String input = String.join(":", components);
     UUID uuid = generateUUIDv5(input);
 
-    return "clid:route:%s".formatted(uuid);
+    return formatCLID(EntityType.ROUTE, uuid);
   }
 
   /** Generate a deterministic CLID for a sector */
   public static String generateSectorCLID(String locationCLID, Sector sector) {
-    // Extract location UUID
-    String locationUuid = locationCLID.replace("clid:location:", "");
+    // Extract location UUID (handle v1 format)
+    String locationUuid = locationCLID.contains(":location:") 
+        ? locationCLID.substring(locationCLID.lastIndexOf(':') + 1)
+        : locationCLID;
 
     List<String> components =
         Arrays.asList(
@@ -121,13 +149,13 @@ public class CLIDGenerator {
     String input = String.join(":", components);
     UUID uuid = generateUUIDv5(input);
 
-    return "clid:sector:%s".formatted(uuid);
+    return formatCLID(EntityType.SECTOR, uuid);
   }
 
   /** Generate a random UUID v4 for user content */
   public static String generateRandomCLID(EntityType type) {
     UUID uuid = UUID.randomUUID();
-    return "clid:%s:%s".formatted(type.value, uuid);
+    return formatCLID(type, uuid);
   }
 
   /** Parse a CLID into its components */

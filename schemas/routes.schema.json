@@ -24,7 +24,7 @@
         },
         "clid": {
           "type": "string",
-          "pattern": "^clid:route:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "pattern": "^clid:v\\d+:route:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
           "description": "CrushLog ID - globally unique identifier (v1.3.0+)"
         },
         "locationId": {
@@ -145,13 +145,13 @@
             },
             "ipfsHash": {
               "type": "string",
-              "description": "IPFS hash for CLDF archive reference",
-              "pattern": "^(Qm[1-9A-HJ-NP-Za-km-z]{44}|bafy[a-z2-7]{50,})$"
+              "description": "IPFS hash for CLDF archive reference (supports CIDv0 and CIDv1 formats)",
+              "pattern": "^(Qm[1-9A-HJ-NP-Za-km-z]{44}|ba[a-z2-7]{50,})$"
             },
             "blockchainTx": {
               "type": "string",
-              "description": "Blockchain transaction hash for permanent record",
-              "pattern": "^(0x)?[a-fA-F0-9]{64}$"
+              "description": "Blockchain transaction hash for permanent record (supports 32-128 hex chars, optionally prefixed with 0x; e.g., Ethereum, Bitcoin, and other networks)",
+              "pattern": "^(0x)?[a-fA-F0-9]{32,128}$"
             },
             "generatedAt": {
               "type": "string",

@@ -21,12 +21,12 @@ class CLIDSpec extends Specification {
 
 		where:
 		validClid                                               | expectedNamespace | expectedType                      | expectedUuid
-		"clid:route:550e8400-e29b-41d4-a716-446655440000"      | "clid"           | CLIDGenerator.EntityType.ROUTE    | "550e8400-e29b-41d4-a716-446655440000"
-		"clid:location:123e4567-e89b-12d3-a456-426614174000"   | "clid"           | CLIDGenerator.EntityType.LOCATION | "123e4567-e89b-12d3-a456-426614174000"
-		"clid:sector:00000000-0000-0000-0000-000000000000"     | "clid"           | CLIDGenerator.EntityType.SECTOR   | "00000000-0000-0000-0000-000000000000"
-		"clid:climb:ffffffff-ffff-ffff-ffff-ffffffffffff"      | "clid"           | CLIDGenerator.EntityType.CLIMB    | "ffffffff-ffff-ffff-ffff-ffffffffffff"
-		"clid:session:abcdef12-3456-7890-abcd-ef1234567890"    | "clid"           | CLIDGenerator.EntityType.SESSION  | "abcdef12-3456-7890-abcd-ef1234567890"
-		"clid:media:ABCDEF12-3456-7890-ABCD-EF1234567890"      | "clid"           | CLIDGenerator.EntityType.MEDIA    | "ABCDEF12-3456-7890-ABCD-EF1234567890"
+		"clid:v1:route:550e8400-e29b-41d4-a716-446655440000"      | "clid"           | CLIDGenerator.EntityType.ROUTE    | "550e8400-e29b-41d4-a716-446655440000"
+		"clid:v1:location:123e4567-e89b-12d3-a456-426614174000"   | "clid"           | CLIDGenerator.EntityType.LOCATION | "123e4567-e89b-12d3-a456-426614174000"
+		"clid:v1:sector:00000000-0000-0000-0000-000000000000"     | "clid"           | CLIDGenerator.EntityType.SECTOR   | "00000000-0000-0000-0000-000000000000"
+		"clid:v1:climb:ffffffff-ffff-ffff-ffff-ffffffffffff"      | "clid"           | CLIDGenerator.EntityType.CLIMB    | "ffffffff-ffff-ffff-ffff-ffffffffffff"
+		"clid:v1:session:abcdef12-3456-7890-abcd-ef1234567890"    | "clid"           | CLIDGenerator.EntityType.SESSION  | "abcdef12-3456-7890-abcd-ef1234567890"
+		"clid:v1:media:ABCDEF12-3456-7890-ABCD-EF1234567890"      | "clid"           | CLIDGenerator.EntityType.MEDIA    | "ABCDEF12-3456-7890-ABCD-EF1234567890"
 	}
 
 	@Unroll
@@ -36,17 +36,17 @@ class CLIDSpec extends Specification {
 
 		where:
 		clid                                                | expectedResult
-		"clid:route:550e8400-e29b-41d4-a716-446655440000"  | true
-		"clid:location:123e4567-e89b-12d3-a456-426614174000"| true
-		"clid:climb:abcdef12-3456-7890-abcd-ef1234567890"  | true
+		"clid:v1:route:550e8400-e29b-41d4-a716-446655440000"  | true
+		"clid:v1:location:123e4567-e89b-12d3-a456-426614174000"| true
+		"clid:v1:climb:abcdef12-3456-7890-abcd-ef1234567890"  | true
 		null                                                | false
 		""                                                  | false
 		"   "                                               | false
 		"invalid"                                           | false
-		"cldf:route:550e8400-e29b-41d4-a716-446655440000"  | false
-		"clid:invalid:550e8400-e29b-41d4-a716-446655440000"| false
-		"clid:route:not-a-uuid"                            | false
-		"clid:route:550e8400"                              | false
+		"cldf:v1:route:550e8400-e29b-41d4-a716-446655440000"  | false
+		"clid:v1:invalid:550e8400-e29b-41d4-a716-446655440000"| false
+		"clid:v1:route:not-a-uuid"                            | false
+		"clid:v1:route:550e8400"                              | false
 	}
 
 	@Unroll
@@ -66,16 +66,17 @@ class CLIDSpec extends Specification {
 		"invalid"                                          | "Invalid CLID format"
 		"route:550e8400-e29b-41d4-a716-446655440000"      | "Invalid CLID format"
 		"clid:route"                                       | "Invalid CLID format"
-		"clid:route:uuid:extra"                            | "Invalid CLID format"
-		"cldf:route:550e8400-e29b-41d4-a716-446655440000" | "Invalid namespace 'cldf'"
-		"xyz:route:550e8400-e29b-41d4-a716-446655440000"  | "Invalid namespace 'xyz'"
-		"clid:invalid:550e8400-e29b-41d4-a716-446655440000"| "Invalid entity type 'invalid'"
-		"clid:ROUTE:550e8400-e29b-41d4-a716-446655440000" | "Invalid entity type 'ROUTE'"
-		"clid:route:not-a-uuid"                            | "Invalid UUID format"
-		"clid:route:550e8400"                              | "Invalid UUID format"
-		"clid:route:g50e8400-e29b-41d4-a716-446655440000" | "Invalid UUID format"
-		"clid:route:550e8400-e29b-41d4-a716"              | "Invalid UUID format"
-		"clid:route:550e8400-e29b-41d4-a716-4466554400000"| "Invalid UUID format"
+		"clid:v1:route"                                    | "Invalid CLID format"
+		"clid:route:550e8400-e29b-41d4-a716-446655440000" | "Invalid CLID format"
+		"cldf:v1:route:550e8400-e29b-41d4-a716-446655440000" | "Invalid namespace 'cldf'"
+		"xyz:v1:route:550e8400-e29b-41d4-a716-446655440000"  | "Invalid namespace 'xyz'"
+		"clid:v1:invalid:550e8400-e29b-41d4-a716-446655440000"| "Invalid entity type 'invalid'"
+		"clid:v1:ROUTE:550e8400-e29b-41d4-a716-446655440000" | "Invalid entity type 'ROUTE'"
+		"clid:v1:route:not-a-uuid"                            | "Invalid UUID format"
+		"clid:v1:route:550e8400"                              | "Invalid UUID format"
+		"clid:v1:route:g50e8400-e29b-41d4-a716-446655440000" | "Invalid UUID format"
+		"clid:v1:route:550e8400-e29b-41d4-a716"              | "Invalid UUID format"
+		"clid:v1:route:550e8400-e29b-41d4-a716-4466554400000"| "Invalid UUID format"
 	}
 
 	def "should handle all entity types"() {
@@ -91,7 +92,7 @@ class CLIDSpec extends Specification {
 
 		expect: "all can be parsed"
 		entityTypes.each { type ->
-			def clid = "clid:${type.value}:550e8400-e29b-41d4-a716-446655440000"
+			def clid = "clid:v1:${type.value}:550e8400-e29b-41d4-a716-446655440000"
 			def parsed = CLID.fromString(clid)
 			assert parsed.type() == type
 		}
@@ -120,14 +121,14 @@ class CLIDSpec extends Specification {
 
 		expect: "short form is first 8 characters"
 		testCases.each { uuid, expectedShort ->
-			def clid = CLID.fromString("clid:route:${uuid}")
+			def clid = CLID.fromString("clid:v1:route:${uuid}")
 			assert clid.shortForm() == expectedShort
 		}
 	}
 
 	def "should create consistent URL"() {
 		given: "a CLID"
-		def clid = CLID.fromString("clid:route:550e8400-e29b-41d4-a716-446655440000")
+		def clid = CLID.fromString("clid:v1:route:550e8400-e29b-41d4-a716-446655440000")
 
 		expect: "URL is correctly formatted"
 		clid.url() == "https://crushlog.pro/g/550e8400"
@@ -135,7 +136,7 @@ class CLIDSpec extends Specification {
 
 	def "toString should return full CLID"() {
 		given: "a CLID string"
-		def clidString = "clid:route:550e8400-e29b-41d4-a716-446655440000"
+		def clidString = "clid:v1:route:550e8400-e29b-41d4-a716-446655440000"
 
 		when: "parsing and converting back to string"
 		def clid = CLID.fromString(clidString)
@@ -146,9 +147,9 @@ class CLIDSpec extends Specification {
 
 	def "should handle case-insensitive UUID validation"() {
 		given: "CLIDs with different case UUIDs"
-		def lowercase = "clid:route:550e8400-e29b-41d4-a716-446655440000"
-		def uppercase = "clid:route:550E8400-E29B-41D4-A716-446655440000"
-		def mixedcase = "clid:route:550e8400-E29B-41d4-A716-446655440000"
+		def lowercase = "clid:v1:route:550e8400-e29b-41d4-a716-446655440000"
+		def uppercase = "clid:v1:route:550E8400-E29B-41D4-A716-446655440000"
+		def mixedcase = "clid:v1:route:550e8400-E29B-41d4-A716-446655440000"
 
 		when: "parsing CLIDs"
 		def clidLower = CLID.fromString(lowercase)
@@ -170,7 +171,7 @@ class CLIDSpec extends Specification {
 		given: "a technically valid UUID format that Java UUID can't parse"
 		// This is actually a valid UUID, so let's use one that would pass regex but fail UUID parsing
 		// Actually, Java's UUID.fromString is quite permissive, so this test ensures both checks work
-		def validClid = "clid:route:550e8400-e29b-41d4-a716-446655440000"
+		def validClid = "clid:v1:route:550e8400-e29b-41d4-a716-446655440000"
 
 		when: "parsing"
 		def clid = CLID.fromString(validClid)

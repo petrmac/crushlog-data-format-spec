@@ -30,7 +30,7 @@ class QRCodeGeneratorSpec extends Specification {
 		def route = Route.builder()
 				.id(1)
 				.locationId(100)
-				.clid("clid:route:550e8400-e29b-41d4-a716-446655440000")
+				.clid("clid:v1:route:550e8400-e29b-41d4-a716-446655440000")
 				.name("Test Route")
 				.grades(Route.Grades.builder()
 				.yds("5.14a")
@@ -50,7 +50,7 @@ class QRCodeGeneratorSpec extends Specification {
 		then:
 		data != null
 		data.version == 1
-		data.clid == "clid:route:550e8400-e29b-41d4-a716-446655440000"
+		data.clid == "clid:v1:route:550e8400-e29b-41d4-a716-446655440000"
 		data.url != null
 		data.ipfsHash == "QmXk9abc123"
 		data.routeData != null
@@ -65,7 +65,7 @@ class QRCodeGeneratorSpec extends Specification {
 		def generator = QRCodeFactory.createGenerator()
 		def location = Location.builder()
 				.id(1)
-				.clid("clid:location:loc12345-e29b-41d4-a716-446655440000")
+				.clid("clid:v1:location:loc12345-e29b-41d4-a716-446655440000")
 				.name("El Capitan")
 				.country("US")
 				.state("CA")
@@ -81,7 +81,7 @@ class QRCodeGeneratorSpec extends Specification {
 		then:
 		data != null
 		data.version == 1
-		data.clid == "clid:location:loc12345-e29b-41d4-a716-446655440000"
+		data.clid == "clid:v1:location:loc12345-e29b-41d4-a716-446655440000"
 		data.url != null
 		data.locationData != null
 		data.locationData["name"] == "El Capitan"
@@ -96,7 +96,7 @@ class QRCodeGeneratorSpec extends Specification {
 		def generator = QRCodeFactory.createGenerator()
 		def route = Route.builder()
 				.id(1)
-				.clid("clid:route:test-uuid")
+				.clid("clid:v1:route:test-uuid")
 				.name("Test Route")
 				.build()
 
@@ -118,7 +118,7 @@ class QRCodeGeneratorSpec extends Specification {
 		def generator = QRCodeFactory.createGenerator()
 		def location = Location.builder()
 				.id(1)
-				.clid("clid:location:test-uuid")
+				.clid("clid:v1:location:test-uuid")
 				.name("Test Location")
 				.isIndoor(false)
 				.build()
@@ -171,7 +171,7 @@ class QRCodeGeneratorSpec extends Specification {
 		def generator = new DefaultQRCodeGenerator()
 		def route = Route.builder()
 				.id(1)
-				.clid("clid:route:550e8400-e29b-41d4-a716-446655440000")
+				.clid("clid:v1:route:550e8400-e29b-41d4-a716-446655440000")
 				.name("Test Route")
 				.build()
 
@@ -211,7 +211,7 @@ class QRCodeGeneratorSpec extends Specification {
 		when: "route data is present"
 		def routeData = QRCodeData.builder()
 				.version(1)
-				.clid("clid:route:test")
+				.clid("clid:v1:route:test")
 				.url("https://example.com")
 				.routeData(["name": "Test"])
 				.build()
@@ -222,7 +222,7 @@ class QRCodeGeneratorSpec extends Specification {
 		when: "location data is present"
 		def locationData = QRCodeData.builder()
 				.version(1)
-				.clid("clid:location:test")
+				.clid("clid:v1:location:test")
 				.url("https://example.com")
 				.locationData(["name": "Test"])
 				.build()
@@ -233,7 +233,7 @@ class QRCodeGeneratorSpec extends Specification {
 		when: "no offline data"
 		def noData = QRCodeData.builder()
 				.version(1)
-				.clid("clid:route:test")
+				.clid("clid:v1:route:test")
 				.url("https://example.com")
 				.build()
 
@@ -245,7 +245,7 @@ class QRCodeGeneratorSpec extends Specification {
 		given:
 		def data = QRCodeData.builder()
 				.version(1)
-				.clid("clid:route:test")
+				.clid("clid:v1:route:test")
 				.url("https://example.com/route/123")
 				.build()
 
@@ -276,7 +276,7 @@ class QRCodeGeneratorSpec extends Specification {
 		then:
 		data != null
 		data.clid != null
-		data.clid.startsWith("clid:route:")
+		data.clid.startsWith("clid:v1:route:")
 
 		where:
 		format << [
@@ -303,7 +303,7 @@ class QRCodeGeneratorSpec extends Specification {
 		then:
 		data != null
 		data.clid != null
-		data.clid.startsWith("clid:location:")
+		data.clid.startsWith("clid:v1:location:")
 	}
 
 	def "should include location data with route when provided"() {
@@ -311,7 +311,7 @@ class QRCodeGeneratorSpec extends Specification {
 		def generator = new DefaultQRCodeGenerator()
 		def location = Location.builder()
 				.id(100)
-				.clid("clid:location:loc12345")
+				.clid("clid:v1:location:loc12345")
 				.name("Test Crag")
 				.country("US")
 				.isIndoor(false)
@@ -320,7 +320,7 @@ class QRCodeGeneratorSpec extends Specification {
 		def route = Route.builder()
 				.id(1)
 				.locationId(100)
-				.clid("clid:route:route12345")
+				.clid("clid:v1:route:route12345")
 				.name("Test Route")
 				.build()
 
@@ -334,7 +334,7 @@ class QRCodeGeneratorSpec extends Specification {
 		then:
 		data != null
 		data.locationData != null
-		data.locationData["clid"] == "clid:location:loc12345"
+		data.locationData["clid"] == "clid:v1:location:loc12345"
 		data.locationData["name"] == "Test Crag"
 		data.locationData["country"] == "US"
 	}

@@ -37,7 +37,7 @@ class QRScannerSpec extends Specification {
 		def json = '''
     {
       "v": 1,
-      "clid": "clid:route:550e8400-e29b-41d4-a716-446655440000",
+      "clid": "clid:v1:route:550e8400-e29b-41d4-a716-446655440000",
       "url": "https://crushlog.com/routes/123",
       "route": {
         "id": 123,
@@ -66,7 +66,7 @@ class QRScannerSpec extends Specification {
 
 		def data = result.getSuccess().get()
 		data.version == 1
-		data.clid == "clid:route:550e8400-e29b-41d4-a716-446655440000"
+		data.clid == "clid:v1:route:550e8400-e29b-41d4-a716-446655440000"
 		data.url == "https://crushlog.com/routes/123"
 		data.hasOfflineData
 
@@ -136,7 +136,7 @@ class QRScannerSpec extends Specification {
 		result.isSuccess()
 		def data = result.getSuccess().get()
 		data.version == 2
-		data.clid == "clid:route:550e8400-e29b-41d4-a716-446655440000"
+		data.clid == "clid:v1:route:550e8400-e29b-41d4-a716-446655440000"
 		data.hasOfflineData
 		data.route != null
 		data.route.name == "TestRoute"
@@ -160,7 +160,7 @@ class QRScannerSpec extends Specification {
 		def json = '''
     {
       "v": 1,
-      "clid": "clid:route:123",
+      "clid": "clid:v1:route:123",
       "meta": {
         "blockchain": true,
         "verified": true,
@@ -194,7 +194,7 @@ class QRScannerSpec extends Specification {
 	def "should convert parsed data to Route successfully"() {
 		given:
 		def data = ParsedQRData.builder()
-				.clid("clid:route:123")
+				.clid("clid:v1:route:123")
 				.route(ParsedQRData.RouteInfo.builder()
 				.id(123)
 				.name("Test Route")
@@ -214,7 +214,7 @@ class QRScannerSpec extends Specification {
 		then:
 		result.isSuccess()
 		def route = result.getSuccess().get()
-		route.clid == "clid:route:123"
+		route.clid == "clid:v1:route:123"
 		route.id == 123
 		route.name == "Test Route"
 		route.grades.yds == "5.10a"
@@ -247,7 +247,7 @@ class QRScannerSpec extends Specification {
 	def "should fail to convert to Route when no route data"() {
 		given:
 		def data = ParsedQRData.builder()
-				.clid("clid:location:123")
+				.clid("clid:v1:location:123")
 				.build()
 
 		when:
@@ -262,7 +262,7 @@ class QRScannerSpec extends Specification {
 		given:
 		def data = ParsedQRData.builder()
 				.location(ParsedQRData.LocationInfo.builder()
-				.clid("clid:location:123")
+				.clid("clid:v1:location:123")
 				.id(1)
 				.name("Test Gym")
 				.country("US")
@@ -290,7 +290,7 @@ class QRScannerSpec extends Specification {
 	def "should fail to convert to Location when no location data"() {
 		given:
 		def data = ParsedQRData.builder()
-				.clid("clid:route:123")
+				.clid("clid:v1:route:123")
 				.build()
 
 		when:
@@ -303,7 +303,7 @@ class QRScannerSpec extends Specification {
 
 	def "should validate valid QR data"() {
 		given:
-		def validData = '{"v": 1, "clid": "clid:route:123"}'
+		def validData = '{"v": 1, "clid": "clid:v1:route:123"}'
 
 		when:
 		def result = scanner.validate(validData)
@@ -391,7 +391,7 @@ class QRScannerSpec extends Specification {
 
 	def "should scan QR code from image bytes"() {
 		given:
-		def testData = '{"v": 1, "clid": "clid:route:123", "route": {"name": "Image Test"}}'
+		def testData = '{"v": 1, "clid": "clid:v1:route:123", "route": {"name": "Image Test"}}'
 		def imageBytes = generateQRImageBytes(testData)
 
 		when:

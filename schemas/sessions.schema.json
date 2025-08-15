@@ -24,7 +24,7 @@
         },
         "clid": {
           "type": "string",
-          "pattern": "^clid:session:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "pattern": "^clid:v\\d+:session:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
           "description": "CrushLog ID - globally unique identifier (v1.3.0+)"
         },
         "date": {
