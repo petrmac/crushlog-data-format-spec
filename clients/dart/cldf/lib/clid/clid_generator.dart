@@ -111,17 +111,19 @@ class CLIDGenerator {
 
     // Only support v1 format (clid:v1:type:uuid)
     if (parts.length != 4 || parts[0] != 'clid' || parts[1] != 'v1') {
-      throw ArgumentError('Invalid CLID format. Expected clid:v1:type:uuid, got: $clid');
+      throw ArgumentError(
+        'Invalid CLID format. Expected clid:v1:type:uuid, got: $clid',
+      );
     }
 
     final type = EntityType.values.firstWhere(
       (e) => e.value == parts[2],
       orElse: () => throw ArgumentError('Unknown entity type: ${parts[2]}'),
     );
-    
+
     final uuid = parts[3];
     final shortForm = uuid.substring(0, uuid.length.clamp(0, 8));
-    
+
     return CLID(
       namespace: 'clid',
       type: type,

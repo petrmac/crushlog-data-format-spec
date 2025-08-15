@@ -448,12 +448,13 @@ public class QRCommand implements Callable<Integer> {
     }
 
     private QROptions buildQROptions() {
-      QROptions.QRDataFormat dataFormat = switch (format.toLowerCase()) {
-        case "url" -> QROptions.QRDataFormat.URL;
-        case "uri" -> QROptions.QRDataFormat.CUSTOM_URI;
-        default -> QROptions.QRDataFormat.JSON;
-      };
-      
+      QROptions.QRDataFormat dataFormat =
+          switch (format.toLowerCase()) {
+            case "url" -> QROptions.QRDataFormat.URL;
+            case "uri" -> QROptions.QRDataFormat.CUSTOM_URI;
+            default -> QROptions.QRDataFormat.JSON;
+          };
+
       return QROptions.builder()
           .baseUrl(baseUrl)
           .includeIPFS(includeIPFS)
