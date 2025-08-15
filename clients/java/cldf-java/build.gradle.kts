@@ -39,9 +39,8 @@ dependencies {
     // Archive handling
     implementation("org.apache.commons:commons-compress:1.26.1")
     
-    // QR Code generation and scanning
+    // QR Code generation (core only, no AWT dependencies)
     implementation("com.google.zxing:core:3.5.2")
-    implementation("com.google.zxing:javase:3.5.2")
     
     // ===== COMPILE-ONLY DEPENDENCIES =====
     // Lombok

@@ -1,15 +1,9 @@
 package app.crushlog.cldf.qr.impl;
 
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import javax.imageio.ImageIO;
 
 import app.crushlog.cldf.models.Location;
 import app.crushlog.cldf.models.Route;
@@ -22,14 +16,14 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.zxing.*;
-import com.google.zxing.client.j2se.BufferedImageLuminanceSource;
 import com.google.zxing.common.HybridBinarizer;
 import com.google.zxing.qrcode.QRCodeReader;
 import lombok.extern.slf4j.Slf4j;
 
 /**
  * Functional implementation of QR code scanner using Result types. This implementation avoids
- * throwing exceptions and instead models errors as data.
+ * throwing exceptions and instead models errors as data. Uses pure Java image reading to eliminate
+ * AWT dependencies.
  */
 @Slf4j
 public class DefaultQRScanner implements QRScanner {
@@ -40,6 +34,7 @@ public class DefaultQRScanner implements QRScanner {
   private static final Pattern URL_PATTERN = Pattern.compile("https?://[^/]+/g/([a-f0-9-]+)");
   private static final Pattern URI_PATTERN = Pattern.compile("cldf://global/route/([a-f0-9-]+)");
 
+  private final PureJavaImageReader imageReader = new PureJavaImageReader();
   private final QRCodeReader qrCodeReader = new QRCodeReader();
 
   @Override
@@ -72,32 +67,7 @@ public class DefaultQRScanner implements QRScanner {
             trimmedData.substring(0, Math.min(50, trimmedData.length()))));
   }
 
-  @Override
-  public Result<ParsedQRData, QRError> scan(BufferedImage image) {
-    if (image == null) {
-      return Result.failure(QRError.scanError("Image cannot be null"));
-    }
-
-    try {
-      LuminanceSource source = new BufferedImageLuminanceSource(image);
-      BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
-
-      Map<DecodeHintType, Object> hints = new HashMap<>();
-      hints.put(DecodeHintType.CHARACTER_SET, "UTF-8");
-      hints.put(DecodeHintType.TRY_HARDER, Boolean.TRUE);
-
-      com.google.zxing.Result zxingResult = qrCodeReader.decode(bitmap, hints);
-      String text = zxingResult.getText();
-
-      return parse(text);
-    } catch (NotFoundException e) {
-      return Result.failure(QRError.scanError("No QR code found in image"));
-    } catch (ChecksumException | FormatException e) {
-      return Result.failure(QRError.scanError("Invalid QR code format: " + e.getMessage()));
-    } catch (Exception e) {
-      return Result.failure(QRError.from(QRError.ErrorType.SCAN_ERROR, e));
-    }
-  }
+  // BufferedImage scan method is deprecated and moved to interface default
 
   @Override
   public Result<ParsedQRData, QRError> scan(byte[] imageBytes) {
@@ -106,19 +76,30 @@ public class DefaultQRScanner implements QRScanner {
     }
 
     try {
-      ByteArrayInputStream bais = new ByteArrayInputStream(imageBytes);
-      BufferedImage image = ImageIO.read(bais);
+      // Create LuminanceSource from PNG bytes using pure Java
+      LuminanceSource source = imageReader.createLuminanceSource(imageBytes);
 
-      if (image == null) {
-        return Result.failure(QRError.imageError("Failed to read image from bytes"));
-      }
+      // Create binary bitmap
+      BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
 
-      return scan(image);
+      // Decode QR code
+      com.google.zxing.Result zxingResult = qrCodeReader.decode(bitmap);
+
+      // Parse the decoded text
+      String decodedText = zxingResult.getText();
+      return parse(decodedText);
+
+    } catch (NotFoundException e) {
+      return Result.failure(QRError.scanError("No QR code found in image"));
+    } catch (ChecksumException e) {
+      return Result.failure(QRError.scanError("QR code checksum validation failed"));
+    } catch (FormatException e) {
+      return Result.failure(QRError.scanError("Invalid QR code format"));
     } catch (IOException e) {
-      return Result.failure(
-          QRError.imageError("Failed to read image from bytes: " + e.getMessage()));
+      return Result.failure(QRError.scanError("Failed to read image: " + e.getMessage()));
     } catch (Exception e) {
-      return Result.failure(QRError.from(QRError.ErrorType.SCAN_ERROR, e));
+      log.error("Unexpected error scanning QR code", e);
+      return Result.failure(QRError.scanError("Failed to scan QR code: " + e.getMessage()));
     }
   }
 

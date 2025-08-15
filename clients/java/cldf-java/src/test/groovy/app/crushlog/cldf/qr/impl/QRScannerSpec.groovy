@@ -9,9 +9,7 @@ import app.crushlog.cldf.models.enums.RouteType
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.EncodeHintType
 import com.google.zxing.qrcode.QRCodeWriter
-import com.google.zxing.client.j2se.MatrixToImageWriter
-import java.awt.image.BufferedImage
-import javax.imageio.ImageIO
+import app.crushlog.cldf.qr.QRImageOptions
 
 class QRScannerSpec extends Specification {
 
@@ -391,13 +389,13 @@ class QRScannerSpec extends Specification {
 		route.grades == null  // Grade not set without gradeSystem
 	}
 
-	def "should scan QR code from image"() {
+	def "should scan QR code from image bytes"() {
 		given:
 		def testData = '{"v": 1, "clid": "clid:route:123", "route": {"name": "Image Test"}}'
-		def image = generateQRImage(testData)
+		def imageBytes = generateQRImageBytes(testData)
 
 		when:
-		def result = scanner.scan(image)
+		def result = scanner.scan(imageBytes)
 
 		then:
 		result.isSuccess()
@@ -408,10 +406,13 @@ class QRScannerSpec extends Specification {
 
 	def "should fail scanning image without QR code"() {
 		given:
-		def blankImage = new BufferedImage(100, 100, BufferedImage.TYPE_INT_RGB)
+		// Create a blank PNG using our pure Java generator
+		def generator = new PureJavaPNGGenerator()
+		def emptyMatrix = new com.google.zxing.common.BitMatrix(100, 100)
+		def blankImageBytes = generator.generatePNG(emptyMatrix, 100, 0x000000, 0xFFFFFF)
 
 		when:
-		def result = scanner.scan(blankImage)
+		def result = scanner.scan(blankImageBytes)
 
 		then:
 		result.isFailure()
@@ -422,8 +423,7 @@ class QRScannerSpec extends Specification {
 	def "should scan QR code from byte array"() {
 		given:
 		def testData = '{"v": 1, "route": {"name": "Byte Test"}}'
-		def image = generateQRImage(testData)
-		def bytes = imageToBytes(image)
+		def bytes = generateQRImageBytes(testData)
 
 		when:
 		def result = scanner.scan(bytes)
@@ -446,13 +446,13 @@ class QRScannerSpec extends Specification {
 		result.getError().get().type == QRError.ErrorType.IMAGE_ERROR
 	}
 
-	def "should scanToRoute from image directly"() {
+	def "should scanToRoute from image bytes directly"() {
 		given:
 		def testData = '{"v": 1, "route": {"name": "Direct Scan", "grade": "V7", "gradeSystem": "vScale"}}'
-		def image = generateQRImage(testData)
+		def imageBytes = generateQRImageBytes(testData)
 
 		when:
-		def result = scanner.scanToRoute(image)
+		def result = scanner.scanToRoute(imageBytes)
 
 		then:
 		result.isSuccess()
@@ -512,16 +512,9 @@ class QRScannerSpec extends Specification {
 
 	// Helper methods
 
-	private BufferedImage generateQRImage(String data) {
-		def writer = new QRCodeWriter()
-		def hints = [(EncodeHintType.CHARACTER_SET): "UTF-8"]
-		def bitMatrix = writer.encode(data, BarcodeFormat.QR_CODE, 200, 200, hints)
-		return MatrixToImageWriter.toBufferedImage(bitMatrix)
-	}
-
-	private byte[] imageToBytes(BufferedImage image) {
-		def baos = new ByteArrayOutputStream()
-		ImageIO.write(image, "PNG", baos)
-		return baos.toByteArray()
+	private byte[] generateQRImageBytes(String data) {
+		def generator = new DefaultQRCodeGenerator()
+		def options = QRImageOptions.builder().size(200).build()
+		return generator.generatePNG(data, options)
 	}
 }

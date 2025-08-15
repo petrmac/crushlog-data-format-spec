@@ -1,7 +1,5 @@
 package app.crushlog.cldf.qr.impl;
 
-import java.awt.image.BufferedImage;
-
 import app.crushlog.cldf.models.Location;
 import app.crushlog.cldf.models.Route;
 import app.crushlog.cldf.qr.*;
@@ -40,26 +38,17 @@ public class DefaultQRCodeGenerator implements QRCodeGenerator {
   }
 
   @Override
-  public BufferedImage generateImage(Route route, QROptions options) {
+  public byte[] generatePNG(Route route, QROptions options, QRImageOptions imageOptions) {
     QRCodeData data = generateData(route, options);
     String payload = getPayloadString(data, options);
-
-    QRImageOptions imageOptions = QRImageOptions.builder().build();
-    return imageGenerator.generateImage(payload, imageOptions);
+    return imageGenerator.generatePNG(payload, imageOptions);
   }
 
   @Override
-  public BufferedImage generateImage(Location location, QROptions options) {
+  public byte[] generatePNG(Location location, QROptions options, QRImageOptions imageOptions) {
     QRCodeData data = generateData(location, options);
     String payload = getPayloadString(data, options);
-
-    QRImageOptions imageOptions = QRImageOptions.builder().build();
-    return imageGenerator.generateImage(payload, imageOptions);
-  }
-
-  @Override
-  public BufferedImage generateImage(String data, QRImageOptions imageOptions) {
-    return imageGenerator.generateImage(data, imageOptions);
+    return imageGenerator.generatePNG(payload, imageOptions);
   }
 
   @Override
@@ -70,23 +59,5 @@ public class DefaultQRCodeGenerator implements QRCodeGenerator {
   @Override
   public String generateSVG(String data, QRImageOptions imageOptions) {
     return imageGenerator.generateSVG(data, imageOptions);
-  }
-
-  private String getPayloadString(QRCodeData data, QROptions options) {
-    return switch (options.getFormat()) {
-      case JSON -> dataGenerator.toJson(data);
-      case URL -> data.getUrl();
-      case CUSTOM_URI -> {
-        // For custom URI, we need to reconstruct from the data
-        // This is a simplified version
-        yield "cldf://global/route/" + extractUuidFromClid(data.getClid());
-      }
-    };
-  }
-
-  private String extractUuidFromClid(String clid) {
-    if (clid == null) return "";
-    String[] parts = clid.split(":");
-    return parts.length >= 3 ? parts[2] : "";
   }
 }

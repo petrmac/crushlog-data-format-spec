@@ -1,6 +1,5 @@
 package app.crushlog.cldf.qr;
 
-import java.awt.image.BufferedImage;
 import java.util.Optional;
 
 import app.crushlog.cldf.models.Location;
@@ -28,10 +27,15 @@ public interface QRScanner {
   /**
    * Scan a QR code from an image.
    *
+   * @deprecated Use {@link #scan(byte[])} instead to avoid AWT dependencies
    * @param image The image containing the QR code
    * @return Result containing parsed data or error
    */
-  Result<ParsedQRData, QRError> scan(BufferedImage image);
+  @Deprecated
+  default Result<ParsedQRData, QRError> scan(java.awt.image.BufferedImage image) {
+    return Result.failure(
+        QRError.scanError("BufferedImage scanning not supported - use byte array scan method"));
+  }
 
   /**
    * Scan a QR code from image bytes.
@@ -86,23 +90,23 @@ public interface QRScanner {
   }
 
   /**
-   * Scan image and convert to Route in one operation.
+   * Scan image bytes and convert to Route in one operation.
    *
-   * @param image The image containing the QR code
+   * @param imageBytes The image bytes containing the QR code
    * @return Result containing route or error
    */
-  default Result<Route, QRError> scanToRoute(BufferedImage image) {
-    return scan(image).flatMap(this::toRoute);
+  default Result<Route, QRError> scanToRoute(byte[] imageBytes) {
+    return scan(imageBytes).flatMap(this::toRoute);
   }
 
   /**
-   * Scan image and convert to Location in one operation.
+   * Scan image bytes and convert to Location in one operation.
    *
-   * @param image The image containing the QR code
+   * @param imageBytes The image bytes containing the QR code
    * @return Result containing location or error
    */
-  default Result<Location, QRError> scanToLocation(BufferedImage image) {
-    return scan(image).flatMap(this::toLocation);
+  default Result<Location, QRError> scanToLocation(byte[] imageBytes) {
+    return scan(imageBytes).flatMap(this::toLocation);
   }
 
   // Static convenience methods for backward compatibility and ease of use

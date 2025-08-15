@@ -1,9 +1,8 @@
 package app.crushlog.cldf.qr;
 
-import java.awt.image.BufferedImage;
-
 import app.crushlog.cldf.models.Location;
 import app.crushlog.cldf.models.Route;
+import app.crushlog.cldf.qr.impl.QRDataGenerator;
 
 /**
  * Interface for QR code generation. Provides methods for generating QR codes in various formats.
@@ -29,31 +28,48 @@ public interface QRCodeGenerator {
   QRCodeData generateData(Location location, QROptions options);
 
   /**
-   * Generate QR code image for a route.
+   * Generate QR code PNG for a route.
    *
    * @param route The route to generate QR code for
    * @param options Generation options
-   * @return BufferedImage containing the QR code
+   * @param imageOptions Image generation options
+   * @return Byte array containing PNG image
    */
-  BufferedImage generateImage(Route route, QROptions options);
+  default byte[] generatePNG(Route route, QROptions options, QRImageOptions imageOptions) {
+    QRCodeData data = generateData(route, options);
+    String payload = getPayloadString(data, options);
+    return generatePNG(payload, imageOptions);
+  }
 
   /**
-   * Generate QR code image for a location.
+   * Generate QR code PNG for a location.
    *
    * @param location The location to generate QR code for
    * @param options Generation options
-   * @return BufferedImage containing the QR code
-   */
-  BufferedImage generateImage(Location location, QROptions options);
-
-  /**
-   * Generate QR code image from data payload.
-   *
-   * @param data The data to encode
    * @param imageOptions Image generation options
-   * @return BufferedImage containing the QR code
+   * @return Byte array containing PNG image
    */
-  BufferedImage generateImage(String data, QRImageOptions imageOptions);
+  default byte[] generatePNG(Location location, QROptions options, QRImageOptions imageOptions) {
+    QRCodeData data = generateData(location, options);
+    String payload = getPayloadString(data, options);
+    return generatePNG(payload, imageOptions);
+  }
+
+  /** Get payload string from QR code data. Default implementation for convenience. */
+  default String getPayloadString(QRCodeData data, QROptions options) {
+    return switch (options.getFormat()) {
+      case JSON -> new QRDataGenerator().toJson(data);
+      case URL -> data.getUrl();
+      case CUSTOM_URI -> "cldf://global/route/" + extractUuidFromClid(data.getClid());
+    };
+  }
+
+  /** Extract UUID from CLID. Default implementation for convenience. */
+  default String extractUuidFromClid(String clid) {
+    if (clid == null) return "";
+    String[] parts = clid.split(":");
+    return parts.length >= 3 ? parts[2] : "";
+  }
 
   /**
    * Generate QR code as byte array (PNG format).

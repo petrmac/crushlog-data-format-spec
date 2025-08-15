@@ -138,6 +138,11 @@ graalvmNative {
             buildArgs.add("--initialize-at-run-time=com.fasterxml.jackson.core.Base64Variants")
             buildArgs.add("--initialize-at-run-time=com.fasterxml.jackson.core.io.CharTypes")
             buildArgs.add("--initialize-at-run-time=com.fasterxml.jackson.annotation.JsonInclude\$Value")
+            
+            // Native image optimizations
+            buildArgs.add("-H:+AddAllCharsets")
+            buildArgs.add("-H:+UnlockExperimentalVMOptions")
+            buildArgs.add("-H:+EnableAllSecurityServices")
         }
     }
 }
@@ -145,6 +150,7 @@ graalvmNative {
 tasks.test {
     useJUnitPlatform()
 }
+
 
 // Create a custom fat JAR task that produces an executable JAR
 tasks.register<Jar>("fatJar") {

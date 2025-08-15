@@ -4,41 +4,48 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Optional;
 import java.util.concurrent.Callable;
 
-
 import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 
 import app.crushlog.cldf.api.CLDFArchive;
 import app.crushlog.cldf.models.Location;
 import app.crushlog.cldf.models.Route;
 import app.crushlog.cldf.qr.*;
-import app.crushlog.cldf.qr.impl.*;
+import app.crushlog.cldf.qr.impl.DefaultQRCodeGenerator;
+import app.crushlog.cldf.qr.impl.DefaultQRScanner;
+import app.crushlog.cldf.qr.impl.QRDataGenerator;
 import app.crushlog.cldf.qr.result.QRError;
 import app.crushlog.cldf.qr.result.Result;
 import app.crushlog.cldf.tool.services.CLDFService;
-import app.crushlog.cldf.tool.utils.OutputHandler;
 import app.crushlog.cldf.tool.utils.OutputFormat;
+import app.crushlog.cldf.tool.utils.OutputHandler;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine.Command;
+import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 import picocli.CommandLine.ParentCommand;
 import picocli.CommandLine.Spec;
-import picocli.CommandLine.Model.CommandSpec;
 
-import jakarta.inject.Singleton;
-
+@Slf4j
 @Singleton
 @Command(
     name = "qr",
-    description = "Generate or scan QR codes for routes and locations",
+    description = "Generate, scan, or parse QR codes for routes and locations",
     mixinStandardHelpOptions = true,
-    subcommands = {QRCommand.GenerateCommand.class, QRCommand.ScanCommand.class})
+    subcommands = {
+      QRCommand.GenerateCommand.class,
+      QRCommand.ScanCommand.class,
+      QRCommand.ParseCommand.class
+    })
 public class QRCommand implements Callable<Integer> {
 
   @Spec CommandSpec spec;
 
-  // For PicoCLI
   public QRCommand() {}
 
   @Override
@@ -59,7 +66,7 @@ public class QRCommand implements Callable<Integer> {
 
     @Option(
         names = {"-o", "--output"},
-        description = "Output file path (PNG format)",
+        description = "Output file path (PNG or SVG format)",
         required = true)
     private Path outputPath;
 
@@ -110,92 +117,25 @@ public class QRCommand implements Callable<Integer> {
         System.err.println("Error: CLDFService not initialized");
         return 1;
       }
-      
-      // Create OutputHandler
+
       OutputHandler outputHandler = new OutputHandler(OutputFormat.text, verbose);
-      
+
       try {
-
-        // Load the archive
         CLDFArchive archive = cldfService.read(archivePath.toFile());
-
-        // Find the entity by CLID
-        String entityType = extractEntityType(clid);
-        Object entity = findEntityByClid(archive, clid, entityType);
+        Object entity = findEntity(archive, clid);
 
         if (entity == null) {
           outputHandler.writeError("Entity not found with CLID: " + clid);
           return 1;
         }
 
-        // Generate QR code
-        QRCodeGenerator generator = new DefaultQRCodeGenerator();
-        QROptions qrOptions =
-            QROptions.builder()
-                .baseUrl(baseUrl)
-                .includeIPFS(includeIPFS)
-                .ipfsHash(ipfsHash)
-                .build();
-
-        QRImageOptions imageOptions = QRImageOptions.builder().size(size).build();
-
-        // Generate QR data
-        QRCodeData qrData;
-        if (entity instanceof Route) {
-          qrData = generator.generateData((Route) entity, qrOptions);
-        } else if (entity instanceof Location) {
-          qrData = generator.generateData((Location) entity, qrOptions);
-        } else {
-          outputHandler.writeError("Unsupported entity type for QR generation");
+        String qrContent = generateQRContent(entity, outputHandler);
+        if (qrContent == null) {
           return 1;
         }
 
-        // Generate payload string
-        QRDataGenerator dataGen = new QRDataGenerator();
-        String payload = switch (qrOptions.getFormat()) {
-          case JSON -> dataGen.toJson(qrData);
-          case URL -> qrData.getUrl();
-          case CUSTOM_URI -> {
-            // Determine type from entity
-            String typeStr = entity instanceof Route ? "route" : "location";
-            yield "cldf://" + typeStr + "/" + extractUuidFromClid(qrData.getClid());
-          }
-        };
+        return saveQRCode(qrContent, outputHandler);
 
-        // Check if we're running in native image
-        boolean isNativeImage = System.getProperty("org.graalvm.nativeimage.imagecode") != null;
-        
-        File outputFile = outputPath.toFile();
-        String outputFileName = outputFile.getName();
-        
-        if (isNativeImage || outputFileName.endsWith(".svg")) {
-          // Generate SVG (no AWT required)
-          String svgContent = generator.generateSVG(payload, imageOptions);
-          // Ensure output has .svg extension
-          if (!outputFileName.endsWith(".svg")) {
-            outputFile = new File(outputFile.getParentFile(), outputFileName.replaceAll("\\.[^.]*$", "") + ".svg");
-          }
-          Files.writeString(outputFile.toPath(), svgContent);
-          outputHandler.writeInfo("QR code generated as SVG (native-image compatible): " + outputFile);
-        } else {
-          // Generate PNG using AWT (only in JVM mode)
-          try {
-            byte[] pngData = generator.generatePNG(payload, imageOptions);
-            Files.write(outputFile.toPath(), pngData);
-            outputHandler.writeInfo("QR code generated as PNG: " + outputFile);
-          } catch (UnsatisfiedLinkError e) {
-            // Fallback to SVG if AWT is not available
-            outputHandler.writeWarning("AWT not available, generating SVG instead");
-            String svgContent = generator.generateSVG(payload, imageOptions);
-            outputFile = new File(outputFile.getParentFile(), outputFileName.replaceAll("\\.[^.]*$", "") + ".svg");
-            Files.writeString(outputFile.toPath(), svgContent);
-            outputHandler.writeInfo("QR code generated as SVG: " + outputFile);
-          }
-        }
-
-        outputHandler.writeInfo("Entity: " + entity.getClass().getSimpleName() + " [" + clid + "]");
-
-        return 0;
       } catch (Exception e) {
         outputHandler.writeError("Failed to generate QR code: " + e.getMessage());
         if (verbose) {
@@ -205,13 +145,122 @@ public class QRCommand implements Callable<Integer> {
       }
     }
 
-    private String extractUuidFromClid(String clid) {
-      if (clid == null) return "";
-      String[] parts = clid.split(":");
-      return parts.length >= 3 ? parts[2] : "";
+    private String generateQRContent(Object entity, OutputHandler outputHandler) {
+      try {
+        QRCodeGenerator generator = new DefaultQRCodeGenerator();
+        QROptions qrOptions = buildQROptions();
+
+        QRCodeData qrData = generateQRData(generator, entity, qrOptions);
+        if (qrData == null) {
+          outputHandler.writeError("Unsupported entity type for QR generation");
+          return null;
+        }
+
+        return createPayload(qrData, qrOptions);
+      } catch (Exception e) {
+        outputHandler.writeError("Failed to generate QR content: " + e.getMessage());
+        return null;
+      }
     }
-    
-    private String extractEntityType(String clid) {
+
+    private QROptions buildQROptions() {
+      return QROptions.builder()
+          .baseUrl(baseUrl)
+          .includeIPFS(includeIPFS)
+          .ipfsHash(ipfsHash)
+          .build();
+    }
+
+    private QRCodeData generateQRData(QRCodeGenerator generator, Object entity, QROptions options) {
+      if (entity instanceof Route) {
+        return generator.generateData((Route) entity, options);
+      } else if (entity instanceof Location) {
+        return generator.generateData((Location) entity, options);
+      }
+      return null;
+    }
+
+    private String createPayload(QRCodeData qrData, QROptions qrOptions) {
+      QRDataGenerator dataGen = new QRDataGenerator();
+      return switch (qrOptions.getFormat()) {
+        case JSON -> dataGen.toJson(qrData);
+        case URL -> qrData.getUrl();
+        case CUSTOM_URI -> createCustomUri(qrData);
+      };
+    }
+
+    private String createCustomUri(QRCodeData qrData) {
+      String typeStr = determineEntityType(qrData.getClid());
+      String uuid = extractUuid(qrData.getClid());
+      return "cldf://" + typeStr + "/" + uuid;
+    }
+
+    private int saveQRCode(String payload, OutputHandler outputHandler) throws IOException {
+      QRCodeGenerator generator = new DefaultQRCodeGenerator();
+      QRImageOptions imageOptions = QRImageOptions.builder().size(size).build();
+
+      File outputFile = outputPath.toFile();
+      String outputFileName = outputFile.getName().toLowerCase();
+
+      if (outputFileName.endsWith(".svg")) {
+        return saveSVG(generator, payload, imageOptions, outputFile, outputHandler);
+      } else {
+        return savePNG(generator, payload, imageOptions, outputFile, outputHandler);
+      }
+    }
+
+    private int saveSVG(
+        QRCodeGenerator generator,
+        String payload,
+        QRImageOptions imageOptions,
+        File outputFile,
+        OutputHandler outputHandler)
+        throws IOException {
+      String svgContent = generator.generateSVG(payload, imageOptions);
+      Files.writeString(outputFile.toPath(), svgContent);
+      outputHandler.writeInfo("QR code generated as SVG: " + outputFile);
+      return 0;
+    }
+
+    private int savePNG(
+        QRCodeGenerator generator,
+        String payload,
+        QRImageOptions imageOptions,
+        File outputFile,
+        OutputHandler outputHandler)
+        throws IOException {
+      byte[] pngData = generator.generatePNG(payload, imageOptions);
+      Files.write(outputFile.toPath(), pngData);
+      outputHandler.writeInfo("QR code generated as PNG: " + outputFile);
+      return 0;
+    }
+
+    private Object findEntity(CLDFArchive archive, String clid) {
+      String entityType = determineEntityType(clid);
+
+      if ("route".equals(entityType)) {
+        return findRoute(archive, clid).orElse(null);
+      } else if ("location".equals(entityType)) {
+        return findLocation(archive, clid).orElse(null);
+      }
+      return null;
+    }
+
+    private Optional<Route> findRoute(CLDFArchive archive, String clid) {
+      if (archive.getRoutes() == null) {
+        return Optional.empty();
+      }
+      return archive.getRoutes().stream().filter(r -> clid.equals(r.getClid())).findFirst();
+    }
+
+    private Optional<Location> findLocation(CLDFArchive archive, String clid) {
+      if (archive.getLocations() == null) {
+        return Optional.empty();
+      }
+      return archive.getLocations().stream().filter(l -> clid.equals(l.getClid())).findFirst();
+    }
+
+    private String determineEntityType(String clid) {
       if (clid != null && clid.startsWith("clid:")) {
         String[] parts = clid.split(":");
         if (parts.length >= 2) {
@@ -221,28 +270,20 @@ public class QRCommand implements Callable<Integer> {
       return null;
     }
 
-    private Object findEntityByClid(CLDFArchive archive, String clid, String entityType) {
-      if ("route".equals(entityType) && archive.getRoutes() != null) {
-        return archive.getRoutes().stream()
-            .filter(r -> clid.equals(r.getClid()))
-            .findFirst()
-            .orElse(null);
-      }
-      if ("location".equals(entityType) && archive.getLocations() != null) {
-        return archive.getLocations().stream()
-            .filter(l -> clid.equals(l.getClid()))
-            .findFirst()
-            .orElse(null);
-      }
-      return null;
+    private String extractUuid(String clid) {
+      if (clid == null) return "";
+      String[] parts = clid.split(":");
+      return parts.length >= 3 ? parts[2] : "";
     }
   }
 
   @Singleton
-  @Command(name = "scan", description = "Scan and parse QR code from an image")
+  @Command(name = "scan", description = "Scan QR code from image file")
   static class ScanCommand implements Callable<Integer> {
 
-    @Parameters(index = "0", description = "Path to QR code image")
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
+    @Parameters(index = "0", description = "Path to image file containing QR code")
     private Path imagePath;
 
     @Option(
@@ -268,33 +309,366 @@ public class QRCommand implements Callable<Integer> {
 
     @ParentCommand private QRCommand parent;
 
-    // For PicoCLI
-    public ScanCommand() {
-    }
+    public ScanCommand() {}
 
     @Override
     public Integer call() {
-      // Create OutputHandler
-      OutputHandler outputHandler = new OutputHandler(
-          "json".equals(outputFormat) ? OutputFormat.json : OutputFormat.text, 
-          verbose);
-      
-      // Check if running in native image
-      boolean isNativeImage = System.getProperty("org.graalvm.nativeimage.imagecode") != null;
-      
-      if (isNativeImage) {
-        outputHandler.writeError("QR code scanning is not supported in native image mode (requires AWT).");
-        outputHandler.writeInfo("Please use the standard Java runtime for QR code scanning:");
-        outputHandler.writeInfo("  java -jar cldf-tool.jar qr scan <image-path>");
+      OutputFormat format = "json".equals(outputFormat) ? OutputFormat.json : OutputFormat.text;
+      OutputHandler outputHandler = new OutputHandler(format, verbose);
+
+      try {
+        // Read image file
+        byte[] imageBytes = Files.readAllBytes(imagePath);
+
+        // Scan QR code from image
+        DefaultQRScanner scanner = new DefaultQRScanner();
+        Result<ParsedQRData, QRError> result = scanner.scan(imageBytes);
+
+        if (result.isFailure()) {
+          handleScanFailure(result, outputHandler);
+          return 1;
+        }
+
+        ParsedQRData parsedData =
+            result
+                .getSuccess()
+                .orElseThrow(() -> new IllegalStateException("Result success but no data"));
+
+        outputParsedData(parsedData, outputHandler);
+
+        if (extractRoute || extractLocation) {
+          extractEntities(scanner, parsedData, outputHandler);
+        }
+
+        return 0;
+
+      } catch (IOException e) {
+        outputHandler.writeError("Failed to read image file: " + e.getMessage());
+        return 1;
+      } catch (Exception e) {
+        outputHandler.writeError("Failed to scan QR code: " + e.getMessage());
+        if (verbose) {
+          e.printStackTrace();
+        }
         return 1;
       }
-      
-      // This code will only run in JVM mode but we still can't use AWT classes
-      // as they would prevent compilation for native image
-      outputHandler.writeError("QR code scanning is temporarily disabled in this build.");
-      outputHandler.writeInfo("The scan functionality requires AWT libraries which are not compatible with native image compilation.");
-      outputHandler.writeInfo("To enable scanning, use a separate build without native image support.");
-      return 1;
+    }
+
+    private void handleScanFailure(
+        Result<ParsedQRData, QRError> result, OutputHandler outputHandler) {
+      QRError error = result.getError().orElse(QRError.scanError("Unknown error"));
+      outputHandler.writeError("Failed to scan QR code: " + error.getMessage());
+      if (verbose && error.getDetails() != null) {
+        outputHandler.writeError("Details: " + error.getDetails());
+      }
+    }
+
+    private void outputParsedData(ParsedQRData parsedData, OutputHandler outputHandler)
+        throws Exception {
+      if ("json".equals(outputFormat)) {
+        String json = OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(parsedData);
+        outputHandler.write(json);
+      } else {
+        outputHandler.write(formatAsText(parsedData));
+      }
+    }
+
+    private void extractEntities(
+        DefaultQRScanner scanner, ParsedQRData parsedData, OutputHandler outputHandler) {
+      if (extractRoute) {
+        extractRoute(scanner, parsedData, outputHandler);
+      }
+
+      if (extractLocation) {
+        extractLocation(scanner, parsedData, outputHandler);
+      }
+    }
+
+    private void extractRoute(
+        DefaultQRScanner scanner, ParsedQRData parsedData, OutputHandler outputHandler) {
+      Result<Route, QRError> routeResult = scanner.toRoute(parsedData);
+      if (routeResult.isSuccess()) {
+        routeResult
+            .getSuccess()
+            .ifPresent(route -> outputHandler.writeInfo("Extracted route: " + route));
+      } else {
+        routeResult
+            .getError()
+            .ifPresent(
+                error ->
+                    outputHandler.writeWarning("Failed to extract route: " + error.getMessage()));
+      }
+    }
+
+    private void extractLocation(
+        DefaultQRScanner scanner, ParsedQRData parsedData, OutputHandler outputHandler) {
+      Result<Location, QRError> locationResult = scanner.toLocation(parsedData);
+      if (locationResult.isSuccess()) {
+        locationResult
+            .getSuccess()
+            .ifPresent(location -> outputHandler.writeInfo("Extracted location: " + location));
+      } else {
+        locationResult
+            .getError()
+            .ifPresent(
+                error ->
+                    outputHandler.writeWarning(
+                        "Failed to extract location: " + error.getMessage()));
+      }
+    }
+
+    private String formatAsText(ParsedQRData data) {
+      StringBuilder sb = new StringBuilder();
+      sb.append("QR Code Data:\n");
+      sb.append("  Version: ").append(data.getVersion()).append("\n");
+
+      appendIfPresent(sb, "CLID", data.getClid());
+      appendIfPresent(sb, "URL", data.getUrl());
+      appendIfPresent(sb, "IPFS Hash", data.getIpfsHash());
+
+      if (data.getRoute() != null) {
+        appendRouteInfo(sb, data.getRoute());
+      }
+
+      if (data.getLocation() != null) {
+        appendLocationInfo(sb, data.getLocation());
+      }
+
+      sb.append("  Has Offline Data: ").append(data.isHasOfflineData()).append("\n");
+
+      if (data.isBlockchainVerified()) {
+        sb.append("  Blockchain Verified: true\n");
+      }
+
+      return sb.toString();
+    }
+
+    private void appendIfPresent(StringBuilder sb, String label, String value) {
+      if (value != null) {
+        sb.append("  ").append(label).append(": ").append(value).append("\n");
+      }
+    }
+
+    private void appendRouteInfo(StringBuilder sb, ParsedQRData.RouteInfo route) {
+      sb.append("  Route:\n");
+      appendIfPresent(sb, "    ID", route.getId() != null ? route.getId().toString() : null);
+      appendIfPresent(sb, "    Name", route.getName());
+      appendIfPresent(sb, "    Grade", route.getGrade());
+      appendIfPresent(sb, "    Grade System", route.getGradeSystem());
+      appendIfPresent(sb, "    Type", route.getType());
+      if (route.getHeight() != null) {
+        sb.append("    Height: ").append(route.getHeight()).append("m\n");
+      }
+    }
+
+    private void appendLocationInfo(StringBuilder sb, ParsedQRData.LocationInfo location) {
+      sb.append("  Location:\n");
+      appendIfPresent(sb, "    ID", location.getId() != null ? location.getId().toString() : null);
+      appendIfPresent(sb, "    Name", location.getName());
+      appendIfPresent(sb, "    Country", location.getCountry());
+      appendIfPresent(sb, "    State", location.getState());
+      appendIfPresent(sb, "    City", location.getCity());
+      sb.append("    Indoor: ").append(location.isIndoor()).append("\n");
+    }
+  }
+
+  @Singleton
+  @Command(name = "parse", description = "Parse QR code data from text string")
+  static class ParseCommand implements Callable<Integer> {
+
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
+    @Parameters(index = "0", description = "QR code data string or file containing QR data")
+    private String input;
+
+    @Option(
+        names = {"-o", "--output"},
+        description = "Output format",
+        defaultValue = "json")
+    private String outputFormat;
+
+    @Option(
+        names = {"--extract-route"},
+        description = "Extract route data from QR code")
+    private boolean extractRoute;
+
+    @Option(
+        names = {"--extract-location"},
+        description = "Extract location data from QR code")
+    private boolean extractLocation;
+
+    @Option(
+        names = {"-v", "--verbose"},
+        description = "Verbose output")
+    private boolean verbose;
+
+    @ParentCommand private QRCommand parent;
+
+    public ParseCommand() {}
+
+    @Override
+    public Integer call() {
+      OutputFormat format = "json".equals(outputFormat) ? OutputFormat.json : OutputFormat.text;
+      OutputHandler outputHandler = new OutputHandler(format, verbose);
+
+      try {
+        // Check if input is a file path
+        String qrData;
+        Path inputPath = Path.of(input);
+        if (Files.exists(inputPath)) {
+          qrData = Files.readString(inputPath);
+        } else {
+          qrData = input;
+        }
+
+        DefaultQRScanner scanner = new DefaultQRScanner();
+        Result<ParsedQRData, QRError> result = scanner.parse(qrData);
+
+        if (result.isFailure()) {
+          handleScanFailure(result, outputHandler);
+          return 1;
+        }
+
+        ParsedQRData parsedData =
+            result
+                .getSuccess()
+                .orElseThrow(() -> new IllegalStateException("Result success but no data"));
+
+        outputParsedData(parsedData, outputHandler);
+
+        if (extractRoute || extractLocation) {
+          extractEntities(scanner, parsedData, outputHandler);
+        }
+
+        return 0;
+
+      } catch (IOException e) {
+        outputHandler.writeError("Failed to read input file: " + e.getMessage());
+        return 1;
+      } catch (Exception e) {
+        outputHandler.writeError("Failed to parse QR code: " + e.getMessage());
+        if (verbose) {
+          e.printStackTrace();
+        }
+        return 1;
+      }
+    }
+
+    private void handleScanFailure(
+        Result<ParsedQRData, QRError> result, OutputHandler outputHandler) {
+      QRError error = result.getError().orElse(QRError.scanError("Unknown error"));
+      outputHandler.writeError("Failed to scan QR code: " + error.getMessage());
+      if (verbose && error.getDetails() != null) {
+        outputHandler.writeError("Details: " + error.getDetails());
+      }
+    }
+
+    private void outputParsedData(ParsedQRData parsedData, OutputHandler outputHandler)
+        throws Exception {
+      if ("json".equals(outputFormat)) {
+        String json = OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(parsedData);
+        outputHandler.write(json);
+      } else {
+        outputHandler.write(formatAsText(parsedData));
+      }
+    }
+
+    private void extractEntities(
+        DefaultQRScanner scanner, ParsedQRData parsedData, OutputHandler outputHandler) {
+      if (extractRoute) {
+        extractRoute(scanner, parsedData, outputHandler);
+      }
+
+      if (extractLocation) {
+        extractLocation(scanner, parsedData, outputHandler);
+      }
+    }
+
+    private void extractRoute(
+        DefaultQRScanner scanner, ParsedQRData parsedData, OutputHandler outputHandler) {
+      Result<Route, QRError> routeResult = scanner.toRoute(parsedData);
+      if (routeResult.isSuccess()) {
+        routeResult
+            .getSuccess()
+            .ifPresent(route -> outputHandler.writeInfo("Extracted route: " + route));
+      } else {
+        routeResult
+            .getError()
+            .ifPresent(
+                error ->
+                    outputHandler.writeWarning("Failed to extract route: " + error.getMessage()));
+      }
+    }
+
+    private void extractLocation(
+        DefaultQRScanner scanner, ParsedQRData parsedData, OutputHandler outputHandler) {
+      Result<Location, QRError> locationResult = scanner.toLocation(parsedData);
+      if (locationResult.isSuccess()) {
+        locationResult
+            .getSuccess()
+            .ifPresent(location -> outputHandler.writeInfo("Extracted location: " + location));
+      } else {
+        locationResult
+            .getError()
+            .ifPresent(
+                error ->
+                    outputHandler.writeWarning(
+                        "Failed to extract location: " + error.getMessage()));
+      }
+    }
+
+    private String formatAsText(ParsedQRData data) {
+      StringBuilder sb = new StringBuilder();
+      sb.append("QR Code Data:\n");
+      sb.append("  Version: ").append(data.getVersion()).append("\n");
+
+      appendIfPresent(sb, "CLID", data.getClid());
+      appendIfPresent(sb, "URL", data.getUrl());
+      appendIfPresent(sb, "IPFS Hash", data.getIpfsHash());
+
+      if (data.getRoute() != null) {
+        appendRouteInfo(sb, data.getRoute());
+      }
+
+      if (data.getLocation() != null) {
+        appendLocationInfo(sb, data.getLocation());
+      }
+
+      sb.append("  Has Offline Data: ").append(data.isHasOfflineData()).append("\n");
+
+      if (data.isBlockchainVerified()) {
+        sb.append("  Blockchain Verified: true\n");
+      }
+
+      return sb.toString();
+    }
+
+    private void appendIfPresent(StringBuilder sb, String label, String value) {
+      if (value != null) {
+        sb.append("  ").append(label).append(": ").append(value).append("\n");
+      }
+    }
+
+    private void appendRouteInfo(StringBuilder sb, ParsedQRData.RouteInfo route) {
+      sb.append("  Route:\n");
+      appendIfPresent(sb, "    ID", route.getId() != null ? route.getId().toString() : null);
+      appendIfPresent(sb, "    Name", route.getName());
+      appendIfPresent(sb, "    Grade", route.getGrade());
+      appendIfPresent(sb, "    Grade System", route.getGradeSystem());
+      appendIfPresent(sb, "    Type", route.getType());
+      if (route.getHeight() != null) {
+        sb.append("    Height: ").append(route.getHeight()).append("m\n");
+      }
+    }
+
+    private void appendLocationInfo(StringBuilder sb, ParsedQRData.LocationInfo location) {
+      sb.append("  Location:\n");
+      appendIfPresent(sb, "    ID", location.getId() != null ? location.getId().toString() : null);
+      appendIfPresent(sb, "    Name", location.getName());
+      appendIfPresent(sb, "    Country", location.getCountry());
+      appendIfPresent(sb, "    State", location.getState());
+      appendIfPresent(sb, "    City", location.getCity());
+      sb.append("    Indoor: ").append(location.isIndoor()).append("\n");
     }
   }
 }
