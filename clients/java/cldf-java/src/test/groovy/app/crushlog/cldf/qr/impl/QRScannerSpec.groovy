@@ -278,7 +278,7 @@ class QRScannerSpec extends Specification {
 		then:
 		result.isSuccess()
 		def location = result.getSuccess().get()
-		location.clid == "clid:location:123"
+		location.clid == "clid:v1:location:123"
 		location.id == 1
 		location.name == "Test Gym"
 		location.country == "US"
@@ -400,7 +400,7 @@ class QRScannerSpec extends Specification {
 		then:
 		result.isSuccess()
 		def data = result.getSuccess().get()
-		data.clid == "clid:route:123"
+		data.clid == "clid:v1:route:123"
 		data.route.name == "Image Test"
 	}
 
@@ -443,7 +443,8 @@ class QRScannerSpec extends Specification {
 
 		then:
 		result.isFailure()
-		result.getError().get().type == QRError.ErrorType.IMAGE_ERROR
+		result.getError().get().type == QRError.ErrorType.SCAN_ERROR
+		result.getError().get().message.contains("Not a valid PNG file")
 	}
 
 	def "should scanToRoute from image bytes directly"() {

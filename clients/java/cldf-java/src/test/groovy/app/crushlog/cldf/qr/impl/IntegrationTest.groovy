@@ -10,7 +10,7 @@ class IntegrationTest extends Specification {
 		DefaultQRCodeGenerator generator = new DefaultQRCodeGenerator()
 		DefaultQRScanner scanner = new DefaultQRScanner()
 
-		String testData = '{"version": 1, "clid": "clid:v1:route:test", "route": {"name": "Test Route"}}'
+		String testData = '{"v": 1, "clid": "clid:v1:route:test", "route": {"name": "Test Route"}}'
 
 		when:
 		// Generate QR code PNG

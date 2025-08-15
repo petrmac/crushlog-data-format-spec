@@ -130,22 +130,22 @@ Three modes are available for QR code generation:
 **1. Archive Mode** - Generate from existing CLDF archive:
 ```bash
 # Generate QR for a route from archive
-cldf qr generate my-climbs.cldf clid:route:550e8400... -o route-qr.png
+cldf qr generate my-climbs.cldf clid:v1:route:550e8400... -o route-qr.png
 
 # Generate as SVG with custom size
-cldf qr generate my-climbs.cldf clid:location:123abc... -o location-qr.svg --size 512
+cldf qr generate my-climbs.cldf clid:v1:location:123abc... -o location-qr.svg --size 512
 ```
 
 **2. Direct Mode with Auto-Generated CLID** - Generate without archive:
 ```bash
 # Generate QR for route (minimal)
 cldf qr generate --type route --name "Midnight Lightning" --grade "V8" \
-  --location-clid clid:location:abc123... -o qr.png
+  --location-clid clid:v1:location:abc123... -o qr.png
 
 # Generate QR for route with full details
 cldf qr generate --type route --name "The Nose" --grade "5.14a" \
   --route-type sport --height 900 \
-  --location-clid clid:location:abc123... \
+  --location-clid clid:v1:location:abc123... \
   --first-ascent-name "Lynn Hill" --first-ascent-year 1993 \
   -o nose-qr.png
 
@@ -159,7 +159,7 @@ cldf qr generate --type location --name "Yosemite Valley" \
 **3. Direct Mode with Explicit CLID** - Provide your own CLID:
 ```bash
 # Generate with specific CLID
-cldf qr generate --clid clid:route:custom-uuid-here \
+cldf qr generate --clid clid:v1:route:custom-uuid-here \
   --type route --name "Dawn Wall" --grade "5.14d" \
   -o dawn-wall-qr.png
 ```

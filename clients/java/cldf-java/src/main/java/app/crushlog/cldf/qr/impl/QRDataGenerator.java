@@ -295,13 +295,22 @@ public class QRDataGenerator {
 
   private String extractShortClid(String clid) {
     try {
+      // Parse CLID to extract UUID
+      CLID parsed = CLID.fromString(clid);
+      String uuid = parsed.uuid();
+      return uuid.substring(0, Math.min(8, uuid.length()));
+    } catch (Exception e) {
+      // Fallback for old or malformed CLIDs
       String[] parts = clid.split(":");
-      if (parts.length >= 3) {
+      if (parts.length == 3) {
+        // Old format: clid:type:uuid
         String uuid = parts[2];
         return uuid.substring(0, Math.min(8, uuid.length()));
+      } else if (parts.length == 4) {
+        // New format: clid:v1:type:uuid
+        String uuid = parts[3];
+        return uuid.substring(0, Math.min(8, uuid.length()));
       }
-      return clid;
-    } catch (Exception e) {
       log.error("Failed to extract short CLID from: {}", clid, e);
       return clid;
     }

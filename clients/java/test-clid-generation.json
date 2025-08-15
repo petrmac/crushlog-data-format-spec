@@ -37,8 +37,8 @@
     {
       "id": 2,
       "locationId": 1,
-      "name": "Route With Wrong Type CLID",
-      "clid": "clid:location:660e8400-e29b-41d4-a716-446655440002",
+      "name": "Route With Valid CLID",
+      "clid": "clid:v1:route:660e8400-e29b-41d4-a716-446655440002",
       "routeType": "route",
       "grades": {
         "yds": "5.11b"

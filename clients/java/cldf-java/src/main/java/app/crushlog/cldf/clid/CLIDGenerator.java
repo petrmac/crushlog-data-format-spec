@@ -52,6 +52,7 @@ public class CLIDGenerator {
 
   /**
    * Format a CLID with the current version
+   *
    * @param type Entity type
    * @param uuid UUID string
    * @return Formatted CLID string
@@ -62,6 +63,7 @@ public class CLIDGenerator {
 
   /**
    * Format a CLID with the current version using type string
+   *
    * @param typeStr Entity type string
    * @param uuid UUID string
    * @return Formatted CLID string
@@ -108,9 +110,10 @@ public class CLIDGenerator {
 
     // Extract location UUID (remove prefix)
     // Handle both v1 format and potential legacy format
-    String locationUuid = locationCLID.contains(":location:") 
-        ? locationCLID.substring(locationCLID.lastIndexOf(':') + 1)
-        : locationCLID;
+    String locationUuid =
+        locationCLID.contains(":location:")
+            ? locationCLID.substring(locationCLID.lastIndexOf(':') + 1)
+            : locationCLID;
 
     // Build deterministic components
     List<String> components =
@@ -136,9 +139,10 @@ public class CLIDGenerator {
   /** Generate a deterministic CLID for a sector */
   public static String generateSectorCLID(String locationCLID, Sector sector) {
     // Extract location UUID (handle v1 format)
-    String locationUuid = locationCLID.contains(":location:") 
-        ? locationCLID.substring(locationCLID.lastIndexOf(':') + 1)
-        : locationCLID;
+    String locationUuid =
+        locationCLID.contains(":location:")
+            ? locationCLID.substring(locationCLID.lastIndexOf(':') + 1)
+            : locationCLID;
 
     List<String> components =
         Arrays.asList(

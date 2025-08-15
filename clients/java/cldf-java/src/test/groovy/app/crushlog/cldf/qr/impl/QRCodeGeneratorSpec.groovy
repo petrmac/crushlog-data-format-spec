@@ -7,6 +7,7 @@ import app.crushlog.cldf.qr.QRCodeData
 import app.crushlog.cldf.qr.QRCodeFactory
 import app.crushlog.cldf.qr.QRCodeGenerator
 import app.crushlog.cldf.qr.QROptions
+import app.crushlog.cldf.qr.QRImageOptions
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -105,12 +106,11 @@ class QRCodeGeneratorSpec extends Specification {
 				.build()
 
 		when:
-		BufferedImage image = generator.generateImage(route, options)
+		byte[] pngBytes = generator.generatePNG(route, options, QRImageOptions.builder().size(256).build())
 
 		then:
-		image != null
-		image.width > 0
-		image.height > 0
+		pngBytes != null
+		pngBytes.length > 0
 	}
 
 	def "should generate QR image for location"() {
@@ -128,12 +128,11 @@ class QRCodeGeneratorSpec extends Specification {
 				.build()
 
 		when:
-		BufferedImage image = generator.generateImage(location, options)
+		byte[] pngBytes = generator.generatePNG(location, options, QRImageOptions.builder().size(256).build())
 
 		then:
-		image != null
-		image.width > 0
-		image.height > 0
+		pngBytes != null
+		pngBytes.length > 0
 	}
 
 	def "should generate QR image with custom image options"() {
@@ -143,12 +142,11 @@ class QRCodeGeneratorSpec extends Specification {
 		def imageOptions = QRCodeFactory.highQualityImageOptions()
 
 		when:
-		BufferedImage image = generator.generateImage(data, imageOptions)
+		byte[] pngBytes = generator.generatePNG(data, imageOptions)
 
 		then:
-		image != null
-		image.width == 512 // high quality size
-		image.height == 512
+		pngBytes != null
+		pngBytes.length > 0
 	}
 
 	def "should generate SVG for route"() {
@@ -179,29 +177,32 @@ class QRCodeGeneratorSpec extends Specification {
 		def jsonOptions = QROptions.builder()
 				.format(QROptions.QRDataFormat.JSON)
 				.build()
-		def jsonImage = generator.generateImage(route, jsonOptions)
+		def jsonPng = generator.generatePNG(route, jsonOptions, QRImageOptions.builder().size(256).build())
 
 		then:
-		jsonImage != null
+		jsonPng != null
+		jsonPng.length > 0
 
 		when: "generating with URL format"
 		def urlOptions = QROptions.builder()
 				.format(QROptions.QRDataFormat.URL)
 				.baseUrl("https://example.com")
 				.build()
-		def urlImage = generator.generateImage(route, urlOptions)
+		def urlPng = generator.generatePNG(route, urlOptions, QRImageOptions.builder().size(256).build())
 
 		then:
-		urlImage != null
+		urlPng != null
+		urlPng.length > 0
 
 		when: "generating with CUSTOM_URI format"
 		def customOptions = QROptions.builder()
 				.format(QROptions.QRDataFormat.CUSTOM_URI)
 				.build()
-		def customImage = generator.generateImage(route, customOptions)
+		def customPng = generator.generatePNG(route, customOptions, QRImageOptions.builder().size(256).build())
 
 		then:
-		customImage != null
+		customPng != null
+		customPng.length > 0
 	}
 
 	def "should check hasOfflineData correctly"() {

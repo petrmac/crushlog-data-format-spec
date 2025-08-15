@@ -67,8 +67,21 @@ public interface QRCodeGenerator {
   /** Extract UUID from CLID. Default implementation for convenience. */
   default String extractUuidFromClid(String clid) {
     if (clid == null) return "";
-    String[] parts = clid.split(":");
-    return parts.length >= 3 ? parts[2] : "";
+    try {
+      app.crushlog.cldf.clid.CLID parsed = app.crushlog.cldf.clid.CLID.fromString(clid);
+      return parsed.uuid();
+    } catch (Exception e) {
+      // Fallback for malformed CLIDs
+      String[] parts = clid.split(":");
+      if (parts.length == 4) {
+        // New format: clid:v1:type:uuid
+        return parts[3];
+      } else if (parts.length == 3) {
+        // Old format: clid:type:uuid
+        return parts[2];
+      }
+      return "";
+    }
   }
 
   /**

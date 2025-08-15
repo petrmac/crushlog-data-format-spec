@@ -31,8 +31,8 @@ public class DefaultQRScanner implements QRScanner {
   private static final ObjectMapper objectMapper =
       new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
-  private static final Pattern URL_PATTERN = Pattern.compile("https?://[^/]+/g/([a-f0-9-]+)");
-  private static final Pattern URI_PATTERN = Pattern.compile("cldf://global/route/([a-f0-9-]+)");
+  private static final Pattern URL_PATTERN = Pattern.compile("https?://[^/]+/g/([a-zA-Z0-9-]+)");
+  private static final Pattern URI_PATTERN = Pattern.compile("cldf://global/route/([a-zA-Z0-9-]+)");
 
   private final PureJavaImageReader imageReader = new PureJavaImageReader();
   private final QRCodeReader qrCodeReader = new QRCodeReader();
@@ -297,7 +297,7 @@ public class DefaultQRScanner implements QRScanner {
           ParsedQRData.builder()
               .version(1)
               .url(uri)
-              .clid("clid:route:" + uuid)
+              .clid("clid:v1:route:" + uuid)
               .hasOfflineData(false);
 
       // Parse query parameters

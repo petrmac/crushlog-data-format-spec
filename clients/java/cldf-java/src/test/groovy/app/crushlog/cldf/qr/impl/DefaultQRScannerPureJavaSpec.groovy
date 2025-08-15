@@ -17,7 +17,7 @@ class DefaultQRScannerPureJavaSpec extends Specification {
 
 	def "should scan QR code from PNG bytes without AWT"() {
 		given: "A QR code PNG generated with pure Java"
-		String testData = '{"version":2,"clid":"clid:v1:route:abc123","url":"https://crushlog.pro/route/abc123"}'
+		String testData = '{"v":2,"clid":"clid:v1:route:abc123","url":"https://crushlog.pro/route/abc123"}'
 		QRImageOptions options = QRImageOptions.builder()
 				.size(256)
 				.build()
@@ -40,7 +40,7 @@ class DefaultQRScannerPureJavaSpec extends Specification {
 	def "should scan QR code with route data"() {
 		given: "A QR code containing route information"
 		String routeData = '''{
-            "version": 2,
+            "v": 2,
             "clid": "clid:v1:route:test-route",
             "route": {
                 "id": 123,
@@ -69,7 +69,7 @@ class DefaultQRScannerPureJavaSpec extends Specification {
 	def "should scan QR code with location data"() {
 		given: "A QR code containing location information"
 		String locationData = '''{
-            "version": 2,
+            "v": 2,
             "clid": "clid:v1:location:test-loc",
             "location": {
                 "id": 456,
@@ -98,7 +98,7 @@ class DefaultQRScannerPureJavaSpec extends Specification {
 
 	def "should handle colored QR codes"() {
 		given: "A QR code with custom colors"
-		String data = '{"version":1,"clid":"clid:v1:route:colored"}'
+		String data = '{"v":1,"clid":"clid:v1:route:colored"}'
 		QRImageOptions options = QRImageOptions.builder()
 				.size(200)
 				.foregroundColor(new QRColor(0, 0, 255))  // Blue
@@ -117,7 +117,7 @@ class DefaultQRScannerPureJavaSpec extends Specification {
 
 	def "should handle different QR code sizes"() {
 		given: "QR codes of various sizes"
-		String data = '{"version":1,"clid":"clid:v1:route:size-test"}'
+		String data = '{"v":1,"clid":"clid:v1:route:size-test"}'
 
 		when: "Scanning QR codes of different sizes"
 		def results = []
@@ -150,7 +150,10 @@ class DefaultQRScannerPureJavaSpec extends Specification {
 	def "should handle custom URI format"() {
 		given: "A QR code with custom URI"
 		String uri = "cldf://global/route/test-123?name=TestRoute&grade=V4&gradeSystem=vscale"
-		byte[] pngBytes = generator.generatePNG(uri, QRImageOptions.builder().size(200).build())
+		byte[] pngBytes = generator.generatePNG(uri, QRImageOptions.builder()
+				.size(400)
+				.errorCorrectionLevel(QRImageOptions.ErrorCorrectionLevel.H)
+				.build())
 
 		when: "Scanning the custom URI QR code"
 		Result<ParsedQRData, QRError> result = scanner.scan(pngBytes)
@@ -158,7 +161,7 @@ class DefaultQRScannerPureJavaSpec extends Specification {
 		then: "URI is parsed with query parameters"
 		result.isSuccess()
 		ParsedQRData parsed = result.getSuccess().get()
-		parsed.clid == "cldf:route:test-123"
+		parsed.clid == "clid:v1:route:test-123"
 		parsed.route != null
 		parsed.route.name == "TestRoute"
 		parsed.route.grade == "V4"
@@ -211,10 +214,10 @@ class DefaultQRScannerPureJavaSpec extends Specification {
 	def "should handle complex JSON data in QR code"() {
 		given: "Complex nested JSON structure"
 		String complexData = '''{
-            "version": 3,
+            "v": 3,
             "clid": "clid:v1:route:complex",
             "url": "https://crushlog.pro/route/complex",
-            "ipfsHash": "QmTest123",
+            "cldf": "QmTest123",
             "route": {
                 "id": 999,
                 "name": "Complex Route",
@@ -235,7 +238,10 @@ class DefaultQRScannerPureJavaSpec extends Specification {
                 "blockchain": true
             }
         }'''
-		byte[] pngBytes = generator.generatePNG(complexData, QRImageOptions.builder().size(400).build())
+		byte[] pngBytes = generator.generatePNG(complexData, QRImageOptions.builder()
+				.size(600)
+				.errorCorrectionLevel(QRImageOptions.ErrorCorrectionLevel.H)
+				.build())
 
 		when: "Scanning complex QR code"
 		Result<ParsedQRData, QRError> result = scanner.scan(pngBytes)
@@ -255,7 +261,7 @@ class DefaultQRScannerPureJavaSpec extends Specification {
 	def "should maintain data integrity through encode-decode cycle"() {
 		given: "Original data to encode"
 		String originalData = '''{
-            "version": 2,
+            "v": 2,
             "clid": "clid:v1:route:integrity-test",
             "route": {
                 "id": 12345,
