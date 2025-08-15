@@ -145,7 +145,7 @@
             },
             "ipfsHash": {
               "type": "string",
-              "description": "IPFS hash for CLDF archive reference (supports CIDv0 and CIDv1 formats)",
+              "description": "IPFS hash for CLDF archive reference. Supports both CIDv0 and CIDv1 formats:\n- CIDv0: Base58 string starting with 'Qm' followed by 44 characters (total 46), matching [1-9A-HJ-NP-Za-km-z].\n- CIDv1: Base32 string starting with 'ba' followed by at least 50 characters, matching [a-z2-7].\nPattern: ^(Qm[1-9A-HJ-NP-Za-km-z]{44}|ba[a-z2-7]{50,})$",
               "pattern": "^(Qm[1-9A-HJ-NP-Za-km-z]{44}|ba[a-z2-7]{50,})$"
             },
             "blockchainTx": {
