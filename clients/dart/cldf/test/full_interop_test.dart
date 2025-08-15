@@ -29,7 +29,7 @@ void main() {
           {
             'id': 1,
             'name': 'Test Crag',
-            'country': 'Slovakia',
+            'country': 'SK',
             'isIndoor': false,
             'coordinates': {'latitude': 48.8566, 'longitude': 2.3522},
           },
