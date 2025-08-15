@@ -19,7 +19,7 @@ class CLDFClidAdapter {
         lat: location.coordinates?.latitude ?? 0.0,
         lon: location.coordinates?.longitude ?? 0.0,
       ),
-      isIndoor: location.isIndoor ?? false,
+      isIndoor: location.isIndoor,
     );
 
     return CLIDGenerator.generateLocationCLID(clidLocation);

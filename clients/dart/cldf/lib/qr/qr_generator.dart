@@ -81,14 +81,17 @@ class QRGenerator {
             'id': route.id,
             'name': route.name,
             if (route.grades != null) ...{
-              if (route.grades!['vScale'] != null) 'grade': route.grades!['vScale'],
+              if (route.grades!['vScale'] != null)
+                'grade': route.grades!['vScale'],
               if (route.grades!['vScale'] != null) 'gradeSystem': 'vScale',
-              if (route.grades!['yds'] != null && route.grades!['vScale'] == null)
+              if (route.grades!['yds'] != null &&
+                  route.grades!['vScale'] == null)
                 'grade': route.grades!['yds'],
-              if (route.grades!['yds'] != null && route.grades!['vScale'] == null)
+              if (route.grades!['yds'] != null &&
+                  route.grades!['vScale'] == null)
                 'gradeSystem': 'YDS',
             },
-            if (route.routeType != null) 'type': route.routeType!.name,
+            'type': route.routeType.name,
             if (route.height != null) 'height': route.height,
           }
         : null;
@@ -134,7 +137,7 @@ class QRGenerator {
             if (location.country != null) 'country': location.country,
             if (location.state != null) 'state': location.state,
             if (location.city != null) 'city': location.city,
-            'indoor': location.isIndoor ?? false,
+            'indoor': location.isIndoor,
           }
         : null;
 

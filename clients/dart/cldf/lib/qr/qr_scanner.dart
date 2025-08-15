@@ -166,9 +166,7 @@ class QRScanner {
       final reader = QRCodeReader();
       final result = reader.decode(BinaryBitmap(HybridBinarizer(source)));
 
-      if (result?.text != null) {
-        return parse(result!.text!);
-      }
+      return parse(result.text);
     } catch (e) {
       // Failed to decode QR code
       print('QR scan error: $e');

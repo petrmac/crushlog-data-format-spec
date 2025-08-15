@@ -1,6 +1,4 @@
 import 'dart:io';
-import 'dart:convert';
-import 'dart:typed_data';
 import 'package:test/test.dart';
 import 'package:cldf/qr/qr.dart';
 import 'package:cldf/models/route.dart';
@@ -26,23 +24,39 @@ void main() {
         final result = await Process.run(javaCliPath, [
           'qr',
           'generate',
-          '--type', 'route',
-          '--name', 'Java Test Route',
-          '--grade', '5.10a',
-          '--grade-system', 'YDS',
-          '--route-type', 'sport',
-          '--location-name', 'Test Crag',
-          '--location-country', 'US',
-          '--location-state', 'CA',
-          '--latitude', '37.734000',
-          '--longitude', '-119.637700',
-          '--format', 'json',
-          '--output-format', 'png',
-          '--output', '${testResourcesDir.path}/java-route-json.png',
+          '--type',
+          'route',
+          '--name',
+          'Java Test Route',
+          '--grade',
+          '5.10a',
+          '--grade-system',
+          'YDS',
+          '--route-type',
+          'sport',
+          '--location-name',
+          'Test Crag',
+          '--location-country',
+          'US',
+          '--location-state',
+          'CA',
+          '--latitude',
+          '37.734000',
+          '--longitude',
+          '-119.637700',
+          '--format',
+          'json',
+          '--output-format',
+          'png',
+          '--output',
+          '${testResourcesDir.path}/java-route-json.png',
         ]);
 
-        expect(result.exitCode, equals(0), 
-            reason: 'Java QR generation failed: ${result.stderr}');
+        expect(
+          result.exitCode,
+          equals(0),
+          reason: 'Java QR generation failed: ${result.stderr}',
+        );
 
         // Read the generated QR code with Dart
         final qrFile = File('${testResourcesDir.path}/java-route-json.png');
@@ -77,20 +91,33 @@ void main() {
         final result = await Process.run(javaCliPath, [
           'qr',
           'generate',
-          '--type', 'location',
-          '--location-name', 'Java Test Crag',
-          '--location-country', 'FR',
-          '--location-city', 'Chamonix',
-          '--latitude', '45.878600',
-          '--longitude', '6.887300',
-          '--indoor', 'false',
-          '--format', 'json',
-          '--output-format', 'png',
-          '--output', '${testResourcesDir.path}/java-location-json.png',
+          '--type',
+          'location',
+          '--location-name',
+          'Java Test Crag',
+          '--location-country',
+          'FR',
+          '--location-city',
+          'Chamonix',
+          '--latitude',
+          '45.878600',
+          '--longitude',
+          '6.887300',
+          '--indoor',
+          'false',
+          '--format',
+          'json',
+          '--output-format',
+          'png',
+          '--output',
+          '${testResourcesDir.path}/java-location-json.png',
         ]);
 
-        expect(result.exitCode, equals(0),
-            reason: 'Java QR generation failed: ${result.stderr}');
+        expect(
+          result.exitCode,
+          equals(0),
+          reason: 'Java QR generation failed: ${result.stderr}',
+        );
 
         // Read the generated QR code with Dart
         final qrFile = File('${testResourcesDir.path}/java-location-json.png');
@@ -124,23 +151,39 @@ void main() {
         final result = await Process.run(javaCliPath, [
           'qr',
           'generate',
-          '--type', 'route',
-          '--name', 'Java URL Route',
-          '--grade', 'V8',
-          '--grade-system', 'vScale',
-          '--route-type', 'boulder',
-          '--location-name', 'Boulder Field',
-          '--location-country', 'US',
-          '--location-state', 'CO',
-          '--latitude', '40.017900',
-          '--longitude', '-105.281600',
-          '--format', 'url',
-          '--output-format', 'png',
-          '--output', '${testResourcesDir.path}/java-route-url.png',
+          '--type',
+          'route',
+          '--name',
+          'Java URL Route',
+          '--grade',
+          'V8',
+          '--grade-system',
+          'vScale',
+          '--route-type',
+          'boulder',
+          '--location-name',
+          'Boulder Field',
+          '--location-country',
+          'US',
+          '--location-state',
+          'CO',
+          '--latitude',
+          '40.017900',
+          '--longitude',
+          '-105.281600',
+          '--format',
+          'url',
+          '--output-format',
+          'png',
+          '--output',
+          '${testResourcesDir.path}/java-route-url.png',
         ]);
 
-        expect(result.exitCode, equals(0),
-            reason: 'Java QR generation failed: ${result.stderr}');
+        expect(
+          result.exitCode,
+          equals(0),
+          reason: 'Java QR generation failed: ${result.stderr}',
+        );
 
         // Read the generated QR code with Dart
         final qrFile = File('${testResourcesDir.path}/java-route-url.png');
@@ -177,10 +220,7 @@ void main() {
           country: 'ES',
           state: 'Catalunya',
           city: 'Siurana',
-          coordinates: Coordinates(
-            latitude: 41.257900,
-            longitude: 0.932100,
-          ),
+          coordinates: Coordinates(latitude: 41.257900, longitude: 0.932100),
           isIndoor: false,
         );
 
@@ -209,8 +249,11 @@ void main() {
           '${testResourcesDir.path}/dart-route-json.png',
         ]);
 
-        expect(result.exitCode, equals(0),
-            reason: 'Java QR scanning failed: ${result.stderr}');
+        expect(
+          result.exitCode,
+          equals(0),
+          reason: 'Java QR scanning failed: ${result.stderr}',
+        );
 
         final output = result.stdout.toString();
         expect(output, contains('Successfully scanned QR code'));
@@ -231,10 +274,7 @@ void main() {
           country: 'DE',
           state: 'Bayern',
           city: 'Munich',
-          coordinates: Coordinates(
-            latitude: 48.135125,
-            longitude: 11.581981,
-          ),
+          coordinates: Coordinates(latitude: 48.135125, longitude: 11.581981),
           isIndoor: true,
         );
 
@@ -262,8 +302,11 @@ void main() {
           '${testResourcesDir.path}/dart-location-json.png',
         ]);
 
-        expect(result.exitCode, equals(0),
-            reason: 'Java QR scanning failed: ${result.stderr}');
+        expect(
+          result.exitCode,
+          equals(0),
+          reason: 'Java QR scanning failed: ${result.stderr}',
+        );
 
         final output = result.stdout.toString();
         expect(output, contains('Successfully scanned QR code'));
@@ -276,26 +319,8 @@ void main() {
       });
 
       test('Dart generates compact QR -> Java scans', () async {
-        // Create minimal route for compact format
-        final route = Route(
-          id: 999,
-          name: 'Compact Route',
-          grades: {'french': '7a'},
-          routeType: RouteType.route,
-          locationId: 111,
-        );
-
         // Generate compact QR with Dart
         final generator = QRGenerator();
-        
-        // Create custom compact data
-        final compactData = {
-          'v': 2,
-          'clid': 'abc-def-123', // Short form
-          'n': 'Compact Route',
-          'g': '7a',
-          'l': 'Test Location',
-        };
 
         // Generate QR from compact JSON
         final pngBytes = await generator.generatePNG(
@@ -376,7 +401,10 @@ void main() {
 
         expect(parsed, isNotNull);
         expect(parsed!.version, equals(1));
-        expect(parsed.clid, equals('clid:route:550e8400-e29b-41d4-a716-446655440000'));
+        expect(
+          parsed.clid,
+          equals('clid:route:550e8400-e29b-41d4-a716-446655440000'),
+        );
         expect(parsed.blockchainVerified, isTrue);
         expect(parsed.route, isNotNull);
         expect(parsed.route!.name, equals('Modern Route'));
@@ -388,7 +416,7 @@ void main() {
     test('Generate QR test resource gallery', () async {
       // Generate a variety of QR codes for visual testing
       final generator = QRGenerator();
-      
+
       // Test data
       final testCases = [
         {
@@ -405,11 +433,7 @@ void main() {
           'route': Route(
             id: 2,
             name: 'Full Featured Route',
-            grades: {
-              'vScale': 'V12',
-              'font': '8B+',
-              'yds': '5.14d',
-            },
+            grades: {'vScale': 'V12', 'font': '8B+', 'yds': '5.14d'},
             routeType: RouteType.boulder,
             height: 5.5,
             locationId: 2,
@@ -449,7 +473,9 @@ void main() {
           jsonData,
           QROptions(format: QRFormat.json),
         );
-        await File('${testResourcesDir.path}/$name-json.png').writeAsBytes(jsonPng);
+        await File(
+          '${testResourcesDir.path}/$name-json.png',
+        ).writeAsBytes(jsonPng);
 
         // Generate URL format QR
         final urlData = generator.generateRouteData(
@@ -461,7 +487,9 @@ void main() {
           urlData,
           QROptions(format: QRFormat.url),
         );
-        await File('${testResourcesDir.path}/$name-url.png').writeAsBytes(urlPng);
+        await File(
+          '${testResourcesDir.path}/$name-url.png',
+        ).writeAsBytes(urlPng);
 
         // Generate SVG version
         final svg = generator.generateSVG(
