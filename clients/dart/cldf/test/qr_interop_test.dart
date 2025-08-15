@@ -13,8 +13,9 @@ void main() {
     String findJavaCli() {
       // For CI environment - use relative path from dart test directory
       final relativePath = '../../../java/cldf-tool/cldf';
-      final absolutePath = '/Users/petrmacek/git-mirrors/crushlog-data-format-spec/clients/java/cldf-tool/cldf';
-      
+      final absolutePath =
+          '/Users/petrmacek/git-mirrors/crushlog-data-format-spec/clients/java/cldf-tool/cldf';
+
       // Check relative path first (for CI)
       if (File(relativePath).existsSync()) {
         print('Using Java CLI at relative path: $relativePath');
@@ -25,19 +26,20 @@ void main() {
         print('Using Java CLI at absolute path: $absolutePath');
         return absolutePath;
       }
-      
+
       // If neither exists, return the relative path and let the test fail with a clear message
       print('Expected CLI path: $relativePath');
       return relativePath;
     }
-    
+
     final javaCliPath = findJavaCli();
     final testResourcesDir = Directory('test/qr-test-resources');
-    
+
     // Helper to check if we should skip interop tests
     bool shouldSkipInterop() {
       if (!File(javaCliPath).existsSync()) {
-        final skipInterop = Platform.environment['SKIP_INTEROP_TESTS_IF_NO_CLI'] == 'true';
+        final skipInterop =
+            Platform.environment['SKIP_INTEROP_TESTS_IF_NO_CLI'] == 'true';
         if (skipInterop) {
           print('Skipping: Java CLI not available');
           return true;
@@ -51,17 +53,20 @@ void main() {
       if (!testResourcesDir.existsSync()) {
         testResourcesDir.createSync(recursive: true);
       }
-      
+
       // Check if Java CLI is available
       if (!File(javaCliPath).existsSync()) {
-        final skipInterop = Platform.environment['SKIP_INTEROP_TESTS_IF_NO_CLI'] == 'true';
+        final skipInterop =
+            Platform.environment['SKIP_INTEROP_TESTS_IF_NO_CLI'] == 'true';
         if (skipInterop) {
           print('Java CLI not found at $javaCliPath - skipping interop tests');
           return;
         }
-        throw Exception('Java CLI not found at $javaCliPath\n'
-            'Please build the Java project first: cd ../../../java && ./gradlew :cldf-tool:fatJar\n'
-            'Or set SKIP_INTEROP_TESTS_IF_NO_CLI=true to skip these tests');
+        throw Exception(
+          'Java CLI not found at $javaCliPath\n'
+          'Please build the Java project first: cd ../../../java && ./gradlew :cldf-tool:fatJar\n'
+          'Or set SKIP_INTEROP_TESTS_IF_NO_CLI=true to skip these tests',
+        );
       }
     });
 
