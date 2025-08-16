@@ -3,7 +3,8 @@ package app.crushlog.cldf.tool.utils;
 import java.io.IOException;
 import java.util.Map;
 
-import app.crushlog.cldf.tool.commands.ValidateCommand;
+import app.crushlog.cldf.tool.models.ReportFormat;
+import app.crushlog.cldf.tool.models.ValidationReport;
 
 /**
  * Formatter for validation reports in various formats. Extracted to allow proper testing without
@@ -11,21 +12,19 @@ import app.crushlog.cldf.tool.commands.ValidateCommand;
  */
 public class ValidationReportFormatter {
 
-  public String formatReport(
-      ValidateCommand.ValidationReport report, ValidateCommand.ReportFormat format)
-      throws IOException {
+  public String formatReport(ValidationReport report, ReportFormat format) throws IOException {
     switch (format) {
-      case xml:
+      case XML:
         return formatXmlReport(report);
-      case json:
+      case JSON:
         return formatJsonReport(report);
-      case text:
+      case TEXT:
       default:
         return formatTextReport(report);
     }
   }
 
-  public String formatTextReport(ValidateCommand.ValidationReport report) {
+  public String formatTextReport(ValidationReport report) {
     StringBuilder sb = new StringBuilder();
 
     sb.append("\nValidation Report\n");
@@ -38,20 +37,20 @@ public class ValidationReportFormatter {
     // Statistics
     sb.append("Statistics:\n");
     sb.append("-----------\n");
-    sb.append("  Locations: ").append(report.getStatistics().getLocations()).append("\n");
-    sb.append("  Sessions: ").append(report.getStatistics().getSessions()).append("\n");
-    sb.append("  Climbs: ").append(report.getStatistics().getClimbs()).append("\n");
-    if (report.getStatistics().getRoutes() > 0) {
-      sb.append("  Routes: ").append(report.getStatistics().getRoutes()).append("\n");
+    sb.append("  Locations: ").append(report.getStatistics().locations()).append("\n");
+    sb.append("  Sessions: ").append(report.getStatistics().sessions()).append("\n");
+    sb.append("  Climbs: ").append(report.getStatistics().climbs()).append("\n");
+    if (report.getStatistics().routes() > 0) {
+      sb.append("  Routes: ").append(report.getStatistics().routes()).append("\n");
     }
-    if (report.getStatistics().getSectors() > 0) {
-      sb.append("  Sectors: ").append(report.getStatistics().getSectors()).append("\n");
+    if (report.getStatistics().sectors() > 0) {
+      sb.append("  Sectors: ").append(report.getStatistics().sectors()).append("\n");
     }
-    if (report.getStatistics().getTags() > 0) {
-      sb.append("  Tags: ").append(report.getStatistics().getTags()).append("\n");
+    if (report.getStatistics().tags() > 0) {
+      sb.append("  Tags: ").append(report.getStatistics().tags()).append("\n");
     }
-    if (report.getStatistics().getMediaItems() > 0) {
-      sb.append("  Media Items: ").append(report.getStatistics().getMediaItems()).append("\n");
+    if (report.getStatistics().mediaItems() > 0) {
+      sb.append("  Media Items: ").append(report.getStatistics().mediaItems()).append("\n");
     }
     sb.append("\n");
 
@@ -79,13 +78,10 @@ public class ValidationReportFormatter {
     if (report.getChecksumResult() != null) {
       sb.append("Checksums:\n");
       sb.append("----------\n");
-      sb.append("  Algorithm: ").append(report.getChecksumResult().getAlgorithm()).append("\n");
-      sb.append("  Valid: ")
-          .append(report.getChecksumResult().isValid() ? "YES" : "NO")
-          .append("\n");
-      if (!report.getChecksumResult().getResults().isEmpty()) {
-        for (Map.Entry<String, Boolean> entry :
-            report.getChecksumResult().getResults().entrySet()) {
+      sb.append("  Algorithm: ").append(report.getChecksumResult().algorithm()).append("\n");
+      sb.append("  Valid: ").append(report.getChecksumResult().valid() ? "YES" : "NO").append("\n");
+      if (!report.getChecksumResult().results().isEmpty()) {
+        for (Map.Entry<String, Boolean> entry : report.getChecksumResult().results().entrySet()) {
           sb.append("  ")
               .append(entry.getValue() ? "✓" : "✗")
               .append(" ")
@@ -116,20 +112,33 @@ public class ValidationReportFormatter {
     return sb.toString();
   }
 
-  public String formatJsonReport(ValidateCommand.ValidationReport report) throws IOException {
-    // Simple JSON formatting
+  public String formatJsonReport(ValidationReport report) throws IOException {
+    // Create compact JSON (no spaces after colons)
     StringBuilder sb = new StringBuilder();
-    sb.append("{\n");
-    sb.append("  \"file\": \"").append(report.getFile()).append("\",\n");
-    sb.append("  \"timestamp\": \"").append(report.getTimestamp()).append("\",\n");
-    sb.append("  \"valid\": ").append(report.isValid()).append(",\n");
-    sb.append("  \"errors\": ").append(report.getErrors().size()).append(",\n");
-    sb.append("  \"warnings\": ").append(report.getWarnings().size()).append("\n");
+    sb.append("{");
+    sb.append("\"file\":\"").append(report.getFile()).append("\",");
+    sb.append("\"timestamp\":\"").append(report.getTimestamp()).append("\",");
+    sb.append("\"valid\":").append(report.isValid()).append(",");
+    sb.append("\"structureValid\":").append(report.isStructureValid()).append(",");
+
+    // Add statistics
+    sb.append("\"statistics\":{");
+    sb.append("\"locations\":").append(report.getStatistics().locations()).append(",");
+    sb.append("\"sessions\":").append(report.getStatistics().sessions()).append(",");
+    sb.append("\"climbs\":").append(report.getStatistics().climbs()).append(",");
+    sb.append("\"routes\":").append(report.getStatistics().routes()).append(",");
+    sb.append("\"sectors\":").append(report.getStatistics().sectors()).append(",");
+    sb.append("\"tags\":").append(report.getStatistics().tags()).append(",");
+    sb.append("\"mediaItems\":").append(report.getStatistics().mediaItems());
+    sb.append("},");
+
+    sb.append("\"errors\":").append(report.getErrors().size()).append(",");
+    sb.append("\"warnings\":").append(report.getWarnings().size());
     sb.append("}");
     return sb.toString();
   }
 
-  public String formatXmlReport(ValidateCommand.ValidationReport report) {
+  public String formatXmlReport(ValidationReport report) {
     // Simple XML formatting
     StringBuilder sb = new StringBuilder();
     sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
@@ -140,17 +149,15 @@ public class ValidationReportFormatter {
 
     sb.append("  <statistics>\n");
     sb.append("    <locations>")
-        .append(report.getStatistics().getLocations())
+        .append(report.getStatistics().locations())
         .append("</locations>\n");
-    sb.append("    <sessions>")
-        .append(report.getStatistics().getSessions())
-        .append("</sessions>\n");
-    sb.append("    <climbs>").append(report.getStatistics().getClimbs()).append("</climbs>\n");
-    sb.append("    <routes>").append(report.getStatistics().getRoutes()).append("</routes>\n");
-    sb.append("    <sectors>").append(report.getStatistics().getSectors()).append("</sectors>\n");
-    sb.append("    <tags>").append(report.getStatistics().getTags()).append("</tags>\n");
+    sb.append("    <sessions>").append(report.getStatistics().sessions()).append("</sessions>\n");
+    sb.append("    <climbs>").append(report.getStatistics().climbs()).append("</climbs>\n");
+    sb.append("    <routes>").append(report.getStatistics().routes()).append("</routes>\n");
+    sb.append("    <sectors>").append(report.getStatistics().sectors()).append("</sectors>\n");
+    sb.append("    <tags>").append(report.getStatistics().tags()).append("</tags>\n");
     sb.append("    <mediaItems>")
-        .append(report.getStatistics().getMediaItems())
+        .append(report.getStatistics().mediaItems())
         .append("</mediaItems>\n");
     sb.append("  </statistics>\n");
 

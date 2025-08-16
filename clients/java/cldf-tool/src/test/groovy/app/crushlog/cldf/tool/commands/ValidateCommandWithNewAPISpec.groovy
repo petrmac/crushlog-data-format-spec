@@ -2,25 +2,29 @@ package app.crushlog.cldf.tool.commands
 
 import spock.lang.Specification
 import app.crushlog.cldf.api.CLDFArchive
+import app.crushlog.cldf.tool.models.CommandResult
+import app.crushlog.cldf.tool.models.ReportFormat
+import app.crushlog.cldf.tool.models.ValidationReport
+import app.crushlog.cldf.tool.services.ValidationReportService
 import app.crushlog.cldf.tool.services.ValidationService
 import app.crushlog.cldf.tool.services.ValidationResult
-import app.crushlog.cldf.tool.models.CommandResult
+import app.crushlog.cldf.tool.models.Statistics
 import app.crushlog.cldf.models.*
 import app.crushlog.cldf.models.enums.*
 
 class ValidateCommandWithNewAPISpec extends Specification {
 
-    def validationService = Mock(ValidationService)
-    def command = new ValidateCommand(validationService)
+    def validationReportService = Mock(ValidationReportService)
+    def command = new ValidateCommand(validationReportService)
 
     def setup() {
         // Initialize command properties
-        command.outputFormat = app.crushlog.cldf.tool.utils.OutputFormat.text
+        command.outputFormat = app.crushlog.cldf.tool.utils.OutputFormat.TEXT
         command.quiet = false
         command.validateSchema = true
         command.validateChecksums = true
         command.validateReferences = true
-        command.reportFormat = ValidateCommand.ReportFormat.text
+        command.reportFormat = ReportFormat.TEXT
         // Initialize output handler
         command.output = new app.crushlog.cldf.tool.utils.OutputHandler(command.outputFormat, command.quiet)
     }
@@ -46,10 +50,13 @@ class ValidateCommandWithNewAPISpec extends Specification {
         command.inputFile = tempFile
 
         and:
-        validationService.validate(_) >> ValidationResult.builder()
+        validationReportService.validateFile(_, _) >> ValidationReport.builder()
+            .file(tempFile.absolutePath)
             .valid(true)
+            .structureValid(true)
             .errors([])
             .warnings([])
+            .statistics(new Statistics(0, 0, 0, 0, 0, 0, 0))
             .build()
 
         when:
@@ -69,10 +76,13 @@ class ValidateCommandWithNewAPISpec extends Specification {
         command.inputFile = tempFile
 
         and:
-        validationService.validate(_) >> ValidationResult.builder()
+        validationReportService.validateFile(_, _) >> ValidationReport.builder()
+            .file(tempFile.absolutePath)
             .valid(false)
+            .structureValid(true)
             .errors(["Missing required field: version", "Invalid date format"])
             .warnings(["Route 'Test Route' appears 2 times on 2024-01-01"])
+            .statistics(new Statistics(0, 0, 0, 0, 0, 0, 0))
             .build()
 
         when:
@@ -95,10 +105,13 @@ class ValidateCommandWithNewAPISpec extends Specification {
         command.inputFile = tempFile
 
         and:
-        validationService.validate(_) >> ValidationResult.builder()
+        validationReportService.validateFile(_, _) >> ValidationReport.builder()
+            .file(tempFile.absolutePath)
             .valid(true)
+            .structureValid(true)
             .errors([])
             .warnings(["2 climbs have dates in the future"])
+            .statistics(new Statistics(0, 0, 0, 0, 0, 0, 0))
             .build()
 
         when:
@@ -123,10 +136,13 @@ class ValidateCommandWithNewAPISpec extends Specification {
         command.strict = true
 
         and:
-        validationService.validate(_) >> ValidationResult.builder()
+        validationReportService.validateFile(_, _) >> ValidationReport.builder()
+            .file(tempFile.absolutePath)
             .valid(true)
+            .structureValid(true)
             .errors([])
             .warnings([])
+            .statistics(new Statistics(0, 0, 0, 0, 0, 0, 0))
             .build()
 
         when:
@@ -144,13 +160,16 @@ class ValidateCommandWithNewAPISpec extends Specification {
         tempFile.deleteOnExit()
         createValidArchive(tempFile)
         command.inputFile = tempFile
-        command.reportFormat = ValidateCommand.ReportFormat.json
+        command.reportFormat = ReportFormat.JSON
 
         and:
-        validationService.validate(_) >> ValidationResult.builder()
+        validationReportService.validateFile(_, _) >> ValidationReport.builder()
+            .file(tempFile.absolutePath)
             .valid(true)
+            .structureValid(true)
             .errors([])
             .warnings([])
+            .statistics(new Statistics(0, 0, 0, 0, 0, 0, 0))
             .build()
 
         when:
@@ -159,7 +178,7 @@ class ValidateCommandWithNewAPISpec extends Specification {
         then:
         result.success
         result.data != null
-        result.data instanceof ValidateCommand.ValidationReport
+        result.data instanceof ValidationReport
     }
 
     def "should format report as text by default"() {
@@ -168,13 +187,16 @@ class ValidateCommandWithNewAPISpec extends Specification {
         tempFile.deleteOnExit()
         createValidArchive(tempFile)
         command.inputFile = tempFile
-        command.reportFormat = ValidateCommand.ReportFormat.text
+        command.reportFormat = ReportFormat.TEXT
 
         and:
-        validationService.validate(_) >> ValidationResult.builder()
+        validationReportService.validateFile(_, _) >> ValidationReport.builder()
+            .file(tempFile.absolutePath)
             .valid(true)
+            .structureValid(true)
             .errors([])
             .warnings([])
+            .statistics(new Statistics(0, 0, 0, 0, 0, 0, 0))
             .build()
 
         when:
@@ -192,13 +214,16 @@ class ValidateCommandWithNewAPISpec extends Specification {
         tempFile.deleteOnExit()
         createValidArchive(tempFile)
         command.inputFile = tempFile
-        command.reportFormat = ValidateCommand.ReportFormat.xml
+        command.reportFormat = ReportFormat.XML
 
         and:
-        validationService.validate(_) >> ValidationResult.builder()
+        validationReportService.validateFile(_, _) >> ValidationReport.builder()
+            .file(tempFile.absolutePath)
             .valid(true)
+            .structureValid(true)
             .errors([])
             .warnings([])
+            .statistics(new Statistics(0, 0, 0, 0, 0, 0, 0))
             .build()
 
         when:
@@ -219,10 +244,13 @@ class ValidateCommandWithNewAPISpec extends Specification {
         command.inputFile = tempFile
 
         and:
-        validationService.validate(_) >> ValidationResult.builder()
+        validationReportService.validateFile(_, _) >> ValidationReport.builder()
+            .file(tempFile.absolutePath)
             .valid(true)
+            .structureValid(true)
             .errors([])
             .warnings([])
+            .statistics(new Statistics(2, 3, 5, 4, 0, 0, 0))
             .build()
 
         when:
@@ -244,13 +272,16 @@ class ValidateCommandWithNewAPISpec extends Specification {
         command.inputFile = tempFile
 
         and:
-        validationService.validate(_) >> ValidationResult.builder()
+        validationReportService.validateFile(_, _) >> ValidationReport.builder()
+            .file(tempFile.absolutePath)
             .valid(false)
+            .structureValid(true)
             .errors([
                 'manifest.json$.version: missing required property',
                 'climbs.json$[0].grade: invalid format'
             ])
             .warnings([])
+            .statistics(new Statistics(0, 0, 0, 0, 0, 0, 0))
             .build()
 
         when:
@@ -270,8 +301,10 @@ class ValidateCommandWithNewAPISpec extends Specification {
         command.inputFile = tempFile
 
         and: "mocked validation service returns schema errors from new API"
-        validationService.validate(_) >> ValidationResult.builder()
+        validationReportService.validateFile(_, _) >> ValidationReport.builder()
+            .file(tempFile.absolutePath)
             .valid(false)
+            .structureValid(true)
             .errors([
                 'manifest.json$: missing required property \'version\'',
                 'manifest.json$.creationDate: invalid date format',
@@ -279,6 +312,7 @@ class ValidateCommandWithNewAPISpec extends Specification {
                 'climbs.json$[0].grade: does not match pattern'
             ])
             .warnings([])
+            .statistics(new Statistics(0, 0, 0, 0, 0, 0, 0))
             .build()
 
         when:

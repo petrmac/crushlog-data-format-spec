@@ -31,7 +31,7 @@ class CLIDGeneratorSpec extends Specification {
 
 		and: "the CLID can be parsed"
 		def parsed = CLIDGenerator.parse(clid1)
-		parsed.type() == CLIDGenerator.EntityType.LOCATION
+		parsed.type() == EntityType.LOCATION
 		parsed.namespace() == "clid"
 		parsed.url() != null
 	}
@@ -70,7 +70,7 @@ class CLIDGeneratorSpec extends Specification {
 
 		and: "can be parsed"
 		def parsed = CLIDGenerator.parse(routeCLID)
-		parsed.type() == CLIDGenerator.EntityType.ROUTE
+		parsed.type() == EntityType.ROUTE
 	}
 
 	@Unroll
@@ -158,9 +158,9 @@ class CLIDGeneratorSpec extends Specification {
 
 	def "should generate unique random CLIDs"() {
 		when: "generating multiple random CLIDs"
-		def clid1 = CLIDGenerator.generateRandomCLID(CLIDGenerator.EntityType.CLIMB)
-		def clid2 = CLIDGenerator.generateRandomCLID(CLIDGenerator.EntityType.CLIMB)
-		def clid3 = CLIDGenerator.generateRandomCLID(CLIDGenerator.EntityType.SESSION)
+		def clid1 = CLIDGenerator.generateRandomCLID(EntityType.CLIMB)
+		def clid2 = CLIDGenerator.generateRandomCLID(EntityType.CLIMB)
+		def clid3 = CLIDGenerator.generateRandomCLID(EntityType.SESSION)
 
 		then: "all are unique and valid"
 		clid1 != clid2
@@ -191,9 +191,9 @@ class CLIDGeneratorSpec extends Specification {
 
 		where:
 		clid                                                    | expectedNamespace | expectedType                      | expectedUuid
-		"clid:v1:route:550e8400-e29b-41d4-a716-446655440000"      | "clid"           | CLIDGenerator.EntityType.ROUTE    | "550e8400-e29b-41d4-a716-446655440000"
-		"clid:v1:location:660e8400-e29b-41d4-a716-446655440000"   | "clid"           | CLIDGenerator.EntityType.LOCATION | "660e8400-e29b-41d4-a716-446655440000"
-		"clid:v1:climb:770e8400-e29b-41d4-a716-446655440000"      | "clid"           | CLIDGenerator.EntityType.CLIMB    | "770e8400-e29b-41d4-a716-446655440000"
+		"clid:v1:route:550e8400-e29b-41d4-a716-446655440000"      | "clid"           | EntityType.ROUTE    | "550e8400-e29b-41d4-a716-446655440000"
+		"clid:v1:location:660e8400-e29b-41d4-a716-446655440000"   | "clid"           | EntityType.LOCATION | "660e8400-e29b-41d4-a716-446655440000"
+		"clid:v1:climb:770e8400-e29b-41d4-a716-446655440000"      | "clid"           | EntityType.CLIMB    | "770e8400-e29b-41d4-a716-446655440000"
 	}
 
 	@Unroll

@@ -9,7 +9,6 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import app.crushlog.cldf.clid.RouteModel.*;
-import lombok.Getter;
 
 /**
  * CLID (CrushLog ID) Generator Generates globally unique, deterministic identifiers for climbing
@@ -23,32 +22,6 @@ public class CLIDGenerator {
   // CrushLog namespace UUID (registered for climbing data)
   public static final UUID CRUSHLOG_NAMESPACE =
       UUID.fromString("6ba7b810-9dad-11d1-80b4-00c04fd430c8");
-
-  // Valid entity types
-  @Getter
-  public enum EntityType {
-    LOCATION("location"),
-    ROUTE("route"),
-    SECTOR("sector"),
-    CLIMB("climb"),
-    SESSION("session"),
-    MEDIA("media");
-
-    private final String value;
-
-    EntityType(String value) {
-      this.value = value;
-    }
-
-    public static EntityType fromString(String value) {
-      for (EntityType type : EntityType.values()) {
-        if (type.value.equals(value)) {
-          return type;
-        }
-      }
-      throw new IllegalArgumentException("Unknown entity type: " + value);
-    }
-  }
 
   /**
    * Format a CLID with the current version
@@ -162,22 +135,6 @@ public class CLIDGenerator {
     return formatCLID(type, uuid);
   }
 
-  /** Parse a CLID into its components */
-  public static CLID parse(String clid) {
-    return CLID.fromString(clid);
-  }
-
-  /** Validate a CLID */
-  public static boolean validate(String clid) {
-    return CLID.isValid(clid);
-  }
-
-  /** Generate a short URL-safe version of the CLID */
-  public static String toShortForm(String clid) {
-    CLID parsed = parse(clid);
-    return parsed.shortForm();
-  }
-
   /** Generate UUID v5 (deterministic) from input string */
   private static UUID generateUUIDv5(String input) {
     try {
@@ -223,6 +180,38 @@ public class CLIDGenerator {
     }
 
     return new UUID(msb, lsb);
+  }
+
+  /**
+   * Validate a CLID string
+   *
+   * @param clid The CLID string to validate
+   * @return true if valid, false otherwise
+   */
+  public static boolean validate(String clid) {
+    return CLID.isValid(clid);
+  }
+
+  /**
+   * Parse a CLID string into a CLID object
+   *
+   * @param clid The CLID string to parse
+   * @return The parsed CLID object
+   * @throws IllegalArgumentException if the CLID is invalid
+   */
+  public static CLID parse(String clid) {
+    return CLID.fromString(clid);
+  }
+
+  /**
+   * Extract the short form (first 8 characters of UUID) from a CLID
+   *
+   * @param clid The full CLID string
+   * @return The 8-character short form
+   */
+  public static String toShortForm(String clid) {
+    CLID parsed = CLID.fromString(clid);
+    return parsed.shortForm();
   }
 
   /** Normalize string for consistent ID generation */

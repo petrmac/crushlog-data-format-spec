@@ -37,7 +37,7 @@ class LoadCommandSpec extends Specification {
     def setup() {
         loadCommand = new LoadCommand(mockGraphService)
         loadCommand.output = mockOutput
-        loadCommand.outputFormat = OutputFormat.text
+        loadCommand.outputFormat = OutputFormat.TEXT
     }
     
     def "should handle non-existent file"() {

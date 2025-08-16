@@ -8,15 +8,6 @@ import java.util.Map;
 public interface SchemaService {
 
   /**
-   * Creates a new instance of the default SchemaService implementation.
-   *
-   * @return a new DefaultSchemaService instance
-   */
-  static SchemaService create() {
-    return new DefaultSchemaService();
-  }
-
-  /**
    * Retrieves schema information for a specific component.
    *
    * @param componentName the name of the component (e.g., "manifest", "location", "all")

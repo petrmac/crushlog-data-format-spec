@@ -1,6 +1,5 @@
 package app.crushlog.cldf.clid
 
-import app.crushlog.cldf.clid.*
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -20,13 +19,13 @@ class CLIDSpec extends Specification {
 		clid.url() == "https://crushlog.pro/g/${expectedUuid.substring(0, 8)}"
 
 		where:
-		validClid                                               | expectedNamespace | expectedType                      | expectedUuid
-		"clid:v1:route:550e8400-e29b-41d4-a716-446655440000"      | "clid"           | CLIDGenerator.EntityType.ROUTE    | "550e8400-e29b-41d4-a716-446655440000"
-		"clid:v1:location:123e4567-e89b-12d3-a456-426614174000"   | "clid"           | CLIDGenerator.EntityType.LOCATION | "123e4567-e89b-12d3-a456-426614174000"
-		"clid:v1:sector:00000000-0000-0000-0000-000000000000"     | "clid"           | CLIDGenerator.EntityType.SECTOR   | "00000000-0000-0000-0000-000000000000"
-		"clid:v1:climb:ffffffff-ffff-ffff-ffff-ffffffffffff"      | "clid"           | CLIDGenerator.EntityType.CLIMB    | "ffffffff-ffff-ffff-ffff-ffffffffffff"
-		"clid:v1:session:abcdef12-3456-7890-abcd-ef1234567890"    | "clid"           | CLIDGenerator.EntityType.SESSION  | "abcdef12-3456-7890-abcd-ef1234567890"
-		"clid:v1:media:ABCDEF12-3456-7890-ABCD-EF1234567890"      | "clid"           | CLIDGenerator.EntityType.MEDIA    | "ABCDEF12-3456-7890-ABCD-EF1234567890"
+		validClid                                               | expectedNamespace | expectedType        | expectedUuid
+		"clid:v1:route:550e8400-e29b-41d4-a716-446655440000"    | "clid"            | EntityType.ROUTE    | "550e8400-e29b-41d4-a716-446655440000"
+		"clid:v1:location:123e4567-e89b-12d3-a456-426614174000" | "clid"            | EntityType.LOCATION | "123e4567-e89b-12d3-a456-426614174000"
+		"clid:v1:sector:00000000-0000-0000-0000-000000000000"   | "clid"            | EntityType.SECTOR   | "00000000-0000-0000-0000-000000000000"
+		"clid:v1:climb:ffffffff-ffff-ffff-ffff-ffffffffffff"    | "clid"            | EntityType.CLIMB    | "ffffffff-ffff-ffff-ffff-ffffffffffff"
+		"clid:v1:session:abcdef12-3456-7890-abcd-ef1234567890"  | "clid"            | EntityType.SESSION  | "abcdef12-3456-7890-abcd-ef1234567890"
+		"clid:v1:media:ABCDEF12-3456-7890-ABCD-EF1234567890"    | "clid"            | EntityType.MEDIA    | "ABCDEF12-3456-7890-ABCD-EF1234567890"
 	}
 
 	@Unroll
@@ -35,18 +34,18 @@ class CLIDSpec extends Specification {
 		CLID.isValid(clid) == expectedResult
 
 		where:
-		clid                                                | expectedResult
-		"clid:v1:route:550e8400-e29b-41d4-a716-446655440000"  | true
-		"clid:v1:location:123e4567-e89b-12d3-a456-426614174000"| true
-		"clid:v1:climb:abcdef12-3456-7890-abcd-ef1234567890"  | true
-		null                                                | false
-		""                                                  | false
-		"   "                                               | false
-		"invalid"                                           | false
-		"cldf:v1:route:550e8400-e29b-41d4-a716-446655440000"  | false
-		"clid:v1:invalid:550e8400-e29b-41d4-a716-446655440000"| false
-		"clid:v1:route:not-a-uuid"                            | false
-		"clid:v1:route:550e8400"                              | false
+		clid                                                    | expectedResult
+		"clid:v1:route:550e8400-e29b-41d4-a716-446655440000"    | true
+		"clid:v1:location:123e4567-e89b-12d3-a456-426614174000" | true
+		"clid:v1:climb:abcdef12-3456-7890-abcd-ef1234567890"    | true
+		null                                                    | false
+		""                                                      | false
+		"   "                                                   | false
+		"invalid"                                               | false
+		"cldf:v1:route:550e8400-e29b-41d4-a716-446655440000"    | false
+		"clid:v1:invalid:550e8400-e29b-41d4-a716-446655440000"  | false
+		"clid:v1:route:not-a-uuid"                              | false
+		"clid:v1:route:550e8400"                                | false
 	}
 
 	@Unroll
@@ -59,37 +58,37 @@ class CLIDSpec extends Specification {
 		e.message.contains(expectedMessage)
 
 		where:
-		invalidClid                                        | expectedMessage
-		null                                               | "cannot be null"
-		""                                                 | "cannot be null or empty"
-		"   "                                              | "cannot be null or empty"
-		"invalid"                                          | "Invalid CLID format"
-		"route:550e8400-e29b-41d4-a716-446655440000"      | "Invalid CLID format"
-		"clid:route"                                       | "Invalid CLID format"
-		"clid:v1:route"                                    | "Invalid CLID format"
-		"clid:route:550e8400-e29b-41d4-a716-446655440000" | "Invalid CLID format"
-		"cldf:v1:route:550e8400-e29b-41d4-a716-446655440000" | "Invalid namespace 'cldf'"
-		"xyz:v1:route:550e8400-e29b-41d4-a716-446655440000"  | "Invalid namespace 'xyz'"
-		"clid:v1:invalid:550e8400-e29b-41d4-a716-446655440000"| "Invalid entity type 'invalid'"
-		"clid:v1:ROUTE:550e8400-e29b-41d4-a716-446655440000" | "Invalid entity type 'ROUTE'"
-		"clid:v1:route:not-a-uuid"                            | "Invalid UUID format"
-		"clid:v1:route:550e8400"                              | "Invalid UUID format"
-		"clid:v1:route:g50e8400-e29b-41d4-a716-446655440000" | "Invalid UUID format"
-		"clid:v1:route:550e8400-e29b-41d4-a716"              | "Invalid UUID format"
-		"clid:v1:route:550e8400-e29b-41d4-a716-4466554400000"| "Invalid UUID format"
+		invalidClid                                            | expectedMessage
+		null                                                   | "cannot be null"
+		""                                                     | "cannot be null or empty"
+		"   "                                                  | "cannot be null or empty"
+		"invalid"                                              | "Invalid CLID format"
+		"route:550e8400-e29b-41d4-a716-446655440000"           | "Invalid CLID format"
+		"clid:route"                                           | "Invalid CLID format"
+		"clid:v1:route"                                        | "Invalid CLID format"
+		"clid:route:550e8400-e29b-41d4-a716-446655440000"      | "Invalid CLID format"
+		"cldf:v1:route:550e8400-e29b-41d4-a716-446655440000"   | "Invalid namespace 'cldf'"
+		"xyz:v1:route:550e8400-e29b-41d4-a716-446655440000"    | "Invalid namespace 'xyz'"
+		"clid:v1:invalid:550e8400-e29b-41d4-a716-446655440000" | "Invalid entity type 'invalid'"
+		"clid:v1:ROUTE:550e8400-e29b-41d4-a716-446655440000"   | "Invalid entity type 'ROUTE'"
+		"clid:v1:route:not-a-uuid"                             | "Invalid UUID format"
+		"clid:v1:route:550e8400"                               | "Invalid UUID format"
+		"clid:v1:route:g50e8400-e29b-41d4-a716-446655440000"   | "Invalid UUID format"
+		"clid:v1:route:550e8400-e29b-41d4-a716"                | "Invalid UUID format"
+		"clid:v1:route:550e8400-e29b-41d4-a716-4466554400000"  | "Invalid UUID format"
 	}
 
 	def "should handle all entity types"() {
 		given: "all entity types"
-		def entityTypes = [
-			CLIDGenerator.EntityType.LOCATION,
-			CLIDGenerator.EntityType.ROUTE,
-			CLIDGenerator.EntityType.SECTOR,
-			CLIDGenerator.EntityType.CLIMB,
-			CLIDGenerator.EntityType.SESSION,
-			CLIDGenerator.EntityType.MEDIA
-		]
 
+		def entityTypes = [
+			EntityType.LOCATION,
+			EntityType.SECTOR,
+			EntityType.ROUTE,
+			EntityType.CLIMB,
+			EntityType.SESSION,
+			EntityType.MEDIA
+		]
 		expect: "all can be parsed"
 		entityTypes.each { type ->
 			def clid = "clid:v1:${type.value}:550e8400-e29b-41d4-a716-446655440000"

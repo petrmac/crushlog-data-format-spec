@@ -170,7 +170,8 @@ public class PureJavaImageReader {
   }
 
   /** Apply PNG filter to scanline data. */
-  private void applyFilter(byte[] current, byte[] previous, int filterType, int bytesPerPixel) {
+  private void applyFilter(byte[] current, byte[] previous, int filterType, int bytesPerPixel)
+      throws IOException {
     switch (filterType) {
       case 0: // None
         break;
@@ -199,6 +200,8 @@ public class PureJavaImageReader {
           current[i] = (byte) ((current[i] + paethPredictor(left, up, upLeft)) & 0xFF);
         }
         break;
+      default:
+        throw new IOException("Unknown PNG filter type: " + filterType);
     }
   }
 

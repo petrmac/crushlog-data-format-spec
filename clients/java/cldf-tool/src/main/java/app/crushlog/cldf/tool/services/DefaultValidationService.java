@@ -57,96 +57,72 @@ public class DefaultValidationService implements ValidationService {
   private void validateSchemas(CLDFArchive archive, List<String> errors) {
     SchemaValidator schemaValidator = new SchemaValidator();
 
-    // Validate manifest
+    validateManifestSchema(schemaValidator, archive, errors);
+    validateCoreDataSchemas(schemaValidator, archive, errors);
+    validateOptionalDataSchemas(schemaValidator, archive, errors);
+  }
+
+  /** Validates the manifest schema. */
+  private void validateManifestSchema(
+      SchemaValidator validator, CLDFArchive archive, List<String> errors) {
     if (archive.getManifest() != null) {
-      app.crushlog.cldf.api.ValidationResult result =
-          schemaValidator.validateObjectWithResult("manifest.json", archive.getManifest());
-      if (!result.valid()) {
-        for (app.crushlog.cldf.api.ValidationResult.ValidationError error : result.errors()) {
-          errors.add(String.format("manifest.json%s: %s", error.path(), error.message()));
-        }
-      }
+      validateObjectSchema(validator, "manifest.json", archive.getManifest(), errors);
     }
+  }
 
-    // Validate locations
+  /** Validates core data schemas (locations, sessions, climbs). */
+  private void validateCoreDataSchemas(
+      SchemaValidator validator, CLDFArchive archive, List<String> errors) {
     if (archive.getLocations() != null && !archive.getLocations().isEmpty()) {
-      app.crushlog.cldf.api.ValidationResult result =
-          schemaValidator.validateObjectWithResult(
-              "locations.json", LocationsFile.builder().locations(archive.getLocations()).build());
-      if (!result.valid()) {
-        for (app.crushlog.cldf.api.ValidationResult.ValidationError error : result.errors()) {
-          errors.add(String.format("locations.json%s: %s", error.path(), error.message()));
-        }
-      }
+      LocationsFile locationsFile =
+          LocationsFile.builder().locations(archive.getLocations()).build();
+      validateObjectSchema(validator, "locations.json", locationsFile, errors);
     }
 
-    // Validate sessions
     if (archive.getSessions() != null && !archive.getSessions().isEmpty()) {
-      app.crushlog.cldf.api.ValidationResult result =
-          schemaValidator.validateObjectWithResult(
-              "sessions.json", SessionsFile.builder().sessions(archive.getSessions()).build());
-      if (!result.valid()) {
-        for (app.crushlog.cldf.api.ValidationResult.ValidationError error : result.errors()) {
-          errors.add(String.format("sessions.json%s: %s", error.path(), error.message()));
-        }
-      }
+      SessionsFile sessionsFile = SessionsFile.builder().sessions(archive.getSessions()).build();
+      validateObjectSchema(validator, "sessions.json", sessionsFile, errors);
     }
 
-    // Validate climbs
     if (archive.getClimbs() != null && !archive.getClimbs().isEmpty()) {
-      app.crushlog.cldf.api.ValidationResult result =
-          schemaValidator.validateObjectWithResult(
-              "climbs.json", ClimbsFile.builder().climbs(archive.getClimbs()).build());
-      if (!result.valid()) {
-        for (app.crushlog.cldf.api.ValidationResult.ValidationError error : result.errors()) {
-          errors.add(String.format("climbs.json%s: %s", error.path(), error.message()));
-        }
-      }
+      ClimbsFile climbsFile = ClimbsFile.builder().climbs(archive.getClimbs()).build();
+      validateObjectSchema(validator, "climbs.json", climbsFile, errors);
     }
+  }
 
-    // Validate optional files
+  /** Validates optional data schemas (routes, sectors, tags, media). */
+  private void validateOptionalDataSchemas(
+      SchemaValidator validator, CLDFArchive archive, List<String> errors) {
     if (archive.hasRoutes()) {
-      app.crushlog.cldf.api.ValidationResult result =
-          schemaValidator.validateObjectWithResult(
-              "routes.json", RoutesFile.builder().routes(archive.getRoutes()).build());
-      if (!result.valid()) {
-        for (app.crushlog.cldf.api.ValidationResult.ValidationError error : result.errors()) {
-          errors.add(String.format("routes.json%s: %s", error.path(), error.message()));
-        }
-      }
+      RoutesFile routesFile = RoutesFile.builder().routes(archive.getRoutes()).build();
+      validateObjectSchema(validator, "routes.json", routesFile, errors);
     }
 
     if (archive.hasSectors()) {
-      app.crushlog.cldf.api.ValidationResult result =
-          schemaValidator.validateObjectWithResult(
-              "sectors.json", SectorsFile.builder().sectors(archive.getSectors()).build());
-      if (!result.valid()) {
-        for (app.crushlog.cldf.api.ValidationResult.ValidationError error : result.errors()) {
-          errors.add(String.format("sectors.json%s: %s", error.path(), error.message()));
-        }
-      }
+      SectorsFile sectorsFile = SectorsFile.builder().sectors(archive.getSectors()).build();
+      validateObjectSchema(validator, "sectors.json", sectorsFile, errors);
     }
 
     if (archive.hasTags()) {
-      app.crushlog.cldf.api.ValidationResult result =
-          schemaValidator.validateObjectWithResult(
-              "tags.json", TagsFile.builder().tags(archive.getTags()).build());
-      if (!result.valid()) {
-        for (app.crushlog.cldf.api.ValidationResult.ValidationError error : result.errors()) {
-          errors.add(String.format("tags.json%s: %s", error.path(), error.message()));
-        }
-      }
+      TagsFile tagsFile = TagsFile.builder().tags(archive.getTags()).build();
+      validateObjectSchema(validator, "tags.json", tagsFile, errors);
     }
 
     if (archive.hasMedia()) {
-      app.crushlog.cldf.api.ValidationResult result =
-          schemaValidator.validateObjectWithResult(
-              "media-metadata.json",
-              MediaMetadataFile.builder().media(archive.getMediaItems()).build());
-      if (!result.valid()) {
-        for (app.crushlog.cldf.api.ValidationResult.ValidationError error : result.errors()) {
-          errors.add(String.format("media-metadata.json%s: %s", error.path(), error.message()));
-        }
+      MediaMetadataFile mediaFile =
+          MediaMetadataFile.builder().media(archive.getMediaItems()).build();
+      validateObjectSchema(validator, "media-metadata.json", mediaFile, errors);
+    }
+  }
+
+  /** Generic helper method to validate an object against its schema and collect errors. */
+  private void validateObjectSchema(
+      SchemaValidator validator, String filename, Object object, List<String> errors) {
+    app.crushlog.cldf.api.ValidationResult result =
+        validator.validateObjectWithResult(filename, object);
+    if (!result.valid()) {
+      for (app.crushlog.cldf.api.ValidationResult.ValidationError error : result.errors()) {
+        errors.add(String.format("%s%s: %s", filename, error.path(), error.message()));
       }
     }
   }

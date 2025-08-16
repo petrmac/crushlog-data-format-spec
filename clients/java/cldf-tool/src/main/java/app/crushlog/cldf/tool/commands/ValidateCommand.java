@@ -3,21 +3,16 @@ package app.crushlog.cldf.tool.commands;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.time.OffsetDateTime;
-import java.util.Map;
-import java.util.TreeMap;
 
 import jakarta.inject.Inject;
 
-import app.crushlog.cldf.api.CLDF;
-import app.crushlog.cldf.api.CLDFArchive;
+import app.crushlog.cldf.tool.converters.ReportFormatConverter;
 import app.crushlog.cldf.tool.models.CommandResult;
-import app.crushlog.cldf.tool.services.ValidationResult;
-import app.crushlog.cldf.tool.services.ValidationService;
-import app.crushlog.cldf.tool.utils.ConsoleUtils;
+import app.crushlog.cldf.tool.models.ReportFormat;
+import app.crushlog.cldf.tool.models.ValidationReport;
+import app.crushlog.cldf.tool.services.ValidationReportService;
+import app.crushlog.cldf.tool.services.ValidationReportService.ValidationOptions;
 import app.crushlog.cldf.tool.utils.ValidationReportFormatter;
-import lombok.Builder;
-import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -47,32 +42,27 @@ public class ValidateCommand extends BaseCommand {
 
   @Option(
       names = "--report-format",
-      description = "Output format: ${COMPLETION-CANDIDATES}",
-      defaultValue = "text")
+      description = "Output format: text, json, xml (case-insensitive)",
+      defaultValue = "text",
+      converter = ReportFormatConverter.class)
   private ReportFormat reportFormat;
 
   @Option(names = "--output", description = "Output file for report (stdout if not specified)")
   private File outputFile;
 
-  private final ValidationService validationService;
+  private final ValidationReportService validationReportService;
   private final ValidationReportFormatter formatter;
 
   @Inject
-  public ValidateCommand(ValidationService validationService) {
-    this.validationService = validationService;
+  public ValidateCommand(ValidationReportService validationReportService) {
+    this.validationReportService = validationReportService;
     this.formatter = new ValidationReportFormatter();
   }
 
   // For tests that only need CLI parsing (e.g., help text)
   public ValidateCommand() {
-    this.validationService = null;
+    this.validationReportService = null;
     this.formatter = new ValidationReportFormatter();
-  }
-
-  public enum ReportFormat {
-    text,
-    json,
-    xml
   }
 
   @Override
@@ -85,24 +75,26 @@ public class ValidateCommand extends BaseCommand {
           .build();
     }
 
+    logInfo("Validating: " + inputFile.getName());
+
+    // If strict mode is enabled, enable all validations
     if (strict) {
       validateSchema = true;
       validateChecksums = true;
       validateReferences = true;
     }
 
-    logInfo("Validating: " + inputFile.getName());
+    // Create validation options from command flags
+    ValidationOptions options =
+        ValidationOptions.fromFlags(validateSchema, validateChecksums, validateReferences, strict);
 
     try {
-      // Read the archive
-      CLDFArchive archive = CLDF.read(inputFile);
-
-      // Perform validation
-      ValidationReport report = performValidation(archive);
+      // Perform validation using the service
+      ValidationReport report = validationReportService.validateFile(inputFile, options);
 
       // Build result based on report format
-      if (reportFormat == ReportFormat.json
-          || outputFormat == app.crushlog.cldf.tool.utils.OutputFormat.json) {
+      if (reportFormat == ReportFormat.JSON
+          || outputFormat == app.crushlog.cldf.tool.utils.OutputFormat.JSON) {
         return CommandResult.builder()
             .success(report.isValid())
             .message(report.isValid() ? "Validation passed" : "Validation failed")
@@ -111,7 +103,7 @@ public class ValidateCommand extends BaseCommand {
             .build();
       } else {
         // For text/xml format, we'll handle output in outputText method
-        String formattedReport = formatReport(report);
+        String formattedReport = formatter.formatReport(report, reportFormat);
         return CommandResult.builder()
             .success(report.isValid())
             .message(formattedReport)
@@ -119,52 +111,12 @@ public class ValidateCommand extends BaseCommand {
             .build();
       }
     } catch (IOException e) {
-      // Handle various validation errors from CLDFReader
-      String errorMessage = e.getMessage();
-      String errorType = "Validation failed";
-
-      if (errorMessage.contains("Schema validation failed")) {
-        errorType = "Schema validation failed";
-      } else if (errorMessage.contains("Checksum mismatch")) {
-        errorType = "Checksum validation failed";
-      } else if (errorMessage.contains("Missing required file")) {
-        errorType = "Archive structure validation failed";
-      }
-
-      ValidationReport errorReport =
-          ValidationReport.builder()
-              .timestamp(OffsetDateTime.now())
-              .file(inputFile.getName())
-              .valid(false)
-              .errors(java.util.Arrays.asList(errorType + ": " + errorMessage))
-              .warnings(new java.util.ArrayList<>())
-              .statistics(
-                  Statistics.builder()
-                      .locations(0)
-                      .sessions(0)
-                      .climbs(0)
-                      .routes(0)
-                      .sectors(0)
-                      .tags(0)
-                      .mediaItems(0)
-                      .build())
-              .build();
-
-      if (reportFormat == ReportFormat.json
-          || outputFormat == app.crushlog.cldf.tool.utils.OutputFormat.json) {
-        return CommandResult.builder()
-            .success(false)
-            .message(errorType)
-            .data(errorReport)
-            .exitCode(1)
-            .build();
-      } else {
-        return CommandResult.builder()
-            .success(false)
-            .message(formatReport(errorReport))
-            .exitCode(1)
-            .build();
-      }
+      log.error("Validation failed", e);
+      return CommandResult.builder()
+          .success(false)
+          .message("Validation failed: " + e.getMessage())
+          .exitCode(1)
+          .build();
     }
   }
 
@@ -183,101 +135,5 @@ public class ValidateCommand extends BaseCommand {
     }
   }
 
-  private ValidationReport performValidation(CLDFArchive archive) throws IOException {
-    ValidationReport.ValidationReportBuilder reportBuilder = ValidationReport.builder();
-    reportBuilder.timestamp(OffsetDateTime.now());
-    reportBuilder.file(inputFile.getName());
-
-    // Basic validation
-    ValidationResult result = validationService.validate(archive);
-    reportBuilder.structureValid(result.isValid());
-    reportBuilder.errors(result.getErrors());
-    reportBuilder.warnings(result.getWarnings());
-
-    // Checksum validation
-    if (validateChecksums && archive.getChecksums() != null) {
-      ChecksumResult checksumResult = validateChecksums(archive);
-      reportBuilder.checksumResult(checksumResult);
-    }
-
-    // Statistics
-    reportBuilder.statistics(gatherStatistics(archive));
-
-    ValidationReport report = reportBuilder.build();
-    report.setValid(
-        result.isValid()
-            && (report.getChecksumResult() == null || report.getChecksumResult().isValid()));
-
-    return report;
-  }
-
-  private ChecksumResult validateChecksums(CLDFArchive archive) {
-    if (!quiet) {
-      ConsoleUtils.printSection("Checksum Validation");
-    }
-
-    ChecksumResult result =
-        ChecksumResult.builder()
-            .algorithm(archive.getChecksums().getAlgorithm())
-            .results(new TreeMap<>())
-            .build();
-
-    // Note: In a real implementation, we would need to access the actual file contents
-    // from the ZIP archive to calculate checksums. For now, we'll simulate this.
-    logWarning("Checksum validation not fully implemented");
-
-    result.setValid(true);
-    return result;
-  }
-
-  private Statistics gatherStatistics(CLDFArchive archive) {
-    return Statistics.builder()
-        .locations(archive.getLocations() != null ? archive.getLocations().size() : 0)
-        .sessions(archive.getSessions() != null ? archive.getSessions().size() : 0)
-        .climbs(archive.getClimbs() != null ? archive.getClimbs().size() : 0)
-        .routes(archive.hasRoutes() ? archive.getRoutes().size() : 0)
-        .sectors(archive.hasSectors() ? archive.getSectors().size() : 0)
-        .tags(archive.hasTags() ? archive.getTags().size() : 0)
-        .mediaItems(archive.hasMedia() ? archive.getMediaItems().size() : 0)
-        .build();
-  }
-
-  private String formatReport(ValidationReport report) throws IOException {
-    return formatter.formatReport(report, reportFormat);
-  }
-
-  // Formatting methods moved to ValidationReportFormatter
-
-  @Data
-  @Builder
-  public static class ValidationReport {
-    private String file;
-    private OffsetDateTime timestamp;
-    private boolean valid;
-    private boolean structureValid;
-    private ChecksumResult checksumResult;
-    private Statistics statistics;
-    private java.util.List<String> errors;
-    private java.util.List<String> warnings;
-  }
-
-  @Data
-  @Builder
-  public static class ChecksumResult {
-    private String algorithm;
-    private boolean valid;
-    private Map<String, Boolean> results;
-  }
-
-  @Data
-  @Builder
-  public static class Statistics {
-    private int locations;
-    private int sessions;
-    private int climbs;
-    private int routes;
-    private int sectors;
-    private int tags;
-    private int mediaItems;
-  }
+  // All validation logic has been moved to ValidationReportService
 }

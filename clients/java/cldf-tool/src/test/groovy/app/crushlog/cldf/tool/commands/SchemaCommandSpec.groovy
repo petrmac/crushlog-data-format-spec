@@ -17,7 +17,7 @@ class SchemaCommandSpec extends Specification {
         mockSchemaService = Mock(SchemaService)
         command = new SchemaCommand(mockSchemaService)
         mockOutput = Mock(OutputHandler)
-        command.outputFormat = OutputFormat.json
+        command.outputFormat = OutputFormat.JSON
         command.output = mockOutput
     }
 
@@ -124,7 +124,7 @@ class SchemaCommandSpec extends Specification {
     def "should output text format correctly"() {
         given:
         command.component = "enums"
-        command.outputFormat = OutputFormat.text
+        command.outputFormat = OutputFormat.TEXT
         command.output = mockOutput
         def mockData = [
             enums: [

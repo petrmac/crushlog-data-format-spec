@@ -8,6 +8,7 @@ import java.util.stream.Stream;
 import app.crushlog.cldf.api.CLDFArchive;
 import app.crushlog.cldf.clid.CLID;
 import app.crushlog.cldf.clid.CLIDGenerator;
+import app.crushlog.cldf.clid.EntityType;
 import app.crushlog.cldf.clid.RouteModel;
 import app.crushlog.cldf.models.*;
 import lombok.Builder;
@@ -80,7 +81,7 @@ public class CLIDService {
                         validateAndRegister(
                             clid,
                             location,
-                            CLIDGenerator.EntityType.LOCATION,
+                            EntityType.LOCATION,
                             "Location",
                             location.getName(),
                             context),
@@ -105,12 +106,7 @@ public class CLIDService {
                   () -> generateRouteCLID(route, locationCLID),
                   clid ->
                       validateAndRegister(
-                          clid,
-                          route,
-                          CLIDGenerator.EntityType.ROUTE,
-                          "Route",
-                          route.getName(),
-                          context),
+                          clid, route, EntityType.ROUTE, "Route", route.getName(), context),
                   route::setClid,
                   context);
             })
@@ -133,12 +129,7 @@ public class CLIDService {
                   () -> generateSectorCLID(sector, locationCLID),
                   clid ->
                       validateAndRegister(
-                          clid,
-                          sector,
-                          CLIDGenerator.EntityType.SECTOR,
-                          "Sector",
-                          sector.getName(),
-                          context),
+                          clid, sector, EntityType.SECTOR, "Sector", sector.getName(), context),
                   sector::setClid,
                   context);
             })
@@ -157,12 +148,12 @@ public class CLIDService {
             climb ->
                 processEntity(
                     climb.getClid(),
-                    () -> CLIDGenerator.generateRandomCLID(CLIDGenerator.EntityType.CLIMB),
+                    () -> CLIDGenerator.generateRandomCLID(EntityType.CLIMB),
                     clid ->
                         validateAndRegister(
                             clid,
                             climb,
-                            CLIDGenerator.EntityType.CLIMB,
+                            EntityType.CLIMB,
                             "Climb",
                             getClimbIdentifier(climb),
                             context),
@@ -183,12 +174,12 @@ public class CLIDService {
             session ->
                 processEntity(
                     session.getClid(),
-                    () -> CLIDGenerator.generateRandomCLID(CLIDGenerator.EntityType.SESSION),
+                    () -> CLIDGenerator.generateRandomCLID(EntityType.SESSION),
                     clid ->
                         validateAndRegister(
                             clid,
                             session,
-                            CLIDGenerator.EntityType.SESSION,
+                            EntityType.SESSION,
                             "Session",
                             getSessionIdentifier(session),
                             context),
@@ -231,7 +222,7 @@ public class CLIDService {
   private boolean validateAndRegister(
       String clid,
       Object entity,
-      CLIDGenerator.EntityType expectedType,
+      EntityType expectedType,
       String entityName,
       String identifier,
       ProcessingContext context) {
@@ -250,7 +241,7 @@ public class CLIDService {
 
   private String generateLocationCLID(Location location) {
     if (!canGenerateDeterministicLocationCLID(location)) {
-      return CLIDGenerator.generateRandomCLID(CLIDGenerator.EntityType.LOCATION);
+      return CLIDGenerator.generateRandomCLID(EntityType.LOCATION);
     }
 
     app.crushlog.cldf.clid.Location genLocation =
@@ -267,7 +258,7 @@ public class CLIDService {
 
   private String generateRouteCLID(Route route, String locationCLID) {
     if (!canGenerateDeterministicRouteCLID(route) || locationCLID == null) {
-      return CLIDGenerator.generateRandomCLID(CLIDGenerator.EntityType.ROUTE);
+      return CLIDGenerator.generateRandomCLID(EntityType.ROUTE);
     }
 
     String grade =
@@ -280,7 +271,7 @@ public class CLIDService {
             .orElse(null);
 
     if (grade == null) {
-      return CLIDGenerator.generateRandomCLID(CLIDGenerator.EntityType.ROUTE);
+      return CLIDGenerator.generateRandomCLID(EntityType.ROUTE);
     }
 
     RouteModel.RouteType genType =
@@ -307,7 +298,7 @@ public class CLIDService {
 
   private String generateSectorCLID(Sector sector, String locationCLID) {
     if (locationCLID == null || sector.getName() == null) {
-      return CLIDGenerator.generateRandomCLID(CLIDGenerator.EntityType.SECTOR);
+      return CLIDGenerator.generateRandomCLID(EntityType.SECTOR);
     }
 
     app.crushlog.cldf.clid.Sector genSector =
@@ -331,7 +322,7 @@ public class CLIDService {
   }
 
   private void validateCLID(
-      String clid, CLIDGenerator.EntityType expectedType, String entityName, String identifier) {
+      String clid, EntityType expectedType, String entityName, String identifier) {
     try {
       CLID parsed = CLID.fromString(clid);
 

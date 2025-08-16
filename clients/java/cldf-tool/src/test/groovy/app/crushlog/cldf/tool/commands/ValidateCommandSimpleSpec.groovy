@@ -1,23 +1,27 @@
 package app.crushlog.cldf.tool.commands
 
 import spock.lang.Specification
+import app.crushlog.cldf.tool.models.CommandResult
+import app.crushlog.cldf.tool.models.ReportFormat
+import app.crushlog.cldf.tool.models.ValidationReport
+import app.crushlog.cldf.tool.models.Statistics
+import app.crushlog.cldf.tool.services.ValidationReportService
 import app.crushlog.cldf.tool.services.ValidationService
 import app.crushlog.cldf.tool.services.ValidationResult
-import app.crushlog.cldf.tool.models.CommandResult
 
 class ValidateCommandSimpleSpec extends Specification {
 
-    def validationService = Mock(ValidationService)
-    def command = new ValidateCommand(validationService)
+    def validationReportService = Mock(ValidationReportService)
+    def command = new ValidateCommand(validationReportService)
 
     def setup() {
         // Initialize command properties
-        command.outputFormat = app.crushlog.cldf.tool.utils.OutputFormat.text
+        command.outputFormat = app.crushlog.cldf.tool.utils.OutputFormat.TEXT
         command.quiet = false
         command.validateSchema = true
         command.validateChecksums = false // Disable checksum validation for tests
         command.validateReferences = true
-        command.reportFormat = ValidateCommand.ReportFormat.text
+        command.reportFormat = ReportFormat.TEXT
         // Initialize output handler
         command.output = new app.crushlog.cldf.tool.utils.OutputHandler(command.outputFormat, command.quiet)
     }
@@ -44,8 +48,10 @@ class ValidateCommandSimpleSpec extends Specification {
         command.inputFile = tempFile
 
         and: "mocked validation service returns schema errors"
-        validationService.validate(_) >> ValidationResult.builder()
+        validationReportService.validateFile(_, _) >> ValidationReport.builder()
+            .file(tempFile.absolutePath)
             .valid(false)
+            .structureValid(true)
             .errors([
                 'manifest.json$: missing required property \'version\'',
                 'manifest.json$.creationDate: invalid date format',
@@ -53,6 +59,7 @@ class ValidateCommandSimpleSpec extends Specification {
                 'climbs.json$[0].grade: does not match pattern'
             ])
             .warnings(['2 climbs have dates in the future'])
+            .statistics(new Statistics(0, 0, 0, 0, 0, 0, 0))
             .build()
 
         when:
@@ -77,10 +84,13 @@ class ValidateCommandSimpleSpec extends Specification {
         command.inputFile = tempFile
 
         and:
-        validationService.validate(_) >> ValidationResult.builder()
+        validationReportService.validateFile(_, _) >> ValidationReport.builder()
+            .file(tempFile.absolutePath)
             .valid(true)
+            .structureValid(true)
             .errors([])
             .warnings([])
+            .statistics(new Statistics(0, 0, 0, 0, 0, 0, 0))
             .build()
 
         when:
@@ -98,13 +108,16 @@ class ValidateCommandSimpleSpec extends Specification {
         tempFile.deleteOnExit()
         createValidCLDF(tempFile)
         command.inputFile = tempFile
-        command.reportFormat = ValidateCommand.ReportFormat.json
+        command.reportFormat = ReportFormat.JSON
 
         and:
-        validationService.validate(_) >> ValidationResult.builder()
+        validationReportService.validateFile(_, _) >> ValidationReport.builder()
+            .file(tempFile.absolutePath)
             .valid(false)
+            .structureValid(true)
             .errors(['Error 1', 'Error 2'])
             .warnings(['Warning 1'])
+            .statistics(new Statistics(0, 0, 0, 0, 0, 0, 0))
             .build()
 
         when:
@@ -113,7 +126,7 @@ class ValidateCommandSimpleSpec extends Specification {
         then:
         !result.success
         result.data != null
-        result.data instanceof ValidateCommand.ValidationReport
+        result.data instanceof ValidationReport
         result.data.errors == ['Error 1', 'Error 2']
         result.data.warnings == ['Warning 1']
     }
@@ -130,10 +143,13 @@ class ValidateCommandSimpleSpec extends Specification {
         command.strict = true
 
         and:
-        validationService.validate(_) >> ValidationResult.builder()
+        validationReportService.validateFile(_, _) >> ValidationReport.builder()
+            .file(tempFile.absolutePath)
             .valid(true)
+            .structureValid(true)
             .errors([])
             .warnings([])
+            .statistics(new Statistics(0, 0, 0, 0, 0, 0, 0))
             .build()
 
         when:

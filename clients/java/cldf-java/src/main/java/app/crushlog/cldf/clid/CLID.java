@@ -9,7 +9,7 @@ import lombok.NonNull;
 public record CLID(
     @NonNull String namespace,
     @NonNull String version,
-    @NonNull CLIDGenerator.EntityType type,
+    @NonNull EntityType type,
     @NonNull String uuid,
     @NonNull String fullId,
     @NonNull String shortForm,
@@ -48,13 +48,13 @@ public record CLID(
     }
 
     // Validate entity type
-    CLIDGenerator.EntityType entityType;
+    EntityType entityType;
     try {
-      entityType = CLIDGenerator.EntityType.fromString(parts[2]);
+      entityType = EntityType.fromString(parts[2]);
     } catch (IllegalArgumentException e) {
       throw new IllegalArgumentException(
           "Invalid entity type '%s'. Valid types: %s"
-              .formatted(parts[2], java.util.Arrays.toString(CLIDGenerator.EntityType.values())));
+              .formatted(parts[2], java.util.Arrays.toString(EntityType.values())));
     }
 
     // Validate UUID format

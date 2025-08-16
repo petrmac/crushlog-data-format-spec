@@ -34,7 +34,7 @@ public class OutputHandler {
 
   public void writeResult(CommandResult result) {
     try {
-      if (format == OutputFormat.json) {
+      if (format == OutputFormat.JSON) {
         out.println(jsonMapper.writeValueAsString(result));
       } else {
         if (result.getMessage() != null) {
@@ -49,7 +49,7 @@ public class OutputHandler {
 
   public void writeError(ErrorResponse error) {
     try {
-      if (format == OutputFormat.json) {
+      if (format == OutputFormat.JSON) {
         err.println(jsonMapper.writeValueAsString(error));
       } else {
         err.println("Error: " + error.getError().getMessage());
@@ -64,7 +64,7 @@ public class OutputHandler {
   }
 
   public void writeError(String message) {
-    if (format == OutputFormat.json) {
+    if (format == OutputFormat.JSON) {
       ErrorResponse error =
           ErrorResponse.builder()
               .success(false)
@@ -77,19 +77,19 @@ public class OutputHandler {
   }
 
   public void writeInfo(String message) {
-    if (!quiet && format != OutputFormat.json) {
+    if (!quiet && format != OutputFormat.JSON) {
       err.println(message);
     }
   }
 
   public void writeWarning(String message) {
-    if (!quiet && format != OutputFormat.json) {
+    if (!quiet && format != OutputFormat.JSON) {
       err.println("Warning: " + message);
     }
   }
 
   public void writeDebug(String message) {
-    if (!quiet && format != OutputFormat.json) {
+    if (!quiet && format != OutputFormat.JSON) {
       log.debug(message);
     }
   }
@@ -116,6 +116,6 @@ public class OutputHandler {
   }
 
   public boolean isJsonFormat() {
-    return format == OutputFormat.json;
+    return format == OutputFormat.JSON;
   }
 }

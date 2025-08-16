@@ -4,7 +4,9 @@ import spock.lang.Specification
 import app.crushlog.cldf.api.CLDFArchive
 import app.crushlog.cldf.models.*
 import app.crushlog.cldf.models.enums.*
-import app.crushlog.cldf.tool.services.ValidationService
+import app.crushlog.cldf.tool.models.ReportFormat
+import app.crushlog.cldf.tool.models.ValidationReport
+import app.crushlog.cldf.tool.services.ValidationReportService
 import app.crushlog.cldf.tool.utils.OutputFormat
 import app.crushlog.cldf.tool.utils.OutputHandler
 import io.micronaut.context.ApplicationContext
@@ -12,16 +14,16 @@ import io.micronaut.context.ApplicationContext
 class ValidateCommandIntegrationSpec extends Specification {
 
     def applicationContext = ApplicationContext.run()
-    def validationService = applicationContext.getBean(ValidationService)
-    def command = new ValidateCommand(validationService)
+    def validationReportService = applicationContext.getBean(ValidationReportService)
+    def command = new ValidateCommand(validationReportService)
 
     def setup() {
-        command.outputFormat = OutputFormat.text
+        command.outputFormat = OutputFormat.TEXT
         command.quiet = false
         command.validateSchema = false // Disable schema validation by default
         command.validateChecksums = false // Disable checksum validation by default  
         command.validateReferences = true
-        command.reportFormat = ValidateCommand.ReportFormat.text
+        command.reportFormat = ReportFormat.TEXT
         command.output = new OutputHandler(command.outputFormat, command.quiet)
     }
 
@@ -135,7 +137,7 @@ class ValidateCommandIntegrationSpec extends Specification {
 
     def "should format output as JSON when requested"() {
         given: "JSON output requested"
-        command.reportFormat = ValidateCommand.ReportFormat.json
+        command.reportFormat = ReportFormat.JSON
         
         and: "a valid archive"
         def tempFile = File.createTempFile("test", ".cldf")
@@ -149,7 +151,7 @@ class ValidateCommandIntegrationSpec extends Specification {
         then:
         result.success
         result.data != null
-        result.data instanceof ValidateCommand.ValidationReport
+        result.data instanceof ValidationReport
     }
 
     def "should enable all validations in strict mode"() {

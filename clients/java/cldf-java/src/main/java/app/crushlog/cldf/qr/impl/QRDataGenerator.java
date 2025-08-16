@@ -8,6 +8,7 @@ import java.util.Objects;
 
 import app.crushlog.cldf.clid.CLID;
 import app.crushlog.cldf.clid.CLIDGenerator;
+import app.crushlog.cldf.clid.EntityType;
 import app.crushlog.cldf.models.Location;
 import app.crushlog.cldf.models.Route;
 import app.crushlog.cldf.models.enums.RouteType;
@@ -26,12 +27,22 @@ public class QRDataGenerator {
 
   private static final String PROTOCOL_VERSION = "1";
   private static final String DEFAULT_BASE_URL = "https://crushlog.pro";
+  private static final String ROUTE_NULL_ERROR = "Route cannot be null";
+  private static final String LOCATION_NULL_ERROR = "Location cannot be null";
+  private static final String OPTIONS_NULL_ERROR = "Options cannot be null";
+  private static final String GRADE_VALUE_KEY = "value";
+  private static final String GRADE_SYSTEM_KEY = "system";
+  private static final String VSCALE_SYSTEM = "vScale";
+  private static final String FONT_SYSTEM = "font";
+  private static final String YDS_SYSTEM = "yds";
+  private static final String FRENCH_SYSTEM = "french";
+  private static final String UIAA_SYSTEM = "uiaa";
   private final ObjectMapper objectMapper = new ObjectMapper();
 
   /** Generate QR code data for a route. */
   public QRCodeData generateRouteData(Route route, QROptions options) {
-    Objects.requireNonNull(route, "Route cannot be null");
-    Objects.requireNonNull(options, "Options cannot be null");
+    Objects.requireNonNull(route, ROUTE_NULL_ERROR);
+    Objects.requireNonNull(options, OPTIONS_NULL_ERROR);
 
     String routeClid = ensureClid(route);
     String baseUrl = options.getBaseUrl() != null ? options.getBaseUrl() : DEFAULT_BASE_URL;
@@ -59,8 +70,8 @@ public class QRDataGenerator {
 
   /** Generate QR code data for a location. */
   public QRCodeData generateLocationData(Location location, QROptions options) {
-    Objects.requireNonNull(location, "Location cannot be null");
-    Objects.requireNonNull(options, "Options cannot be null");
+    Objects.requireNonNull(location, LOCATION_NULL_ERROR);
+    Objects.requireNonNull(options, OPTIONS_NULL_ERROR);
 
     String locationClid = ensureLocationClid(location);
     String baseUrl = options.getBaseUrl() != null ? options.getBaseUrl() : DEFAULT_BASE_URL;
@@ -136,9 +147,11 @@ public class QRDataGenerator {
       Map<String, String> gradeInfo = extractGradeWithSystem(route);
       if (gradeInfo != null) {
         uri.append("&grade=")
-            .append(URLEncoder.encode(gradeInfo.get("value"), StandardCharsets.UTF_8.name()));
+            .append(
+                URLEncoder.encode(gradeInfo.get(GRADE_VALUE_KEY), StandardCharsets.UTF_8.name()));
         uri.append("&gradeSystem=")
-            .append(URLEncoder.encode(gradeInfo.get("system"), StandardCharsets.UTF_8.name()));
+            .append(
+                URLEncoder.encode(gradeInfo.get(GRADE_SYSTEM_KEY), StandardCharsets.UTF_8.name()));
       }
 
       return uri.toString();
@@ -151,7 +164,7 @@ public class QRDataGenerator {
     String clid = route.getClid();
     if (clid == null || clid.isEmpty()) {
       log.warn("Route {} missing CLID, generating one", route.getName());
-      clid = CLIDGenerator.generateRandomCLID(CLIDGenerator.EntityType.ROUTE);
+      clid = CLIDGenerator.generateRandomCLID(EntityType.ROUTE);
     }
     return clid;
   }
@@ -160,7 +173,7 @@ public class QRDataGenerator {
     String clid = location.getClid();
     if (clid == null || clid.isEmpty()) {
       log.warn("Location {} missing CLID, generating one", location.getName());
-      clid = CLIDGenerator.generateRandomCLID(CLIDGenerator.EntityType.LOCATION);
+      clid = CLIDGenerator.generateRandomCLID(EntityType.LOCATION);
     }
     return clid;
   }
@@ -182,8 +195,8 @@ public class QRDataGenerator {
     // Store grade with its system
     Map<String, String> gradeInfo = extractGradeWithSystem(route);
     if (gradeInfo != null) {
-      data.put("grade", gradeInfo.get("value"));
-      data.put("gradeSystem", gradeInfo.get("system"));
+      data.put("grade", gradeInfo.get(GRADE_VALUE_KEY));
+      data.put("gradeSystem", gradeInfo.get(GRADE_SYSTEM_KEY));
     }
 
     if (route.getRouteType() != null) {
@@ -239,7 +252,7 @@ public class QRDataGenerator {
 
   private String extractPrimaryGrade(Route route) {
     Map<String, String> gradeInfo = extractGradeWithSystem(route);
-    return gradeInfo != null ? gradeInfo.get("value") : null;
+    return gradeInfo != null ? gradeInfo.get(GRADE_VALUE_KEY) : null;
   }
 
   private Map<String, String> extractGradeWithSystem(Route route) {
@@ -252,41 +265,41 @@ public class QRDataGenerator {
     // Priority based on route type
     if (route.getRouteType() == RouteType.BOULDER) {
       if (route.getGrades().getVScale() != null) {
-        gradeInfo.put("value", route.getGrades().getVScale());
-        gradeInfo.put("system", "vScale");
+        gradeInfo.put(GRADE_VALUE_KEY, route.getGrades().getVScale());
+        gradeInfo.put(GRADE_SYSTEM_KEY, VSCALE_SYSTEM);
         return gradeInfo;
       }
       if (route.getGrades().getFont() != null) {
-        gradeInfo.put("value", route.getGrades().getFont());
-        gradeInfo.put("system", "font");
+        gradeInfo.put(GRADE_VALUE_KEY, route.getGrades().getFont());
+        gradeInfo.put(GRADE_SYSTEM_KEY, FONT_SYSTEM);
         return gradeInfo;
       }
     }
 
     // For non-boulder routes or fallback
     if (route.getGrades().getYds() != null) {
-      gradeInfo.put("value", route.getGrades().getYds());
-      gradeInfo.put("system", "yds");
+      gradeInfo.put(GRADE_VALUE_KEY, route.getGrades().getYds());
+      gradeInfo.put(GRADE_SYSTEM_KEY, YDS_SYSTEM);
       return gradeInfo;
     }
     if (route.getGrades().getFrench() != null) {
-      gradeInfo.put("value", route.getGrades().getFrench());
-      gradeInfo.put("system", "french");
+      gradeInfo.put(GRADE_VALUE_KEY, route.getGrades().getFrench());
+      gradeInfo.put(GRADE_SYSTEM_KEY, FRENCH_SYSTEM);
       return gradeInfo;
     }
     if (route.getGrades().getUiaa() != null) {
-      gradeInfo.put("value", route.getGrades().getUiaa());
-      gradeInfo.put("system", "uiaa");
+      gradeInfo.put(GRADE_VALUE_KEY, route.getGrades().getUiaa());
+      gradeInfo.put(GRADE_SYSTEM_KEY, UIAA_SYSTEM);
       return gradeInfo;
     }
     if (route.getGrades().getVScale() != null) {
-      gradeInfo.put("value", route.getGrades().getVScale());
-      gradeInfo.put("system", "vScale");
+      gradeInfo.put(GRADE_VALUE_KEY, route.getGrades().getVScale());
+      gradeInfo.put(GRADE_SYSTEM_KEY, VSCALE_SYSTEM);
       return gradeInfo;
     }
     if (route.getGrades().getFont() != null) {
-      gradeInfo.put("value", route.getGrades().getFont());
-      gradeInfo.put("system", "font");
+      gradeInfo.put(GRADE_VALUE_KEY, route.getGrades().getFont());
+      gradeInfo.put(GRADE_SYSTEM_KEY, FONT_SYSTEM);
       return gradeInfo;
     }
 
