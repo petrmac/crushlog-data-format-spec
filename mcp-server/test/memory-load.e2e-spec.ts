@@ -20,9 +20,10 @@ describe('Memory Load Test', () => {
 
     // Set the CLDF CLI path for testing if not already set
     if (!process.env.CLDF_CLI) {
-      process.env.CLDF_CLI = '/Users/petrmacek/git-mirrors/crushlog-data-format-spec/clients/java/cldf-tool/build/native/nativeCompile/cldf';
+      process.env.CLDF_CLI =
+        '/Users/petrmacek/git-mirrors/crushlog-data-format-spec/clients/java/cldf-tool/build/native/nativeCompile/cldf';
     }
-    
+
     const moduleRef = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
@@ -54,7 +55,7 @@ describe('Memory Load Test', () => {
     }
     // Generate test data with 1000 routes
     const testData = generateLargeTestData(1000);
-    
+
     // Measure initial memory
     const initialMemory = process.memoryUsage();
     console.log('Initial memory usage:', {
@@ -65,7 +66,7 @@ describe('Memory Load Test', () => {
 
     // Create CLDF archive with large dataset
     const startTime = Date.now();
-    
+
     try {
       await toolHandlers.handleToolCall('cldf_create', {
         template: 'basic',
@@ -75,7 +76,7 @@ describe('Memory Load Test', () => {
 
       const duration = Date.now() - startTime;
       const finalMemory = process.memoryUsage();
-      
+
       console.log('Final memory usage:', {
         heapUsed: `${Math.round(finalMemory.heapUsed / 1024 / 1024)}MB`,
         external: `${Math.round(finalMemory.external / 1024 / 1024)}MB`,
@@ -115,7 +116,6 @@ describe('Memory Load Test', () => {
       const parsedResult = JSON.parse(resultText);
       expect(parsedResult.data?.count).toBe(1000);
       expect(parsedResult.data?.results?.length).toBe(1000);
-
     } catch (error) {
       console.error('Test failed:', error);
       throw error;
@@ -133,10 +133,13 @@ describe('Memory Load Test', () => {
 
     for (let i = 0; i < iterations; i++) {
       const testData = generateLargeTestData(200); // Smaller dataset for multiple iterations
-      const outputPath = path.join(tmpdir(), `cldf-leak-test-${Date.now()}-${i}.cldf`);
+      const outputPath = path.join(
+        tmpdir(),
+        `cldf-leak-test-${Date.now()}-${i}.cldf`,
+      );
 
       const beforeMemory = process.memoryUsage();
-      
+
       try {
         await toolHandlers.handleToolCall('cldf_create', {
           template: 'basic',
@@ -153,7 +156,9 @@ describe('Memory Load Test', () => {
         memoryUsage.push({
           iteration: i,
           heapUsed: Math.round(afterMemory.heapUsed / 1024 / 1024),
-          increase: Math.round((afterMemory.heapUsed - beforeMemory.heapUsed) / 1024 / 1024),
+          increase: Math.round(
+            (afterMemory.heapUsed - beforeMemory.heapUsed) / 1024 / 1024,
+          ),
         });
 
         // Clean up
@@ -170,8 +175,10 @@ describe('Memory Load Test', () => {
     const lastIterationMemory = memoryUsage[iterations - 1].heapUsed;
     const memoryGrowth = lastIterationMemory - firstIterationMemory;
 
-    console.log(`Memory growth over ${iterations} iterations: ${memoryGrowth}MB`);
-    
+    console.log(
+      `Memory growth over ${iterations} iterations: ${memoryGrowth}MB`,
+    );
+
     // Allow some memory growth but flag if it's excessive (>50MB growth)
     expect(memoryGrowth).toBeLessThan(50);
   }, 120000); // 2 minute timeout
@@ -193,8 +200,8 @@ function generateLargeTestData(routeCount: number) {
       city: `Test City ${i}`,
       address: `${i * 100} Test Street`,
       coordinates: {
-        latitude: 40.7128 + (i * 0.01),
-        longitude: -74.0060 + (i * 0.01),
+        latitude: 40.7128 + i * 0.01,
+        longitude: -74.006 + i * 0.01,
       },
       rockType: ['limestone', 'granite', 'sandstone'][i % 3],
       accessInfo: `A test climbing location with many routes for memory testing`,
@@ -211,8 +218,8 @@ function generateLargeTestData(routeCount: number) {
         name: `Sector ${sectorId}`,
         description: `Test sector ${sectorId} with many routes`,
         coordinates: {
-          latitude: 40.7128 + (locId * 0.01) + (s * 0.001),
-          longitude: -74.0060 + (locId * 0.01) + (s * 0.001),
+          latitude: 40.7128 + locId * 0.01 + s * 0.001,
+          longitude: -74.006 + locId * 0.01 + s * 0.001,
         },
       });
       sectorId++;
@@ -222,8 +229,19 @@ function generateLargeTestData(routeCount: number) {
   // Create routes distributed across sectors
   for (let i = 1; i <= routeCount; i++) {
     const sectorId = ((i - 1) % 100) + 1;
-    const grade = ['5a', '5b', '5c', '6a', '6a+', '6b', '6b+', '6c', '6c+', '7a'][i % 10];
-    
+    const grade = [
+      '5a',
+      '5b',
+      '5c',
+      '6a',
+      '6a+',
+      '6b',
+      '6b+',
+      '6c',
+      '6c+',
+      '7a',
+    ][i % 10];
+
     const routeType = ['boulder', 'route'][i % 2];
     routes.push({
       id: i,
@@ -231,14 +249,19 @@ function generateLargeTestData(routeCount: number) {
       sectorId: sectorId,
       name: `Test Route ${i}`,
       routeType: routeType,
-      grades: routeType === 'boulder' ? { vScale: `V${i % 10}` } : { french: grade },
+      grades:
+        routeType === 'boulder' ? { vScale: `V${i % 10}` } : { french: grade },
       height: Math.floor(Math.random() * 30) + 10,
       color: `#${((i * 123456) % 16777215).toString(16).padStart(6, '0').toUpperCase()}`,
-      beta: `This is test route number ${i} with a fairly long description to simulate real-world data. ` +
-            `The route has various characteristics and features that climbers might find interesting. ` +
-            `Additional details about the route include its exposure, rock quality, and recommended gear.`,
+      beta:
+        `This is test route number ${i} with a fairly long description to simulate real-world data. ` +
+        `The route has various characteristics and features that climbers might find interesting. ` +
+        `Additional details about the route include its exposure, rock quality, and recommended gear.`,
       qualityRating: (i % 5) + 1,
-      tags: [`rockType:${['limestone', 'granite', 'sandstone'][i % 3]}`, `popularity:${i % 5}`],
+      tags: [
+        `rockType:${['limestone', 'granite', 'sandstone'][i % 3]}`,
+        `popularity:${i % 5}`,
+      ],
     });
   }
 

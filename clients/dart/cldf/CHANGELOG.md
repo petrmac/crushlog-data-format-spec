@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.3.0
+
+### Added
+- **CLID Support** - Initial implementation of Crushlog IDs (CLIDs)
+  - CLIDs use versioned format `clid:v1:type:uuid` for unique entity identification
+  - New `CLIDGenerator` class for generating v1 CLIDs
+  - Full CLID validation and parsing support
+  - QR code generation and cross-platform QR code scanning between Java and Dart implementations
+
+
 ## 1.2.3
 
 ### Added

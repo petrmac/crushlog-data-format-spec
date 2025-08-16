@@ -12,6 +12,7 @@ class Location {
   /// Creates a new [Location] instance
   Location({
     required this.id,
+    this.clid,
     required this.name,
     required this.isIndoor,
     this.country,
@@ -35,6 +36,9 @@ class Location {
 
   /// Unique identifier
   final int id;
+
+  /// CrushLog ID - globally unique identifier (v1.3.0+)
+  final String? clid;
 
   /// Location name
   final String name;

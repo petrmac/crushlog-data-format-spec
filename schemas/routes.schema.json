@@ -22,6 +22,11 @@
           "type": "integer",
           "description": "Unique identifier for the route"
         },
+        "clid": {
+          "type": "string",
+          "pattern": "^clid:v\\d+:route:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "description": "CrushLog ID - globally unique identifier (v1.3.0+)"
+        },
         "locationId": {
           "type": "integer",
           "description": "Reference to location ID"
@@ -124,6 +129,41 @@
         "media": {
           "$ref": "media.schema.json",
           "description": "Media associated with this route (topos, beta videos, etc.)"
+        },
+        "qrCode": {
+          "type": "object",
+          "description": "QR code data for physical route marking (v1.3.0+)",
+          "properties": {
+            "data": {
+              "type": "string",
+              "description": "Generated QR code data string"
+            },
+            "url": {
+              "type": "string",
+              "format": "uri",
+              "description": "Public URL for the route"
+            },
+            "ipfsHash": {
+              "type": "string",
+              "description": "IPFS hash for CLDF archive reference. Supports both CIDv0 and CIDv1 formats:\n- CIDv0: Base58 string starting with 'Qm' followed by 44 characters (total 46), matching [1-9A-HJ-NP-Za-km-z].\n- CIDv1: Base32 string starting with 'ba' followed by at least 50 characters, matching [a-z2-7].\nPattern: ^(Qm[1-9A-HJ-NP-Za-km-z]{44}|ba[a-z2-7]{50,})$",
+              "pattern": "^(Qm[1-9A-HJ-NP-Za-km-z]{44}|ba[a-z2-7]{50,})$"
+            },
+            "blockchainTx": {
+              "type": "string",
+              "description": "Blockchain transaction hash for permanent record. Supports multiple blockchain formats: Bitcoin/Ethereum (64 hex chars), some L2 chains (32 hex chars), and future formats up to 128 hex chars. May be prefixed with '0x' for EVM-compatible chains.",
+              "pattern": "^(0x)?[a-fA-F0-9]{32,128}$",
+              "examples": [
+                "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+                "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                "12345678901234567890123456789012"
+              ]
+            },
+            "generatedAt": {
+              "type": "string",
+              "format": "date-time",
+              "description": "When the QR code was generated"
+            }
+          }
         },
         "createdAt": {
           "type": "string",

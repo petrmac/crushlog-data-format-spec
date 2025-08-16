@@ -201,7 +201,7 @@ export const FIELD_REFERENCE = {
       belayType: 'enum: topRope, lead, autoBelay',
     },
   },
-  
+
   withMedia: {
     description: 'CLDF with media attached to entities',
     data: {
@@ -225,11 +225,11 @@ export const FIELD_REFERENCE = {
                 path: 'media/el_cap_overview.jpg',
                 designation: 'overview',
                 source: 'embedded',
-                caption: 'View from the valley floor'
-              }
+                caption: 'View from the valley floor',
+              },
             ],
-            count: 1
-          }
+            count: 1,
+          },
         },
       ],
       routes: [
@@ -245,20 +245,20 @@ export const FIELD_REFERENCE = {
                 path: 'media/dawn_wall_topo.jpg',
                 designation: 'topo',
                 source: 'embedded',
-                caption: 'Full route topo with pitch breakdown'
+                caption: 'Full route topo with pitch breakdown',
               },
               {
                 type: 'video',
                 path: 'https://youtube.com/watch?v=example',
                 designation: 'beta',
                 source: 'external',
-                caption: 'Beta video from Tommy Caldwell'
-              }
+                caption: 'Beta video from Tommy Caldwell',
+              },
             ],
-            count: 2
-          }
-        }
-      ]
-    }
-  }
+            count: 2,
+          },
+        },
+      ],
+    },
+  },
 };

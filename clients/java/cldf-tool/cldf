@@ -1,0 +1,48 @@
+#!/bin/bash
+# CLDF Tool Launcher - Automatically selects the best runtime
+
+# Get the directory where this script is located
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+# Function to check if we need PNG support or QR scanning
+needs_jvm_support() {
+    for arg in "$@"; do
+        if [[ "$arg" == "qr" ]]; then
+            # QR commands need JVM for full functionality
+            return 0
+        fi
+    done
+    return 1  # No JVM support needed
+}
+
+# Check if native image exists
+NATIVE_IMAGE="$SCRIPT_DIR/build/native/nativeCompile/cldf"
+FAT_JAR="$SCRIPT_DIR/build/libs/cldf-tool-1.0.0-standalone.jar"
+
+if [[ -f "$NATIVE_IMAGE" ]]; then
+    if needs_jvm_support "$@"; then
+        # QR operations need JVM - check if we have Java available
+        if command -v java &> /dev/null && [[ -f "$FAT_JAR" ]]; then
+            # Don't output the note for scan operations to avoid breaking JSON parsing
+            if [[ "$1" == "qr" && "$2" == "scan" ]]; then
+                exec java -jar "$FAT_JAR" "$@"
+            else
+                echo "Note: Using JVM for QR operations" >&2
+                exec java -jar "$FAT_JAR" "$@"
+            fi
+        else
+            echo "Warning: QR operations may not work correctly in native mode" >&2
+            exec "$NATIVE_IMAGE" "$@"
+        fi
+    else
+        # Use native image for better performance
+        exec "$NATIVE_IMAGE" "$@"
+    fi
+elif [[ -f "$FAT_JAR" ]] && command -v java &> /dev/null; then
+    # Fall back to JAR if native image not available
+    exec java -jar "$FAT_JAR" "$@"
+else
+    echo "Error: Neither native image nor JAR file found. Please build the project first." >&2
+    echo "Run: ./gradlew :cldf-tool:nativeCompile :cldf-tool:fatJar" >&2
+    exit 1
+fi

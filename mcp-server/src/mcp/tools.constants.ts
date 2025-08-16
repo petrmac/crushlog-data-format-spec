@@ -101,15 +101,47 @@ export const TOOL_DEFINITIONS = [
         },
         dataType: {
           type: 'string',
-          enum: ['locations', 'climbs', 'sessions', 'media', 'all'],
+          enum: [
+            'locations',
+            'climbs',
+            'sessions',
+            'routes',
+            'sectors',
+            'media',
+            'all',
+          ],
           description: 'Type of data to query',
         },
         filter: {
           type: 'string',
           description: 'Optional filter expression',
         },
+        clid: {
+          type: 'string',
+          description: 'Search for a specific CLID (CrushLog ID)',
+        },
       },
       required: ['filePath', 'dataType'],
+    },
+  },
+  {
+    name: 'cldf_search_by_clid',
+    description:
+      'Search for an entity by its CLID (CrushLog ID) across all data types',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        filePath: {
+          type: 'string',
+          description: 'Path to the CLDF archive',
+        },
+        clid: {
+          type: 'string',
+          description:
+            'The CLID to search for (e.g., clid:v1:route:550e8400-e29b-41d4-a716-446655440000)',
+        },
+      },
+      required: ['filePath', 'clid'],
     },
   },
   {
@@ -193,7 +225,8 @@ export const TOOL_DEFINITIONS = [
   },
   {
     name: 'cldf_query_media',
-    description: 'Query media information from a CLDF archive, including metadata and embedded file details',
+    description:
+      'Query media information from a CLDF archive, including metadata and embedded file details',
     inputSchema: {
       type: 'object',
       properties: {
@@ -237,6 +270,52 @@ export const TOOL_DEFINITIONS = [
         },
       },
       required: ['filePath', 'outputDir'],
+    },
+  },
+  {
+    name: 'cldf_generate_qr',
+    description: 'Generate QR code for a route or location by CLID',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        filePath: {
+          type: 'string',
+          description: 'Path to the CLDF archive',
+        },
+        clid: {
+          type: 'string',
+          description: 'CLID of the route or location',
+        },
+        outputPath: {
+          type: 'string',
+          description: 'Path where the QR code image will be saved',
+        },
+        size: {
+          type: 'number',
+          description: 'QR code size in pixels',
+          default: 256,
+        },
+        baseUrl: {
+          type: 'string',
+          description: 'Base URL for QR code links',
+          default: 'https://crushlog.pro',
+        },
+      },
+      required: ['filePath', 'clid', 'outputPath'],
+    },
+  },
+  {
+    name: 'cldf_scan_qr',
+    description: 'Scan and parse QR code from an image',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        imagePath: {
+          type: 'string',
+          description: 'Path to the QR code image',
+        },
+      },
+      required: ['imagePath'],
     },
   },
 ];

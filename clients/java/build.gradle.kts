@@ -56,7 +56,7 @@ tasks.named("sonar") {
 }
 
 allprojects {
-    group = "io.cldf"
+    group = "app.crushlog"
     version = "1.0.0"
 }
 

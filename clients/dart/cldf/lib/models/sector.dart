@@ -11,6 +11,7 @@ class Sector {
   /// Creates a new [Sector] instance
   Sector({
     required this.id,
+    this.clid,
     required this.locationId,
     required this.name,
     this.isDefault = false,
@@ -28,6 +29,9 @@ class Sector {
 
   /// Unique identifier
   final int id;
+
+  /// CrushLog ID - globally unique identifier (v1.3.0+)
+  final String? clid;
 
   /// Reference to location
   final int locationId;

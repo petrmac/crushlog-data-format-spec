@@ -23,6 +23,7 @@ class Climb {
   /// Creates a new [Climb] instance
   Climb({
     required this.id,
+    this.clid,
     this.sessionId,
     this.routeId,
     required this.date,
@@ -57,6 +58,9 @@ class Climb {
 
   /// Unique identifier
   final int id;
+
+  /// CrushLog ID - globally unique identifier (v1.3.0+)
+  final String? clid;
 
   /// Reference to session
   final int? sessionId;

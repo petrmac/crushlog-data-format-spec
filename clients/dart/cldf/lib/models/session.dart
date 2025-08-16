@@ -20,6 +20,7 @@ class Session {
   /// Creates a new [Session] instance
   Session({
     required this.id,
+    this.clid,
     required this.date,
     this.startTime,
     this.endTime,
@@ -46,6 +47,9 @@ class Session {
 
   /// Unique identifier
   final int id;
+
+  /// CrushLog ID - globally unique identifier (v1.3.0+)
+  final String? clid;
 
   /// Date of the session (YYYY-MM-DD)
   @JsonKey(fromJson: _dateFromJson, toJson: _dateToJson)

@@ -38,6 +38,7 @@ example/cldf_example.exe
 # Test artifacts
 test/*.cldf
 test/temp/
+test/qr-test-resources/
 
 # Temporary files
 *.tmp

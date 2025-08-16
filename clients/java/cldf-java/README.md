@@ -21,7 +21,7 @@ Java client library for reading and writing CrushLog Data Format (CLDF) archives
 
 ```xml
 <dependency>
-    <groupId>io.cldf</groupId>
+    <groupId>app.crushlog.cldf</groupId>
     <artifactId>cldf-java</artifactId>
     <version>1.0.0</version>
 </dependency>
@@ -30,7 +30,7 @@ Java client library for reading and writing CrushLog Data Format (CLDF) archives
 ### Gradle
 
 ```gradle
-implementation 'io.cldf:cldf-java:1.0.0'
+implementation 'app.crushlog.cldf:cldf-java:1.0.0'
 ```
 
 ## Quick Start
@@ -38,8 +38,8 @@ implementation 'io.cldf:cldf-java:1.0.0'
 ### Reading a CLDF Archive
 
 ```java
-import io.cldf.api.CLDF;
-import io.cldf.api.CLDFArchive;
+import app.crushlog.cldf.api.CLDF;
+import app.crushlog.cldf.api.CLDFArchive;
 import java.io.File;
 
 // Read from file
@@ -58,9 +58,9 @@ for (Climb climb : archive.getClimbs()) {
 ### Writing a CLDF Archive
 
 ```java
-import io.cldf.api.CLDF;
-import io.cldf.api.CLDFArchive;
-import io.cldf.models.*;
+import app.crushlog.cldf.api.CLDF;
+import app.crushlog.cldf.api.CLDFArchive;
+import app.crushlog.cldf.models.*;
 import java.time.OffsetDateTime;
 import java.time.LocalDate;
 import java.util.Arrays;

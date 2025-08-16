@@ -11,6 +11,15 @@ import {
 @Injectable()
 export class ToolHandlersService {
   private readonly logger = new Logger(ToolHandlersService.name);
+  
+  // Valid CLID entity types
+  private static readonly VALID_ENTITY_TYPES = [
+    'route',
+    'location', 
+    'sector',
+    'climb',
+    'session'
+  ] as const;
 
   constructor(private readonly cldfService: CldfService) {}
 
@@ -50,6 +59,15 @@ export class ToolHandlersService {
           break;
         case 'cldf_extract_media':
           result = await this.handleExtractMedia(args);
+          break;
+        case 'cldf_search_by_clid':
+          result = await this.handleSearchByCLID(args);
+          break;
+        case 'cldf_generate_qr':
+          result = await this.handleGenerateQR(args);
+          break;
+        case 'cldf_scan_qr':
+          result = await this.handleScanQR(args);
           break;
         default:
           throw new Error(`Unknown tool: ${name}`);
@@ -365,9 +383,12 @@ Use cldf_schema_info with component="commonMistakes" for more details.
   }
 
   private async handleQuery(args: any) {
-    const { filePath, dataType, filter } = args;
+    const { filePath, dataType, filter, clid } = args;
 
     let command = `${this.cldfService.getCliPath()} query "${filePath}" --select ${dataType} --json json`;
+    if (clid) {
+      command += ` --clid "${clid}"`;
+    }
     if (filter) {
       command += ` --filter "${filter}"`;
     }
@@ -478,11 +499,84 @@ Use cldf_schema_info with component="commonMistakes" for more details.
     }
   }
 
+  /**
+   * Parse a CLID string and extract its components
+   * @param clid The CLID string to parse (format: clid:v1:type:uuid)
+   * @returns Parsed CLID components or null if invalid
+   */
+  private parseClid(
+    clid: string,
+  ): { version: string; type: string; uuid: string } | null {
+    if (!clid || typeof clid !== 'string' || !clid.startsWith('clid:')) {
+      return null;
+    }
+
+    const parts = clid.split(':');
+    if (parts.length !== 4) {
+      this.logger.warn(
+        `Invalid CLID format: ${clid} - expected format: clid:version:type:uuid`,
+      );
+      return null;
+    }
+
+    const [, version, type, uuid] = parts; // Skip prefix, we already validated it starts with 'clid:'
+
+    // Validate version format (v1, v2, etc.)
+    if (!version.match(/^v\d+$/)) {
+      this.logger.warn(`Invalid CLID version: ${version} in CLID: ${clid}`);
+      return null;
+    }
+
+    // Validate UUID exists (basic check - just ensure it's not empty)
+    if (!uuid || uuid.length < 3) {
+      this.logger.warn(`Invalid UUID in CLID: ${clid}`);
+      return null;
+    }
+
+    return { version, type, uuid };
+  }
+
+  /**
+   * Determine the entity type from CLID or field-based detection
+   * @param clid Optional CLID string
+   * @param item The item to check for type detection
+   * @returns The detected entity type
+   */
+  private determineEntityType(clid: string | undefined, item: any): string {
+    // First try CLID-based detection if CLID is provided
+    if (clid) {
+      const parsedClid = this.parseClid(clid);
+      if (parsedClid) {
+        if (ToolHandlersService.VALID_ENTITY_TYPES.includes(parsedClid.type as any)) {
+          return parsedClid.type;
+        }
+        this.logger.warn(
+          `Unknown CLID type: ${parsedClid.type} in CLID: ${clid}`,
+        );
+        return 'unknown';
+      }
+    }
+
+    // Fallback to field-based detection only when no CLID is provided
+    // This is less reliable but necessary for non-CLID searches
+    if (!clid && item) {
+      if (item.routeType !== undefined) return 'route';
+      if (item.isIndoor !== undefined && item.coordinates) return 'location';
+      if (item.locationId !== undefined && item.name && !item.routeType)
+        return 'sector';
+      if (item.finishType !== undefined) return 'climb';
+      if (item.date !== undefined && item.startTime !== undefined)
+        return 'session';
+    }
+
+    return 'unknown';
+  }
+
   private async handleQueryMedia(args: any) {
     const { filePath, includeEmbedded = true, mediaType = 'all' } = args;
 
     // First query media metadata
-    let command = `${this.cldfService.getCliPath()} query "${filePath}" --select all --json json`;
+    const command = `${this.cldfService.getCliPath()} query "${filePath}" --select all --json json`;
     const { stdout, stderr } = await this.cldfService.executeCommand(command);
 
     if (stderr && !stdout) {
@@ -492,8 +586,8 @@ Use cldf_schema_info with component="commonMistakes" for more details.
     try {
       const result = JSON.parse(stdout);
       const data = result.data || {};
-      
-      let mediaInfo: any = {
+
+      const mediaInfo: any = {
         metadata: data.media || [],
         embedded: [],
         stats: {
@@ -507,27 +601,37 @@ Use cldf_schema_info with component="commonMistakes" for more details.
 
       // Filter by media type if specified
       if (mediaType !== 'all' && mediaInfo.metadata.length > 0) {
-        mediaInfo.metadata = mediaInfo.metadata.filter((item: any) => 
-          mediaType === 'photo' ? item.type === 'PHOTO' : item.type === 'VIDEO'
+        mediaInfo.metadata = mediaInfo.metadata.filter((item: any) =>
+          mediaType === 'photo' ? item.type === 'PHOTO' : item.type === 'VIDEO',
         );
       }
 
       // Calculate stats
       mediaInfo.stats.total = mediaInfo.metadata.length;
-      mediaInfo.stats.photos = mediaInfo.metadata.filter((m: any) => m.type === 'PHOTO').length;
-      mediaInfo.stats.videos = mediaInfo.metadata.filter((m: any) => m.type === 'VIDEO').length;
-      mediaInfo.stats.embedded = mediaInfo.metadata.filter((m: any) => m.embedded).length;
-      mediaInfo.stats.external = mediaInfo.stats.total - mediaInfo.stats.embedded;
+      mediaInfo.stats.photos = mediaInfo.metadata.filter(
+        (m: any) => m.type === 'PHOTO',
+      ).length;
+      mediaInfo.stats.videos = mediaInfo.metadata.filter(
+        (m: any) => m.type === 'VIDEO',
+      ).length;
+      mediaInfo.stats.embedded = mediaInfo.metadata.filter(
+        (m: any) => m.embedded,
+      ).length;
+      mediaInfo.stats.external =
+        mediaInfo.stats.total - mediaInfo.stats.embedded;
 
       // Get embedded file info if requested
       if (includeEmbedded && mediaInfo.stats.embedded > 0) {
         const extractCommand = `${this.cldfService.getCliPath()} extract "${filePath}" --files media --json json`;
         try {
-          const extractResult = await this.cldfService.executeCommand(extractCommand);
+          const extractResult =
+            await this.cldfService.executeCommand(extractCommand);
           if (extractResult.stdout) {
             const extractData = JSON.parse(extractResult.stdout);
             if (extractData.files) {
-              mediaInfo.embedded = extractData.files.filter((f: string) => f.startsWith('media/'));
+              mediaInfo.embedded = extractData.files.filter((f: string) =>
+                f.startsWith('media/'),
+              );
             }
           }
         } catch (error) {
@@ -553,7 +657,7 @@ Use cldf_schema_info with component="commonMistakes" for more details.
     const { filePath, outputDir, preserveStructure = true } = args;
 
     let command = `${this.cldfService.getCliPath()} extract "${filePath}" --output "${outputDir}" --files media`;
-    
+
     if (!preserveStructure) {
       command += ' --no-preserve-structure';
     }
@@ -566,18 +670,23 @@ Use cldf_schema_info with component="commonMistakes" for more details.
 
     try {
       const result = JSON.parse(stdout);
-      const mediaFiles = result.files?.filter((f: string) => f.startsWith('media/')) || [];
-      
+      const mediaFiles =
+        result.files?.filter((f: string) => f.startsWith('media/')) || [];
+
       return {
         content: [
           {
             type: 'text',
-            text: JSON.stringify({
-              success: true,
-              message: `Extracted ${mediaFiles.length} media files`,
-              outputDirectory: outputDir,
-              files: mediaFiles,
-            }, null, 2),
+            text: JSON.stringify(
+              {
+                success: true,
+                message: `Extracted ${mediaFiles.length} media files`,
+                outputDirectory: outputDir,
+                files: mediaFiles,
+              },
+              null,
+              2,
+            ),
           },
         ],
       };
@@ -587,6 +696,186 @@ Use cldf_schema_info with component="commonMistakes" for more details.
           {
             type: 'text',
             text: stdout || 'Media extraction completed',
+          },
+        ],
+      };
+    }
+  }
+
+  private async handleSearchByCLID(args: any) {
+    const { filePath, clid } = args;
+
+    const command = `${this.cldfService.getCliPath()} query "${filePath}" --select all --clid "${clid}" --json json`;
+
+    const { stdout, stderr } = await this.cldfService.executeCommand(command);
+
+    if (stderr && !stdout) {
+      throw new Error(stderr);
+    }
+
+    try {
+      const result = JSON.parse(stdout);
+      const data = result.data || {};
+
+      // Check if any results were found
+      const foundItem =
+        data.results && data.results.length > 0 ? data.results[0] : null;
+
+      if (foundItem) {
+        // Determine the type using our robust parsing functions
+        const itemType = this.determineEntityType(clid, foundItem);
+
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify(
+                {
+                  found: true,
+                  type: itemType,
+                  clid: clid,
+                  data: foundItem,
+                },
+                null,
+                2,
+              ),
+            },
+          ],
+        };
+      } else {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify(
+                {
+                  found: false,
+                  clid: clid,
+                  message: `No entity found with CLID: ${clid}`,
+                },
+                null,
+                2,
+              ),
+            },
+          ],
+        };
+      }
+    } catch (error) {
+      return {
+        content: [
+          {
+            type: 'text',
+            text: stdout || `Error searching for CLID: ${clid}`,
+          },
+        ],
+      };
+    }
+  }
+
+  private async handleGenerateQR(args: any) {
+    const {
+      filePath,
+      clid,
+      outputPath,
+      size = 256,
+      baseUrl = 'https://crushlog.pro',
+    } = args;
+
+    try {
+      const { stdout, stderr } = await this.cldfService.runCLDFTool([
+        'qr',
+        'generate',
+        filePath,
+        clid,
+        '-o',
+        outputPath,
+        '-s',
+        size.toString(),
+        '--base-url',
+        baseUrl,
+      ]);
+
+      if (stderr && !stdout) {
+        throw new Error(stderr);
+      }
+
+      return {
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify(
+              {
+                success: true,
+                message: `QR code generated successfully at ${outputPath}`,
+                clid: clid,
+                outputPath: outputPath,
+                size: size,
+                baseUrl: baseUrl,
+              },
+              null,
+              2,
+            ),
+          },
+        ],
+      };
+    } catch (error) {
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Error generating QR code: ${error.message}`,
+          },
+        ],
+      };
+    }
+  }
+
+  private async handleScanQR(args: any) {
+    const { imagePath } = args;
+
+    try {
+      const { stdout, stderr } = await this.cldfService.runCLDFTool([
+        'qr',
+        'scan',
+        imagePath,
+        '--output',
+        'json',
+      ]);
+
+      if (stderr && !stdout) {
+        throw new Error(stderr);
+      }
+
+      // Parse the output to get QR data
+      let qrData;
+      try {
+        qrData = JSON.parse(stdout);
+      } catch {
+        qrData = { rawOutput: stdout };
+      }
+
+      return {
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify(
+              {
+                success: true,
+                data: qrData,
+                imagePath: imagePath,
+              },
+              null,
+              2,
+            ),
+          },
+        ],
+      };
+    } catch (error) {
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Error scanning QR code: ${error.message}`,
           },
         ],
       };

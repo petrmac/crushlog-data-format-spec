@@ -24,7 +24,7 @@ cldf-tool/
 ├── src/
 │   ├── main/
 │   │   ├── java/
-│   │   │   └── io/cldf/tool/
+│   │   │   └── app/crushlog/cldf/tool/
 │   │   │       ├── Application.java
 │   │   │       ├── commands/
 │   │   │       │   ├── CLDFCommand.java (main command)
@@ -45,12 +45,12 @@ cldf-tool/
 │   │       ├── application.yml
 │   │       └── META-INF/
 │   │           └── native-image/
-│   │               └── io.cldf/cldf-tool/
+│   │               └── app.crushlog.cldf/cldf-tool/
 │   │                   ├── native-image.properties
 │   │                   └── reflect-config.json
 │   └── test/
 │       └── java/
-│           └── io/cldf/tool/
+│           └── app/crushlog/cldf/tool/
 │               └── commands/
 │                   └── *CommandTest.java
 └── README.md
@@ -261,7 +261,7 @@ dependencies {
     implementation("io.micronaut:micronaut-runtime")
     implementation("io.micronaut.picocli:micronaut-picocli")
     implementation("info.picocli:picocli")
-    implementation("io.cldf:cldf-java:1.0.0")
+    implementation("app.crushlog.cldf:cldf-java:1.0.0")
     
     annotationProcessor("io.micronaut:micronaut-inject-java")
     annotationProcessor("info.picocli:picocli-codegen")

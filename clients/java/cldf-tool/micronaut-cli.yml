@@ -1,5 +1,5 @@
 applicationType: cli
-defaultPackage: io.cldf.tool
+defaultPackage: app.crushlog.cldf.tool
 testFramework: junit
 sourceLanguage: java
 buildTool: gradle

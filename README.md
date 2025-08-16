@@ -2,7 +2,7 @@
 
 # CrushLog Data Format (CLDF) Specification
 
-Version 1.2.3
+Version 1.3.0
 
 ## Overview
 
@@ -509,6 +509,66 @@ classDiagram
     Climb --> GradeInfo : uses
 ```
 
+#### QR Code Integration Model (v1.3.0+)
+
+```mermaid
+classDiagram
+    class QRCode {
+        +int version
+        +string url
+        +string cldfHash
+        +object locationInfo
+        +object routeInfo
+        +object metadata
+    }
+    
+    class QRMetadata {
+        +datetime created
+        +datetime expires
+        +string blockchain
+        +string txHash
+    }
+    
+    class QRRoute {
+        +int id
+        +string name
+        +string grade
+        +string type
+    }
+    
+    class QRLocation {
+        +int id
+        +string name
+        +string country
+    }
+    
+    class BlockchainRecord {
+        +string network
+        +string contractAddress
+        +string ipfsHash
+        +datetime timestamp
+        +bool verified
+    }
+    
+    class Route {
+        +int id
+        +generateQR()
+    }
+    
+    class Location {
+        +int id
+        +bool isIndoor
+    }
+    
+    QRCode --> QRMetadata : contains
+    QRCode --> QRRoute : embeds
+    QRCode --> QRLocation : references
+    QRCode --> BlockchainRecord : optional
+    Route --> QRCode : generates
+    Location --> QRCode : determines type
+    BlockchainRecord --> "IPFS" : stores in
+```
+
 #### Export Structure
 
 ```mermaid
@@ -644,6 +704,86 @@ if (archive.hasEmbeddedMedia) {
 
 See [Media Support Documentation](MEDIA_SUPPORT.md) for comprehensive details on using media features across all platforms.
 
+## QR Code Integration (v1.3.0+)
+
+CLDF supports QR code generation for physical route marking, enabling seamless data exchange between physical climbing locations and digital tracking systems.
+
+### Features
+
+- **Hybrid QR codes** containing both embedded route data and online references
+- **CLDF archive references** via IPFS for full offline sync
+- **Blockchain integration** for permanent outdoor route records
+- **Custom URI scheme** (`cldf://`) for native app handling
+
+### QR Code Format
+
+```json
+{
+  "v": 1,
+  "url": "https://crushlog.pro/r/{locationId}/{routeId}",
+  "cldf": "QmXk9...",  // IPFS hash
+  "route": {
+    "id": 456,
+    "name": "Crimson Tide",
+    "grade": "7a"
+  }
+}
+```
+
+### Implementation Example
+
+```java
+// Java - Generate QR code for route
+import io.cldf.qr.QRGenerator;
+
+CLDFArchive archive = CLDF.read(new File("routes.cldf"));
+Route route = archive.getRoutes().get(0);
+
+// Generate QR with embedded data and online reference
+String qrData = QRGenerator.generateHybrid(
+    route,
+    "https://crushlog.pro",
+    QROptions.builder()
+        .includeIPFS(true)
+        .blockchainRecord(route.getLocationId() != null && !location.isIndoor())
+        .build()
+);
+```
+
+```dart
+// Dart - Scan and process QR code
+import 'package:cldf/qr.dart';
+
+final scanner = CLDFQRScanner();
+final qrData = await scanner.scan();
+
+if (qrData.hasOfflineData) {
+  // Use embedded route info immediately
+  print('Route: ${qrData.route.name} - ${qrData.route.grade}');
+}
+
+// Fetch full CLDF archive if online
+if (await isOnline()) {
+  final archive = await CLDFReader().readFromIPFS(qrData.cldfHash);
+}
+```
+
+### Global Unique IDs (v1.3.0+)
+
+CLDF v1.3.0 introduces globally unique identifiers to ensure routes and locations can be referenced universally across all platforms:
+
+- **Format**: `cldf:{type}:{uuid}` (e.g., `cldf:route:550e8400-e29b-41d4-a716-446655440000`)
+- **Deterministic Generation**: UUID v5 for permanent features (based on location + route data)
+- **Random Generation**: UUID v4 for user-generated content
+- **Backwards Compatible**: Legacy integer IDs still supported
+
+**Documentation:**
+- [Global ID Specification](GLOBAL_ID_SPEC.md) - Overall ID system architecture
+- [Deterministic UUID Construction](DETERMINISTIC_UUID_SPEC.md) - Component breakdown and normalization rules
+- [UUID Version Comparison](UUID_COMPARISON.md) - Analysis of UUID versions for different use cases
+
+See [QR Code Specification](QR_CODE_SPEC.md) for complete implementation details, architecture diagrams, and blockchain integration options.
+
 ## Features
 
 ### Automatic Statistics Calculation
@@ -715,13 +855,13 @@ The Java client library provides full support for reading and writing CLDF archi
 <dependency>
     <groupId>io.cldf</groupId>
     <artifactId>cldf-java</artifactId>
-    <version>1.2.0</version>
+    <version>1.3.0</version>
 </dependency>
 ```
 
 **Installation (Gradle):**
 ```gradle
-implementation 'io.cldf:cldf-java:1.2.0'
+implementation 'io.cldf:cldf-java:1.3.0'
 ```
 
 **Quick Example:**
@@ -746,7 +886,7 @@ The Dart client library provides type-safe models and full CLDF support for Dart
 **Installation:**
 ```yaml
 dependencies:
-  cldf: ^1.2.0
+  cldf: ^1.3.0
 ```
 
 **Quick Example:**
