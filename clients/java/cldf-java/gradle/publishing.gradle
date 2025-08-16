@@ -32,7 +32,7 @@ publishing {
                     developer {
                         id = 'petrmac'
                         name = 'Petr Macek'
-                        email = 'petr@crushlog.com'
+                        email = 'petrmac@gmail.com'
                     }
                 }
                 
