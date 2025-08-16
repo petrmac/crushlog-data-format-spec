@@ -101,7 +101,7 @@ dependencies {
 }
 
 application {
-    mainClass.set("io.cldf.tool.Application")
+    mainClass.set("app.crushlog.cldf.tool.Application")
 }
 
 micronaut {
@@ -109,7 +109,7 @@ micronaut {
     testRuntime("junit5")
     processing {
         incremental(true)
-        annotations("io.cldf.tool.*")
+        annotations("app.crushlog.cldf.tool.*")
     }
 }
 
@@ -117,7 +117,7 @@ graalvmNative {
     binaries {
         named("main") {
             imageName.set("cldf")
-            mainClass.set("io.cldf.tool.Application")
+            mainClass.set("app.crushlog.cldf.tool.Application")
             buildArgs.add("--no-fallback")
             buildArgs.add("--enable-http")
             buildArgs.add("--enable-https")
@@ -138,6 +138,11 @@ graalvmNative {
             buildArgs.add("--initialize-at-run-time=com.fasterxml.jackson.core.Base64Variants")
             buildArgs.add("--initialize-at-run-time=com.fasterxml.jackson.core.io.CharTypes")
             buildArgs.add("--initialize-at-run-time=com.fasterxml.jackson.annotation.JsonInclude\$Value")
+            
+            // Native image optimizations
+            buildArgs.add("-H:+AddAllCharsets")
+            buildArgs.add("-H:+UnlockExperimentalVMOptions")
+            buildArgs.add("-H:+EnableAllSecurityServices")
         }
     }
 }
@@ -145,6 +150,7 @@ graalvmNative {
 tasks.test {
     useJUnitPlatform()
 }
+
 
 // Create a custom fat JAR task that produces an executable JAR
 tasks.register<Jar>("fatJar") {
@@ -161,7 +167,7 @@ tasks.register<Jar>("fatJar") {
     
     manifest {
         attributes(
-            "Main-Class" to "io.cldf.tool.Application",
+            "Main-Class" to "app.crushlog.cldf.tool.Application",
             "Multi-Release" to "true"
         )
     }

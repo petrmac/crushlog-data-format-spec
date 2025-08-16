@@ -31,7 +31,7 @@ This document describes the release process for the CLDF Java client library and
    - Java 21+ (Temurin or Oracle)
    - GraalVM 21+ (for native image builds)
    - GPG key for signing artifacts
-   - Sonatype OSSRH account with permissions for `io.cldf` group
+   - Sonatype OSSRH account with permissions for `app.crushlog.cldf` group
 
 ## Release Workflow
 
@@ -77,7 +77,7 @@ This document describes the release process for the CLDF Java client library and
 
 1. **Create Sonatype OSSRH Account**:
    - Register at https://issues.sonatype.org
-   - Create JIRA ticket requesting `io.cldf` namespace
+   - Create JIRA ticket requesting `app.crushlog.cldf` namespace
    - Wait for approval (usually 1-2 business days)
 
 2. **Generate GPG Key**:

@@ -130,6 +130,11 @@ jobs:
     - name: Run tests
       working-directory: clients/dart/cldf
       run: dart test
+      env:
+        # Skip interop tests in regular Dart CI since Java CLI is not built
+        SKIP_INTEROP_TESTS_IF_NO_CLI: 'true'
+        # Also skip flaky interop tests
+        SKIP_FLAKY_INTEROP_TESTS: 'true'
     
     - name: Test publishing setup (dry run)
       working-directory: clients/dart/cldf

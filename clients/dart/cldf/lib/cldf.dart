@@ -8,6 +8,11 @@ export 'api/cldf_archive.dart';
 export 'api/cldf_reader.dart';
 export 'api/cldf_writer.dart';
 
+// CLID (CrushLog ID) exports
+export 'clid/clid_generator.dart';
+export 'clid/models/clid.dart';
+export 'clid/models/validation_result.dart';
+
 // Utility exports
 export 'utils/date_time_converter.dart';
 export 'utils/local_date_converter.dart';

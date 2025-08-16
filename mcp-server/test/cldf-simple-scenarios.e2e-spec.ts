@@ -19,9 +19,10 @@ describe('CLDF Simple Scenarios', () => {
 
     // Set the CLDF CLI path for testing if not already set
     if (!process.env.CLDF_CLI) {
-      process.env.CLDF_CLI = '/Users/petrmacek/git-mirrors/crushlog-data-format-spec/clients/java/cldf-tool/build/native/nativeCompile/cldf';
+      process.env.CLDF_CLI =
+        '/Users/petrmacek/git-mirrors/crushlog-data-format-spec/clients/java/cldf-tool/build/native/nativeCompile/cldf';
     }
-    
+
     const moduleRef = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
@@ -44,8 +45,11 @@ describe('CLDF Simple Scenarios', () => {
         console.log('Skipping test - CLDF CLI not available');
         return;
       }
-      const outputPath = path.join(tmpdir(), `cldf-scenario1-${Date.now()}.cldf`);
-      
+      const outputPath = path.join(
+        tmpdir(),
+        `cldf-scenario1-${Date.now()}.cldf`,
+      );
+
       try {
         // Minimal valid data - just locations and routes
         const testData = {
@@ -118,8 +122,9 @@ describe('CLDF Simple Scenarios', () => {
         expect(data.data?.results?.[0].name).toBe('Classic Route');
         expect(data.data?.results?.[1].name).toBe('Gym Problem');
 
-        console.log('✓ Scenario 1: Successfully created and queried locations+routes only');
-
+        console.log(
+          '✓ Scenario 1: Successfully created and queried locations+routes only',
+        );
       } finally {
         await fs.unlink(outputPath).catch(() => {});
       }
@@ -132,8 +137,11 @@ describe('CLDF Simple Scenarios', () => {
         console.log('Skipping test - CLDF CLI not available');
         return;
       }
-      const outputPath = path.join(tmpdir(), `cldf-scenario2-${Date.now()}.cldf`);
-      
+      const outputPath = path.join(
+        tmpdir(),
+        `cldf-scenario2-${Date.now()}.cldf`,
+      );
+
       try {
         // Climbs without routes - just locations, sessions and climbs
         const testData = {
@@ -198,8 +206,9 @@ describe('CLDF Simple Scenarios', () => {
         expect(data.data?.results?.[0].routeName).toBe('Unknown Boulder 1');
         expect(data.data?.results?.[0].routeId).toBeUndefined();
 
-        console.log('✓ Scenario 2: Successfully created and queried climbs without route links');
-
+        console.log(
+          '✓ Scenario 2: Successfully created and queried climbs without route links',
+        );
       } finally {
         await fs.unlink(outputPath).catch(() => {});
       }
@@ -212,8 +221,11 @@ describe('CLDF Simple Scenarios', () => {
         console.log('Skipping test - CLDF CLI not available');
         return;
       }
-      const outputPath = path.join(tmpdir(), `cldf-scenario3-${Date.now()}.cldf`);
-      
+      const outputPath = path.join(
+        tmpdir(),
+        `cldf-scenario3-${Date.now()}.cldf`,
+      );
+
       try {
         // Full data with tags
         const testData = {
@@ -313,7 +325,7 @@ describe('CLDF Simple Scenarios', () => {
         const routesData = JSON.parse(routesResult.content[0].text);
         expect(routesData.data?.count).toBe(2);
         expect(routesData.data?.results?.length).toBe(2);
-        
+
         // Query climbs
         const climbsResult = await toolHandlers.handleToolCall('cldf_query', {
           filePath: outputPath,
@@ -322,7 +334,7 @@ describe('CLDF Simple Scenarios', () => {
         const climbsData = JSON.parse(climbsResult.content[0].text);
         expect(climbsData.data?.count).toBe(2);
         expect(climbsData.data?.results?.length).toBe(2);
-        
+
         // Query tags
         const tagsResult = await toolHandlers.handleToolCall('cldf_query', {
           filePath: outputPath,
@@ -331,18 +343,19 @@ describe('CLDF Simple Scenarios', () => {
         const tagsData = JSON.parse(tagsResult.content[0].text);
         expect(tagsData.data?.count).toBe(6);
         expect(tagsData.data?.results?.length).toBe(6);
-        
+
         // Verify tags are present
         const routeWithTags = routesData.data.results[0];
         expect(routeWithTags.tags).toContain('style:crimpy');
         expect(routeWithTags.tags).toContain('condition:polished');
-        
+
         const climbWithTags = climbsData.data.results[0];
         expect(climbWithTags.tags).toContain('condition:wet');
         expect(climbWithTags.tags).toContain('personal:project');
 
-        console.log('✓ Scenario 3: Successfully created and queried full data with tags');
-
+        console.log(
+          '✓ Scenario 3: Successfully created and queried full data with tags',
+        );
       } finally {
         await fs.unlink(outputPath).catch(() => {});
       }
@@ -355,8 +368,11 @@ describe('CLDF Simple Scenarios', () => {
         console.log('Skipping test - CLDF CLI not available');
         return;
       }
-      const outputPath = path.join(tmpdir(), `cldf-scenario4-${Date.now()}.cldf`);
-      
+      const outputPath = path.join(
+        tmpdir(),
+        `cldf-scenario4-${Date.now()}.cldf`,
+      );
+
       try {
         // Test data with routes and climbs that reference them by ID
         const testData = {
@@ -404,7 +420,7 @@ describe('CLDF Simple Scenarios', () => {
           climbs: [
             {
               id: 1,
-              routeId: 1,  // Integer reference to route
+              routeId: 1, // Integer reference to route
               date: '2025-01-20',
               type: 'route',
               finishType: 'onsight',
@@ -412,7 +428,7 @@ describe('CLDF Simple Scenarios', () => {
             },
             {
               id: 2,
-              routeId: 2,  // Integer reference to boulder
+              routeId: 2, // Integer reference to boulder
               date: '2025-01-20',
               type: 'boulder',
               finishType: 'flash',
@@ -420,7 +436,7 @@ describe('CLDF Simple Scenarios', () => {
             },
             {
               id: 3,
-              routeId: 3,  // Integer reference to route
+              routeId: 3, // Integer reference to route
               date: '2025-01-21',
               type: 'route',
               finishType: 'redpoint',
@@ -452,35 +468,36 @@ describe('CLDF Simple Scenarios', () => {
           dataType: 'routes',
         });
         const routesData = JSON.parse(routesResult.content[0].text);
-        
+
         // Verify routes exist
         expect(routesData.data?.count).toBe(3);
         expect(routesData.data?.results?.length).toBe(3);
         expect(routesData.data?.results?.[0].id).toBe(1);
         expect(routesData.data?.results?.[1].id).toBe(2);
         expect(routesData.data?.results?.[2].id).toBe(3);
-        
+
         // Query climbs
         const climbsResult = await toolHandlers.handleToolCall('cldf_query', {
           filePath: outputPath,
           dataType: 'climbs',
         });
         const climbsData = JSON.parse(climbsResult.content[0].text);
-        
+
         // Verify climbs exist and reference routes by ID
         expect(climbsData.data?.count).toBe(3);
         expect(climbsData.data?.results?.length).toBe(3);
         expect(climbsData.data?.results?.[0].routeId).toBe(1);
         expect(climbsData.data?.results?.[1].routeId).toBe(2);
         expect(climbsData.data?.results?.[2].routeId).toBe(3);
-        
+
         // Verify climb should NOT have routeName when routeId is present
         expect(climbsData.data?.results?.[0].routeName).toBeUndefined();
         expect(climbsData.data?.results?.[1].routeName).toBeUndefined();
         expect(climbsData.data?.results?.[2].routeName).toBeUndefined();
 
-        console.log('✓ Scenario 4: Successfully created and queried climbs with route ID references');
-
+        console.log(
+          '✓ Scenario 4: Successfully created and queried climbs with route ID references',
+        );
       } finally {
         await fs.unlink(outputPath).catch(() => {});
       }
@@ -494,9 +511,25 @@ describe('CLDF Simple Scenarios', () => {
         return;
       }
       const scenarios = [
-        { name: 'Locations+Routes (1000 routes)', locationCount: 100, routeCount: 1000 },
-        { name: 'Climbs Only (1000 climbs)', locationCount: 20, sessionCount: 100, climbCount: 1000 },
-        { name: 'Full Data (500 of each)', locationCount: 50, routeCount: 500, sessionCount: 100, climbCount: 500, tagCount: 20 },
+        {
+          name: 'Locations+Routes (1000 routes)',
+          locationCount: 100,
+          routeCount: 1000,
+        },
+        {
+          name: 'Climbs Only (1000 climbs)',
+          locationCount: 20,
+          sessionCount: 100,
+          climbCount: 1000,
+        },
+        {
+          name: 'Full Data (500 of each)',
+          locationCount: 50,
+          routeCount: 500,
+          sessionCount: 100,
+          climbCount: 500,
+          tagCount: 20,
+        },
       ];
 
       console.log('\nMemory Performance Summary:');
@@ -504,10 +537,10 @@ describe('CLDF Simple Scenarios', () => {
 
       for (const scenario of scenarios) {
         const outputPath = path.join(tmpdir(), `cldf-perf-${Date.now()}.cldf`);
-        
+
         try {
           const initialMemory = process.memoryUsage();
-          
+
           // Generate test data based on scenario
           const testData: any = {
             manifest: {
@@ -522,15 +555,24 @@ describe('CLDF Simple Scenarios', () => {
           };
 
           if (scenario.routeCount) {
-            testData.routes = generateSimpleRoutes(scenario.routeCount, scenario.locationCount);
+            testData.routes = generateSimpleRoutes(
+              scenario.routeCount,
+              scenario.locationCount,
+            );
           }
 
           if (scenario.sessionCount) {
-            testData.sessions = generateSimpleSessions(scenario.sessionCount, scenario.locationCount);
+            testData.sessions = generateSimpleSessions(
+              scenario.sessionCount,
+              scenario.locationCount,
+            );
           }
 
           if (scenario.climbCount) {
-            testData.climbs = generateSimpleClimbs(scenario.climbCount, scenario.sessionCount || 0);
+            testData.climbs = generateSimpleClimbs(
+              scenario.climbCount,
+              scenario.sessionCount || 0,
+            );
           }
 
           if (scenario.tagCount) {
@@ -546,12 +588,13 @@ describe('CLDF Simple Scenarios', () => {
 
           const duration = Date.now() - startTime;
           const finalMemory = process.memoryUsage();
-          const memoryIncrease = Math.round((finalMemory.heapUsed - initialMemory.heapUsed) / 1024 / 1024);
+          const memoryIncrease = Math.round(
+            (finalMemory.heapUsed - initialMemory.heapUsed) / 1024 / 1024,
+          );
 
           console.log(`${scenario.name}:`);
           console.log(`  Creation time: ${duration}ms`);
           console.log(`  Memory increase: ${memoryIncrease}MB`);
-
         } finally {
           await fs.unlink(outputPath).catch(() => {});
         }
@@ -574,7 +617,7 @@ function generateSimpleLocations(count: number) {
 function generateSimpleRoutes(count: number, locationCount: number) {
   return Array.from({ length: count }, (_, i) => ({
     id: i + 1,
-    locationId: ((i % locationCount) + 1),
+    locationId: (i % locationCount) + 1,
     name: `Route ${i + 1}`,
     routeType: i % 2 === 0 ? 'boulder' : 'route',
   }));
@@ -583,7 +626,7 @@ function generateSimpleRoutes(count: number, locationCount: number) {
 function generateSimpleSessions(count: number, locationCount: number) {
   return Array.from({ length: count }, (_, i) => ({
     id: i + 1,
-    locationId: ((i % locationCount) + 1),
+    locationId: (i % locationCount) + 1,
     date: '2025-01-01',
     sessionType: 'bouldering',
   }));
@@ -592,7 +635,7 @@ function generateSimpleSessions(count: number, locationCount: number) {
 function generateSimpleClimbs(count: number, sessionCount: number) {
   return Array.from({ length: count }, (_, i) => ({
     id: i + 1,
-    sessionId: sessionCount > 0 ? ((i % sessionCount) + 1) : undefined,
+    sessionId: sessionCount > 0 ? (i % sessionCount) + 1 : undefined,
     date: '2025-01-01',
     routeName: `Climb ${i + 1}`,
     type: 'boulder',

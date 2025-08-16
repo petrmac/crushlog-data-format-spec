@@ -24,14 +24,14 @@ Publishing to Maven Central requires:
 1. Create a new JIRA ticket:
    - Project: `Community Support - Open Source Project Repository Hosting (OSSRH)`
    - Issue Type: `New Project`
-   - Summary: `Request for io.cldf namespace`
-   - Group Id: `io.cldf`
+   - Summary: `Request for app.crushlog.cldf namespace`
+   - Group Id: `app.crushlog.cldf`
    - Project URL: `https://github.com/your-org/crushlog-data-format-spec`
    - SCM URL: `https://github.com/your-org/crushlog-data-format-spec.git`
 
 2. Example Description:
    ```
-   We are requesting the io.cldf namespace for the CrushLog Data Format project.
+   We are requesting the app.crushlog.cldf namespace for the CrushLog Data Format project.
    This is an open-source data format specification for climbing and training data.
    
    We own the cldf.io domain and can verify ownership.
@@ -214,7 +214,7 @@ ls ~/.m2/repository/io/cldf/cldf-java/1.0.0/
 # Check staging repository
 # Login to: https://s01.oss.sonatype.org
 # Go to: Staging Repositories
-# Find your repository (io.cldf-XXXX)
+# Find your repository (app.crushlog.cldf-XXXX)
 ```
 
 ## Step 6: First Release
@@ -258,19 +258,19 @@ GitHub Actions will handle the rest!
 
 After 10-30 minutes:
 - Direct: https://repo1.maven.org/maven2/io/cldf/cldf-java/
-- Search: https://search.maven.org/search?q=g:io.cldf
+- Search: https://search.maven.org/search?q=g:app.crushlog.cldf
 
 ### Test Dependency
 
 ```gradle
 dependencies {
-    implementation 'io.cldf:cldf-java:1.0.0'
+    implementation 'app.crushlog.cldf:cldf-java:1.0.0'
 }
 ```
 
 ```xml
 <dependency>
-    <groupId>io.cldf</groupId>
+    <groupId>app.crushlog.cldf</groupId>
     <artifactId>cldf-java</artifactId>
     <version>1.0.0</version>
 </dependency>

@@ -13,6 +13,7 @@ class Route {
   /// Creates a new [Route] instance
   Route({
     required this.id,
+    this.clid,
     required this.locationId,
     this.sectorId,
     required this.name,
@@ -38,6 +39,9 @@ class Route {
 
   /// Unique identifier
   final int id;
+
+  /// CrushLog ID - globally unique identifier (v1.3.0+)
+  final String? clid;
 
   /// Reference to location
   final int locationId;

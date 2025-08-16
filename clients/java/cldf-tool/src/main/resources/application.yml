@@ -5,4 +5,4 @@ micronaut:
 logger:
   levels:
     ROOT: ERROR
-    io.cldf: INFO
+    app.crushlog.cldf: INFO

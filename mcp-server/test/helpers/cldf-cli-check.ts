@@ -3,7 +3,7 @@ import * as fs from 'fs';
 
 export function isCldfCliAvailable(): boolean {
   const cliPath = process.env.CLDF_CLI;
-  
+
   if (!cliPath) {
     return false;
   }
@@ -16,10 +16,10 @@ export function isCldfCliAvailable(): boolean {
 
     // Check if it's executable
     fs.accessSync(cliPath, fs.constants.X_OK);
-    
+
     // Try to run version command
     execSync(`${cliPath} --version`, { stdio: 'ignore' });
-    
+
     return true;
   } catch (error) {
     return false;
