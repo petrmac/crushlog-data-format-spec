@@ -1,6 +1,7 @@
 package app.crushlog.cldf.tool.utils;
 
 import java.io.IOException;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import app.crushlog.cldf.tool.models.ReportFormat;
@@ -113,29 +114,29 @@ public class ValidationReportFormatter {
   }
 
   public String formatJsonReport(ValidationReport report) throws IOException {
-    // Create compact JSON (no spaces after colons)
-    StringBuilder sb = new StringBuilder();
-    sb.append("{");
-    sb.append("\"file\":\"").append(report.getFile()).append("\",");
-    sb.append("\"timestamp\":\"").append(report.getTimestamp()).append("\",");
-    sb.append("\"valid\":").append(report.isValid()).append(",");
-    sb.append("\"structureValid\":").append(report.isStructureValid()).append(",");
-
-    // Add statistics
-    sb.append("\"statistics\":{");
-    sb.append("\"locations\":").append(report.getStatistics().locations()).append(",");
-    sb.append("\"sessions\":").append(report.getStatistics().sessions()).append(",");
-    sb.append("\"climbs\":").append(report.getStatistics().climbs()).append(",");
-    sb.append("\"routes\":").append(report.getStatistics().routes()).append(",");
-    sb.append("\"sectors\":").append(report.getStatistics().sectors()).append(",");
-    sb.append("\"tags\":").append(report.getStatistics().tags()).append(",");
-    sb.append("\"mediaItems\":").append(report.getStatistics().mediaItems());
-    sb.append("},");
-
-    sb.append("\"errors\":").append(report.getErrors().size()).append(",");
-    sb.append("\"warnings\":").append(report.getWarnings().size());
-    sb.append("}");
-    return sb.toString();
+    // Use Jackson for proper JSON serialization with escaping
+    Map<String, Object> jsonMap = new LinkedHashMap<>();
+    jsonMap.put("file", report.getFile());
+    jsonMap.put("timestamp", report.getTimestamp());
+    jsonMap.put("valid", report.isValid());
+    jsonMap.put("structureValid", report.isStructureValid());
+    
+    // Add statistics as a nested map
+    Map<String, Object> stats = new LinkedHashMap<>();
+    stats.put("locations", report.getStatistics().locations());
+    stats.put("sessions", report.getStatistics().sessions());
+    stats.put("climbs", report.getStatistics().climbs());
+    stats.put("routes", report.getStatistics().routes());
+    stats.put("sectors", report.getStatistics().sectors());
+    stats.put("tags", report.getStatistics().tags());
+    stats.put("mediaItems", report.getStatistics().mediaItems());
+    jsonMap.put("statistics", stats);
+    
+    jsonMap.put("errors", report.getErrors().size());
+    jsonMap.put("warnings", report.getWarnings().size());
+    
+    // Use compact JSON format (no pretty printing)
+    return JsonUtils.toJson(jsonMap, false);
   }
 
   public String formatXmlReport(ValidationReport report) {

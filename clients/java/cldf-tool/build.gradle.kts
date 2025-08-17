@@ -17,10 +17,8 @@ micronaut {
     version.set("4.3.5")
 }
 
-// Versions
-val mapstructVersion = "1.5.5.Final"
-val neo4jVersion = "5.15.0"
-val jmhVersion = "1.37"
+// Access parent's version catalog
+val libVersions: Map<String, String> by rootProject.extra
 
 dependencies {
     // ===== IMPLEMENTATION DEPENDENCIES =====
@@ -37,23 +35,23 @@ dependencies {
     implementation("info.picocli:picocli")
     
     // JSON Processing (explicit versions to ensure consistency)
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.17.0")
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.17.0")
+    implementation("com.fasterxml.jackson.core:jackson-databind:${libVersions["jackson"]}")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${libVersions["jackson"]}")
     
     // MapStruct
-    implementation("org.mapstruct:mapstruct:$mapstructVersion")
+    implementation("org.mapstruct:mapstruct:${libVersions["mapstruct"]}")
     
     // Logging
     implementation("org.slf4j:slf4j-api")
     
     // Neo4j Database
-    implementation("org.neo4j:neo4j:$neo4jVersion") {
+    implementation("org.neo4j:neo4j:${libVersions["neo4j"]}") {
         exclude(group = "org.slf4j", module = "slf4j-nop")
         exclude(module = "neo4j-logging")
         exclude(module = "neo4j-slf4j-provider")
         exclude(group = "org.neo4j", module = "neo4j-slf4j-provider")
     }
-    implementation("org.neo4j:neo4j-cypher-dsl:2024.0.0")
+    implementation("org.neo4j:neo4j-cypher-dsl:${libVersions["neo4jCypherDsl"]}")
     
     // ===== COMPILE-ONLY DEPENDENCIES =====
     compileOnly("org.projectlombok:lombok")
@@ -65,8 +63,8 @@ dependencies {
     annotationProcessor("io.micronaut:micronaut-inject-java")
     annotationProcessor("info.picocli:picocli-codegen")
     annotationProcessor("org.projectlombok:lombok")
-    annotationProcessor("org.mapstruct:mapstruct-processor:$mapstructVersion")
-    annotationProcessor("org.projectlombok:lombok-mapstruct-binding:0.2.0")
+    annotationProcessor("org.mapstruct:mapstruct-processor:${libVersions["mapstruct"]}")
+    annotationProcessor("org.projectlombok:lombok-mapstruct-binding:${libVersions["lombokMapstructBinding"]}")
     
     // ===== TEST IMPLEMENTATION DEPENDENCIES =====
     // Micronaut Testing
@@ -74,19 +72,19 @@ dependencies {
     testImplementation("io.micronaut.test:micronaut-test-spock")
     
     // Spock Framework
-    testImplementation("org.spockframework:spock-core:2.4-M1-groovy-4.0")
-    testImplementation("org.apache.groovy:groovy-json:4.0.21")
+    testImplementation("org.spockframework:spock-core:${libVersions["spock"]}")
+    testImplementation("org.apache.groovy:groovy-json:${libVersions["groovy"]}")
     
     // JUnit and Mockito
     testImplementation("org.junit.jupiter:junit-jupiter-api")
     testImplementation("org.mockito:mockito-core")
     
     // Neo4j Test Harness
-    testImplementation("org.neo4j.test:neo4j-harness:$neo4jVersion")
-    testImplementation("org.assertj:assertj-core:3.25.1")
+    testImplementation("org.neo4j.test:neo4j-harness:${libVersions["neo4j"]}")
+    testImplementation("org.assertj:assertj-core:${libVersions["assertj"]}")
     
     // JMH Benchmarking
-    testImplementation("org.openjdk.jmh:jmh-core:$jmhVersion")
+    testImplementation("org.openjdk.jmh:jmh-core:${libVersions["jmh"]}")
     
     // ===== TEST COMPILE-ONLY DEPENDENCIES =====
     testCompileOnly("org.projectlombok:lombok")
@@ -96,8 +94,8 @@ dependencies {
     
     // ===== TEST ANNOTATION PROCESSORS =====
     testAnnotationProcessor("org.projectlombok:lombok")
-    testAnnotationProcessor("org.mapstruct:mapstruct-processor:$mapstructVersion")
-    testAnnotationProcessor("org.openjdk.jmh:jmh-generator-annprocess:$jmhVersion")
+    testAnnotationProcessor("org.mapstruct:mapstruct-processor:${libVersions["mapstruct"]}")
+    testAnnotationProcessor("org.openjdk.jmh:jmh-generator-annprocess:${libVersions["jmh"]}")
 }
 
 application {

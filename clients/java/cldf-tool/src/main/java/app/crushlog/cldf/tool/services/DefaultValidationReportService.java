@@ -151,14 +151,9 @@ public class DefaultValidationReportService implements ValidationReportService {
     Checksums expectedChecksums = archive.getChecksums();
     String algorithm = expectedChecksums.getAlgorithm();
 
-    // Only support SHA-256 for now
+    // Check if the algorithm is supported
     if (!SHA256_ALGORITHM.equals(algorithm)) {
-      log.warn("Unsupported checksum algorithm: {}. Skipping checksum validation.", algorithm);
-      return ChecksumResult.builder()
-          .algorithm(algorithm)
-          .valid(false)
-          .results(Map.of("error", false))
-          .build();
+      return handleUnsupportedAlgorithm(algorithm);
     }
 
     // Extract and calculate actual checksums
@@ -342,6 +337,22 @@ public class DefaultValidationReportService implements ValidationReportService {
                 .tags(0)
                 .mediaItems(0)
                 .build())
+        .build();
+  }
+
+  /**
+   * Handles unsupported checksum algorithms.
+   * This method can be extended in the future to support additional algorithms.
+   *
+   * @param algorithm the unsupported algorithm name
+   * @return a ChecksumResult indicating the algorithm is not supported
+   */
+  private ChecksumResult handleUnsupportedAlgorithm(String algorithm) {
+    log.warn("Unsupported checksum algorithm: {}. Skipping checksum validation.", algorithm);
+    return ChecksumResult.builder()
+        .algorithm(algorithm)
+        .valid(false)
+        .results(Map.of("error", false))
         .build();
   }
 }

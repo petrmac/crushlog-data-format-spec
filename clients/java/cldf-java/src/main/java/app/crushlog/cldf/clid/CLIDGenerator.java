@@ -34,17 +34,6 @@ public class CLIDGenerator {
     return "clid:%s:%s:%s".formatted(CURRENT_VERSION, type.value, uuid);
   }
 
-  /**
-   * Format a CLID with the current version using type string
-   *
-   * @param typeStr Entity type string
-   * @param uuid UUID string
-   * @return Formatted CLID string
-   */
-  private static String formatCLID(String typeStr, UUID uuid) {
-    return "clid:%s:%s:%s".formatted(CURRENT_VERSION, typeStr, uuid);
-  }
-
   /** Generate a deterministic CLID for a location */
   public static String generateLocationCLID(Location location) {
     // Validate required fields
@@ -148,7 +137,7 @@ public class CLIDGenerator {
 
       return toUUID(Arrays.copyOf(hash, 16));
     } catch (NoSuchAlgorithmException e) {
-      throw new RuntimeException("SHA-1 algorithm not available", e);
+      throw new CLIDGenerationException("SHA-1 algorithm not available", e);
     }
   }
 
@@ -222,7 +211,7 @@ public class CLIDGenerator {
         .replaceAll("\\s+", "-")
         .replaceAll("[^\\w\\-]", "")
         .replaceAll("-+", "-")
-        .replaceAll("^-|-$", "");
+        .replaceAll("(^-)|(-$)", "");
   }
 
   /** Standardize grade format */
