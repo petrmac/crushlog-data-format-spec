@@ -608,7 +608,12 @@ public class CreateCommand extends BaseCommand {
 
   private MediaType determineMediaType(String filename) {
     String lower = filename.toLowerCase();
-    if (lower.matches(".*\\.(mp4|mov|avi|webm|mkv)$")) {
+    // Use endsWith to avoid regex complexity and potential ReDoS
+    if (lower.endsWith(".mp4")
+        || lower.endsWith(".mov")
+        || lower.endsWith(".avi")
+        || lower.endsWith(".webm")
+        || lower.endsWith(".mkv")) {
       return MediaType.VIDEO;
     }
     return MediaType.PHOTO;

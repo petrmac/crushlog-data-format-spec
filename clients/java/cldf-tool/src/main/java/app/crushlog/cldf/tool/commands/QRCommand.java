@@ -13,6 +13,7 @@ import jakarta.inject.Singleton;
 import app.crushlog.cldf.api.CLDFArchive;
 import app.crushlog.cldf.clid.EntityType;
 import app.crushlog.cldf.clid.RouteModel;
+import app.crushlog.cldf.constants.CLDFConstants;
 import app.crushlog.cldf.models.Location;
 import app.crushlog.cldf.models.Route;
 import app.crushlog.cldf.qr.*;
@@ -336,10 +337,10 @@ public class QRCommand implements Callable<Integer> {
       }
     }
 
-    private void setGradeByPattern(Route.Grades grades, String gradeValue) {
+    void setGradeByPattern(Route.Grades grades, String gradeValue) {
       if (gradeValue.matches("5\\..*")) {
         grades.setYds(gradeValue);
-      } else if (gradeValue.matches("V\\d+.*")) {
+      } else if (gradeValue.matches("V\\d{1,2}([+-])?$")) {
         grades.setVScale(gradeValue);
       } else if (gradeValue.matches("\\d+[abc]?\\+?")) {
         grades.setFrench(gradeValue);
@@ -661,7 +662,7 @@ public class QRCommand implements Callable<Integer> {
         outputHandler.writeError("Failed to read image file: " + e.getMessage());
         return 1;
       } catch (Exception e) {
-        outputHandler.writeError("Failed to scan QR code: " + e.getMessage());
+        outputHandler.writeError(CLDFConstants.FAILED_TO_SCAN_QR_CODE + e.getMessage());
         if (verbose) {
           e.printStackTrace();
         }
@@ -672,7 +673,7 @@ public class QRCommand implements Callable<Integer> {
     private void handleScanFailure(
         Result<ParsedQRData, QRError> result, OutputHandler outputHandler) {
       QRError error = result.getError().orElse(QRError.scanError("Unknown error"));
-      outputHandler.writeError("Failed to scan QR code: " + error.getMessage());
+      outputHandler.writeError(CLDFConstants.FAILED_TO_SCAN_QR_CODE + error.getMessage());
       if (verbose && error.getDetails() != null) {
         outputHandler.writeError("Details: " + error.getDetails());
       }
@@ -705,13 +706,14 @@ public class QRCommand implements Callable<Integer> {
       if (routeResult.isSuccess()) {
         routeResult
             .getSuccess()
-            .ifPresent(route -> outputHandler.writeInfo("Extracted route: " + route));
+            .ifPresent(route -> outputHandler.writeInfo(CLDFConstants.EXTRACTED_ROUTE + route));
       } else {
         routeResult
             .getError()
             .ifPresent(
                 error ->
-                    outputHandler.writeWarning("Failed to extract route: " + error.getMessage()));
+                    outputHandler.writeWarning(
+                        CLDFConstants.FAILED_TO_EXTRACT_ROUTE + error.getMessage()));
       }
     }
 
@@ -721,14 +723,15 @@ public class QRCommand implements Callable<Integer> {
       if (locationResult.isSuccess()) {
         locationResult
             .getSuccess()
-            .ifPresent(location -> outputHandler.writeInfo("Extracted location: " + location));
+            .ifPresent(
+                location -> outputHandler.writeInfo(CLDFConstants.EXTRACTED_LOCATION + location));
       } else {
         locationResult
             .getError()
             .ifPresent(
                 error ->
                     outputHandler.writeWarning(
-                        "Failed to extract location: " + error.getMessage()));
+                        CLDFConstants.FAILED_TO_EXTRACT_LOCATION + error.getMessage()));
       }
     }
 
@@ -885,7 +888,7 @@ public class QRCommand implements Callable<Integer> {
     private void handleScanFailure(
         Result<ParsedQRData, QRError> result, OutputHandler outputHandler) {
       QRError error = result.getError().orElse(QRError.scanError("Unknown error"));
-      outputHandler.writeError("Failed to scan QR code: " + error.getMessage());
+      outputHandler.writeError(CLDFConstants.FAILED_TO_SCAN_QR_CODE + error.getMessage());
       if (verbose && error.getDetails() != null) {
         outputHandler.writeError("Details: " + error.getDetails());
       }
@@ -918,13 +921,14 @@ public class QRCommand implements Callable<Integer> {
       if (routeResult.isSuccess()) {
         routeResult
             .getSuccess()
-            .ifPresent(route -> outputHandler.writeInfo("Extracted route: " + route));
+            .ifPresent(route -> outputHandler.writeInfo(CLDFConstants.EXTRACTED_ROUTE + route));
       } else {
         routeResult
             .getError()
             .ifPresent(
                 error ->
-                    outputHandler.writeWarning("Failed to extract route: " + error.getMessage()));
+                    outputHandler.writeWarning(
+                        CLDFConstants.FAILED_TO_EXTRACT_ROUTE + error.getMessage()));
       }
     }
 
@@ -934,14 +938,15 @@ public class QRCommand implements Callable<Integer> {
       if (locationResult.isSuccess()) {
         locationResult
             .getSuccess()
-            .ifPresent(location -> outputHandler.writeInfo("Extracted location: " + location));
+            .ifPresent(
+                location -> outputHandler.writeInfo(CLDFConstants.EXTRACTED_LOCATION + location));
       } else {
         locationResult
             .getError()
             .ifPresent(
                 error ->
                     outputHandler.writeWarning(
-                        "Failed to extract location: " + error.getMessage()));
+                        CLDFConstants.FAILED_TO_EXTRACT_LOCATION + error.getMessage()));
       }
     }
 
