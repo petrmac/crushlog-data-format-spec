@@ -24,6 +24,10 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class QRGenerator {
 
+  private QRGenerator() {
+    // Private constructor to prevent instantiation
+  }
+
   private static final String PROTOCOL_VERSION = "1";
   private static final String DEFAULT_BASE_URL = "https://crushlog.pro";
   private static final String ROUTE_NULL_ERROR = "Route cannot be null";

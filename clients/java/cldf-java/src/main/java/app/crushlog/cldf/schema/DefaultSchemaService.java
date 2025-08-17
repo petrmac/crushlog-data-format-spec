@@ -6,6 +6,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import app.crushlog.cldf.constants.CLDFConstants;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -20,12 +21,18 @@ public class DefaultSchemaService implements SchemaService {
   // Schema file mappings
   private static final Map<String, String> SCHEMA_FILES =
       Map.of(
-          "manifest", "manifest.schema.json",
-          "location", "locations.schema.json",
-          "route", "routes.schema.json",
-          "climb", "climbs.schema.json",
-          "session", "sessions.schema.json",
-          "tag", "tags.schema.json");
+          "manifest",
+          CLDFConstants.MANIFEST_SCHEMA_JSON,
+          "location",
+          CLDFConstants.LOCATIONS_SCHEMA_JSON,
+          CLDFConstants.FIELD_ROUTE,
+          CLDFConstants.ROUTES_SCHEMA_JSON,
+          "climb",
+          CLDFConstants.CLIMBS_SCHEMA_JSON,
+          "session",
+          CLDFConstants.SESSIONS_SCHEMA_JSON,
+          "tag",
+          CLDFConstants.TAGS_SCHEMA_JSON);
 
   @Override
   public Map<String, Object> getSchemaInfo(String componentName) throws IOException {
@@ -34,7 +41,7 @@ public class DefaultSchemaService implements SchemaService {
     return switch (normalizedName) {
       case "all" -> buildCompleteSchema();
       case "dateformats" -> Map.of("dateFormats", buildDateFormatsInfo());
-      case "enums" -> Map.of("enums", buildEnumsFromSchemas());
+      case CLDFConstants.FIELD_ENUMS -> Map.of(CLDFConstants.FIELD_ENUMS, buildEnumsFromSchemas());
       case "commonmistakes" -> Map.of("commonMistakes", buildCommonMistakes());
       case "exampledata" -> Map.of("exampleData", buildExampleData());
       default ->
@@ -52,7 +59,7 @@ public class DefaultSchemaService implements SchemaService {
   public Map<String, Object> buildCompleteSchema() {
     Map<String, Object> completeSchema = new HashMap<>();
     completeSchema.put("dateFormats", buildDateFormatsInfo());
-    completeSchema.put("enums", buildEnumsFromSchemas());
+    completeSchema.put(CLDFConstants.FIELD_ENUMS, buildEnumsFromSchemas());
     completeSchema.put("commonMistakes", buildCommonMistakes());
     completeSchema.put("exampleData", buildExampleData());
 

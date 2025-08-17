@@ -165,15 +165,21 @@ public class DefaultValidationService implements ValidationService {
   }
 
   private void validateReferenceIntegrity(CLDFArchive archive, List<String> errors) {
-    // Create lookup maps for validation
-    Set<Integer> locationIds = new HashSet<>();
-    Set<Integer> sessionIds = new HashSet<>();
-    Set<Integer> routeIds = new HashSet<>();
-    Set<Integer> sectorIds = new HashSet<>();
-
     // Collect all valid IDs
+    ReferenceIds ids = collectReferenceIds(archive);
+
+    // Validate references for each entity type
+    validateSessionReferences(archive.getSessions(), ids.locationIds, errors);
+    validateClimbReferences(archive.getClimbs(), ids.sessionIds, ids.routeIds, errors);
+    validateRouteReferences(archive.getRoutes(), ids.sectorIds, ids.locationIds, errors);
+    validateSectorReferences(archive.getSectors(), ids.locationIds, errors);
+  }
+
+  private ReferenceIds collectReferenceIds(CLDFArchive archive) {
+    ReferenceIds ids = new ReferenceIds();
+
     if (archive.getLocations() != null) {
-      locationIds =
+      ids.locationIds =
           archive.getLocations().stream()
               .map(Location::getId)
               .filter(Objects::nonNull)
@@ -181,7 +187,7 @@ public class DefaultValidationService implements ValidationService {
     }
 
     if (archive.getSessions() != null) {
-      sessionIds =
+      ids.sessionIds =
           archive.getSessions().stream()
               .map(Session::getId)
               .filter(Objects::nonNull)
@@ -189,7 +195,7 @@ public class DefaultValidationService implements ValidationService {
     }
 
     if (archive.getRoutes() != null) {
-      routeIds =
+      ids.routeIds =
           archive.getRoutes().stream()
               .map(Route::getId)
               .filter(Objects::nonNull)
@@ -197,70 +203,87 @@ public class DefaultValidationService implements ValidationService {
     }
 
     if (archive.getSectors() != null) {
-      sectorIds =
+      ids.sectorIds =
           archive.getSectors().stream()
               .map(Sector::getId)
               .filter(Objects::nonNull)
               .collect(Collectors.toSet());
     }
 
-    // Validate session references
-    if (archive.getSessions() != null) {
-      for (Session session : archive.getSessions()) {
-        if (session.getLocationId() != null && !locationIds.contains(session.getLocationId())) {
-          errors.add(
-              String.format(
-                  "Session %d references non-existent location %d",
-                  session.getId(), session.getLocationId()));
-        }
-      }
-    }
+    return ids;
+  }
 
-    // Validate climb references
-    if (archive.getClimbs() != null) {
-      for (Climb climb : archive.getClimbs()) {
-        if (climb.getSessionId() != null && !sessionIds.contains(climb.getSessionId())) {
-          errors.add(
-              String.format(
-                  "Climb %d references non-existent session %d",
-                  climb.getId(), climb.getSessionId()));
-        }
-        if (climb.getRouteId() != null && !routeIds.contains(climb.getRouteId())) {
-          errors.add(
-              String.format(
-                  "Climb %d references non-existent route %d", climb.getId(), climb.getRouteId()));
-        }
-      }
-    }
+  private void validateSessionReferences(
+      List<Session> sessions, Set<Integer> locationIds, List<String> errors) {
+    if (sessions == null) return;
 
-    // Validate route references
-    if (archive.getRoutes() != null) {
-      for (Route route : archive.getRoutes()) {
-        if (route.getSectorId() != null && !sectorIds.contains(route.getSectorId())) {
-          errors.add(
-              String.format(
-                  "Route %d references non-existent sector %d",
-                  route.getId(), route.getSectorId()));
-        }
-        if (route.getLocationId() != null && !locationIds.contains(route.getLocationId())) {
-          errors.add(
-              String.format(
-                  "Route %d references non-existent location %d",
-                  route.getId(), route.getLocationId()));
-        }
+    for (Session session : sessions) {
+      if (session.getLocationId() != null && !locationIds.contains(session.getLocationId())) {
+        errors.add(
+            String.format(
+                "Session %d references non-existent location %d",
+                session.getId(), session.getLocationId()));
       }
     }
+  }
 
-    // Validate sector references
-    if (archive.getSectors() != null) {
-      for (Sector sector : archive.getSectors()) {
-        if (sector.getLocationId() != null && !locationIds.contains(sector.getLocationId())) {
-          errors.add(
-              String.format(
-                  "Sector %d references non-existent location %d",
-                  sector.getId(), sector.getLocationId()));
-        }
+  private void validateClimbReferences(
+      List<Climb> climbs, Set<Integer> sessionIds, Set<Integer> routeIds, List<String> errors) {
+    if (climbs == null) return;
+
+    for (Climb climb : climbs) {
+      if (climb.getSessionId() != null && !sessionIds.contains(climb.getSessionId())) {
+        errors.add(
+            String.format(
+                "Climb %d references non-existent session %d",
+                climb.getId(), climb.getSessionId()));
+      }
+      if (climb.getRouteId() != null && !routeIds.contains(climb.getRouteId())) {
+        errors.add(
+            String.format(
+                "Climb %d references non-existent route %d", climb.getId(), climb.getRouteId()));
       }
     }
+  }
+
+  private void validateRouteReferences(
+      List<Route> routes, Set<Integer> sectorIds, Set<Integer> locationIds, List<String> errors) {
+    if (routes == null) return;
+
+    for (Route route : routes) {
+      if (route.getSectorId() != null && !sectorIds.contains(route.getSectorId())) {
+        errors.add(
+            String.format(
+                "Route %d references non-existent sector %d", route.getId(), route.getSectorId()));
+      }
+      if (route.getLocationId() != null && !locationIds.contains(route.getLocationId())) {
+        errors.add(
+            String.format(
+                "Route %d references non-existent location %d",
+                route.getId(), route.getLocationId()));
+      }
+    }
+  }
+
+  private void validateSectorReferences(
+      List<Sector> sectors, Set<Integer> locationIds, List<String> errors) {
+    if (sectors == null) return;
+
+    for (Sector sector : sectors) {
+      if (sector.getLocationId() != null && !locationIds.contains(sector.getLocationId())) {
+        errors.add(
+            String.format(
+                "Sector %d references non-existent location %d",
+                sector.getId(), sector.getLocationId()));
+      }
+    }
+  }
+
+  // Helper class to hold reference IDs
+  private static class ReferenceIds {
+    Set<Integer> locationIds = new HashSet<>();
+    Set<Integer> sessionIds = new HashSet<>();
+    Set<Integer> routeIds = new HashSet<>();
+    Set<Integer> sectorIds = new HashSet<>();
   }
 }

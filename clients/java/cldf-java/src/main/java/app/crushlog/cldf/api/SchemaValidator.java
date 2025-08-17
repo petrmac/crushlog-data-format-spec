@@ -21,8 +21,10 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class SchemaValidator {
 
-  private static final String SCHEMAS_BASE_PATH = "/schemas/";
+  private static final String DEFAULT_SCHEMAS_BASE_PATH = "/schemas/";
   private static final Map<String, String> FILE_TO_SCHEMA_MAPPING = new HashMap<>();
+
+  private final String schemasBasePath;
 
   static {
     FILE_TO_SCHEMA_MAPPING.put("manifest.json", "manifest.schema.json");
@@ -41,6 +43,11 @@ public class SchemaValidator {
   private final Map<String, JsonSchema> schemaCache;
 
   public SchemaValidator() {
+    this(DEFAULT_SCHEMAS_BASE_PATH);
+  }
+
+  public SchemaValidator(String schemasBasePath) {
+    this.schemasBasePath = schemasBasePath;
     this.objectMapper = new ObjectMapper();
     // Register JSR310 module for Java 8 time types
     this.objectMapper.findAndRegisterModules();
@@ -136,7 +143,7 @@ public class SchemaValidator {
     }
 
     // Load from classpath resources
-    String resourcePath = SCHEMAS_BASE_PATH + schemaFile;
+    String resourcePath = schemasBasePath + schemaFile;
     try (InputStream is = getClass().getResourceAsStream(resourcePath)) {
       if (is == null) {
         throw new IOException("Schema not found: " + resourcePath);
