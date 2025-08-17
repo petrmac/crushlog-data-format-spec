@@ -203,7 +203,7 @@ public class QRCommand implements Callable<Integer> {
 
     @ParentCommand private QRCommand parent;
 
-    @Inject private CLDFService cldfService;
+    private CLDFService cldfService;
 
     // For PicoCLI
     public GenerateCommand() {
@@ -612,7 +612,7 @@ public class QRCommand implements Callable<Integer> {
 
     @ParentCommand private QRCommand parent;
 
-    @Inject private QRScanner qrScanner;
+    private QRScanner qrScanner;
 
     // For PicoCLI framework
     public ScanCommand() {
@@ -822,7 +822,7 @@ public class QRCommand implements Callable<Integer> {
 
     @ParentCommand private QRCommand parent;
 
-    @Inject private QRScanner qrScanner;
+    private QRScanner qrScanner;
 
     // For PicoCLI framework
     public ParseCommand() {

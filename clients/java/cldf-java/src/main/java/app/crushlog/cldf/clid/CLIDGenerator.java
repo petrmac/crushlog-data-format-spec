@@ -16,6 +16,10 @@ import app.crushlog.cldf.clid.RouteModel.*;
  */
 public class CLIDGenerator {
 
+  private CLIDGenerator() {
+    // Private constructor to prevent instantiation
+  }
+
   // Current CLID version
   public static final String CURRENT_VERSION = "v1";
 

@@ -3,6 +3,7 @@ package app.crushlog.cldf.qr.impl;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.InflaterInputStream;
@@ -32,7 +33,10 @@ public class PureJavaImageReader {
     ByteArrayInputStream bais = new ByteArrayInputStream(pngBytes);
 
     // Skip PNG signature
-    bais.skip(8);
+    long skipped = bais.skip(8);
+    if (skipped != 8) {
+      throw new IOException("Failed to skip PNG signature");
+    }
 
     int width = 0;
     int height = 0;
@@ -52,8 +56,11 @@ public class PureJavaImageReader {
 
       // Read chunk type
       byte[] chunkTypeBytes = new byte[4];
-      bais.read(chunkTypeBytes);
-      String chunkType = new String(chunkTypeBytes, "ASCII");
+      int bytesRead = bais.read(chunkTypeBytes);
+      if (bytesRead != 4) {
+        throw new IOException("Failed to read chunk type");
+      }
+      String chunkType = new String(chunkTypeBytes, StandardCharsets.US_ASCII);
 
       if ("IHDR".equals(chunkType)) {
         // Image header (13 bytes total)
@@ -62,22 +69,34 @@ public class PureJavaImageReader {
         bitDepth = bais.read();
         colorType = bais.read();
         // Skip compression method, filter method, interlace method (3 bytes)
-        bais.skip(3);
+        skipped = bais.skip(3);
+        if (skipped != 3) {
+          throw new IOException("Failed to skip IHDR trailing bytes");
+        }
       } else if ("IDAT".equals(chunkType)) {
         // Image data (compressed) - there can be multiple IDAT chunks
         byte[] chunkData = new byte[chunkLength];
-        bais.read(chunkData);
+        bytesRead = bais.read(chunkData);
+        if (bytesRead != chunkLength) {
+          throw new IOException("Failed to read IDAT chunk data");
+        }
         imageDataChunks.add(chunkData);
       } else if ("IEND".equals(chunkType)) {
         // End of PNG
         break;
       } else {
         // Skip other chunks
-        bais.skip(chunkLength);
+        skipped = bais.skip(chunkLength);
+        if (skipped != chunkLength) {
+          throw new IOException("Failed to skip chunk data");
+        }
       }
 
       // Skip CRC
-      bais.skip(4);
+      skipped = bais.skip(4);
+      if (skipped != 4) {
+        throw new IOException("Failed to skip CRC");
+      }
     }
 
     if (width == 0 || height == 0 || imageDataChunks.isEmpty()) {

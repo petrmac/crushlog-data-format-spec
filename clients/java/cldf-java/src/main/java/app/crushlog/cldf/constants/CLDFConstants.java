@@ -24,6 +24,13 @@ public final class CLDFConstants {
   // Schema file names
   public static final String LOCATIONS_SCHEMA_JSON = "locations.schema.json";
   public static final String CLIMBS_SCHEMA_JSON = "climbs.schema.json";
+  public static final String ROUTES_SCHEMA_JSON = "routes.schema.json";
+  public static final String SECTORS_SCHEMA_JSON = "sectors.schema.json";
+  public static final String SESSIONS_SCHEMA_JSON = "sessions.schema.json";
+  public static final String TAGS_SCHEMA_JSON = "tags.schema.json";
+  public static final String MANIFEST_SCHEMA_JSON = "manifest.schema.json";
+  public static final String MEDIA_METADATA_SCHEMA_JSON = "media-metadata.schema.json";
+  public static final String CHECKSUMS_SCHEMA_JSON = "checksums.schema.json";
 
   // Field names
   public static final String FIELD_LOCATIONS = "locations";

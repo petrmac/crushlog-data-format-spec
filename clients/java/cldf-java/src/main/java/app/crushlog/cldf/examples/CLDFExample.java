@@ -48,7 +48,7 @@ public class CLDFExample {
     } catch (IOException e) {
       System.err.println("Error: " + e.getMessage());
       // In production code, use proper logging instead of printStackTrace
-      // log.error("Failed to process CLDF file", e);
+      // e.printStackTrace();
     }
   }
 
