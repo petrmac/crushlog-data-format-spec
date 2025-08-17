@@ -341,8 +341,8 @@ public class DefaultValidationReportService implements ValidationReportService {
   }
 
   /**
-   * Handles unsupported checksum algorithms.
-   * This method can be extended in the future to support additional algorithms.
+   * Handles unsupported checksum algorithms. This method can be extended in the future to support
+   * additional algorithms.
    *
    * @param algorithm the unsupported algorithm name
    * @return a ChecksumResult indicating the algorithm is not supported

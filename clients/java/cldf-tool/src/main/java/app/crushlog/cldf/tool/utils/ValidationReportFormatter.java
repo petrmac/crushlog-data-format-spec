@@ -120,7 +120,7 @@ public class ValidationReportFormatter {
     jsonMap.put("timestamp", report.getTimestamp());
     jsonMap.put("valid", report.isValid());
     jsonMap.put("structureValid", report.isStructureValid());
-    
+
     // Add statistics as a nested map
     Map<String, Object> stats = new LinkedHashMap<>();
     stats.put("locations", report.getStatistics().locations());
@@ -131,10 +131,10 @@ public class ValidationReportFormatter {
     stats.put("tags", report.getStatistics().tags());
     stats.put("mediaItems", report.getStatistics().mediaItems());
     jsonMap.put("statistics", stats);
-    
+
     jsonMap.put("errors", report.getErrors().size());
     jsonMap.put("warnings", report.getWarnings().size());
-    
+
     // Use compact JSON format (no pretty printing)
     return JsonUtils.toJson(jsonMap, false);
   }
