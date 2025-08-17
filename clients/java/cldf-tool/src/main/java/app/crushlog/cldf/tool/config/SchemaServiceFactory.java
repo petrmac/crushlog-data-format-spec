@@ -2,6 +2,7 @@ package app.crushlog.cldf.tool.config;
 
 import jakarta.inject.Singleton;
 
+import app.crushlog.cldf.schema.DefaultSchemaService;
 import app.crushlog.cldf.schema.SchemaService;
 import io.micronaut.context.annotation.Factory;
 
@@ -11,6 +12,6 @@ public class SchemaServiceFactory {
 
   @Singleton
   public SchemaService schemaService() {
-    return SchemaService.create();
+    return new DefaultSchemaService();
   }
 }

@@ -21,26 +21,26 @@ repositories {
     mavenCentral()
 }
 
-// MapStruct version
-val mapstructVersion = "1.5.5.Final"
+// Access parent's version catalog
+val libVersions: Map<String, String> by rootProject.extra
 
 dependencies {
     // ===== IMPLEMENTATION DEPENDENCIES =====
     // JSON Processing
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.17.0")
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.17.0")
+    implementation("com.fasterxml.jackson.core:jackson-databind:${libVersions["jackson"]}")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${libVersions["jackson"]}")
     
     // JSON Schema Validation
-    implementation("com.networknt:json-schema-validator:1.3.3")
+    implementation("com.networknt:json-schema-validator:${libVersions["jsonSchemaValidator"]}")
     
     // MapStruct
-    implementation("org.mapstruct:mapstruct:$mapstructVersion")
+    implementation("org.mapstruct:mapstruct:${libVersions["mapstruct"]}")
     
     // Archive handling
-    implementation("org.apache.commons:commons-compress:1.26.1")
+    implementation("org.apache.commons:commons-compress:${libVersions["commonsCompress"]}")
     
     // QR Code generation (core only, no AWT dependencies)
-    implementation("com.google.zxing:core:3.5.2")
+    implementation("com.google.zxing:core:${libVersions["zxing"]}")
     
     // ===== COMPILE-ONLY DEPENDENCIES =====
     // Lombok
@@ -48,14 +48,14 @@ dependencies {
     
     // ===== ANNOTATION PROCESSORS =====
     annotationProcessor("org.projectlombok:lombok")
-    annotationProcessor("org.mapstruct:mapstruct-processor:$mapstructVersion")
-    annotationProcessor("org.projectlombok:lombok-mapstruct-binding:0.2.0")
+    annotationProcessor("org.mapstruct:mapstruct-processor:${libVersions["mapstruct"]}")
+    annotationProcessor("org.projectlombok:lombok-mapstruct-binding:${libVersions["lombokMapstructBinding"]}")
     
     // ===== TEST IMPLEMENTATION DEPENDENCIES =====
     // Spock Testing
-    testImplementation("org.spockframework:spock-core:2.4-M1-groovy-4.0")
-    testImplementation("org.apache.groovy:groovy:4.0.21")
-    testImplementation("org.mockito:mockito-core:5.11.0")
+    testImplementation("org.spockframework:spock-core:${libVersions["spock"]}")
+    testImplementation("org.apache.groovy:groovy:${libVersions["groovy"]}")
+    testImplementation("org.mockito:mockito-core:${libVersions["mockito"]}")
     
     // ===== TEST COMPILE-ONLY DEPENDENCIES =====
     // Lombok for tests
@@ -63,7 +63,7 @@ dependencies {
     
     // ===== TEST ANNOTATION PROCESSORS =====
     testAnnotationProcessor("org.projectlombok:lombok")
-    testAnnotationProcessor("org.mapstruct:mapstruct-processor:$mapstructVersion")
+    testAnnotationProcessor("org.mapstruct:mapstruct-processor:${libVersions["mapstruct"]}")
 }
 
 tasks.withType<JavaCompile> {

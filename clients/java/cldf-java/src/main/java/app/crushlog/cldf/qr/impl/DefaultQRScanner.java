@@ -111,51 +111,63 @@ public class DefaultQRScanner implements QRScanner {
     }
 
     return Result.tryExecute(
-        () -> {
-          Route.RouteBuilder builder = Route.builder();
-
-          if (data.getClid() != null) {
-            builder.clid(data.getClid());
-          }
-
-          ParsedQRData.RouteInfo routeInfo = data.getRoute();
-
-          if (routeInfo.getId() != null) {
-            builder.id(routeInfo.getId());
-          }
-          if (routeInfo.getName() != null) {
-            builder.name(routeInfo.getName());
-          }
-          if (routeInfo.getType() != null) {
-            RouteType type =
-                "boulder".equalsIgnoreCase(routeInfo.getType())
-                    ? RouteType.BOULDER
-                    : RouteType.ROUTE;
-            builder.routeType(type);
-          }
-          if (routeInfo.getHeight() != null) {
-            builder.height(routeInfo.getHeight());
-          }
-
-          // Set grade if available - grade system is required
-          if (routeInfo.getGrade() != null && routeInfo.getGradeSystem() != null) {
-            Route.Grades.GradesBuilder gradesBuilder = Route.Grades.builder();
-            setGradeBySystem(routeInfo.getGrade(), routeInfo.getGradeSystem(), gradesBuilder);
-            builder.grades(gradesBuilder.build());
-          } else if (routeInfo.getGrade() != null) {
-            log.warn("Grade without grade system found, ignoring: {}", routeInfo.getGrade());
-          }
-
-          // Set location ID if available
-          if (data.getLocation() != null && data.getLocation().getId() != null) {
-            builder.locationId(data.getLocation().getId());
-          }
-
-          return builder.build();
-        },
+        () -> buildRouteFromData(data),
         e ->
             QRError.of(
                 QRError.ErrorType.PARSE_ERROR, "Failed to convert to Route", e.getMessage()));
+  }
+
+  /** Builds a Route object from parsed QR data. */
+  private Route buildRouteFromData(ParsedQRData data) {
+    Route.RouteBuilder builder = Route.builder();
+
+    setRouteBasicFields(builder, data);
+    setRouteGrades(builder, data.getRoute());
+    setRouteLocationId(builder, data);
+
+    return builder.build();
+  }
+
+  /** Sets basic route fields from QR data. */
+  private void setRouteBasicFields(Route.RouteBuilder builder, ParsedQRData data) {
+    if (data.getClid() != null) {
+      builder.clid(data.getClid());
+    }
+
+    ParsedQRData.RouteInfo routeInfo = data.getRoute();
+
+    if (routeInfo.getId() != null) {
+      builder.id(routeInfo.getId());
+    }
+    if (routeInfo.getName() != null) {
+      builder.name(routeInfo.getName());
+    }
+    if (routeInfo.getType() != null) {
+      RouteType type =
+          "boulder".equalsIgnoreCase(routeInfo.getType()) ? RouteType.BOULDER : RouteType.ROUTE;
+      builder.routeType(type);
+    }
+    if (routeInfo.getHeight() != null) {
+      builder.height(routeInfo.getHeight());
+    }
+  }
+
+  /** Sets route grades if available. */
+  private void setRouteGrades(Route.RouteBuilder builder, ParsedQRData.RouteInfo routeInfo) {
+    if (routeInfo.getGrade() != null && routeInfo.getGradeSystem() != null) {
+      Route.Grades.GradesBuilder gradesBuilder = Route.Grades.builder();
+      setGradeBySystem(routeInfo.getGrade(), routeInfo.getGradeSystem(), gradesBuilder);
+      builder.grades(gradesBuilder.build());
+    } else if (routeInfo.getGrade() != null) {
+      log.warn("Grade without grade system found, ignoring: {}", routeInfo.getGrade());
+    }
+  }
+
+  /** Sets location ID if available. */
+  private void setRouteLocationId(Route.RouteBuilder builder, ParsedQRData data) {
+    if (data.getLocation() != null && data.getLocation().getId() != null) {
+      builder.locationId(data.getLocation().getId());
+    }
   }
 
   @Override
@@ -226,50 +238,71 @@ public class DefaultQRScanner implements QRScanner {
     return Result.<ParsedQRData, QRError>tryExecute(
         () -> {
           try {
-            // Use Jackson's automatic object mapping
             QRPayload payload = objectMapper.readValue(jsonData, QRPayload.class);
-
-            ParsedQRData.ParsedQRDataBuilder builder = ParsedQRData.builder();
-
-            // Map version
-            builder.version(payload.getVersion() != null ? payload.getVersion() : 1);
-
-            // Map basic fields
-            if (payload.getClid() != null) {
-              builder.clid(payload.getClid());
-            }
-            if (payload.getUrl() != null) {
-              builder.url(payload.getUrl());
-            }
-            if (payload.getIpfsHash() != null) {
-              builder.ipfsHash(payload.getIpfsHash());
-            }
-
-            // Map route data
-            if (payload.getRoute() != null) {
-              builder.route(mapRoutePayload(payload.getRoute()));
-            }
-
-            // Map location data (check both 'loc' and 'location' fields)
-            QRPayload.LocationPayload locationPayload = payload.getEffectiveLocation();
-            if (locationPayload != null) {
-              builder.location(mapLocationPayload(locationPayload));
-            }
-
-            // Map metadata
-            if (payload.getMeta() != null && payload.getMeta().getBlockchain() != null) {
-              builder.blockchainVerified(payload.getMeta().getBlockchain());
-            }
-
-            // Set hasOfflineData if we have actual data
-            builder.hasOfflineData(payload.getRoute() != null || locationPayload != null);
-
-            return builder.build();
+            return buildParsedDataFromPayload(payload);
           } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
           }
         },
         e -> QRError.parseError("Invalid JSON format in QR code: " + e.getMessage()));
+  }
+
+  /** Builds ParsedQRData from a QRPayload. */
+  private ParsedQRData buildParsedDataFromPayload(QRPayload payload) {
+    ParsedQRData.ParsedQRDataBuilder builder = ParsedQRData.builder();
+
+    setBasicPayloadFields(builder, payload);
+    setRouteDataFromPayload(builder, payload);
+    setLocationDataFromPayload(builder, payload);
+    setMetadataFromPayload(builder, payload);
+    setOfflineDataFlag(builder, payload);
+
+    return builder.build();
+  }
+
+  /** Sets basic fields from payload. */
+  private void setBasicPayloadFields(ParsedQRData.ParsedQRDataBuilder builder, QRPayload payload) {
+    builder.version(payload.getVersion() != null ? payload.getVersion() : 1);
+
+    if (payload.getClid() != null) {
+      builder.clid(payload.getClid());
+    }
+    if (payload.getUrl() != null) {
+      builder.url(payload.getUrl());
+    }
+    if (payload.getIpfsHash() != null) {
+      builder.ipfsHash(payload.getIpfsHash());
+    }
+  }
+
+  /** Sets route data from payload. */
+  private void setRouteDataFromPayload(
+      ParsedQRData.ParsedQRDataBuilder builder, QRPayload payload) {
+    if (payload.getRoute() != null) {
+      builder.route(mapRoutePayload(payload.getRoute()));
+    }
+  }
+
+  /** Sets location data from payload. */
+  private void setLocationDataFromPayload(
+      ParsedQRData.ParsedQRDataBuilder builder, QRPayload payload) {
+    QRPayload.LocationPayload locationPayload = payload.getEffectiveLocation();
+    if (locationPayload != null) {
+      builder.location(mapLocationPayload(locationPayload));
+    }
+  }
+
+  /** Sets metadata from payload. */
+  private void setMetadataFromPayload(ParsedQRData.ParsedQRDataBuilder builder, QRPayload payload) {
+    if (payload.getMeta() != null && payload.getMeta().getBlockchain() != null) {
+      builder.blockchainVerified(payload.getMeta().getBlockchain());
+    }
+  }
+
+  /** Sets the offline data flag based on available data. */
+  private void setOfflineDataFlag(ParsedQRData.ParsedQRDataBuilder builder, QRPayload payload) {
+    QRPayload.LocationPayload locationPayload = payload.getEffectiveLocation();
+    builder.hasOfflineData(payload.getRoute() != null || locationPayload != null);
   }
 
   private Result<ParsedQRData, QRError> parseUrlData(String url) {
@@ -347,6 +380,10 @@ public class DefaultQRScanner implements QRScanner {
           break;
         case "v":
           builder.version(Integer.parseInt(value));
+          break;
+        default:
+          // Unknown parameter, ignore
+          log.debug("Unknown URI parameter: {}", key);
           break;
       }
     }

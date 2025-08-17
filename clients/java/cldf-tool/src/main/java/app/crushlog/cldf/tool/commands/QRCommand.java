@@ -11,12 +11,12 @@ import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 
 import app.crushlog.cldf.api.CLDFArchive;
+import app.crushlog.cldf.clid.EntityType;
 import app.crushlog.cldf.clid.RouteModel;
 import app.crushlog.cldf.models.Location;
 import app.crushlog.cldf.models.Route;
 import app.crushlog.cldf.qr.*;
 import app.crushlog.cldf.qr.impl.DefaultQRCodeGenerator;
-import app.crushlog.cldf.qr.impl.DefaultQRScanner;
 import app.crushlog.cldf.qr.impl.QRDataGenerator;
 import app.crushlog.cldf.qr.result.QRError;
 import app.crushlog.cldf.qr.result.Result;
@@ -48,7 +48,9 @@ public class QRCommand implements Callable<Integer> {
 
   @Spec CommandSpec spec;
 
-  public QRCommand() {}
+  public QRCommand() {
+    // Constructor for PicoCLI framework
+  }
 
   @Override
   public Integer call() {
@@ -219,7 +221,7 @@ public class QRCommand implements Callable<Integer> {
         return 1;
       }
 
-      OutputHandler outputHandler = new OutputHandler(OutputFormat.text, verbose);
+      OutputHandler outputHandler = new OutputHandler(OutputFormat.TEXT, verbose);
 
       try {
         // Determine which mode to use
@@ -311,26 +313,43 @@ public class QRCommand implements Callable<Integer> {
       Route route = new Route();
       route.setName(name);
 
+      setRouteLocationId(route);
+      setRouteGrades(route);
+      setRouteType(route);
+      setRouteHeight(route);
+      setRouteFirstAscent(route);
+
+      return route;
+    }
+
+    private void setRouteLocationId(Route route) {
       if (locationId != null) {
         route.setLocationId(locationId);
       }
+    }
 
+    private void setRouteGrades(Route route) {
       if (grade != null) {
         Route.Grades grades = new Route.Grades();
-        // Try to determine grade system from format
-        if (grade.matches("5\\..*")) {
-          grades.setYds(grade);
-        } else if (grade.matches("V\\d+.*")) {
-          grades.setVScale(grade);
-        } else if (grade.matches("\\d+[abc]?\\+?")) {
-          grades.setFrench(grade);
-        } else {
-          // Default to YDS
-          grades.setYds(grade);
-        }
+        setGradeByPattern(grades, grade);
         route.setGrades(grades);
       }
+    }
 
+    private void setGradeByPattern(Route.Grades grades, String gradeValue) {
+      if (gradeValue.matches("5\\..*")) {
+        grades.setYds(gradeValue);
+      } else if (gradeValue.matches("V\\d+.*")) {
+        grades.setVScale(gradeValue);
+      } else if (gradeValue.matches("\\d+[abc]?\\+?")) {
+        grades.setFrench(gradeValue);
+      } else {
+        // Default to YDS
+        grades.setYds(gradeValue);
+      }
+    }
+
+    private void setRouteType(Route route) {
       if (routeType != null) {
         try {
           if (routeType.equalsIgnoreCase("boulder")) {
@@ -343,11 +362,15 @@ public class QRCommand implements Callable<Integer> {
           route.setRouteType(app.crushlog.cldf.models.enums.RouteType.ROUTE);
         }
       }
+    }
 
+    private void setRouteHeight(Route route) {
       if (height != null) {
         route.setHeight(height);
       }
+    }
 
+    private void setRouteFirstAscent(Route route) {
       if (firstAscentName != null || firstAscentYear != null) {
         Route.FirstAscent fa = new Route.FirstAscent();
         fa.setName(firstAscentName);
@@ -356,8 +379,6 @@ public class QRCommand implements Callable<Integer> {
         }
         route.setFirstAscent(fa);
       }
-
-      return route;
     }
 
     private Location createLocationForDirectMode() {
@@ -384,30 +405,33 @@ public class QRCommand implements Callable<Integer> {
       // For direct mode route CLID generation
       if (locationClid != null && grade != null) {
         // Create minimal route model for CLID generation
-        RouteModel.RouteType type = RouteModel.RouteType.SPORT;
-        if (routeType != null) {
-          try {
-            if (routeType.equalsIgnoreCase("boulder")) {
-              type = RouteModel.RouteType.BOULDER;
-            }
-          } catch (Exception e) {
-            // Use default
-          }
-        }
-
-        RouteModel.FirstAscent fa = null;
-        if (firstAscentName != null || firstAscentYear != null) {
-          fa = new RouteModel.FirstAscent(firstAscentName, firstAscentYear);
-        }
-
-        RouteModel.Route routeModel = new RouteModel.Route(name, grade, type, fa, height);
+        RouteModel.Route routeModel = getRouteModel();
 
         return app.crushlog.cldf.clid.CLIDGenerator.generateRouteCLID(locationClid, routeModel);
       }
 
       // Fallback to random CLID
-      return app.crushlog.cldf.clid.CLIDGenerator.generateRandomCLID(
-          app.crushlog.cldf.clid.CLIDGenerator.EntityType.ROUTE);
+      return app.crushlog.cldf.clid.CLIDGenerator.generateRandomCLID(EntityType.ROUTE);
+    }
+
+    private RouteModel.Route getRouteModel() {
+      RouteModel.RouteType type = RouteModel.RouteType.SPORT;
+      if (routeType != null) {
+        try {
+          if (routeType.equalsIgnoreCase("boulder")) {
+            type = RouteModel.RouteType.BOULDER;
+          }
+        } catch (Exception e) {
+          // Use default
+        }
+      }
+
+      RouteModel.FirstAscent fa = null;
+      if (firstAscentName != null || firstAscentYear != null) {
+        fa = new RouteModel.FirstAscent(firstAscentName, firstAscentYear);
+      }
+
+      return new RouteModel.Route(name, grade, type, fa, height);
     }
 
     private String generateLocationCLIDDirect() {
@@ -426,8 +450,7 @@ public class QRCommand implements Callable<Integer> {
       }
 
       // Fallback to random CLID
-      return app.crushlog.cldf.clid.CLIDGenerator.generateRandomCLID(
-          app.crushlog.cldf.clid.CLIDGenerator.EntityType.LOCATION);
+      return app.crushlog.cldf.clid.CLIDGenerator.generateRandomCLID(EntityType.LOCATION);
     }
 
     private String generateQRContent(Object entity, OutputHandler outputHandler) {
@@ -588,11 +611,21 @@ public class QRCommand implements Callable<Integer> {
 
     @ParentCommand private QRCommand parent;
 
-    public ScanCommand() {}
+    @Inject private QRScanner qrScanner;
+
+    // For PicoCLI framework
+    public ScanCommand() {
+      this.qrScanner = null;
+    }
+
+    @Inject
+    public ScanCommand(QRScanner qrScanner) {
+      this.qrScanner = qrScanner;
+    }
 
     @Override
     public Integer call() {
-      OutputFormat format = "json".equals(outputFormat) ? OutputFormat.json : OutputFormat.text;
+      OutputFormat format = "json".equals(outputFormat) ? OutputFormat.JSON : OutputFormat.TEXT;
       OutputHandler outputHandler = new OutputHandler(format, verbose);
 
       try {
@@ -600,8 +633,11 @@ public class QRCommand implements Callable<Integer> {
         byte[] imageBytes = Files.readAllBytes(imagePath);
 
         // Scan QR code from image
-        DefaultQRScanner scanner = new DefaultQRScanner();
-        Result<ParsedQRData, QRError> result = scanner.scan(imageBytes);
+        if (qrScanner == null) {
+          outputHandler.writeError("QRScanner not initialized");
+          return 1;
+        }
+        Result<ParsedQRData, QRError> result = qrScanner.scan(imageBytes);
 
         if (result.isFailure()) {
           handleScanFailure(result, outputHandler);
@@ -616,7 +652,7 @@ public class QRCommand implements Callable<Integer> {
         outputParsedData(parsedData, outputHandler);
 
         if (extractRoute || extractLocation) {
-          extractEntities(scanner, parsedData, outputHandler);
+          extractEntities(qrScanner, parsedData, outputHandler);
         }
 
         return 0;
@@ -653,7 +689,7 @@ public class QRCommand implements Callable<Integer> {
     }
 
     private void extractEntities(
-        DefaultQRScanner scanner, ParsedQRData parsedData, OutputHandler outputHandler) {
+        QRScanner scanner, ParsedQRData parsedData, OutputHandler outputHandler) {
       if (extractRoute) {
         extractRoute(scanner, parsedData, outputHandler);
       }
@@ -664,7 +700,7 @@ public class QRCommand implements Callable<Integer> {
     }
 
     private void extractRoute(
-        DefaultQRScanner scanner, ParsedQRData parsedData, OutputHandler outputHandler) {
+        QRScanner scanner, ParsedQRData parsedData, OutputHandler outputHandler) {
       Result<Route, QRError> routeResult = scanner.toRoute(parsedData);
       if (routeResult.isSuccess()) {
         routeResult
@@ -680,7 +716,7 @@ public class QRCommand implements Callable<Integer> {
     }
 
     private void extractLocation(
-        DefaultQRScanner scanner, ParsedQRData parsedData, OutputHandler outputHandler) {
+        QRScanner scanner, ParsedQRData parsedData, OutputHandler outputHandler) {
       Result<Location, QRError> locationResult = scanner.toLocation(parsedData);
       if (locationResult.isSuccess()) {
         locationResult
@@ -783,11 +819,21 @@ public class QRCommand implements Callable<Integer> {
 
     @ParentCommand private QRCommand parent;
 
-    public ParseCommand() {}
+    @Inject private QRScanner qrScanner;
+
+    // For PicoCLI framework
+    public ParseCommand() {
+      this.qrScanner = null;
+    }
+
+    @Inject
+    public ParseCommand(QRScanner qrScanner) {
+      this.qrScanner = qrScanner;
+    }
 
     @Override
     public Integer call() {
-      OutputFormat format = "json".equals(outputFormat) ? OutputFormat.json : OutputFormat.text;
+      OutputFormat format = "json".equals(outputFormat) ? OutputFormat.JSON : OutputFormat.TEXT;
       OutputHandler outputHandler = new OutputHandler(format, verbose);
 
       try {
@@ -800,8 +846,11 @@ public class QRCommand implements Callable<Integer> {
           qrData = input;
         }
 
-        DefaultQRScanner scanner = new DefaultQRScanner();
-        Result<ParsedQRData, QRError> result = scanner.parse(qrData);
+        if (qrScanner == null) {
+          outputHandler.writeError("QRScanner not initialized");
+          return 1;
+        }
+        Result<ParsedQRData, QRError> result = qrScanner.parse(qrData);
 
         if (result.isFailure()) {
           handleScanFailure(result, outputHandler);
@@ -816,7 +865,7 @@ public class QRCommand implements Callable<Integer> {
         outputParsedData(parsedData, outputHandler);
 
         if (extractRoute || extractLocation) {
-          extractEntities(scanner, parsedData, outputHandler);
+          extractEntities(qrScanner, parsedData, outputHandler);
         }
 
         return 0;
@@ -853,7 +902,7 @@ public class QRCommand implements Callable<Integer> {
     }
 
     private void extractEntities(
-        DefaultQRScanner scanner, ParsedQRData parsedData, OutputHandler outputHandler) {
+        QRScanner scanner, ParsedQRData parsedData, OutputHandler outputHandler) {
       if (extractRoute) {
         extractRoute(scanner, parsedData, outputHandler);
       }
@@ -864,7 +913,7 @@ public class QRCommand implements Callable<Integer> {
     }
 
     private void extractRoute(
-        DefaultQRScanner scanner, ParsedQRData parsedData, OutputHandler outputHandler) {
+        QRScanner scanner, ParsedQRData parsedData, OutputHandler outputHandler) {
       Result<Route, QRError> routeResult = scanner.toRoute(parsedData);
       if (routeResult.isSuccess()) {
         routeResult
@@ -880,7 +929,7 @@ public class QRCommand implements Callable<Integer> {
     }
 
     private void extractLocation(
-        DefaultQRScanner scanner, ParsedQRData parsedData, OutputHandler outputHandler) {
+        QRScanner scanner, ParsedQRData parsedData, OutputHandler outputHandler) {
       Result<Location, QRError> locationResult = scanner.toLocation(parsedData);
       if (locationResult.isSuccess()) {
         locationResult

@@ -47,7 +47,7 @@ public class TreeCommand extends BaseCommand {
   protected CommandResult execute() throws Exception {
     CLDFArchive archive = cldfService.read(inputFile);
 
-    if (outputFormat == OutputFormat.json) {
+    if (outputFormat == OutputFormat.JSON) {
       Map<String, Object> treeData =
           treeService.buildTreeData(archive, inputFile.getName(), showDetails);
       output.writeJson(treeData);

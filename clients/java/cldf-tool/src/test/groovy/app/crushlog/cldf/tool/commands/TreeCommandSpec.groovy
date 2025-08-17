@@ -24,14 +24,14 @@ class TreeCommandSpec extends Specification {
     def setup() {
         command = new TreeCommand(cldfService, treeService)
         command.output = Mock(OutputHandler)
-        command.outputFormat = OutputFormat.text
+        command.outputFormat = OutputFormat.TEXT
     }
 
     def "should display tree structure in text format"() {
         given: "a CLDF archive with hierarchical data"
         def testFile = new File("test.cldf")
         command.inputFile = testFile
-        command.outputFormat = OutputFormat.text
+        command.outputFormat = OutputFormat.TEXT
 
         def archive = createTestArchive()
 
@@ -55,7 +55,7 @@ class TreeCommandSpec extends Specification {
         given: "a CLDF archive and JSON output format"
         def testFile = new File("test.cldf")
         command.inputFile = testFile
-        command.outputFormat = OutputFormat.json
+        command.outputFormat = OutputFormat.JSON
         command.output.isJsonFormat() >> true
 
         def archive = createTestArchive()
@@ -78,7 +78,7 @@ class TreeCommandSpec extends Specification {
         given: "show-details flag is enabled"
         def testFile = new File("test.cldf")
         command.inputFile = testFile
-        command.outputFormat = OutputFormat.json
+        command.outputFormat = OutputFormat.JSON
         command.output.isJsonFormat() >> true
         command.showDetails = true
 
@@ -103,7 +103,7 @@ class TreeCommandSpec extends Specification {
         given: "an empty CLDF archive"
         def testFile = new File("empty.cldf")
         command.inputFile = testFile
-        command.outputFormat = OutputFormat.json
+        command.outputFormat = OutputFormat.JSON
         command.output.isJsonFormat() >> true
 
         def emptyArchive = CLDFArchive.builder()
@@ -149,7 +149,7 @@ class TreeCommandSpec extends Specification {
         given: "a complex archive with multiple levels"
         def testFile = new File("complex.cldf")
         command.inputFile = testFile
-        command.outputFormat = OutputFormat.json
+        command.outputFormat = OutputFormat.JSON
         command.output.isJsonFormat() >> true
 
         def archive = createComplexArchive()
@@ -175,7 +175,7 @@ class TreeCommandSpec extends Specification {
         given: "text output format"
         def testFile = new File("test.cldf")
         command.inputFile = testFile
-        command.outputFormat = OutputFormat.text
+        command.outputFormat = OutputFormat.TEXT
         command.showDetails = true
 
         def archive = createTestArchive()

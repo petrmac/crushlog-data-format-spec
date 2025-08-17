@@ -40,13 +40,13 @@ class CreateCommandSpec extends Specification {
         
         outputFile = tempDir.resolve("test.cldf").toFile()
         command.outputFile = outputFile
-        command.outputFormat = OutputFormat.text
+        command.outputFormat = OutputFormat.TEXT
         command.quiet = false
         command.validate = true
         command.prettyPrint = true
         
         // Initialize the output handler
-        command.output = new OutputHandler(OutputFormat.text, false)
+        command.output = new OutputHandler(OutputFormat.TEXT, false)
         
         // Default mock behavior - return valid result
         def defaultValidationResult = ValidationResult.builder()

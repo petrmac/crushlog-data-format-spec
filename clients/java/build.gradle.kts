@@ -60,6 +60,32 @@ allprojects {
     version = "1.0.0"
 }
 
+// Centralized version catalog for all modules
+val libVersions by extra {
+    mapOf(
+        // Core libraries
+        "jackson" to "2.17.0",
+        "mapstruct" to "1.5.5.Final",
+        "lombokMapstructBinding" to "0.2.0",
+        
+        // Database
+        "neo4j" to "5.15.0",
+        "neo4jCypherDsl" to "2024.0.0",
+        
+        // Validation and utilities
+        "jsonSchemaValidator" to "1.3.3",
+        "commonsCompress" to "1.26.1",
+        "zxing" to "3.5.2",
+        
+        // Testing
+        "spock" to "2.4-M1-groovy-4.0",
+        "groovy" to "4.0.21",
+        "mockito" to "5.11.0",
+        "assertj" to "3.25.1",
+        "jmh" to "1.37"
+    )
+}
+
 subprojects {
     apply(plugin = "java")
     apply(plugin = "idea")

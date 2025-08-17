@@ -1,10 +1,13 @@
 package app.crushlog.cldf.qr
 
 import app.crushlog.cldf.models.enums.RouteType
+import app.crushlog.cldf.qr.impl.DefaultQRScanner
 import spock.lang.Specification
 import spock.lang.Unroll
 
 class QRScannerSpec extends Specification {
+
+	QRScanner scanner = new DefaultQRScanner()
 
 	def "should parse JSON QR data with CLID"() {
 		given: "JSON QR data"
@@ -35,7 +38,7 @@ class QRScannerSpec extends Specification {
         """
 
 		when: "parsing QR data"
-		def data = QRScanner.parseString(jsonData)
+		def data = scanner.parse(jsonData).orElseThrow { new RuntimeException("Failed to parse") }
 
 		then: "data is correctly parsed"
 		data.version == 1
@@ -64,7 +67,7 @@ class QRScannerSpec extends Specification {
 		def url = "https://crushlog.pro/g/550e8400"
 
 		when: "parsing URL"
-		def data = QRScanner.parseString(url)
+		def data = scanner.parse(url).orElseThrow { new RuntimeException("Failed to parse") }
 
 		then: "data is correctly parsed"
 		data.version == 1
@@ -78,7 +81,7 @@ class QRScannerSpec extends Specification {
 		def uri = "cldf://global/route/550e8400-e29b-41d4-a716-446655440000?v=1&cldf=QmTest&name=Test+Route&grade=V8&gradeSystem=vScale"
 
 		when: "parsing URI"
-		def data = QRScanner.parseString(uri)
+		def data = scanner.parse(uri).orElseThrow { new RuntimeException("Failed to parse") }
 
 		then: "data is correctly parsed"
 		data.version == 1
@@ -102,7 +105,7 @@ class QRScannerSpec extends Specification {
         """
 
 		when: "parsing QR data"
-		def data = QRScanner.parseString(jsonData)
+		def data = scanner.parse(jsonData).orElseThrow { new RuntimeException("Failed to parse") }
 
 		then: "data is correctly parsed"
 		data.version == 1
@@ -130,7 +133,7 @@ class QRScannerSpec extends Specification {
 				.build()
 
 		when: "converting to Route"
-		def routeOpt = QRScanner.toRouteStatic(qrData)
+		def routeOpt = scanner.toRoute(qrData).getSuccess()
 
 		then: "Route is created correctly"
 		routeOpt.isPresent()
@@ -159,7 +162,7 @@ class QRScannerSpec extends Specification {
 				.build()
 
 		when: "converting to Location"
-		def locationOpt = QRScanner.toLocationStatic(qrData)
+		def locationOpt = scanner.toLocation(qrData).getSuccess()
 
 		then: "Location is created correctly"
 		locationOpt.isPresent()
@@ -180,7 +183,7 @@ class QRScannerSpec extends Specification {
 				.build()
 
 		when: "converting to Route"
-		def routeOpt = QRScanner.toRouteStatic(qrData)
+		def routeOpt = scanner.toRoute(qrData).getSuccess()
 
 		then: "Optional is empty"
 		!routeOpt.isPresent()
@@ -193,7 +196,7 @@ class QRScannerSpec extends Specification {
 				.build()
 
 		when: "converting to Location"
-		def locationOpt = QRScanner.toLocationStatic(qrData)
+		def locationOpt = scanner.toLocation(qrData).getSuccess()
 
 		then: "Optional is empty"
 		!locationOpt.isPresent()
@@ -201,40 +204,40 @@ class QRScannerSpec extends Specification {
 
 	def "should throw exception for null QR data"() {
 		when: "parsing null data"
-		QRScanner.parseString(null)
+		scanner.parse(null).orElseThrow { new RuntimeException("Failed to parse") }
 
 		then: "exception is thrown"
-		thrown(QRScanner.QRParseException)
+		thrown(RuntimeException)
 	}
 
 	def "should throw exception for empty QR data"() {
 		when: "parsing empty data"
-		QRScanner.parseString("")
+		scanner.parse("").orElseThrow { new RuntimeException("Failed to parse") }
 
 		then: "exception is thrown"
-		thrown(QRScanner.QRParseException)
+		thrown(RuntimeException)
 	}
 
 	def "should throw exception for unrecognized format"() {
 		when: "parsing unrecognized format"
-		QRScanner.parseString("random string that is not QR data")
+		scanner.parse("random string that is not QR data").orElseThrow { new RuntimeException("Failed to parse") }
 
 		then: "exception is thrown"
-		thrown(QRScanner.QRParseException)
+		thrown(RuntimeException)
 	}
 
 	def "should throw exception for invalid JSON"() {
 		when: "parsing invalid JSON"
-		QRScanner.parseString("{invalid json}")
+		scanner.parse("{invalid json}").orElseThrow { new RuntimeException("Failed to parse") }
 
 		then: "exception is thrown"
-		thrown(QRScanner.QRParseException)
+		thrown(RuntimeException)
 	}
 
 	@Unroll
 	def "should parse different URL formats: #url"() {
 		when: "parsing URL"
-		def data = QRScanner.parseString(url)
+		def data = scanner.parse(url).orElseThrow { new RuntimeException("Failed to parse") }
 
 		then: "data is parsed"
 		data.url == url
@@ -252,7 +255,7 @@ class QRScannerSpec extends Specification {
 		def uri = "cldf://global/route/550e8400-e29b-41d4-a716-446655440000?v=1&name=The+North+Face&grade=5.13%2B"
 
 		when: "parsing URI"
-		def data = QRScanner.parseString(uri)
+		def data = scanner.parse(uri).orElseThrow { new RuntimeException("Failed to parse") }
 
 		then: "parameters are correctly decoded"
 		data.route.name == "The North Face"
@@ -272,7 +275,7 @@ class QRScannerSpec extends Specification {
         """
 
 		when: "parsing QR data"
-		def data = QRScanner.parseString(jsonData)
+		def data = scanner.parse(jsonData).orElseThrow { new RuntimeException("Failed to parse") }
 
 		then: "location is parsed correctly"
 		data.location.name == "Test Location"
@@ -283,7 +286,7 @@ class QRScannerSpec extends Specification {
 		def uri = "cldf://global/route/550e8400-e29b-41d4-a716-446655440000?name=Test&grade=V5"
 
 		when: "parsing URI"
-		def data = QRScanner.parseString(uri)
+		def data = scanner.parse(uri).orElseThrow { new RuntimeException("Failed to parse") }
 
 		then: "hasOfflineData is true"
 		data.hasOfflineData == true
@@ -294,7 +297,7 @@ class QRScannerSpec extends Specification {
 		def uri = "cldf://global/route/550e8400-e29b-41d4-a716-446655440000"
 
 		when: "parsing URI"
-		def data = QRScanner.parseString(uri)
+		def data = scanner.parse(uri).orElseThrow { new RuntimeException("Failed to parse") }
 
 		then: "hasOfflineData is false"
 		data.hasOfflineData == false

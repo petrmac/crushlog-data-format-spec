@@ -80,98 +80,233 @@ public class CLDFReader {
    * @throws IOException if an I/O error occurs
    */
   public CLDFArchive read(InputStream inputStream) throws IOException {
+    Map<String, byte[]> fileContents = extractZipContents(inputStream);
+    validateRequiredFiles(fileContents);
+
+    if (validateSchemas) {
+      validateAllSchemas(fileContents);
+    }
+
+    return buildArchive(fileContents);
+  }
+
+  /**
+   * Extracts all files from the ZIP archive into a map.
+   *
+   * @param inputStream the input stream containing the ZIP archive
+   * @return map of file names to their byte content
+   * @throws IOException if an I/O error occurs
+   */
+  private Map<String, byte[]> extractZipContents(InputStream inputStream) throws IOException {
     Map<String, byte[]> fileContents = new HashMap<>();
-    Map<String, String> actualChecksums = new HashMap<>();
 
     try (ZipArchiveInputStream zis = new ZipArchiveInputStream(inputStream)) {
       ZipArchiveEntry entry;
       while ((entry = zis.getNextEntry()) != null) {
         if (!entry.isDirectory()) {
-          ByteArrayOutputStream baos = new ByteArrayOutputStream();
-          byte[] buffer = new byte[8192];
-          int len;
-          while ((len = zis.read(buffer)) > 0) {
-            baos.write(buffer, 0, len);
-          }
-          byte[] content = baos.toByteArray();
+          byte[] content = readEntryContent(zis);
           fileContents.put(entry.getName(), content);
-
-          if (validateChecksums && !entry.getName().equals(CHECKSUMS_FILE)) {
-            actualChecksums.put(entry.getName(), calculateSHA256(content));
-          }
         }
       }
     }
 
-    // Check required files
+    return fileContents;
+  }
+
+  /**
+   * Reads the content of a ZIP entry.
+   *
+   * @param zis the ZIP archive input stream
+   * @return the content as byte array
+   * @throws IOException if an I/O error occurs
+   */
+  private byte[] readEntryContent(ZipArchiveInputStream zis) throws IOException {
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    byte[] buffer = new byte[8192];
+    int len;
+    while ((len = zis.read(buffer)) > 0) {
+      baos.write(buffer, 0, len);
+    }
+    return baos.toByteArray();
+  }
+
+  /**
+   * Validates that required files are present in the archive.
+   *
+   * @param fileContents map of file names to their content
+   * @throws IOException if required files are missing
+   */
+  private void validateRequiredFiles(Map<String, byte[]> fileContents) throws IOException {
     if (!fileContents.containsKey(MANIFEST_FILE)) {
       throw new IOException("Missing required file: " + MANIFEST_FILE);
     }
     if (!fileContents.containsKey(CHECKSUMS_FILE)) {
       throw new IOException("Missing required file: " + CHECKSUMS_FILE);
     }
+  }
 
-    // Validate schemas if enabled
-    if (validateSchemas) {
-      // Validate all required files first
-      for (String filename : new String[] {MANIFEST_FILE, LOCATIONS_FILE, CHECKSUMS_FILE}) {
-        ValidationResult result =
-            schemaValidator.validateWithResult(filename, fileContents.get(filename));
-        if (!result.valid()) {
-          StringBuilder errorMessage = new StringBuilder();
-          errorMessage.append("Schema validation failed for ").append(filename).append(":\n");
-          for (ValidationResult.ValidationError error : result.errors()) {
-            errorMessage.append("  - ").append(error.message()).append("\n");
-          }
-          throw new IOException(errorMessage.toString());
-        }
-      }
+  /**
+   * Validates all schemas for files in the archive.
+   *
+   * @param fileContents map of file names to their content
+   * @throws IOException if schema validation fails
+   */
+  private void validateAllSchemas(Map<String, byte[]> fileContents) throws IOException {
+    String[] requiredFiles = {MANIFEST_FILE, LOCATIONS_FILE, CHECKSUMS_FILE};
+    String[] optionalFiles = {
+      CLIMBS_FILE, SESSIONS_FILE, ROUTES_FILE, SECTORS_FILE, TAGS_FILE, MEDIA_METADATA_FILE
+    };
 
-      // Validate optional files if present
-      for (String filename :
-          new String[] {
-            CLIMBS_FILE, SESSIONS_FILE, ROUTES_FILE, SECTORS_FILE, TAGS_FILE, MEDIA_METADATA_FILE
-          }) {
-        if (fileContents.containsKey(filename)) {
-          ValidationResult result =
-              schemaValidator.validateWithResult(filename, fileContents.get(filename));
-          if (!result.valid()) {
-            StringBuilder errorMessage = new StringBuilder();
-            errorMessage.append("Schema validation failed for ").append(filename).append(":\n");
-            for (ValidationResult.ValidationError error : result.errors()) {
-              errorMessage.append("  - ").append(error.message()).append("\n");
-            }
-            throw new IOException(errorMessage.toString());
-          }
-        }
+    validateSchemaForFiles(fileContents, requiredFiles, true);
+    validateSchemaForFiles(fileContents, optionalFiles, false);
+  }
+
+  /**
+   * Validates schemas for a set of files.
+   *
+   * @param fileContents map of file names to their content
+   * @param filenames array of file names to validate
+   * @param required whether the files are required to exist
+   * @throws IOException if schema validation fails
+   */
+  private void validateSchemaForFiles(
+      Map<String, byte[]> fileContents, String[] filenames, boolean required) throws IOException {
+    for (String filename : filenames) {
+      if (fileContents.containsKey(filename) || required) {
+        validateSingleSchema(filename, fileContents.get(filename));
       }
     }
+  }
 
-    // Parse files
+  /**
+   * Validates the schema for a single file.
+   *
+   * @param filename the name of the file
+   * @param content the file content
+   * @throws IOException if schema validation fails
+   */
+  private void validateSingleSchema(String filename, byte[] content) throws IOException {
+    ValidationResult result = schemaValidator.validateWithResult(filename, content);
+    if (!result.valid()) {
+      StringBuilder errorMessage = new StringBuilder();
+      errorMessage.append("Schema validation failed for ").append(filename).append(":\n");
+      for (ValidationResult.ValidationError error : result.errors()) {
+        errorMessage.append("  - ").append(error.message()).append("\n");
+      }
+      throw new IOException(errorMessage.toString());
+    }
+  }
+
+  /**
+   * Builds the CLDFArchive from the extracted file contents.
+   *
+   * @param fileContents map of file names to their content
+   * @return the constructed CLDFArchive
+   * @throws IOException if parsing or validation fails
+   */
+  private CLDFArchive buildArchive(Map<String, byte[]> fileContents) throws IOException {
     CLDFArchive archive = new CLDFArchive();
 
-    // Parse manifest
+    parseAndSetManifest(archive, fileContents);
+    parseAndValidateChecksums(archive, fileContents);
+    parseRequiredFiles(archive, fileContents);
+    parseOptionalFiles(archive, fileContents);
+    extractMediaFiles(archive, fileContents);
+
+    return archive;
+  }
+
+  /**
+   * Parses and sets the manifest in the archive.
+   *
+   * @param archive the archive to populate
+   * @param fileContents map of file names to their content
+   * @throws IOException if parsing or validation fails
+   */
+  private void parseAndSetManifest(CLDFArchive archive, Map<String, byte[]> fileContents)
+      throws IOException {
     Manifest manifest = parseJson(fileContents.get(MANIFEST_FILE), Manifest.class);
     archive.setManifest(manifest);
 
-    // Validate CLDF format
     if (!"CLDF".equals(manifest.getFormat())) {
       throw new IOException("Invalid format. Expected 'CLDF', got: " + manifest.getFormat());
     }
+  }
 
-    // Parse checksums and validate if enabled
+  /**
+   * Parses and validates checksums.
+   *
+   * @param archive the archive to populate
+   * @param fileContents map of file names to their content
+   * @throws IOException if parsing or validation fails
+   */
+  private void parseAndValidateChecksums(CLDFArchive archive, Map<String, byte[]> fileContents)
+      throws IOException {
     Checksums checksums = parseJson(fileContents.get(CHECKSUMS_FILE), Checksums.class);
     archive.setChecksums(checksums);
 
     if (validateChecksums) {
+      Map<String, String> actualChecksums = calculateActualChecksums(fileContents);
       validateChecksums(checksums, actualChecksums);
     }
+  }
 
-    // Parse required files
+  /**
+   * Calculates actual checksums for all files except checksums.json.
+   *
+   * @param fileContents map of file names to their content
+   * @return map of file names to their calculated checksums
+   * @throws IOException if checksum calculation fails
+   */
+  private Map<String, String> calculateActualChecksums(Map<String, byte[]> fileContents)
+      throws IOException {
+    Map<String, String> actualChecksums = new HashMap<>();
+
+    for (Map.Entry<String, byte[]> entry : fileContents.entrySet()) {
+      if (!entry.getKey().equals(CHECKSUMS_FILE)) {
+        actualChecksums.put(entry.getKey(), calculateSHA256(entry.getValue()));
+      }
+    }
+
+    return actualChecksums;
+  }
+
+  /**
+   * Parses required files and populates the archive.
+   *
+   * @param archive the archive to populate
+   * @param fileContents map of file names to their content
+   * @throws IOException if parsing fails
+   */
+  private void parseRequiredFiles(CLDFArchive archive, Map<String, byte[]> fileContents)
+      throws IOException {
     LocationsFile locationsFile = parseJson(fileContents.get(LOCATIONS_FILE), LocationsFile.class);
     archive.setLocations(locationsFile.getLocations());
+  }
 
-    // Parse optional climbs and sessions files
+  /**
+   * Parses optional files and populates the archive.
+   *
+   * @param archive the archive to populate
+   * @param fileContents map of file names to their content
+   * @throws IOException if parsing fails
+   */
+  private void parseOptionalFiles(CLDFArchive archive, Map<String, byte[]> fileContents)
+      throws IOException {
+    parseOptionalClimbsAndSessions(archive, fileContents);
+    parseOptionalRouteData(archive, fileContents);
+    parseOptionalMediaMetadata(archive, fileContents);
+  }
+
+  /**
+   * Parses optional climbs and sessions files.
+   *
+   * @param archive the archive to populate
+   * @param fileContents map of file names to their content
+   * @throws IOException if parsing fails
+   */
+  private void parseOptionalClimbsAndSessions(CLDFArchive archive, Map<String, byte[]> fileContents)
+      throws IOException {
     if (fileContents.containsKey(CLIMBS_FILE)) {
       ClimbsFile climbsFile = parseJson(fileContents.get(CLIMBS_FILE), ClimbsFile.class);
       archive.setClimbs(climbsFile.getClimbs());
@@ -181,8 +316,17 @@ public class CLDFReader {
       SessionsFile sessionsFile = parseJson(fileContents.get(SESSIONS_FILE), SessionsFile.class);
       archive.setSessions(sessionsFile.getSessions());
     }
+  }
 
-    // Parse optional files
+  /**
+   * Parses optional route-related files.
+   *
+   * @param archive the archive to populate
+   * @param fileContents map of file names to their content
+   * @throws IOException if parsing fails
+   */
+  private void parseOptionalRouteData(CLDFArchive archive, Map<String, byte[]> fileContents)
+      throws IOException {
     if (fileContents.containsKey(ROUTES_FILE)) {
       RoutesFile routesFile = parseJson(fileContents.get(ROUTES_FILE), RoutesFile.class);
       archive.setRoutes(routesFile.getRoutes());
@@ -197,14 +341,31 @@ public class CLDFReader {
       TagsFile tagsFile = parseJson(fileContents.get(TAGS_FILE), TagsFile.class);
       archive.setTags(tagsFile.getTags());
     }
+  }
 
+  /**
+   * Parses optional media metadata file.
+   *
+   * @param archive the archive to populate
+   * @param fileContents map of file names to their content
+   * @throws IOException if parsing fails
+   */
+  private void parseOptionalMediaMetadata(CLDFArchive archive, Map<String, byte[]> fileContents)
+      throws IOException {
     if (fileContents.containsKey(MEDIA_METADATA_FILE)) {
       MediaMetadataFile mediaFile =
           parseJson(fileContents.get(MEDIA_METADATA_FILE), MediaMetadataFile.class);
       archive.setMediaItems(mediaFile.getMedia());
     }
+  }
 
-    // Store raw media files if present
+  /**
+   * Extracts raw media files from the archive.
+   *
+   * @param archive the archive to populate
+   * @param fileContents map of file names to their content
+   */
+  private void extractMediaFiles(CLDFArchive archive, Map<String, byte[]> fileContents) {
     Map<String, byte[]> mediaFiles = new HashMap<>();
     for (Map.Entry<String, byte[]> entry : fileContents.entrySet()) {
       if (entry.getKey().startsWith("media/")) {
@@ -214,8 +375,6 @@ public class CLDFReader {
     if (!mediaFiles.isEmpty()) {
       archive.setMediaFiles(mediaFiles);
     }
-
-    return archive;
   }
 
   private <T> T parseJson(byte[] content, Class<T> clazz) throws IOException {

@@ -3,6 +3,7 @@ package app.crushlog.cldf.tool.commands
 import app.crushlog.cldf.api.CLDFArchive
 import app.crushlog.cldf.models.*
 import app.crushlog.cldf.tool.models.CommandResult
+import app.crushlog.cldf.tool.models.DataType
 import app.crushlog.cldf.tool.services.CLDFService
 import app.crushlog.cldf.tool.services.QueryService
 import app.crushlog.cldf.tool.services.DefaultQueryService
@@ -40,10 +41,10 @@ class QueryCommandSpec extends Specification {
         queryService = new DefaultQueryService()
         
         command = new QueryCommand(cldfService, queryService)
-        command.outputFormat = OutputFormat.text
+        command.outputFormat = OutputFormat.TEXT
         command.quiet = false
-        command.output = new OutputHandler(OutputFormat.text, false)
-        command.selectType = QueryCommand.DataType.all // Set default select type
+        command.output = new OutputHandler(OutputFormat.TEXT, false)
+        command.selectType = DataType.ALL // Set default select type
         
         inputFile = tempDir.resolve("test.cldf").toFile()
         inputFile.createNewFile()
@@ -163,7 +164,7 @@ class QueryCommandSpec extends Specification {
         given:
         def nonExistentFile = new File("/non/existent/file.cldf")
         command.inputFile = nonExistentFile
-        command.selectType = QueryCommand.DataType.all
+        command.selectType = DataType.ALL
 
         when:
         def result = command.execute()
@@ -176,7 +177,7 @@ class QueryCommandSpec extends Specification {
 
     def "should query all data"() {
         given:
-        command.selectType = QueryCommand.DataType.all
+        command.selectType = DataType.ALL
         cldfService.read(inputFile) >> testArchive
 
         when:
@@ -196,7 +197,7 @@ class QueryCommandSpec extends Specification {
 
     def "should query climbs only"() {
         given:
-        command.selectType = QueryCommand.DataType.climbs
+        command.selectType = DataType.CLIMBS
         cldfService.read(inputFile) >> testArchive
 
         when:
@@ -212,7 +213,7 @@ class QueryCommandSpec extends Specification {
 
     def "should query sessions only"() {
         given:
-        command.selectType = QueryCommand.DataType.sessions
+        command.selectType = DataType.SESSIONS
         cldfService.read(inputFile) >> testArchive
 
         when:
@@ -228,7 +229,7 @@ class QueryCommandSpec extends Specification {
 
     def "should query locations only"() {
         given:
-        command.selectType = QueryCommand.DataType.locations
+        command.selectType = DataType.LOCATIONS
         cldfService.read(inputFile) >> testArchive
 
         when:
@@ -244,7 +245,7 @@ class QueryCommandSpec extends Specification {
 
     def "should apply limit"() {
         given:
-        command.selectType = QueryCommand.DataType.climbs
+        command.selectType = DataType.CLIMBS
         command.limit = 2
         cldfService.read(inputFile) >> testArchive
 
@@ -260,7 +261,7 @@ class QueryCommandSpec extends Specification {
 
     def "should apply offset"() {
         given:
-        command.selectType = QueryCommand.DataType.climbs
+        command.selectType = DataType.CLIMBS
         command.offset = 1
         cldfService.read(inputFile) >> testArchive
 
@@ -276,7 +277,7 @@ class QueryCommandSpec extends Specification {
 
     def "should apply limit and offset together"() {
         given:
-        command.selectType = QueryCommand.DataType.climbs
+        command.selectType = DataType.CLIMBS
         command.limit = 1
         command.offset = 1
         cldfService.read(inputFile) >> testArchive
@@ -293,7 +294,7 @@ class QueryCommandSpec extends Specification {
 
     def "should return count only when requested"() {
         given:
-        command.selectType = QueryCommand.DataType.climbs
+        command.selectType = DataType.CLIMBS
         command.countOnly = true
         cldfService.read(inputFile) >> testArchive
 
@@ -308,7 +309,7 @@ class QueryCommandSpec extends Specification {
 
     def "should include statistics when requested"() {
         given:
-        command.selectType = QueryCommand.DataType.climbs
+        command.selectType = DataType.CLIMBS
         command.includeStats = true
         cldfService.read(inputFile) >> testArchive
 
@@ -323,7 +324,7 @@ class QueryCommandSpec extends Specification {
 
     def "should include query info in result"() {
         given:
-        command.selectType = QueryCommand.DataType.climbs
+        command.selectType = DataType.CLIMBS
         command.filter = "type=boulder"
         command.sortBy = "date"
         command.limit = 10
@@ -347,7 +348,7 @@ class QueryCommandSpec extends Specification {
 
     def "should handle empty results"() {
         given:
-        command.selectType = QueryCommand.DataType.routes  // No routes in test archive
+        command.selectType = DataType.ROUTES  // No routes in test archive
         cldfService.read(inputFile) >> testArchive
 
         when:
@@ -362,7 +363,7 @@ class QueryCommandSpec extends Specification {
 
     def "should query manifest"() {
         given:
-        command.selectType = QueryCommand.DataType.manifest
+        command.selectType = DataType.MANIFEST
         cldfService.read(inputFile) >> testArchive
 
         when:
@@ -378,7 +379,7 @@ class QueryCommandSpec extends Specification {
 
     def "should format text output for climbs"() {
         given:
-        command.selectType = QueryCommand.DataType.climbs
+        command.selectType = DataType.CLIMBS
         cldfService.read(inputFile) >> testArchive
         def result = CommandResult.builder()
             .success(true)
@@ -441,7 +442,7 @@ class QueryCommandSpec extends Specification {
     
     def "should execute query with filter applied"() {
         given: "a query with filter"
-        command.selectType = QueryCommand.DataType.climbs
+        command.selectType = DataType.CLIMBS
         command.filter = "type=boulder"
         cldfService.read(inputFile) >> testArchive
 
@@ -457,7 +458,7 @@ class QueryCommandSpec extends Specification {
     
     def "should execute query with sorting applied"() {
         given: "a query with sorting"
-        command.selectType = QueryCommand.DataType.sessions
+        command.selectType = DataType.SESSIONS
         command.sortBy = "date"
         cldfService.read(inputFile) >> testArchive
 
@@ -472,7 +473,7 @@ class QueryCommandSpec extends Specification {
     
     def "should execute query with field filtering"() {
         given: "a query with field filtering"
-        command.selectType = QueryCommand.DataType.climbs
+        command.selectType = DataType.CLIMBS
         command.fields = "routeName,grade,date"
         cldfService.read(inputFile) >> testArchive
 
@@ -487,7 +488,7 @@ class QueryCommandSpec extends Specification {
     
     def "should execute query for routes when archive has routes"() {
         given: "an archive with routes"
-        command.selectType = QueryCommand.DataType.routes
+        command.selectType = DataType.ROUTES
         def archiveWithRoutes = Mock(CLDFArchive)
         def routes = [Mock(Route), Mock(Route)]
         
@@ -506,7 +507,7 @@ class QueryCommandSpec extends Specification {
     
     def "should execute query for sectors when archive has sectors"() {
         given: "an archive with sectors"
-        command.selectType = QueryCommand.DataType.sectors
+        command.selectType = DataType.SECTORS
         def archiveWithSectors = Mock(CLDFArchive)
         def sectors = [Mock(Sector)]
         
@@ -525,7 +526,7 @@ class QueryCommandSpec extends Specification {
     
     def "should execute query for tags when archive has tags"() {
         given: "an archive with tags"
-        command.selectType = QueryCommand.DataType.tags
+        command.selectType = DataType.TAGS
         def archiveWithTags = Mock(CLDFArchive)
         def tags = [Mock(Tag), Mock(Tag)]
         
@@ -544,7 +545,7 @@ class QueryCommandSpec extends Specification {
     
     def "should execute query for media when archive has media"() {
         given: "an archive with media"
-        command.selectType = QueryCommand.DataType.media
+        command.selectType = DataType.MEDIA
         def archiveWithMedia = Mock(CLDFArchive)
         def mediaItems = [Mock(MediaMetadataItem)]
         
@@ -563,7 +564,7 @@ class QueryCommandSpec extends Specification {
     
     def "should execute query and handle null collections gracefully"() {
         given: "an archive with null collections"
-        command.selectType = QueryCommand.DataType.climbs
+        command.selectType = DataType.CLIMBS
         def archiveWithNulls = Mock(CLDFArchive)
         archiveWithNulls.getClimbs() >> null
         cldfService.read(inputFile) >> archiveWithNulls
@@ -590,7 +591,7 @@ class QueryCommandSpec extends Specification {
     
     def "should execute query with all options combined"() {
         given: "a query with all options"
-        command.selectType = QueryCommand.DataType.climbs
+        command.selectType = DataType.CLIMBS
         command.filter = "type=boulder"
         command.sortBy = "date"
         command.limit = 2
@@ -616,7 +617,7 @@ class QueryCommandSpec extends Specification {
     
     def "should execute query and build proper query info"() {
         given: "a query with various parameters"
-        command.selectType = QueryCommand.DataType.locations
+        command.selectType = DataType.LOCATIONS
         command.filter = "indoor=true"
         command.sortBy = "name"
         command.limit = 5
@@ -640,7 +641,7 @@ class QueryCommandSpec extends Specification {
     
     def "should execute count only query successfully"() {
         given: "a count only query"
-        command.selectType = QueryCommand.DataType.sessions
+        command.selectType = DataType.SESSIONS
         command.countOnly = true
         cldfService.read(inputFile) >> testArchive
 
@@ -657,7 +658,7 @@ class QueryCommandSpec extends Specification {
     
     def "should execute query with statistics enabled"() {
         given: "a query with statistics enabled"
-        command.selectType = QueryCommand.DataType.climbs
+        command.selectType = DataType.CLIMBS
         command.includeStats = true
         cldfService.read(inputFile) >> testArchive
 
@@ -712,7 +713,7 @@ class QueryCommandSpec extends Specification {
         given: "a result with sessions"
         def mockOutput = Mock(OutputHandler)
         command.output = mockOutput
-        command.selectType = QueryCommand.DataType.sessions
+        command.selectType = DataType.SESSIONS
         def result = CommandResult.builder()
             .success(true)
             .message("Query completed")
@@ -735,7 +736,7 @@ class QueryCommandSpec extends Specification {
         given: "a result with locations"
         def mockOutput = Mock(OutputHandler)
         command.output = mockOutput
-        command.selectType = QueryCommand.DataType.locations
+        command.selectType = DataType.LOCATIONS
         def result = CommandResult.builder()
             .success(true)
             .message("Query completed")
@@ -758,7 +759,7 @@ class QueryCommandSpec extends Specification {
         given: "a result with generic type"
         def mockOutput = Mock(OutputHandler)
         command.output = mockOutput
-        command.selectType = QueryCommand.DataType.tags
+        command.selectType = DataType.TAGS
         def tags = [Tag.builder().id(1).name("Hard").build()]
         def result = CommandResult.builder()
             .success(true)
@@ -781,7 +782,7 @@ class QueryCommandSpec extends Specification {
         given: "climbs with null values"
         def mockOutput = Mock(OutputHandler)
         command.output = mockOutput
-        command.selectType = QueryCommand.DataType.climbs
+        command.selectType = DataType.CLIMBS
         def climbWithNulls = Climb.builder()
             .id(99)
             .routeName(null)
@@ -810,7 +811,7 @@ class QueryCommandSpec extends Specification {
         given: "a location without state"
         def mockOutput = Mock(OutputHandler)
         command.output = mockOutput
-        command.selectType = QueryCommand.DataType.locations
+        command.selectType = DataType.LOCATIONS
         def locationNoState = Location.builder()
             .id(3)
             .name("International Crag")
@@ -839,7 +840,7 @@ class QueryCommandSpec extends Specification {
         given: "a location without country"
         def mockOutput = Mock(OutputHandler)
         command.output = mockOutput
-        command.selectType = QueryCommand.DataType.locations
+        command.selectType = DataType.LOCATIONS
         def locationNoCountry = Location.builder()
             .id(4)
             .name("Local Crag")
@@ -867,7 +868,7 @@ class QueryCommandSpec extends Specification {
         given: "a session without session type"
         def mockOutput = Mock(OutputHandler)
         command.output = mockOutput
-        command.selectType = QueryCommand.DataType.sessions
+        command.selectType = DataType.SESSIONS
         def sessionNoType = Session.builder()
             .id(3)
             .date(LocalDate.of(2024, 2, 1))
@@ -902,7 +903,7 @@ class QueryCommandSpec extends Specification {
     
     def "should handle query all with null collections in archive"() {
         given: "an archive with all null collections"
-        command.selectType = QueryCommand.DataType.all
+        command.selectType = DataType.ALL
         def archiveWithNulls = CLDFArchive.builder()
             .manifest(testArchive.manifest)
             .locations(null)

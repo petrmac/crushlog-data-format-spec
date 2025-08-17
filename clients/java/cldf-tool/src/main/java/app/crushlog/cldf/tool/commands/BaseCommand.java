@@ -1,5 +1,6 @@
 package app.crushlog.cldf.tool.commands;
 
+import app.crushlog.cldf.tool.converters.OutputFormatConverter;
 import app.crushlog.cldf.tool.models.CommandResult;
 import app.crushlog.cldf.tool.models.ErrorResponse;
 import app.crushlog.cldf.tool.utils.OutputFormat;
@@ -16,8 +17,9 @@ public abstract class BaseCommand implements Runnable {
 
   @Option(
       names = {"--json", "--output-format"},
-      description = "Output format: ${COMPLETION-CANDIDATES}",
+      description = "Output format: text, json, yaml (case-insensitive)",
       defaultValue = "text",
+      converter = OutputFormatConverter.class,
       scope = picocli.CommandLine.ScopeType.INHERIT)
   protected OutputFormat outputFormat;
 
@@ -43,7 +45,7 @@ public abstract class BaseCommand implements Runnable {
   protected abstract CommandResult execute() throws Exception;
 
   protected void handleResult(CommandResult result) {
-    if (outputFormat == OutputFormat.json) {
+    if (outputFormat == OutputFormat.JSON) {
       output.writeResult(result);
     } else {
       outputText(result);

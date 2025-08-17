@@ -8,7 +8,9 @@ import jakarta.inject.Inject;
 
 import app.crushlog.cldf.api.CLDFArchive;
 import app.crushlog.cldf.models.*;
+import app.crushlog.cldf.tool.converters.DataTypeConverter;
 import app.crushlog.cldf.tool.models.CommandResult;
+import app.crushlog.cldf.tool.models.DataType;
 import app.crushlog.cldf.tool.services.CLDFService;
 import app.crushlog.cldf.tool.services.QueryService;
 import lombok.extern.slf4j.Slf4j;
@@ -28,8 +30,10 @@ public class QueryCommand extends BaseCommand {
 
   @Option(
       names = {"--select", "-s"},
-      description = "Select specific data type: ${COMPLETION-CANDIDATES}",
-      defaultValue = "all")
+      description =
+          "Select specific data type: locations, routes, sectors, climbs, sessions, tags, media, all (case-insensitive)",
+      defaultValue = "all",
+      converter = DataTypeConverter.class)
   private DataType selectType;
 
   @Option(
@@ -85,18 +89,6 @@ public class QueryCommand extends BaseCommand {
   public QueryCommand() {
     this.cldfService = null;
     this.queryService = null;
-  }
-
-  enum DataType {
-    all,
-    climbs,
-    sessions,
-    locations,
-    routes,
-    sectors,
-    tags,
-    media,
-    manifest
   }
 
   @Override
@@ -163,11 +155,11 @@ public class QueryCommand extends BaseCommand {
     }
 
     // Display results based on type
-    if (selectType == DataType.climbs) {
+    if (selectType == DataType.CLIMBS) {
       displayClimbs((List<Climb>) results);
-    } else if (selectType == DataType.sessions) {
+    } else if (selectType == DataType.SESSIONS) {
       displaySessions((List<Session>) results);
-    } else if (selectType == DataType.locations) {
+    } else if (selectType == DataType.LOCATIONS) {
       displayLocations((List<Location>) results);
     } else {
       // Generic display
@@ -187,112 +179,224 @@ public class QueryCommand extends BaseCommand {
   }
 
   private QueryResult performQuery(CLDFArchive archive) {
-    List<Object> allItems = new ArrayList<>();
-    List<Object> filteredItems;
-
-    // If searching by CLID, find the specific item
-    if (clid != null && !clid.isEmpty()) {
-      Object item = findByCLID(archive, clid);
-      if (item != null) {
-        allItems.add(item);
-      }
-    } else {
-      // Select data based on type
-      switch (selectType) {
-        case climbs:
-          allItems.addAll(
-              archive.getClimbs() != null ? archive.getClimbs() : Collections.emptyList());
-          break;
-        case sessions:
-          allItems.addAll(
-              archive.getSessions() != null ? archive.getSessions() : Collections.emptyList());
-          break;
-        case locations:
-          allItems.addAll(
-              archive.getLocations() != null ? archive.getLocations() : Collections.emptyList());
-          break;
-        case routes:
-          if (archive.hasRoutes()) {
-            allItems.addAll(archive.getRoutes());
-          }
-          break;
-        case sectors:
-          if (archive.hasSectors()) {
-            allItems.addAll(archive.getSectors());
-          }
-          break;
-        case tags:
-          if (archive.hasTags()) {
-            allItems.addAll(archive.getTags());
-          }
-          break;
-        case media:
-          if (archive.hasMedia()) {
-            allItems.addAll(archive.getMediaItems());
-          }
-          break;
-        case manifest:
-          allItems.add(archive.getManifest());
-          break;
-        case all:
-        default:
-          // Return summary of all data
-          Map<String, Object> summary = new HashMap<>();
-          summary.put("manifest", archive.getManifest());
-          summary.put(
-              "locationsCount", archive.getLocations() != null ? archive.getLocations().size() : 0);
-          summary.put(
-              "sessionsCount", archive.getSessions() != null ? archive.getSessions().size() : 0);
-          summary.put("climbsCount", archive.getClimbs() != null ? archive.getClimbs().size() : 0);
-          allItems.add(summary);
-          break;
-      }
-    }
-
-    // Apply filter if provided
-    if (filter != null && !filter.isEmpty()) {
-      filteredItems = queryService.applyFilter(allItems, filter);
-    } else {
-      filteredItems = new ArrayList<>(allItems);
-    }
-
-    // Apply sorting if provided
-    if (sortBy != null && !sortBy.isEmpty()) {
-      filteredItems = queryService.sort(filteredItems, sortBy);
-    }
-
-    // Apply offset
-    if (offset != null && offset > 0) {
-      filteredItems = filteredItems.stream().skip(offset).collect(Collectors.toList());
-    }
-
-    // Apply limit
-    if (limit != null && limit > 0) {
-      filteredItems = filteredItems.stream().limit(limit).collect(Collectors.toList());
-    }
-
-    // Filter fields if specified
-    if (fields != null && !fields.isEmpty()) {
-      filteredItems = queryService.filterFields(filteredItems, Arrays.asList(fields.split(",")));
-    }
-
-    // Calculate statistics if requested
-    Map<String, Object> stats = null;
-    if (includeStats) {
-      stats = queryService.calculateStatistics(filteredItems, selectType.name());
-    }
+    List<Object> allItems = collectInitialItems(archive);
+    List<Object> processedItems = applyQueryProcessing(allItems);
+    Map<String, Object> stats = calculateStatsIfRequested(processedItems);
 
     return QueryResult.builder()
-        .results(filteredItems)
-        .count(filteredItems.size())
+        .results(processedItems)
+        .count(processedItems.size())
         .totalCount(allItems.size())
         .stats(stats)
         .build();
   }
 
+  /**
+   * Collects initial items based on CLID search or data type selection.
+   *
+   * @param archive the archive to search
+   * @return list of initial items
+   */
+  private List<Object> collectInitialItems(CLDFArchive archive) {
+    if (clid != null && !clid.isEmpty()) {
+      return searchByCLID(archive);
+    } else {
+      return selectDataByType(archive);
+    }
+  }
+
+  /**
+   * Searches for a specific item by CLID.
+   *
+   * @param archive the archive to search
+   * @return list containing the found item or empty list
+   */
+  private List<Object> searchByCLID(CLDFArchive archive) {
+    List<Object> items = new ArrayList<>();
+    Object item = findByCLID(archive, clid);
+    if (item != null) {
+      items.add(item);
+    }
+    return items;
+  }
+
+  /**
+   * Selects data based on the specified type.
+   *
+   * @param archive the archive to select from
+   * @return list of selected items
+   */
+  private List<Object> selectDataByType(CLDFArchive archive) {
+    List<Object> allItems = new ArrayList<>();
+
+    switch (selectType) {
+      case CLIMBS:
+        addIfNotNull(allItems, archive.getClimbs());
+        break;
+      case SESSIONS:
+        addIfNotNull(allItems, archive.getSessions());
+        break;
+      case LOCATIONS:
+        addIfNotNull(allItems, archive.getLocations());
+        break;
+      case ROUTES:
+        if (archive.hasRoutes()) {
+          allItems.addAll(archive.getRoutes());
+        }
+        break;
+      case SECTORS:
+        if (archive.hasSectors()) {
+          allItems.addAll(archive.getSectors());
+        }
+        break;
+      case TAGS:
+        if (archive.hasTags()) {
+          allItems.addAll(archive.getTags());
+        }
+        break;
+      case MEDIA:
+        if (archive.hasMedia()) {
+          allItems.addAll(archive.getMediaItems());
+        }
+        break;
+      case MANIFEST:
+        allItems.add(archive.getManifest());
+        break;
+      case ALL:
+      default:
+        allItems.add(createArchiveSummary(archive));
+        break;
+    }
+
+    return allItems;
+  }
+
+  /**
+   * Helper method to safely add non-null collections to the results.
+   *
+   * @param target the target list
+   * @param source the source collection
+   */
+  private void addIfNotNull(List<Object> target, List<?> source) {
+    if (source != null) {
+      target.addAll(source);
+    }
+  }
+
+  /**
+   * Creates a summary object for 'all' data type queries.
+   *
+   * @param archive the archive to summarize
+   * @return summary map
+   */
+  private Map<String, Object> createArchiveSummary(CLDFArchive archive) {
+    Map<String, Object> summary = new HashMap<>();
+    summary.put("manifest", archive.getManifest());
+    summary.put("locationsCount", getCollectionSize(archive.getLocations()));
+    summary.put("sessionsCount", getCollectionSize(archive.getSessions()));
+    summary.put("climbsCount", getCollectionSize(archive.getClimbs()));
+    return summary;
+  }
+
+  /**
+   * Helper method to safely get collection size.
+   *
+   * @param collection the collection
+   * @return size or 0 if null
+   */
+  private int getCollectionSize(List<?> collection) {
+    return collection != null ? collection.size() : 0;
+  }
+
+  /**
+   * Applies all query processing steps: filtering, sorting, pagination, and field selection.
+   *
+   * @param items the initial items
+   * @return processed items
+   */
+  private List<Object> applyQueryProcessing(List<Object> items) {
+    List<Object> processedItems = applyFilter(items);
+    processedItems = applySorting(processedItems);
+    processedItems = applyPagination(processedItems);
+    processedItems = applyFieldSelection(processedItems);
+    return processedItems;
+  }
+
+  /**
+   * Applies filter if specified.
+   *
+   * @param items the items to filter
+   * @return filtered items
+   */
+  private List<Object> applyFilter(List<Object> items) {
+    if (filter != null && !filter.isEmpty()) {
+      return queryService.applyFilter(items, filter);
+    }
+    return new ArrayList<>(items);
+  }
+
+  /**
+   * Applies sorting if specified.
+   *
+   * @param items the items to sort
+   * @return sorted items
+   */
+  private List<Object> applySorting(List<Object> items) {
+    if (sortBy != null && !sortBy.isEmpty()) {
+      return queryService.sort(items, sortBy);
+    }
+    return items;
+  }
+
+  /**
+   * Applies pagination (offset and limit) if specified.
+   *
+   * @param items the items to paginate
+   * @return paginated items
+   */
+  private List<Object> applyPagination(List<Object> items) {
+    List<Object> paginatedItems = items;
+
+    if (offset != null && offset > 0) {
+      paginatedItems = paginatedItems.stream().skip(offset).collect(Collectors.toList());
+    }
+
+    if (limit != null && limit > 0) {
+      paginatedItems = paginatedItems.stream().limit(limit).collect(Collectors.toList());
+    }
+
+    return paginatedItems;
+  }
+
+  /**
+   * Applies field selection if specified.
+   *
+   * @param items the items to filter fields from
+   * @return items with selected fields only
+   */
+  private List<Object> applyFieldSelection(List<Object> items) {
+    if (fields != null && !fields.isEmpty()) {
+      return queryService.filterFields(items, Arrays.asList(fields.split(",")));
+    }
+    return items;
+  }
+
+  /**
+   * Calculates statistics if requested.
+   *
+   * @param items the items to calculate statistics for
+   * @return statistics map or null if not requested
+   */
+  private Map<String, Object> calculateStatsIfRequested(List<Object> items) {
+    if (includeStats) {
+      return queryService.calculateStatistics(items, selectType.name());
+    }
+    return null;
+  }
+
   private Map<String, Object> buildQueryInfo() {
     Map<String, Object> queryInfo = new HashMap<>();
-    queryInfo.put("select", selectType.name());
+    queryInfo.put("select", selectType.name().toLowerCase());
     if (clid != null) queryInfo.put("clid", clid);
     if (filter != null) queryInfo.put("filter", filter);
     if (sortBy != null) queryInfo.put("sort", sortBy);

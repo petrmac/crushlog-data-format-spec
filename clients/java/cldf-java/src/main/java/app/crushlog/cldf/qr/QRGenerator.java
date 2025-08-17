@@ -7,6 +7,7 @@ import java.util.Optional;
 
 import app.crushlog.cldf.clid.CLID;
 import app.crushlog.cldf.clid.CLIDGenerator;
+import app.crushlog.cldf.clid.EntityType;
 import app.crushlog.cldf.models.Location;
 import app.crushlog.cldf.models.Route;
 import app.crushlog.cldf.models.enums.RouteType;
@@ -25,6 +26,9 @@ public class QRGenerator {
 
   private static final String PROTOCOL_VERSION = "1";
   private static final String DEFAULT_BASE_URL = "https://crushlog.pro";
+  private static final String ROUTE_NULL_ERROR = "Route cannot be null";
+  private static final String LOCATION_NULL_ERROR = "Location cannot be null";
+  private static final String OPTIONS_NULL_ERROR = "Options cannot be null";
   private static final ObjectMapper objectMapper = new ObjectMapper();
 
   /**
@@ -36,8 +40,8 @@ public class QRGenerator {
    * @return JSON string containing the QR code payload
    */
   public static String generateHybrid(Route route, String baseUrl, QROptions options) {
-    Objects.requireNonNull(route, "Route cannot be null");
-    Objects.requireNonNull(options, "Options cannot be null");
+    Objects.requireNonNull(route, ROUTE_NULL_ERROR);
+    Objects.requireNonNull(options, OPTIONS_NULL_ERROR);
 
     String effectiveBaseUrl = baseUrl != null ? baseUrl : DEFAULT_BASE_URL;
 
@@ -45,7 +49,7 @@ public class QRGenerator {
     String routeClid = route.getClid();
     if (routeClid == null || routeClid.isEmpty()) {
       log.warn("Route {} missing CLID, generating one", route.getName());
-      routeClid = CLIDGenerator.generateRandomCLID(CLIDGenerator.EntityType.ROUTE);
+      routeClid = CLIDGenerator.generateRandomCLID(EntityType.ROUTE);
     }
 
     try {
@@ -128,7 +132,7 @@ public class QRGenerator {
    * @return URL string for the QR code
    */
   public static String generateSimple(Route route, String baseUrl) {
-    Objects.requireNonNull(route, "Route cannot be null");
+    Objects.requireNonNull(route, ROUTE_NULL_ERROR);
 
     String effectiveBaseUrl = baseUrl != null ? baseUrl : DEFAULT_BASE_URL;
 
@@ -149,8 +153,8 @@ public class QRGenerator {
    * @return Custom URI string
    */
   public static String generateCustomURI(Route route, QROptions options) {
-    Objects.requireNonNull(route, "Route cannot be null");
-    Objects.requireNonNull(options, "Options cannot be null");
+    Objects.requireNonNull(route, ROUTE_NULL_ERROR);
+    Objects.requireNonNull(options, OPTIONS_NULL_ERROR);
 
     if (route.getClid() == null) {
       throw new QRGenerationException("Route must have CLID for URI generation");
@@ -185,7 +189,7 @@ public class QRGenerator {
    * @return JSON string containing the QR code payload
    */
   public static String generateLocationQR(Location location, String baseUrl) {
-    Objects.requireNonNull(location, "Location cannot be null");
+    Objects.requireNonNull(location, LOCATION_NULL_ERROR);
 
     String effectiveBaseUrl = baseUrl != null ? baseUrl : DEFAULT_BASE_URL;
 
@@ -193,7 +197,7 @@ public class QRGenerator {
     String locationClid = location.getClid();
     if (locationClid == null || locationClid.isEmpty()) {
       log.warn("Location {} missing CLID, generating one", location.getName());
-      locationClid = CLIDGenerator.generateRandomCLID(CLIDGenerator.EntityType.LOCATION);
+      locationClid = CLIDGenerator.generateRandomCLID(EntityType.LOCATION);
     }
 
     try {

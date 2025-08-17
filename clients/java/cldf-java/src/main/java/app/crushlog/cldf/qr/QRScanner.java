@@ -1,10 +1,7 @@
 package app.crushlog.cldf.qr;
 
-import java.util.Optional;
-
 import app.crushlog.cldf.models.Location;
 import app.crushlog.cldf.models.Route;
-import app.crushlog.cldf.qr.impl.DefaultQRScanner;
 import app.crushlog.cldf.qr.result.QRError;
 import app.crushlog.cldf.qr.result.Result;
 
@@ -23,19 +20,6 @@ public interface QRScanner {
    * @return Result containing parsed data or error
    */
   Result<ParsedQRData, QRError> parse(String data);
-
-  /**
-   * Scan a QR code from an image.
-   *
-   * @deprecated Use {@link #scan(byte[])} instead to avoid AWT dependencies
-   * @param image The image containing the QR code
-   * @return Result containing parsed data or error
-   */
-  @Deprecated
-  default Result<ParsedQRData, QRError> scan(java.awt.image.BufferedImage image) {
-    return Result.failure(
-        QRError.scanError("BufferedImage scanning not supported - use byte array scan method"));
-  }
 
   /**
    * Scan a QR code from image bytes.
@@ -107,53 +91,5 @@ public interface QRScanner {
    */
   default Result<Location, QRError> scanToLocation(byte[] imageBytes) {
     return scan(imageBytes).flatMap(this::toLocation);
-  }
-
-  // Static convenience methods for backward compatibility and ease of use
-
-  /**
-   * Static method to parse QR code data. For backward compatibility with existing code.
-   *
-   * @param data The QR code data string
-   * @return Parsed QR data
-   * @throws QRParseException if parsing fails
-   */
-  static ParsedQRData parseString(String data) throws QRParseException {
-    QRScanner scanner = new DefaultQRScanner();
-    return scanner.parse(data).orElseThrow(() -> new QRParseException("Failed to parse QR data"));
-  }
-
-  /**
-   * Static method to convert parsed data to Route. For backward compatibility with existing code.
-   *
-   * @param data The parsed QR data
-   * @return Optional containing route or empty
-   */
-  static Optional<Route> toRouteStatic(ParsedQRData data) {
-    QRScanner scanner = new DefaultQRScanner();
-    return scanner.toRoute(data).getSuccess();
-  }
-
-  /**
-   * Static method to convert parsed data to Location. For backward compatibility with existing
-   * code.
-   *
-   * @param data The parsed QR data
-   * @return Optional containing location or empty
-   */
-  static Optional<Location> toLocationStatic(ParsedQRData data) {
-    QRScanner scanner = new DefaultQRScanner();
-    return scanner.toLocation(data).getSuccess();
-  }
-
-  /** Exception thrown when QR code parsing fails. For backward compatibility. */
-  class QRParseException extends RuntimeException {
-    public QRParseException(String message) {
-      super(message);
-    }
-
-    public QRParseException(String message, Throwable cause) {
-      super(message, cause);
-    }
   }
 }

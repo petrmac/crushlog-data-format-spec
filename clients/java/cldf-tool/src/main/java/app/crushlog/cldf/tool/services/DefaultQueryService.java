@@ -121,6 +121,9 @@ public class DefaultQueryService implements QueryService {
           return climb.getAttempts();
         case "isIndoor":
           return climb.getIsIndoor();
+        default:
+          // Fall through to generic reflection-based access
+          break;
       }
     } else if (item instanceof Session session) {
       switch (fieldName) {
@@ -130,6 +133,9 @@ public class DefaultQueryService implements QueryService {
           return session.getDate();
         case "isIndoor":
           return session.getIsIndoor();
+        default:
+          // Fall through to generic reflection-based access
+          break;
       }
     } else if (item instanceof Location location) {
       switch (fieldName) {
@@ -139,6 +145,9 @@ public class DefaultQueryService implements QueryService {
           return location.getCountry();
         case "isIndoor":
           return location.getIsIndoor();
+        default:
+          // Fall through to generic reflection-based access
+          break;
       }
     }
 

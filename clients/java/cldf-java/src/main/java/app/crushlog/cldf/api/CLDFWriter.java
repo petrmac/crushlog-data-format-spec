@@ -125,8 +125,30 @@ public class CLDFWriter {
         validateSchemas);
 
     validateArchive(archive);
+    processCLIDs(archive);
 
-    // Process CLIDs - generate missing ones and validate existing ones
+    Map<String, byte[]> fileContents = new HashMap<>();
+    Map<String, String> checksums = new HashMap<>();
+
+    prepareFileContents(archive, fileContents, checksums);
+    createChecksumsFile(fileContents, checksums);
+
+    if (validateSchemas) {
+      validateAllSchemas(fileContents);
+    }
+
+    writeZipArchive(outputStream, fileContents);
+
+    log.info("Successfully wrote CLDF archive with {} files", fileContents.size());
+  }
+
+  /**
+   * Processes CLIDs for the archive if auto-generation or validation is enabled.
+   *
+   * @param archive the archive to process
+   * @throws IOException if CLID processing fails
+   */
+  private void processCLIDs(CLDFArchive archive) throws IOException {
     if (autoGenerateCLIDs || validateCLIDs) {
       log.info("Processing CLIDs: autoGenerate={}, validate={}", autoGenerateCLIDs, validateCLIDs);
       try {
@@ -136,16 +158,40 @@ public class CLDFWriter {
         throw new IOException("CLID validation failed: " + e.getMessage(), e);
       }
     }
+  }
 
-    Map<String, byte[]> fileContents = new HashMap<>();
-    Map<String, String> checksums = new HashMap<>();
+  /**
+   * Prepares all file contents and calculates their checksums.
+   *
+   * @param archive the archive to serialize
+   * @param fileContents map to store file contents
+   * @param checksums map to store file checksums
+   * @throws IOException if serialization fails
+   */
+  private void prepareFileContents(
+      CLDFArchive archive, Map<String, byte[]> fileContents, Map<String, String> checksums)
+      throws IOException {
+    prepareManifest(archive, fileContents, checksums);
+    prepareCoreFiles(archive, fileContents, checksums);
+    prepareOptionalFiles(archive, fileContents, checksums);
+    prepareMediaFiles(archive, fileContents, checksums);
+  }
 
-    // Prepare manifest
+  /**
+   * Prepares the manifest file.
+   *
+   * @param archive the archive
+   * @param fileContents map to store file contents
+   * @param checksums map to store file checksums
+   * @throws IOException if serialization fails
+   */
+  private void prepareManifest(
+      CLDFArchive archive, Map<String, byte[]> fileContents, Map<String, String> checksums)
+      throws IOException {
     if (archive.getManifest() == null) {
       throw new IllegalArgumentException("Manifest is required");
     }
 
-    // Calculate and set stats if not already present
     if (archive.getManifest().getStats() == null) {
       log.debug("Calculating archive statistics");
       archive.getManifest().setStats(calculateStats(archive));
@@ -154,69 +200,117 @@ public class CLDFWriter {
     byte[] manifestBytes = serializeToJson(archive.getManifest());
     fileContents.put(MANIFEST_FILE, manifestBytes);
     checksums.put(MANIFEST_FILE, calculateSHA256(manifestBytes));
+  }
 
-    // Prepare files - all are now optional except manifest and checksums
+  /**
+   * Prepares core data files (locations, climbs, sessions).
+   *
+   * @param archive the archive
+   * @param fileContents map to store file contents
+   * @param checksums map to store file checksums
+   * @throws IOException if serialization fails
+   */
+  private void prepareCoreFiles(
+      CLDFArchive archive, Map<String, byte[]> fileContents, Map<String, String> checksums)
+      throws IOException {
     if (archive.getLocations() != null && !archive.getLocations().isEmpty()) {
       LocationsFile locationsFile =
           LocationsFile.builder().locations(archive.getLocations()).build();
-      byte[] locationsBytes = serializeToJson(locationsFile);
-      fileContents.put(LOCATIONS_FILE, locationsBytes);
-      checksums.put(LOCATIONS_FILE, calculateSHA256(locationsBytes));
+      addFileToContents(LOCATIONS_FILE, locationsFile, fileContents, checksums);
     }
 
     if (archive.getClimbs() != null && !archive.getClimbs().isEmpty()) {
       ClimbsFile climbsFile = ClimbsFile.builder().climbs(archive.getClimbs()).build();
-      byte[] climbsBytes = serializeToJson(climbsFile);
-      fileContents.put(CLIMBS_FILE, climbsBytes);
-      checksums.put(CLIMBS_FILE, calculateSHA256(climbsBytes));
+      addFileToContents(CLIMBS_FILE, climbsFile, fileContents, checksums);
     }
 
     if (archive.getSessions() != null && !archive.getSessions().isEmpty()) {
       SessionsFile sessionsFile = SessionsFile.builder().sessions(archive.getSessions()).build();
-      byte[] sessionsBytes = serializeToJson(sessionsFile);
-      fileContents.put(SESSIONS_FILE, sessionsBytes);
-      checksums.put(SESSIONS_FILE, calculateSHA256(sessionsBytes));
+      addFileToContents(SESSIONS_FILE, sessionsFile, fileContents, checksums);
     }
+  }
 
-    // Prepare optional files
+  /**
+   * Prepares optional data files (routes, sectors, tags, media metadata).
+   *
+   * @param archive the archive
+   * @param fileContents map to store file contents
+   * @param checksums map to store file checksums
+   * @throws IOException if serialization fails
+   */
+  private void prepareOptionalFiles(
+      CLDFArchive archive, Map<String, byte[]> fileContents, Map<String, String> checksums)
+      throws IOException {
     if (archive.hasRoutes()) {
       RoutesFile routesFile = RoutesFile.builder().routes(archive.getRoutes()).build();
-      byte[] routesBytes = serializeToJson(routesFile);
-      fileContents.put(ROUTES_FILE, routesBytes);
-      checksums.put(ROUTES_FILE, calculateSHA256(routesBytes));
+      addFileToContents(ROUTES_FILE, routesFile, fileContents, checksums);
     }
 
     if (archive.hasSectors()) {
       SectorsFile sectorsFile = SectorsFile.builder().sectors(archive.getSectors()).build();
-      byte[] sectorsBytes = serializeToJson(sectorsFile);
-      fileContents.put(SECTORS_FILE, sectorsBytes);
-      checksums.put(SECTORS_FILE, calculateSHA256(sectorsBytes));
+      addFileToContents(SECTORS_FILE, sectorsFile, fileContents, checksums);
     }
 
     if (archive.hasTags()) {
       TagsFile tagsFile = TagsFile.builder().tags(archive.getTags()).build();
-      byte[] tagsBytes = serializeToJson(tagsFile);
-      fileContents.put(TAGS_FILE, tagsBytes);
-      checksums.put(TAGS_FILE, calculateSHA256(tagsBytes));
+      addFileToContents(TAGS_FILE, tagsFile, fileContents, checksums);
     }
 
     if (archive.hasMedia()) {
       MediaMetadataFile mediaFile =
           MediaMetadataFile.builder().media(archive.getMediaItems()).build();
-      byte[] mediaBytes = serializeToJson(mediaFile);
-      fileContents.put(MEDIA_METADATA_FILE, mediaBytes);
-      checksums.put(MEDIA_METADATA_FILE, calculateSHA256(mediaBytes));
+      addFileToContents(MEDIA_METADATA_FILE, mediaFile, fileContents, checksums);
     }
+  }
 
-    // Add embedded media files
+  /**
+   * Prepares embedded media files.
+   *
+   * @param archive the archive
+   * @param fileContents map to store file contents
+   * @param checksums map to store file checksums
+   * @throws IOException if checksum calculation fails
+   */
+  private void prepareMediaFiles(
+      CLDFArchive archive, Map<String, byte[]> fileContents, Map<String, String> checksums)
+      throws IOException {
     if (archive.hasEmbeddedMedia()) {
       for (Map.Entry<String, byte[]> entry : archive.getMediaFiles().entrySet()) {
         fileContents.put(entry.getKey(), entry.getValue());
         checksums.put(entry.getKey(), calculateSHA256(entry.getValue()));
       }
     }
+  }
 
-    // Create checksums file
+  /**
+   * Helper method to serialize an object and add it to file contents.
+   *
+   * @param filename the file name
+   * @param object the object to serialize
+   * @param fileContents map to store file contents
+   * @param checksums map to store file checksums
+   * @throws IOException if serialization fails
+   */
+  private void addFileToContents(
+      String filename,
+      Object object,
+      Map<String, byte[]> fileContents,
+      Map<String, String> checksums)
+      throws IOException {
+    byte[] bytes = serializeToJson(object);
+    fileContents.put(filename, bytes);
+    checksums.put(filename, calculateSHA256(bytes));
+  }
+
+  /**
+   * Creates the checksums file.
+   *
+   * @param fileContents map to store file contents
+   * @param checksums map of file checksums
+   * @throws IOException if serialization fails
+   */
+  private void createChecksumsFile(Map<String, byte[]> fileContents, Map<String, String> checksums)
+      throws IOException {
     Checksums checksumsObj =
         Checksums.builder()
             .algorithm("SHA-256")
@@ -225,36 +319,56 @@ public class CLDFWriter {
             .build();
     byte[] checksumsBytes = serializeToJson(checksumsObj);
     fileContents.put(CHECKSUMS_FILE, checksumsBytes);
+  }
 
-    // Validate schemas if enabled
-    if (validateSchemas) {
-      log.debug("Validating schemas for {} files", fileContents.size());
-      for (Map.Entry<String, byte[]> entry : fileContents.entrySet()) {
-        // Skip media files
-        if (!entry.getKey().startsWith("media/")) {
-          ValidationResult result =
-              schemaValidator.validateWithResult(entry.getKey(), entry.getValue());
-          if (!result.valid()) {
-            StringBuilder errorMessage = new StringBuilder();
-            errorMessage
-                .append("Schema validation failed for ")
-                .append(entry.getKey())
-                .append(":\n");
-            for (ValidationResult.ValidationError error : result.errors()) {
-              errorMessage.append("  - ").append(error.message()).append("\n");
-            }
-            log.error(
-                "Schema validation failed for {}: {} errors found",
-                entry.getKey(),
-                result.errors().size());
-            throw new IOException(errorMessage.toString());
-          }
-        }
+  /**
+   * Validates all schemas for the prepared files.
+   *
+   * @param fileContents map of file contents to validate
+   * @throws IOException if schema validation fails
+   */
+  private void validateAllSchemas(Map<String, byte[]> fileContents) throws IOException {
+    log.debug("Validating schemas for {} files", fileContents.size());
+
+    for (Map.Entry<String, byte[]> entry : fileContents.entrySet()) {
+      if (!entry.getKey().startsWith("media/")) {
+        validateSingleFileSchema(entry.getKey(), entry.getValue());
       }
-      log.debug("Schema validation passed for all files");
     }
 
-    // Write ZIP archive
+    log.debug("Schema validation passed for all files");
+  }
+
+  /**
+   * Validates the schema for a single file.
+   *
+   * @param filename the file name
+   * @param content the file content
+   * @throws IOException if schema validation fails
+   */
+  private void validateSingleFileSchema(String filename, byte[] content) throws IOException {
+    ValidationResult result = schemaValidator.validateWithResult(filename, content);
+    if (!result.valid()) {
+      StringBuilder errorMessage = new StringBuilder();
+      errorMessage.append("Schema validation failed for ").append(filename).append(":\n");
+      for (ValidationResult.ValidationError error : result.errors()) {
+        errorMessage.append("  - ").append(error.message()).append("\n");
+      }
+      log.error(
+          "Schema validation failed for {}: {} errors found", filename, result.errors().size());
+      throw new IOException(errorMessage.toString());
+    }
+  }
+
+  /**
+   * Writes the ZIP archive to the output stream.
+   *
+   * @param outputStream the output stream
+   * @param fileContents map of file contents to write
+   * @throws IOException if writing fails
+   */
+  private void writeZipArchive(OutputStream outputStream, Map<String, byte[]> fileContents)
+      throws IOException {
     try (ZipArchiveOutputStream zos = new ZipArchiveOutputStream(outputStream)) {
       zos.setLevel(9); // Maximum compression
 
@@ -267,8 +381,6 @@ public class CLDFWriter {
 
       zos.finish();
     }
-
-    log.info("Successfully wrote CLDF archive with {} files", fileContents.size());
   }
 
   private void validateArchive(CLDFArchive archive) {

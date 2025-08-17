@@ -19,7 +19,7 @@ class GraphQueryCommandSpec extends Specification {
         
         command = new GraphQueryCommand(mockGraphService)
         command.output = mockOutput
-        command.outputFormat = OutputFormat.text
+        command.outputFormat = OutputFormat.TEXT
         command.limit = 100  // Set default limit
     }
     
@@ -191,7 +191,7 @@ class GraphQueryCommandSpec extends Specification {
     
     def "should execute query and return results in JSON format"() {
         given:
-        command.outputFormat = OutputFormat.json
+        command.outputFormat = OutputFormat.JSON
         command.cypherQuery = "MATCH (n) RETURN n"
         def queryResults = [[n: [id: 1, name: "Test"]]]
         

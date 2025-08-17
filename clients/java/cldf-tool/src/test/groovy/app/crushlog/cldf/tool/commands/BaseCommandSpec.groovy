@@ -23,7 +23,7 @@ class BaseCommandSpec extends Specification {
 
     def "should handle successful execution with text output"() {
         given:
-        command.outputFormat = OutputFormat.text
+        command.outputFormat = OutputFormat.TEXT
         command.quiet = false
         def expectedResult = CommandResult.builder()
             .success(true)
@@ -43,7 +43,7 @@ class BaseCommandSpec extends Specification {
 
     def "should handle successful execution with JSON output"() {
         given:
-        command.outputFormat = OutputFormat.json
+        command.outputFormat = OutputFormat.JSON
         command.quiet = false
         def expectedResult = CommandResult.builder()
             .success(true)
@@ -63,7 +63,7 @@ class BaseCommandSpec extends Specification {
 
     def "should handle execution errors"() {
         given:
-        command.outputFormat = OutputFormat.text
+        command.outputFormat = OutputFormat.TEXT
         command.quiet = false
         def expectedException = new RuntimeException("Test error")
         command.expectedException = expectedException
@@ -78,7 +78,7 @@ class BaseCommandSpec extends Specification {
 
     def "should suppress output when quiet mode is enabled"() {
         given:
-        command.outputFormat = OutputFormat.text
+        command.outputFormat = OutputFormat.TEXT
         command.quiet = true
         def expectedResult = CommandResult.builder()
             .success(true)
@@ -97,7 +97,7 @@ class BaseCommandSpec extends Specification {
     def "should create proper error response for exceptions"() {
         given:
         def exception = new IllegalArgumentException("Invalid argument")
-        command.outputFormat = OutputFormat.json
+        command.outputFormat = OutputFormat.JSON
         command.expectedException = exception
 
         when:
@@ -113,7 +113,7 @@ class BaseCommandSpec extends Specification {
 
     def "should handle logInfo method"() {
         given:
-        command.outputFormat = OutputFormat.text
+        command.outputFormat = OutputFormat.TEXT
         command.quiet = false
         command.output = new OutputHandler(command.outputFormat, command.quiet)
         def message = "Info message"
@@ -128,7 +128,7 @@ class BaseCommandSpec extends Specification {
 
     def "should handle logWarning method"() {
         given:
-        command.outputFormat = OutputFormat.text
+        command.outputFormat = OutputFormat.TEXT
         command.quiet = false
         command.output = new OutputHandler(command.outputFormat, command.quiet)
         def message = "Warning message"
@@ -143,7 +143,7 @@ class BaseCommandSpec extends Specification {
 
     def "should handle logInfo in quiet mode"() {
         given:
-        command.outputFormat = OutputFormat.text
+        command.outputFormat = OutputFormat.TEXT
         command.quiet = true
         command.output = new OutputHandler(command.outputFormat, command.quiet)
         def message = "Info message"
@@ -158,7 +158,7 @@ class BaseCommandSpec extends Specification {
 
     def "should handle logWarning in quiet mode"() {
         given:
-        command.outputFormat = OutputFormat.text
+        command.outputFormat = OutputFormat.TEXT
         command.quiet = true
         command.output = new OutputHandler(command.outputFormat, command.quiet)
         def message = "Warning message"
@@ -174,7 +174,7 @@ class BaseCommandSpec extends Specification {
     def "should handle null exception message gracefully"() {
         given:
         def exception = new RuntimeException((String) null)
-        command.outputFormat = OutputFormat.json
+        command.outputFormat = OutputFormat.JSON
         command.expectedException = exception
 
         when:
@@ -190,7 +190,7 @@ class BaseCommandSpec extends Specification {
 
     def "should handle different exit codes from command result"() {
         given:
-        command.outputFormat = OutputFormat.text
+        command.outputFormat = OutputFormat.TEXT
         def expectedResult = CommandResult.builder()
             .success(false)
             .message("Command failed")
@@ -208,7 +208,7 @@ class BaseCommandSpec extends Specification {
 
     def "should initialize OutputHandler with correct parameters"() {
         given:
-        command.outputFormat = OutputFormat.json
+        command.outputFormat = OutputFormat.JSON
         command.quiet = true
         command.expectedResult = CommandResult.builder()
             .success(true)
@@ -272,7 +272,7 @@ class BaseCommandSpec extends Specification {
         protected void handleResult(CommandResult result) {
             // Override to avoid System.exit in tests
             exitCode = result.getExitCode()
-            if (outputFormat == OutputFormat.json) {
+            if (outputFormat == OutputFormat.JSON) {
                 output.writeResult(result)
             } else {
                 outputText(result)

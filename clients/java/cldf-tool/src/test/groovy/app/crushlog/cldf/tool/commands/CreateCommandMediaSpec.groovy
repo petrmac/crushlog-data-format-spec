@@ -23,7 +23,7 @@ class CreateCommandMediaSpec extends Specification {
 
     def setup() {
         // Initialize the output handler
-        command.output = new OutputHandler(OutputFormat.text, false)
+        command.output = new OutputHandler(OutputFormat.TEXT, false)
     }
 
     def "should add media files when media directory is specified"() {

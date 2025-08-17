@@ -25,7 +25,7 @@ class OutputHandlerSpec extends Specification {
 
     def "should write result in text format"() {
         given: "an output handler in text format"
-        def handler = new OutputHandler(OutputFormat.text, false, out, err)
+        def handler = new OutputHandler(OutputFormat.TEXT, false, out, err)
         
         and: "a command result"
         def result = CommandResult.builder()
@@ -43,7 +43,7 @@ class OutputHandlerSpec extends Specification {
 
     def "should write result in JSON format"() {
         given: "an output handler in JSON format"
-        def handler = new OutputHandler(OutputFormat.json, false, out, err)
+        def handler = new OutputHandler(OutputFormat.JSON, false, out, err)
         
         and: "a command result"
         def result = CommandResult.builder()
@@ -66,7 +66,7 @@ class OutputHandlerSpec extends Specification {
 
     def "should handle null message in text format"() {
         given: "an output handler in text format"
-        def handler = new OutputHandler(OutputFormat.text, false, out, err)
+        def handler = new OutputHandler(OutputFormat.TEXT, false, out, err)
         
         and: "a result with null message"
         def result = CommandResult.builder()
@@ -83,7 +83,7 @@ class OutputHandlerSpec extends Specification {
 
     def "should write error in text format"() {
         given: "an output handler in text format"
-        def handler = new OutputHandler(OutputFormat.text, false, out, err)
+        def handler = new OutputHandler(OutputFormat.TEXT, false, out, err)
         
         and: "an error response"
         def error = ErrorResponse.builder()
@@ -107,7 +107,7 @@ class OutputHandlerSpec extends Specification {
 
     def "should write error in JSON format"() {
         given: "an output handler in JSON format"
-        def handler = new OutputHandler(OutputFormat.json, false, out, err)
+        def handler = new OutputHandler(OutputFormat.JSON, false, out, err)
         
         and: "an error response"
         def error = ErrorResponse.builder()
@@ -131,7 +131,7 @@ class OutputHandlerSpec extends Specification {
 
     def "should write simple error message"() {
         given: "an output handler in text format"
-        def handler = new OutputHandler(OutputFormat.text, false, out, err)
+        def handler = new OutputHandler(OutputFormat.TEXT, false, out, err)
 
         when: "writing a simple error message"
         handler.writeError("Something went wrong")
@@ -143,7 +143,7 @@ class OutputHandlerSpec extends Specification {
 
     def "should write simple error message in JSON format"() {
         given: "an output handler in JSON format"
-        def handler = new OutputHandler(OutputFormat.json, false, out, err)
+        def handler = new OutputHandler(OutputFormat.JSON, false, out, err)
 
         when: "writing a simple error message"
         handler.writeError("Connection failed")
@@ -158,7 +158,7 @@ class OutputHandlerSpec extends Specification {
 
     def "should write info message when not quiet"() {
         given: "an output handler in text format, not quiet"
-        def handler = new OutputHandler(OutputFormat.text, false, out, err)
+        def handler = new OutputHandler(OutputFormat.TEXT, false, out, err)
 
         when: "writing an info message"
         handler.writeInfo("Processing data...")
@@ -170,7 +170,7 @@ class OutputHandlerSpec extends Specification {
 
     def "should not write info message when quiet"() {
         given: "an output handler in quiet mode"
-        def handler = new OutputHandler(OutputFormat.text, true, out, err)
+        def handler = new OutputHandler(OutputFormat.TEXT, true, out, err)
 
         when: "writing an info message"
         handler.writeInfo("Processing data...")
@@ -182,7 +182,7 @@ class OutputHandlerSpec extends Specification {
 
     def "should not write info message in JSON format"() {
         given: "an output handler in JSON format"
-        def handler = new OutputHandler(OutputFormat.json, false, out, err)
+        def handler = new OutputHandler(OutputFormat.JSON, false, out, err)
 
         when: "writing an info message"
         handler.writeInfo("Processing data...")
@@ -194,7 +194,7 @@ class OutputHandlerSpec extends Specification {
 
     def "should write warning message when not quiet"() {
         given: "an output handler in text format, not quiet"
-        def handler = new OutputHandler(OutputFormat.text, false, out, err)
+        def handler = new OutputHandler(OutputFormat.TEXT, false, out, err)
 
         when: "writing a warning message"
         handler.writeWarning("Deprecated feature used")
@@ -206,7 +206,7 @@ class OutputHandlerSpec extends Specification {
 
     def "should not write warning message when quiet"() {
         given: "an output handler in quiet mode"
-        def handler = new OutputHandler(OutputFormat.text, true, out, err)
+        def handler = new OutputHandler(OutputFormat.TEXT, true, out, err)
 
         when: "writing a warning message"
         handler.writeWarning("Deprecated feature used")
@@ -218,7 +218,7 @@ class OutputHandlerSpec extends Specification {
 
     def "should write JSON object"() {
         given: "an output handler"
-        def handler = new OutputHandler(OutputFormat.text, false, out, err)
+        def handler = new OutputHandler(OutputFormat.TEXT, false, out, err)
         
         and: "a data object"
         def data = [
@@ -241,7 +241,7 @@ class OutputHandlerSpec extends Specification {
 
     def "should write plain text"() {
         given: "an output handler"
-        def handler = new OutputHandler(OutputFormat.text, false, out, err)
+        def handler = new OutputHandler(OutputFormat.TEXT, false, out, err)
 
         when: "writing plain text"
         handler.write("Hello World")
@@ -253,7 +253,7 @@ class OutputHandlerSpec extends Specification {
 
     def "should write to stdout or stderr based on error flag"() {
         given: "an output handler"
-        def handler = new OutputHandler(OutputFormat.text, false, out, err)
+        def handler = new OutputHandler(OutputFormat.TEXT, false, out, err)
 
         when: "writing to stdout"
         handler.writeError("Standard output", false)
@@ -273,8 +273,8 @@ class OutputHandlerSpec extends Specification {
 
     def "should report JSON format correctly"() {
         given: "handlers with different formats"
-        def jsonHandler = new OutputHandler(OutputFormat.json, false, out, err)
-        def textHandler = new OutputHandler(OutputFormat.text, false, out, err)
+        def jsonHandler = new OutputHandler(OutputFormat.JSON, false, out, err)
+        def textHandler = new OutputHandler(OutputFormat.TEXT, false, out, err)
 
         expect: "correct format reporting"
         jsonHandler.isJsonFormat() == true
@@ -283,8 +283,8 @@ class OutputHandlerSpec extends Specification {
 
     def "should report quiet mode correctly"() {
         given: "handlers with different quiet settings"
-        def quietHandler = new OutputHandler(OutputFormat.text, true, out, err)
-        def verboseHandler = new OutputHandler(OutputFormat.text, false, out, err)
+        def quietHandler = new OutputHandler(OutputFormat.TEXT, true, out, err)
+        def verboseHandler = new OutputHandler(OutputFormat.TEXT, false, out, err)
 
         expect: "correct quiet mode reporting"
         quietHandler.isQuiet() == true
@@ -293,7 +293,7 @@ class OutputHandlerSpec extends Specification {
 
     def "should use default streams when not provided"() {
         given: "an output handler with default streams"
-        def handler = new OutputHandler(OutputFormat.text, false)
+        def handler = new OutputHandler(OutputFormat.TEXT, false)
 
         expect: "handler is created successfully"
         handler != null
@@ -303,7 +303,7 @@ class OutputHandlerSpec extends Specification {
 
     def "should handle exceptions when writing result"() {
         given: "an output handler"
-        def handler = new OutputHandler(OutputFormat.json, false, out, err)
+        def handler = new OutputHandler(OutputFormat.JSON, false, out, err)
         
         and: "a result that will cause serialization error"
         def result = Mock(CommandResult) {
@@ -321,7 +321,7 @@ class OutputHandlerSpec extends Specification {
 
     def "should handle exceptions when writing error"() {
         given: "an output handler"
-        def handler = new OutputHandler(OutputFormat.json, false, out, err)
+        def handler = new OutputHandler(OutputFormat.JSON, false, out, err)
         
         and: "a mock ErrorResponse that causes issues during serialization" 
         def error = Stub(ErrorResponse) {
@@ -341,7 +341,7 @@ class OutputHandlerSpec extends Specification {
 
     def "should handle exceptions when writing JSON"() {
         given: "an output handler"
-        def handler = new OutputHandler(OutputFormat.text, false, out, err)
+        def handler = new OutputHandler(OutputFormat.TEXT, false, out, err)
         
         and: "an object that can't be serialized"
         def invalidData = new Object() {
@@ -358,7 +358,7 @@ class OutputHandlerSpec extends Specification {
 
     def "should write debug messages when not quiet and not JSON"() {
         given: "an output handler in text format"
-        def handler = new OutputHandler(OutputFormat.text, false, out, err)
+        def handler = new OutputHandler(OutputFormat.TEXT, false, out, err)
 
         when: "writing a debug message"
         handler.writeDebug("Debug information")
@@ -370,7 +370,7 @@ class OutputHandlerSpec extends Specification {
 
     def "should not write debug messages in quiet mode"() {
         given: "an output handler in quiet mode"
-        def handler = new OutputHandler(OutputFormat.text, true, out, err)
+        def handler = new OutputHandler(OutputFormat.TEXT, true, out, err)
 
         when: "writing a debug message"
         handler.writeDebug("Debug information")
@@ -382,7 +382,7 @@ class OutputHandlerSpec extends Specification {
 
     def "should not write debug messages in JSON format"() {
         given: "an output handler in JSON format"
-        def handler = new OutputHandler(OutputFormat.json, false, out, err)
+        def handler = new OutputHandler(OutputFormat.JSON, false, out, err)
 
         when: "writing a debug message"
         handler.writeDebug("Debug information")
