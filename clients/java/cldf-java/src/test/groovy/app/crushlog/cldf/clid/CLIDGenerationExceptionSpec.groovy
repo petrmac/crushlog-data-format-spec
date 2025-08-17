@@ -4,33 +4,33 @@ import spock.lang.Specification
 
 class CLIDGenerationExceptionSpec extends Specification {
 
-    def "should create exception with message"() {
-        when:
-        def exception = new CLIDGenerationException("Test message")
+	def "should create exception with message"() {
+		when:
+		def exception = new CLIDGenerationException("Test message")
 
-        then:
-        exception.message == "Test message"
-        exception.cause == null
-    }
+		then:
+		exception.message == "Test message"
+		exception.cause == null
+	}
 
-    def "should create exception with message and cause"() {
-        given:
-        def cause = new RuntimeException("Cause message")
+	def "should create exception with message and cause"() {
+		given:
+		def cause = new RuntimeException("Cause message")
 
-        when:
-        def exception = new CLIDGenerationException("Test message", cause)
+		when:
+		def exception = new CLIDGenerationException("Test message", cause)
 
-        then:
-        exception.message == "Test message"
-        exception.cause == cause
-        exception.cause.message == "Cause message"
-    }
+		then:
+		exception.message == "Test message"
+		exception.cause == cause
+		exception.cause.message == "Cause message"
+	}
 
-    def "should be a RuntimeException"() {
-        when:
-        def exception = new CLIDGenerationException("Test")
+	def "should be a RuntimeException"() {
+		when:
+		def exception = new CLIDGenerationException("Test")
 
-        then:
-        exception instanceof RuntimeException
-    }
+		then:
+		exception instanceof RuntimeException
+	}
 }
