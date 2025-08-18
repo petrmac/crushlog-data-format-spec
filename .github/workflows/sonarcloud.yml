@@ -220,8 +220,16 @@ jobs:
           grep "^SF:" coverage/lcov.info | head -3
           echo "  Files with coverage:"
           grep "^SF:" coverage/lcov.info | wc -l
+          echo "  Absolute path check:"
+          echo "  PWD: $(pwd)"
+          echo "  Coverage file absolute path: $(realpath coverage/lcov.info)"
         else
           echo "✗ ERROR: coverage/lcov.info not found!"
+          echo "  PWD: $(pwd)"
+          echo "  Directory contents:"
+          ls -la
+          echo "  Coverage directory contents:"
+          ls -la coverage/ || echo "Coverage directory not found"
         fi
     
     # Run separate analysis for Dart using the new SonarQube scan action
