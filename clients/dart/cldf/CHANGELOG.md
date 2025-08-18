@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.3.1
+
+### Fixed
+- **Code Quality Improvements** - Resolved SonarCloud analysis issues
+  - Fixed grade systems to match schema specification - removed unsupported systems
+  - Now only supports the 5 official grade systems: vScale, font, french, yds, uiaa
+
+### Changed
+- Refactored QR generation code for better maintainability
+- Improved date parsing with clearer method separation
+
 ## 1.3.0
 
 ### Added

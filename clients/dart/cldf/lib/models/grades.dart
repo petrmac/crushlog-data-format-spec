@@ -25,43 +25,7 @@ class Grades {
   @JsonKey(name: 'uiaa')
   final String? uiaa;
 
-  /// British technical grade
-  @JsonKey(name: 'british')
-  final String? british;
-
-  /// Australian grade
-  @JsonKey(name: 'australian')
-  final String? australian;
-
-  /// Saxon grade
-  @JsonKey(name: 'saxon')
-  final String? saxon;
-
-  /// Ewbank grade
-  @JsonKey(name: 'ewbank')
-  final String? ewbank;
-
-  /// Nordic grade
-  @JsonKey(name: 'nordic')
-  final String? nordic;
-
-  /// Brazilian grade
-  @JsonKey(name: 'brazilian')
-  final String? brazilian;
-
-  const Grades({
-    this.vScale,
-    this.yds,
-    this.french,
-    this.font,
-    this.uiaa,
-    this.british,
-    this.australian,
-    this.saxon,
-    this.ewbank,
-    this.nordic,
-    this.brazilian,
-  });
+  const Grades({this.vScale, this.yds, this.french, this.font, this.uiaa});
 
   factory Grades.fromJson(Map<String, dynamic> json) => _$GradesFromJson(json);
   Map<String, dynamic> toJson() => _$GradesToJson(this);
@@ -73,12 +37,6 @@ class Grades {
     String? french,
     String? font,
     String? uiaa,
-    String? british,
-    String? australian,
-    String? saxon,
-    String? ewbank,
-    String? nordic,
-    String? brazilian,
   }) {
     return Grades(
       vScale: vScale ?? this.vScale,
@@ -86,12 +44,6 @@ class Grades {
       french: french ?? this.french,
       font: font ?? this.font,
       uiaa: uiaa ?? this.uiaa,
-      british: british ?? this.british,
-      australian: australian ?? this.australian,
-      saxon: saxon ?? this.saxon,
-      ewbank: ewbank ?? this.ewbank,
-      nordic: nordic ?? this.nordic,
-      brazilian: brazilian ?? this.brazilian,
     );
   }
 
@@ -110,18 +62,6 @@ class Grades {
         return font;
       case 'uiaa':
         return uiaa;
-      case 'british':
-        return british;
-      case 'australian':
-        return australian;
-      case 'saxon':
-        return saxon;
-      case 'ewbank':
-        return ewbank;
-      case 'nordic':
-        return nordic;
-      case 'brazilian':
-        return brazilian;
       default:
         return null;
     }
@@ -142,18 +82,6 @@ class Grades {
         return copyWith(font: grade);
       case 'uiaa':
         return copyWith(uiaa: grade);
-      case 'british':
-        return copyWith(british: grade);
-      case 'australian':
-        return copyWith(australian: grade);
-      case 'saxon':
-        return copyWith(saxon: grade);
-      case 'ewbank':
-        return copyWith(ewbank: grade);
-      case 'nordic':
-        return copyWith(nordic: grade);
-      case 'brazilian':
-        return copyWith(brazilian: grade);
       default:
         return this;
     }
@@ -165,13 +93,7 @@ class Grades {
       yds != null ||
       french != null ||
       font != null ||
-      uiaa != null ||
-      british != null ||
-      australian != null ||
-      saxon != null ||
-      ewbank != null ||
-      nordic != null ||
-      brazilian != null;
+      uiaa != null;
 
   /// Convert to simplified Map format for backwards compatibility
   Map<String, String> toMap() {
@@ -181,12 +103,6 @@ class Grades {
     if (french != null) map['french'] = french!;
     if (font != null) map['font'] = font!;
     if (uiaa != null) map['uiaa'] = uiaa!;
-    if (british != null) map['british'] = british!;
-    if (australian != null) map['australian'] = australian!;
-    if (saxon != null) map['saxon'] = saxon!;
-    if (ewbank != null) map['ewbank'] = ewbank!;
-    if (nordic != null) map['nordic'] = nordic!;
-    if (brazilian != null) map['brazilian'] = brazilian!;
     return map;
   }
 
@@ -198,12 +114,6 @@ class Grades {
       french: map['french'],
       font: map['font'],
       uiaa: map['uiaa'],
-      british: map['british'],
-      australian: map['australian'],
-      saxon: map['saxon'],
-      ewbank: map['ewbank'],
-      nordic: map['nordic'],
-      brazilian: map['brazilian'],
     );
   }
 }
