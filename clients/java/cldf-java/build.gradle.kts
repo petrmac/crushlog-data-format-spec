@@ -124,6 +124,18 @@ publishing {
             }
         }
     }
+    
+    repositories {
+        // GitHub Packages repository
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/petrmac/crushlog-data-format-spec")
+            credentials {
+                username = System.getenv("GITHUB_ACTOR") ?: project.findProperty("gpr.user") as String?
+                password = System.getenv("GITHUB_TOKEN") ?: project.findProperty("gpr.token") as String?
+            }
+        }
+    }
 }
 
 // Configure the java-library plugin's built-in tasks

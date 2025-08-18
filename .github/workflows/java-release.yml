@@ -240,7 +240,7 @@ jobs:
         MAVEN_GPG_PRIVATE_KEY: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
         MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
       run: |
-        ./gradlew :cldf-java:publishToSonatype closeAndReleaseSonatypeStagingRepository \
+        ./gradlew publishToSonatype closeAndReleaseSonatypeStagingRepository \
           -PossrhUsername=$MAVEN_USERNAME \
           -PossrhPassword=$MAVEN_PASSWORD \
           -PsigningKey="$MAVEN_GPG_PRIVATE_KEY" \
