@@ -24,55 +24,83 @@ class FlexibleLocalDateConverter implements JsonConverter<String?, String?> {
 
     final trimmed = json.trim();
 
-    // If already in ISO format, validate and return as-is
-    if (RegExp(r'^\d{4}-\d{2}-\d{2}$').hasMatch(trimmed)) {
-      if (trimmed.isValidIsoDate) {
-        return trimmed;
-      }
-      throw FormatException('Invalid date: $json');
+    // Try different date formats in order
+    final isoResult = _tryIsoFormat(trimmed, json);
+    if (isoResult != null) return isoResult;
+
+    final dateTimeResult = _tryIsoDateTimeFormat(trimmed, json);
+    if (dateTimeResult != null) return dateTimeResult;
+
+    final compactResult = _tryCompactFormat(trimmed);
+    if (compactResult != null) return compactResult;
+
+    final multiFormatResult = _tryMultipleFormats(trimmed);
+    if (multiFormatResult != null) return multiFormatResult;
+
+    throw FormatException('Cannot parse date string: $json');
+  }
+
+  /// Try parsing as ISO date format (yyyy-MM-dd)
+  String? _tryIsoFormat(String trimmed, String original) {
+    if (!RegExp(r'^\d{4}-\d{2}-\d{2}$').hasMatch(trimmed)) {
+      return null;
     }
 
-    // Handle ISO date-time format (extract date part)
-    if (RegExp(r'^\d{4}-\d{2}-\d{2}T').hasMatch(trimmed)) {
-      try {
-        // Extract just the date part from the string
-        final datePart = trimmed.substring(0, 10);
-        if (datePart.isValidIsoDate) {
-          return datePart;
-        }
-        throw FormatException('Invalid date in date-time: $json');
-      } catch (_) {
-        throw FormatException('Invalid date-time format: $json');
-      }
+    if (trimmed.isValidIsoDate) {
+      return trimmed;
+    }
+    throw FormatException('Invalid date: $original');
+  }
+
+  /// Try parsing as ISO date-time format
+  String? _tryIsoDateTimeFormat(String trimmed, String original) {
+    if (!RegExp(r'^\d{4}-\d{2}-\d{2}T').hasMatch(trimmed)) {
+      return null;
     }
 
-    // Handle compact format (YYYYMMDD) specially
-    if (RegExp(r'^\d{8}$').hasMatch(trimmed)) {
-      try {
-        final year = int.parse(trimmed.substring(0, 4));
-        final month = int.parse(trimmed.substring(4, 6));
-        final day = int.parse(trimmed.substring(6, 8));
-        final date = DateTime(year, month, day);
-        if (date.year == year && date.month == month && date.day == day) {
-          return DateFormat('yyyy-MM-dd').format(date);
-        }
-      } catch (_) {
-        // Fall through to error
+    try {
+      final datePart = trimmed.substring(0, 10);
+      if (datePart.isValidIsoDate) {
+        return datePart;
       }
+      throw FormatException('Invalid date in date-time: $original');
+    } catch (_) {
+      throw FormatException('Invalid date-time format: $original');
+    }
+  }
+
+  /// Try parsing as compact format (YYYYMMDD)
+  String? _tryCompactFormat(String trimmed) {
+    if (!RegExp(r'^\d{8}$').hasMatch(trimmed)) {
+      return null;
     }
 
-    // Try each format
+    try {
+      final year = int.parse(trimmed.substring(0, 4));
+      final month = int.parse(trimmed.substring(4, 6));
+      final day = int.parse(trimmed.substring(6, 8));
+      final date = DateTime(year, month, day);
+
+      if (date.year == year && date.month == month && date.day == day) {
+        return DateFormat('yyyy-MM-dd').format(date);
+      }
+    } catch (_) {
+      // Return null to try other formats
+    }
+    return null;
+  }
+
+  /// Try parsing with multiple date formats
+  String? _tryMultipleFormats(String trimmed) {
     for (final format in _dateFormats) {
       try {
         final date = format.parseStrict(trimmed);
-        // Always return in ISO format
         return DateFormat('yyyy-MM-dd').format(date);
       } catch (_) {
         // Try next format
       }
     }
-
-    throw FormatException('Cannot parse date string: $json');
+    return null;
   }
 
   @override

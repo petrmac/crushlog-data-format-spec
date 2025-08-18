@@ -66,42 +66,10 @@ class QRGenerator {
     QROptions options, {
     Location? location,
   }) {
-    // Use CLIDGenerator through adapter for proper deterministic ID generation
-    String clid;
-    if (route.clid != null) {
-      clid = route.clid!;
-    } else if (location != null) {
-      clid = CLDFClidAdapter.generateRouteCLID(route, location);
-    } else {
-      clid = CLDFClidAdapter.generateStandaloneRouteCLID(route);
-    }
-
-    final routeData = options.includeOfflineData
-        ? {
-            'id': route.id,
-            'name': route.name,
-            if (route.grades != null) ...{
-              if (route.grades!['vScale'] != null)
-                'grade': route.grades!['vScale'],
-              if (route.grades!['vScale'] != null) 'gradeSystem': 'vScale',
-              if (route.grades!['yds'] != null &&
-                  route.grades!['vScale'] == null)
-                'grade': route.grades!['yds'],
-              if (route.grades!['yds'] != null &&
-                  route.grades!['vScale'] == null)
-                'gradeSystem': 'YDS',
-            },
-            'type': route.routeType.name,
-            if (route.height != null) 'height': route.height,
-          }
-        : null;
-
-    // Generate short CLID (first 8 chars of UUID) for URL
-    final clidParts = clid.split(':');
-    final uuid = clidParts.length == 4
-        ? clidParts[3]
-        : clidParts[2]; // v1 format has UUID at index 3
-    final shortClid = uuid.substring(0, 8);
+    final clid = _getRouteCLID(route, location);
+    final routeData = _buildRouteData(route, options);
+    final shortClid = _extractShortCLID(clid);
+    final locationData = _buildLocationDataForRoute(location, options);
 
     return QRCodeData(
       version: 1,
@@ -109,48 +77,107 @@ class QRGenerator {
       url: '${options.baseUrl}/g/$shortClid', // Using /g/ endpoint per spec
       cldf: options.ipfsHash,
       route: routeData,
-      loc: location != null
-          ? {
-              'clid':
-                  location.clid ?? generateLocationData(location, options).clid,
-              'name': location.name,
-              if (location.country != null) 'country': location.country,
-            }
-          : null,
-      meta: {
-        'created': DateTime.now().toIso8601String(),
-        if (location?.isIndoor == true) 'expires': _getResetDate(),
-      },
-      verification: {
-        'method': 'uuid-v5',
-        'timestamp': DateTime.now().toIso8601String(),
-      },
+      loc: locationData,
+      meta: _buildMetadata(location),
+      verification: _buildVerification(),
     );
   }
 
-  /// Generate QR code data for a location
-  QRCodeData generateLocationData(Location location, QROptions options) {
-    // Use CLIDGenerator through adapter for proper deterministic ID generation
-    final clid =
-        location.clid ?? CLDFClidAdapter.generateLocationCLID(location);
+  /// Get or generate CLID for route
+  String _getRouteCLID(Route route, Location? location) {
+    if (route.clid != null) {
+      return route.clid!;
+    }
+    if (location != null) {
+      return CLDFClidAdapter.generateRouteCLID(route, location);
+    }
+    return CLDFClidAdapter.generateStandaloneRouteCLID(route);
+  }
 
-    final locationData = options.includeOfflineData
-        ? {
-            'id': location.id,
-            'name': location.name,
-            if (location.country != null) 'country': location.country,
-            if (location.state != null) 'state': location.state,
-            if (location.city != null) 'city': location.city,
-            'indoor': location.isIndoor,
-          }
-        : null;
+  /// Build route data for QR code
+  Map<String, dynamic>? _buildRouteData(Route route, QROptions options) {
+    if (!options.includeOfflineData) {
+      return null;
+    }
 
-    // Generate short CLID (first 8 chars of UUID) for URL
+    final data = <String, dynamic>{
+      'id': route.id,
+      'name': route.name,
+      'type': route.routeType.name,
+    };
+
+    _addGradeData(data, route.grades);
+
+    if (route.height != null) {
+      data['height'] = route.height;
+    }
+
+    return data;
+  }
+
+  /// Add grade information to route data
+  void _addGradeData(Map<String, dynamic> data, Map<String, dynamic>? grades) {
+    if (grades == null) return;
+
+    // Prioritize V-scale over YDS
+    if (grades['vScale'] != null) {
+      data['grade'] = grades['vScale'];
+      data['gradeSystem'] = 'vScale';
+    } else if (grades['yds'] != null) {
+      data['grade'] = grades['yds'];
+      data['gradeSystem'] = 'YDS';
+    }
+  }
+
+  /// Build location data for route QR code
+  Map<String, dynamic>? _buildLocationDataForRoute(
+    Location? location,
+    QROptions options,
+  ) {
+    if (location == null) return null;
+
+    final data = <String, dynamic>{
+      'clid': location.clid ?? generateLocationData(location, options).clid,
+      'name': location.name,
+    };
+
+    if (location.country != null) {
+      data['country'] = location.country;
+    }
+
+    return data;
+  }
+
+  /// Extract short CLID from full CLID
+  String _extractShortCLID(String clid) {
     final clidParts = clid.split(':');
     final uuid = clidParts.length == 4
         ? clidParts[3]
         : clidParts[2]; // v1 format has UUID at index 3
-    final shortClid = uuid.substring(0, 8);
+    return uuid.substring(0, 8);
+  }
+
+  /// Build metadata for QR code
+  Map<String, dynamic> _buildMetadata(Location? location) {
+    final meta = <String, dynamic>{'created': DateTime.now().toIso8601String()};
+
+    if (location?.isIndoor == true) {
+      meta['expires'] = _getResetDate();
+    }
+
+    return meta;
+  }
+
+  /// Build verification data for QR code
+  Map<String, dynamic> _buildVerification() {
+    return {'method': 'uuid-v5', 'timestamp': DateTime.now().toIso8601String()};
+  }
+
+  /// Generate QR code data for a location
+  QRCodeData generateLocationData(Location location, QROptions options) {
+    final clid = _getLocationCLID(location);
+    final locationData = _buildLocationData(location, options);
+    final shortClid = _extractShortCLID(clid);
 
     return QRCodeData(
       version: 1,
@@ -158,15 +185,42 @@ class QRGenerator {
       url: '${options.baseUrl}/g/$shortClid', // Using /g/ endpoint per spec
       cldf: options.ipfsHash,
       loc: locationData,
-      meta: {
-        'created': DateTime.now().toIso8601String(),
-        if (location.isIndoor == true) 'expires': _getResetDate(),
-      },
-      verification: {
-        'method': 'uuid-v5',
-        'timestamp': DateTime.now().toIso8601String(),
-      },
+      meta: _buildMetadata(location),
+      verification: _buildVerification(),
     );
+  }
+
+  /// Get or generate CLID for location
+  String _getLocationCLID(Location location) {
+    return location.clid ?? CLDFClidAdapter.generateLocationCLID(location);
+  }
+
+  /// Build location data for QR code
+  Map<String, dynamic>? _buildLocationData(
+    Location location,
+    QROptions options,
+  ) {
+    if (!options.includeOfflineData) {
+      return null;
+    }
+
+    final data = <String, dynamic>{
+      'id': location.id,
+      'name': location.name,
+      'indoor': location.isIndoor,
+    };
+
+    if (location.country != null) {
+      data['country'] = location.country;
+    }
+    if (location.state != null) {
+      data['state'] = location.state;
+    }
+    if (location.city != null) {
+      data['city'] = location.city;
+    }
+
+    return data;
   }
 
   /// Generate QR code image as PNG bytes
