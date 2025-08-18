@@ -209,6 +209,21 @@ jobs:
         echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
         echo "Dart package version: $VERSION"
     
+    - name: Final coverage check before SonarCloud
+      working-directory: clients/dart/cldf
+      run: |
+        if [ -f coverage/lcov.info ]; then
+          echo "✓ Final coverage file check:"
+          echo "  File size: $(ls -lh coverage/lcov.info | awk '{print $5}')"
+          echo "  Line count: $(wc -l coverage/lcov.info | awk '{print $1}')"
+          echo "  Sample paths (should be relative like 'lib/...'):"
+          grep "^SF:" coverage/lcov.info | head -3
+          echo "  Files with coverage:"
+          grep "^SF:" coverage/lcov.info | wc -l
+        else
+          echo "✗ ERROR: coverage/lcov.info not found!"
+        fi
+    
     # Run separate analysis for Dart using the new SonarQube scan action
     - name: Analyze Dart with SonarCloud
       uses: SonarSource/sonarqube-scan-action@v5.2.0
@@ -228,8 +243,8 @@ jobs:
           -Dsonar.exclusions=**/*.g.dart,**/*.freezed.dart,**/*.mocks.dart,**/generated/**,example/**
           -Dsonar.test.exclusions=**/*_test.dart
           -Dsonar.language=dart
+          -Dsonar.coverage.exclusions=**/*.g.dart,**/*.freezed.dart,**/*.mocks.dart
           -Dsonar.dart.coverage.reportPaths=coverage/lcov.info
-          -Dsonar.coverage.lcov.reportPaths=coverage/lcov.info
           -Dsonar.verbose=true
           -Dsonar.links.homepage=https://github.com/petrmac/crushlog-data-format-spec
           -Dsonar.links.ci=https://github.com/petrmac/crushlog-data-format-spec/actions
