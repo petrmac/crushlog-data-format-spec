@@ -244,7 +244,7 @@ jobs:
           -Dsonar.test.exclusions=**/*_test.dart
           -Dsonar.language=dart
           -Dsonar.coverage.exclusions=**/*.g.dart,**/*.freezed.dart,**/*.mocks.dart
-          -Dsonar.dart.coverage.reportPaths=coverage/lcov.info
+          -Dsonar.dart.lcov.reportPaths=coverage/lcov.info
           -Dsonar.verbose=true
           -Dsonar.links.homepage=https://github.com/petrmac/crushlog-data-format-spec
           -Dsonar.links.ci=https://github.com/petrmac/crushlog-data-format-spec/actions
