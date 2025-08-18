@@ -71,9 +71,12 @@ jobs:
     - name: Run build_runner
       run: dart run build_runner build --delete-conflicting-outputs
     
+    - name: Install test tools
+      run: dart pub global activate junitreport
+    
     - name: Run tests with coverage and JUnit output
+      shell: bash
       run: |
-        dart pub global activate junitreport
         # Run tests with coverage collection
         dart test --coverage=coverage --reporter=json > test-output.json || TEST_EXIT_CODE=$?
         # Convert to JUnit format
@@ -85,7 +88,7 @@ jobs:
         fi
         # Verify coverage was collected
         echo "Coverage files generated:"
-        find coverage -type f -name "*.json" | head -10
+        find coverage -type f -name "*.json" 2>/dev/null | head -10 || echo "No coverage files found yet"
         exit 0  # Always exit 0 to continue with coverage processing
       env:
         # Skip interop tests in regular Dart CI since Java CLI is not built
@@ -98,6 +101,7 @@ jobs:
       if: matrix.os == 'ubuntu-latest' && matrix.dart == 'stable'
     
     - name: Format coverage
+      shell: bash
       run: |
         # Show what coverage files we have
         echo "Coverage JSON files:"
