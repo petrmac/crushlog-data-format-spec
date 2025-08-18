@@ -169,8 +169,11 @@ jobs:
         if [ -f clients/dart/cldf/coverage/lcov.info ]; then
           echo "✓ Coverage file exists at clients/dart/cldf/coverage/lcov.info"
           echo "File size: $(ls -lh clients/dart/cldf/coverage/lcov.info | awk '{print $5}')"
+          echo "Line count: $(wc -l clients/dart/cldf/coverage/lcov.info | awk '{print $1}')"
           echo "First few SF entries (source files):"
           grep "^SF:" clients/dart/cldf/coverage/lcov.info | head -5
+          echo "Coverage summary (files with coverage > 0):"
+          awk '/^SF:/ {file=$0} /^LH:/ {if ($2 > 0) print file " - Lines Hit: " $2}' clients/dart/cldf/coverage/lcov.info | head -10
         else
           echo "✗ Coverage file NOT found at clients/dart/cldf/coverage/lcov.info"
           echo "Contents of clients/dart/cldf/:"

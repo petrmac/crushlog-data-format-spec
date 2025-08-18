@@ -74,8 +74,19 @@ jobs:
     - name: Run tests with coverage and JUnit output
       run: |
         dart pub global activate junitreport
-        dart test --coverage=coverage --reporter=json | dart pub global run junitreport:tojunit --output test-results.xml
-      continue-on-error: true
+        # Run tests with coverage collection
+        dart test --coverage=coverage --reporter=json > test-output.json || TEST_EXIT_CODE=$?
+        # Convert to JUnit format
+        cat test-output.json | dart pub global run junitreport:tojunit --output test-results.xml || true
+        # Show test summary
+        echo "Test exit code: ${TEST_EXIT_CODE:-0}"
+        if [ "${TEST_EXIT_CODE:-0}" -ne 0 ]; then
+          echo "Some tests failed, but continuing to collect coverage"
+        fi
+        # Verify coverage was collected
+        echo "Coverage files generated:"
+        find coverage -type f -name "*.json" | head -10
+        exit 0  # Always exit 0 to continue with coverage processing
       env:
         # Skip interop tests in regular Dart CI since Java CLI is not built
         SKIP_INTEROP_TESTS_IF_NO_CLI: 'true'
@@ -88,9 +99,37 @@ jobs:
     
     - name: Format coverage
       run: |
-        dart pub global run coverage:format_coverage --lcov --in=coverage --out=coverage/lcov.info --report-on=lib
-        # Fix paths to be relative for SonarCloud
-        sed -i "s|SF:.*clients/dart/cldf/|SF:|g" coverage/lcov.info
+        # Show what coverage files we have
+        echo "Coverage JSON files:"
+        ls -la coverage/*.json 2>/dev/null | head -10 || echo "No coverage JSON files found"
+        
+        # Format coverage to LCOV
+        dart pub global run coverage:format_coverage --lcov --in=coverage --out=coverage/lcov.info --report-on=lib --check-ignore
+        
+        # Show coverage statistics
+        echo "Coverage statistics:"
+        if [ -f coverage/lcov.info ]; then
+          echo "Total lines in lcov.info: $(wc -l coverage/lcov.info)"
+          echo "Files covered: $(grep -c "^SF:" coverage/lcov.info)"
+          echo "Lines with coverage data: $(grep -c "^DA:" coverage/lcov.info)"
+          
+          # Debug: Show original paths
+          echo "Original paths in lcov.info:"
+          grep "^SF:" coverage/lcov.info | head -5
+          
+          # Fix paths to be relative for SonarCloud - ensure they start with lib/
+          sed -i "s|SF:.*/lib/|SF:lib/|g" coverage/lcov.info
+          
+          # Debug: Show fixed paths
+          echo "Fixed paths in lcov.info:"
+          grep "^SF:" coverage/lcov.info | head -5
+          
+          # Show files with actual coverage
+          echo "Files with coverage > 0:"
+          awk '/^SF:/ {file=$0} /^LH:/ {if ($2 > 0) print file " - Lines Hit: " $2}' coverage/lcov.info | head -10
+        else
+          echo "ERROR: lcov.info was not generated!"
+        fi
       if: matrix.os == 'ubuntu-latest' && matrix.dart == 'stable'
     
     - name: Upload coverage and test reports
