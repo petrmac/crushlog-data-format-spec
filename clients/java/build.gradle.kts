@@ -160,6 +160,12 @@ nexusPublishing {
         sonatype {
             nexusUrl.set(uri("https://s01.oss.sonatype.org/service/local/"))
             snapshotRepositoryUrl.set(uri("https://s01.oss.sonatype.org/content/repositories/snapshots/"))
+            
+            // Use environment variables first, then fall back to project properties
+            username.set(System.getenv("MAVEN_USERNAME") 
+                ?: project.findProperty("ossrhUsername") as String?)
+            password.set(System.getenv("MAVEN_PASSWORD") 
+                ?: project.findProperty("ossrhPassword") as String?)
         }
     }
 }

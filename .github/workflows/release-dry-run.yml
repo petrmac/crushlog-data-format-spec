@@ -69,9 +69,8 @@ jobs:
       working-directory: clients/java
       run: |
         VERSION="${{ needs.validate-version.outputs.version }}"
+        # The version is set in the root build.gradle.kts file for all subprojects
         sed -i "s/version = \"[0-9.]*\"/version = \"$VERSION\"/" build.gradle.kts
-        sed -i "s/version = \"[0-9.]*\"/version = \"$VERSION\"/" cldf-java/build.gradle.kts
-        sed -i "s/version = \"[0-9.]*\"/version = \"$VERSION\"/" cldf-tool/build.gradle.kts
     
     - name: Copy schemas
       working-directory: clients/java

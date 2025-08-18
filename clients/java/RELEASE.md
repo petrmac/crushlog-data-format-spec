@@ -17,11 +17,11 @@ This document describes the release process for the CLDF Java client library and
 1. **GitHub Repository Secrets** (required for Maven Central publishing):
    - `MAVEN_USERNAME`: Sonatype OSSRH username
    - `MAVEN_PASSWORD`: Sonatype OSSRH password
-   - `SIGNING_KEY`: GPG private key (exported as ASCII-armored text)
-   - `SIGNING_PASSWORD`: GPG key passphrase
+   - `MAVEN_GPG_PRIVATE_KEY`: GPG private key (exported as ASCII-armored text)
+   - `MAVEN_GPG_PASSPHRASE`: GPG key passphrase
 
 2. **Version Bumping**:
-   - Update version in `/clients/java/build.gradle` (allprojects block)
+   - Update version in `/clients/java/build.gradle.kts` (allprojects block)
    - Update version in module READMEs
    - Update CHANGELOG.md
 
@@ -39,7 +39,7 @@ This document describes the release process for the CLDF Java client library and
 
 1. **Prepare the Release**:
    ```bash
-   # Update version in build.gradle
+   # Update version in build.gradle.kts
    # Update CHANGELOG.md
    # Commit changes
    git add .
@@ -101,8 +101,8 @@ This document describes the release process for the CLDF Java client library and
    
    # Add MAVEN_USERNAME (your Sonatype username)
    # Add MAVEN_PASSWORD (your Sonatype password)
-   # Add SIGNING_KEY (contents of private-key.asc)
-   # Add SIGNING_PASSWORD (your GPG key passphrase)
+   # Add MAVEN_GPG_PRIVATE_KEY (contents of private-key.asc)
+   # Add MAVEN_GPG_PASSPHRASE (your GPG key passphrase)
    ```
 
 ### Publishing Requirements
@@ -140,6 +140,12 @@ cd clients/java
 
 ```bash
 # Set environment variables
+export MAVEN_USERNAME="your-username"
+export MAVEN_PASSWORD="your-password"
+export MAVEN_GPG_PRIVATE_KEY="$(cat private-key.asc)"
+export MAVEN_GPG_PASSPHRASE="your-gpg-passphrase"
+
+# Or use Gradle properties
 export ORG_GRADLE_PROJECT_ossrhUsername="your-username"
 export ORG_GRADLE_PROJECT_ossrhPassword="your-password"
 export ORG_GRADLE_PROJECT_signingKey="$(cat private-key.asc)"
@@ -225,7 +231,7 @@ For critical issues:
 ### Pre-Release Checklist
 
 - [ ] All tests passing
-- [ ] Version updated in build.gradle
+- [ ] Version updated in build.gradle.kts
 - [ ] CHANGELOG.md updated
 - [ ] README versions updated
 - [ ] API documentation current

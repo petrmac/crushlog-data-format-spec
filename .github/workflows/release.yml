@@ -93,10 +93,9 @@ jobs:
         rm -rf cldf-java/src/main/resources/schemas
         cp -r ../../schemas cldf-java/src/main/resources/
         
-        # Update version in build.gradle files
-        sed -i "s/version = '[0-9.]*'/version = '${{ needs.validate-version.outputs.version }}'/" build.gradle
-        sed -i "s/version = '[0-9.]*'/version = '${{ needs.validate-version.outputs.version }}'/" cldf-java/build.gradle
-        sed -i "s/version = '[0-9.]*'/version = '${{ needs.validate-version.outputs.version }}'/" cldf-tool/build.gradle
+        # Update version in build.gradle.kts files
+        # The version is set in the root build.gradle.kts file for all subprojects
+        sed -i "s/version = \"[0-9.]*\"/version = \"${{ needs.validate-version.outputs.version }}\"/" build.gradle.kts
         
         ./gradlew clean build
     
@@ -151,9 +150,8 @@ jobs:
     - name: Update version
       working-directory: clients/java
       run: |
-        sed -i "s/version = '[0-9.]*'/version = '${{ needs.validate-version.outputs.version }}'/" build.gradle
-        sed -i "s/version = '[0-9.]*'/version = '${{ needs.validate-version.outputs.version }}'/" cldf-java/build.gradle
-        sed -i "s/version = '[0-9.]*'/version = '${{ needs.validate-version.outputs.version }}'/" cldf-tool/build.gradle
+        # The version is set in the root build.gradle.kts file for all subprojects
+        sed -i "s/version = \"[0-9.]*\"/version = \"${{ needs.validate-version.outputs.version }}\"/" build.gradle.kts
     
     - name: Copy schemas
       working-directory: clients/java
@@ -165,8 +163,8 @@ jobs:
     - name: Publish to Maven Central
       working-directory: clients/java
       env:
-        MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
-        MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
+        MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }}
+        MAVEN_PASSWORD: ${{ secrets.MAVEN_PASSWORD }}
         MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
       run: |
         chmod +x gradlew
