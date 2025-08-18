@@ -101,6 +101,11 @@ jobs:
     
     - name: Build and test Dart
       working-directory: clients/dart/cldf
+      env:
+        # Skip interop tests in regular Dart CI since Java CLI is not built
+        SKIP_INTEROP_TESTS_IF_NO_CLI: 'true'
+        # Also skip flaky interop tests
+        SKIP_FLAKY_INTEROP_TESTS: 'true'
       run: |
         # Update version in pubspec.yaml
         sed -i "s/^version: .*/version: ${{ needs.validate-version.outputs.version }}/" pubspec.yaml
