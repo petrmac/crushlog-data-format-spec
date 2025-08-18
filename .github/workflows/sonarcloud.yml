@@ -106,6 +106,13 @@ jobs:
             head -10 clients/dart/cldf/coverage/lcov.info
             echo "Total lines in lcov.info:"
             wc -l clients/dart/cldf/coverage/lcov.info
+            
+            # Fix paths to be relative for SonarCloud
+            echo "Fixing paths in lcov.info for SonarCloud..."
+            cp clients/dart/cldf/coverage/lcov.info clients/dart/cldf/coverage/lcov.info.original
+            sed "s|SF:.*/lib/|SF:lib/|g" clients/dart/cldf/coverage/lcov.info.original > clients/dart/cldf/coverage/lcov.info
+            echo "Paths fixed. Sample paths after fixing:"
+            grep "^SF:" clients/dart/cldf/coverage/lcov.info | head -5
           else
             echo "ERROR: lcov.info not found after extraction"
           fi
@@ -182,6 +189,26 @@ jobs:
           ls -la clients/dart/cldf/coverage/ || echo "Directory not found"
         fi
     
+    # Setup Dart for dependency resolution
+    - name: Setup Dart SDK
+      uses: dart-lang/setup-dart@v1
+      with:
+        sdk: stable
+    
+    - name: Install Dart dependencies
+      working-directory: clients/dart/cldf
+      run: |
+        dart pub get
+        dart run build_runner build --delete-conflicting-outputs
+    
+    - name: Extract version from pubspec
+      id: dart_version
+      working-directory: clients/dart/cldf
+      run: |
+        VERSION=$(grep "^version:" pubspec.yaml | cut -d' ' -f2)
+        echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+        echo "Dart package version: $VERSION"
+    
     # Run separate analysis for Dart using the new SonarQube scan action
     - name: Analyze Dart with SonarCloud
       uses: SonarSource/sonarqube-scan-action@v5.2.0
@@ -195,9 +222,16 @@ jobs:
           -Dsonar.projectKey=petrmac_crushlog-data-format-spec-dart
           -Dsonar.organization=petrmacek
           -Dsonar.projectName="CrushLog Data Format - Dart Client"
+          -Dsonar.projectVersion=${{ steps.dart_version.outputs.VERSION }}
           -Dsonar.sources=lib
           -Dsonar.tests=test
-          -Dsonar.exclusions=**/*.g.dart,**/*.freezed.dart,**/*.mocks.dart,**/generated/**
+          -Dsonar.exclusions=**/*.g.dart,**/*.freezed.dart,**/*.mocks.dart,**/generated/**,example/**
+          -Dsonar.test.exclusions=**/*_test.dart
           -Dsonar.language=dart
+          -Dsonar.dart.coverage.reportPaths=coverage/lcov.info
           -Dsonar.coverage.lcov.reportPaths=coverage/lcov.info
           -Dsonar.verbose=true
+          -Dsonar.links.homepage=https://github.com/petrmac/crushlog-data-format-spec
+          -Dsonar.links.ci=https://github.com/petrmac/crushlog-data-format-spec/actions
+          -Dsonar.links.scm=https://github.com/petrmac/crushlog-data-format-spec
+          -Dsonar.links.issue=https://github.com/petrmac/crushlog-data-format-spec/issues
