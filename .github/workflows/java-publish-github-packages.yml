@@ -3,7 +3,7 @@ name: Publish Java to GitHub Packages
 on:
   push:
     tags:
-      - 'v*'
+      - 'java-v*'
   workflow_dispatch:
     inputs:
       version:
