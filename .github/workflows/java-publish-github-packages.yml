@@ -70,16 +70,87 @@ jobs:
     - name: Build with Gradle
       run: ./gradlew clean build
       
-    - name: Publish to GitHub Packages
+    - name: Publish cldf-java library to GitHub Packages
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         ./gradlew :cldf-java:publishMavenPublicationToGitHubPackagesRepository
         
-    - name: Build and publish cldf-tool
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Build cldf-tool CLI binary
       run: |
-        ./gradlew :cldf-tool:shadowJar
-        # Note: cldf-tool is a CLI application, typically not published as a library
-        # The shadow JAR can be uploaded as a release artifact instead
+        ./gradlew :cldf-tool:build
+        
+    - name: Upload cldf-tool JAR as artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: cldf-tool-${{ steps.version.outputs.version }}
+        path: |
+          clients/java/cldf-tool/build/libs/*.jar
+          
+  create-release:
+    name: Create GitHub Release (Optional)
+    needs: publish
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'  # Only for tag pushes, not manual runs
+    permissions:
+      contents: write
+      
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Download artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: artifacts
+        
+    - name: Extract version from tag
+      id: version
+      run: |
+        VERSION=${GITHUB_REF#refs/tags/java-v}
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+        
+    - name: Generate Release Notes
+      run: |
+        cat > release-notes.md << EOF
+        # Java Client v${{ steps.version.outputs.version }}
+        
+        ## Maven Dependency (GitHub Packages)
+        
+        Add to your \`build.gradle.kts\`:
+        \`\`\`kotlin
+        repositories {
+            maven {
+                url = uri("https://maven.pkg.github.com/petrmac/crushlog-data-format-spec")
+                credentials {
+                    username = project.findProperty("gpr.user") as String?
+                    password = project.findProperty("gpr.token") as String?
+                }
+            }
+        }
+        
+        dependencies {
+            implementation("app.crushlog:cldf-java:${{ steps.version.outputs.version }}")
+        }
+        \`\`\`
+        
+        ## CLI Tool
+        
+        Download the JAR file from the release assets below and run:
+        \`\`\`bash
+        java -jar cldf-tool-${{ steps.version.outputs.version }}.jar
+        \`\`\`
+        
+        ## What's Changed
+        See [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/main/clients/java/CHANGELOG.md) for details.
+        EOF
+        
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: java-v${{ steps.version.outputs.version }}
+        name: Java Client v${{ steps.version.outputs.version }}
+        body_path: release-notes.md
+        draft: false
+        prerelease: false
+        files: |
+          artifacts/*/*.jar
