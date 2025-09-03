@@ -1,12 +1,19 @@
 name: Publish Java Javadoc
 
 on:
-  push:
-    branches: [ main ]
-    paths:
-      - 'clients/java/**'
-      - '.github/workflows/java-javadoc.yml'
+  # Manual trigger only - uncomment push trigger after GitHub Pages is enabled
+  # push:
+  #   branches: [ main ]
+  #   paths:
+  #     - 'clients/java/**'
+  #     - '.github/workflows/java-javadoc.yml'
   workflow_dispatch:
+    inputs:
+      check_pages:
+        description: 'Check if GitHub Pages is enabled first'
+        required: false
+        type: boolean
+        default: true
 
 permissions:
   contents: read
@@ -20,8 +27,35 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  check-pages:
+    name: Check GitHub Pages Status
+    runs-on: ubuntu-latest
+    outputs:
+      enabled: ${{ steps.check.outputs.enabled }}
+    
+    steps:
+    - name: Check if GitHub Pages is enabled
+      id: check
+      run: |
+        # Try to get Pages info, will fail if not enabled
+        if gh api repos/${{ github.repository }}/pages 2>/dev/null; then
+          echo "enabled=true" >> $GITHUB_OUTPUT
+          echo "✅ GitHub Pages is enabled"
+        else
+          echo "enabled=false" >> $GITHUB_OUTPUT
+          echo "⚠️ GitHub Pages is not enabled. Please enable it in Settings > Pages > Source: GitHub Actions"
+          if [[ "${{ github.event.inputs.check_pages }}" == "true" ]]; then
+            echo "Skipping Javadoc deployment. Enable GitHub Pages to use this workflow."
+            exit 0
+          fi
+        fi
+      env:
+        GH_TOKEN: ${{ github.token }}
+
   build-javadoc:
     name: Build Javadoc
+    needs: check-pages
+    if: needs.check-pages.outputs.enabled == 'true' || github.event.inputs.check_pages == 'false'
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -156,7 +190,8 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
-    needs: build-javadoc
+    needs: [check-pages, build-javadoc]
+    if: needs.check-pages.outputs.enabled == 'true' || github.event.inputs.check_pages == 'false'
     
     steps:
     - name: Deploy to GitHub Pages
