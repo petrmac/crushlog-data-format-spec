@@ -57,7 +57,6 @@ void main() {
       final theNose = Route(
         name: 'The Nose',
         grade: '5.14a',
-        type: RouteType.trad,
         firstAscent: FirstAscent(year: 1958, name: 'Warren Harding'),
         height: 900.0,
       );
@@ -203,7 +202,6 @@ void main() {
       final boulder = Route(
         name: 'Rainbow Rocket',
         grade: '8A',
-        type: RouteType.boulder,
         // No height needed for boulders
       );
 

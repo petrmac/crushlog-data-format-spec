@@ -73,7 +73,6 @@ class CLIDGenerator {
           ? StringUtils.normalize(route.firstAscent!.name!)
           : '',
       route.height?.toStringAsFixed(1) ?? '',
-      route.type.value,
     ];
 
     final input = components.join(':');
@@ -188,12 +187,8 @@ class CLIDGenerator {
     }
 
     // Warnings for optional but recommended fields
-    if (route.firstAscent == null && route.type != RouteType.boulder) {
+    if (route.firstAscent == null) {
       warnings.add('First ascent year recommended for historical routes');
-    }
-
-    if (route.height == null && route.type != RouteType.boulder) {
-      warnings.add('Route height recommended for rope routes');
     }
 
     return ValidationResult(errors: errors, warnings: warnings);

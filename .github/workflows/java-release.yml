@@ -70,7 +70,7 @@ jobs:
           ${{ runner.os }}-gradle-release-
           
     - name: Build all modules
-      run: ./gradlew clean build
+      run: ./gradlew clean build javadocJar sourcesJar
       
     - name: Build native binary
       run: |

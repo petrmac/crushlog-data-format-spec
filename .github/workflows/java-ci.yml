@@ -84,7 +84,7 @@ jobs:
           ${{ runner.os }}-gradle-
     
     - name: Build and test with coverage
-      run: ./gradlew build jacocoTestReport
+      run: ./gradlew build jacocoTestReport javadocJar sourcesJar
     
     - name: Generate aggregate coverage report
       run: ./gradlew jacocoTestCoverageVerification
@@ -116,6 +116,24 @@ jobs:
         path: |
           clients/java/cldf-java/build/libs/*.jar
           clients/java/cldf-tool/build/libs/*.jar
+    
+    - name: Upload Javadoc
+      uses: actions/upload-artifact@v4
+      with:
+        name: javadoc
+        path: |
+          clients/java/cldf-java/build/libs/*-javadoc.jar
+          clients/java/cldf-tool/build/libs/*-javadoc.jar
+        retention-days: 30
+    
+    - name: Upload Sources
+      uses: actions/upload-artifact@v4
+      with:
+        name: sources
+        path: |
+          clients/java/cldf-java/build/libs/*-sources.jar
+          clients/java/cldf-tool/build/libs/*-sources.jar
+        retention-days: 30
     
   # Step 3: Build native binaries for each platform
   build-native:

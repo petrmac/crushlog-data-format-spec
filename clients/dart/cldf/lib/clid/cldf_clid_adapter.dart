@@ -42,22 +42,10 @@ class CLDFClidAdapter {
           '';
     }
 
-    // Map route type
-    clid.RouteType routeType;
-    switch (route.routeType.value) {
-      case 'boulder':
-        routeType = clid.RouteType.boulder;
-        break;
-      case 'route':
-      default:
-        routeType = clid.RouteType.sport; // Default to sport for 'route' type
-    }
-
-    // Adapt CLDF Route to CLID Route
+    // Adapt CLDF Route to CLID Route (no longer using route type for CLID generation)
     final clidRoute = clid.Route(
       name: route.name,
       grade: grade,
-      type: routeType,
       firstAscent: null, // FirstAscent info not available in CLDF Route model
       height: route.height,
     );

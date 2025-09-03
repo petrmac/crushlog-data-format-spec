@@ -8,8 +8,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import app.crushlog.cldf.clid.RouteModel.*;
-
 /**
  * CLID (CrushLog ID) Generator Generates globally unique, deterministic identifiers for climbing
  * routes and locations Based on UUID v5 for deterministic IDs and UUID v4 for random IDs
@@ -66,7 +64,7 @@ public class CLIDGenerator {
   }
 
   /** Generate a deterministic CLID for a route */
-  public static String generateRouteCLID(String locationCLID, RouteModel.Route route) {
+  public static String generateRouteCLID(String locationCLID, Route route) {
     // Validate required fields
     ValidationResult validation = validateRoute(route);
     if (!validation.isValid()) {
@@ -93,8 +91,7 @@ public class CLIDGenerator {
             route.firstAscent() != null && route.firstAscent().name() != null
                 ? normalizeString(route.firstAscent().name())
                 : "",
-            route.height() != null ? "%.1f".formatted(route.height()) : "",
-            route.type().toString());
+            route.height() != null ? "%.1f".formatted(route.height()) : "");
 
     String input = String.join(":", components);
     UUID uuid = generateUUIDv5(input);
@@ -250,7 +247,7 @@ public class CLIDGenerator {
   }
 
   /** Validate route data */
-  private static ValidationResult validateRoute(RouteModel.Route route) {
+  private static ValidationResult validateRoute(Route route) {
     ValidationResult result = new ValidationResult();
 
     if (route.name() == null || route.name().trim().isEmpty()) {
@@ -261,17 +258,9 @@ public class CLIDGenerator {
       result.addError("Route grade is required");
     }
 
-    if (route.type() == null) {
-      result.addError("Route type is required");
-    }
-
     // Warnings for optional but recommended fields
-    if (route.firstAscent() == null && route.type() != RouteType.BOULDER) {
+    if (route.firstAscent() == null) {
       result.addWarning("First ascent year recommended for historical routes");
-    }
-
-    if (route.height() == null && route.type() != RouteType.BOULDER) {
-      result.addWarning("Route height recommended for rope routes");
     }
 
     return result;

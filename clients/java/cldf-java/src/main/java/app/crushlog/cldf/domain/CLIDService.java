@@ -9,7 +9,6 @@ import app.crushlog.cldf.api.CLDFArchive;
 import app.crushlog.cldf.clid.CLID;
 import app.crushlog.cldf.clid.CLIDGenerator;
 import app.crushlog.cldf.clid.EntityType;
-import app.crushlog.cldf.clid.RouteModel;
 import app.crushlog.cldf.models.*;
 import lombok.Builder;
 import lombok.Data;
@@ -274,24 +273,26 @@ public class CLIDService {
       return CLIDGenerator.generateRandomCLID(EntityType.ROUTE);
     }
 
-    RouteModel.RouteType genType =
-        route.getRouteType() == app.crushlog.cldf.models.enums.RouteType.BOULDER
-            ? RouteModel.RouteType.BOULDER
-            : RouteModel.RouteType.SPORT;
-
-    RouteModel.FirstAscent genFirstAscent =
+    app.crushlog.cldf.clid.Route.FirstAscent genFirstAscent =
         Optional.ofNullable(route.getFirstAscent())
             .map(
                 fa ->
-                    new RouteModel.FirstAscent(
-                        fa.getName(),
-                        Optional.ofNullable(fa.getDate())
-                            .map(java.time.LocalDate::getYear)
-                            .orElse(null)))
+                    app.crushlog.cldf.clid.Route.FirstAscent.builder()
+                        .name(fa.getName())
+                        .year(
+                            Optional.ofNullable(fa.getDate())
+                                .map(java.time.LocalDate::getYear)
+                                .orElse(null))
+                        .build())
             .orElse(null);
 
-    RouteModel.Route genRoute =
-        new RouteModel.Route(route.getName(), grade, genType, genFirstAscent, route.getHeight());
+    app.crushlog.cldf.clid.Route genRoute =
+        app.crushlog.cldf.clid.Route.builder()
+            .name(route.getName())
+            .grade(grade)
+            .firstAscent(genFirstAscent)
+            .height(route.getHeight())
+            .build();
 
     return CLIDGenerator.generateRouteCLID(locationCLID, genRoute);
   }

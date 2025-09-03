@@ -1,5 +1,20 @@
 # Changelog
 
+## 1.4.0
+
+### Changed
+- **CLID Generation Alignment** - Aligned with Java implementation for consistency
+  - Removed `RouteType` enum from CLID route model (simplified to name, grade, firstAscent, height)
+  - Route type no longer affects CLID generation - routes are uniquely identified by location + name + grade
+  - Updated `CLIDGenerator` to exclude route type from deterministic components
+  - Simplified route validation by removing type-specific checks
+  - Updated `CLDFClidAdapter` to work without route type mapping
+  
+### Improved
+- Better separation between CLID generation models and main data models
+- Reduced coupling between route metadata and CLID generation
+- Improved maintainability through model simplification
+
 ## 1.3.1
 
 ### Fixed

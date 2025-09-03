@@ -12,7 +12,6 @@ import jakarta.inject.Singleton;
 
 import app.crushlog.cldf.api.CLDFArchive;
 import app.crushlog.cldf.clid.EntityType;
-import app.crushlog.cldf.clid.RouteModel;
 import app.crushlog.cldf.constants.CLDFConstants;
 import app.crushlog.cldf.models.Location;
 import app.crushlog.cldf.models.Route;
@@ -406,7 +405,7 @@ public class QRCommand implements Callable<Integer> {
       // For direct mode route CLID generation
       if (locationClid != null && grade != null) {
         // Create minimal route model for CLID generation
-        RouteModel.Route routeModel = getRouteModel();
+        app.crushlog.cldf.clid.Route routeModel = getRouteModel();
 
         return app.crushlog.cldf.clid.CLIDGenerator.generateRouteCLID(locationClid, routeModel);
       }
@@ -415,24 +414,23 @@ public class QRCommand implements Callable<Integer> {
       return app.crushlog.cldf.clid.CLIDGenerator.generateRandomCLID(EntityType.ROUTE);
     }
 
-    private RouteModel.Route getRouteModel() {
-      RouteModel.RouteType type = RouteModel.RouteType.SPORT;
-      if (routeType != null) {
-        try {
-          if (routeType.equalsIgnoreCase("boulder")) {
-            type = RouteModel.RouteType.BOULDER;
-          }
-        } catch (Exception e) {
-          // Use default
-        }
-      }
+    private app.crushlog.cldf.clid.Route getRouteModel() {
 
-      RouteModel.FirstAscent fa = null;
+      app.crushlog.cldf.clid.Route.FirstAscent fa = null;
       if (firstAscentName != null || firstAscentYear != null) {
-        fa = new RouteModel.FirstAscent(firstAscentName, firstAscentYear);
+        fa =
+            app.crushlog.cldf.clid.Route.FirstAscent.builder()
+                .name(firstAscentName)
+                .year(firstAscentYear)
+                .build();
       }
 
-      return new RouteModel.Route(name, grade, type, fa, height);
+      return app.crushlog.cldf.clid.Route.builder()
+          .name(name)
+          .grade(grade)
+          .firstAscent(fa)
+          .height(height)
+          .build();
     }
 
     private String generateLocationCLIDDirect() {
