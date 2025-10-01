@@ -8,7 +8,7 @@ part 'media_metadata_item.g.dart';
 
 /// A standalone media item for media-metadata.json file
 /// This is different from FlexibleMediaItem which is used inline in climbs
-@JsonSerializable()
+@JsonSerializable(includeIfNull: false)
 class MediaMetadataItem {
   /// Creates a new [MediaMetadataItem] instance
   MediaMetadataItem({
@@ -92,7 +92,7 @@ class MediaMetadataItem {
 }
 
 /// GPS coordinates for media
-@JsonSerializable()
+@JsonSerializable(includeIfNull: false)
 class MediaCoordinates {
   /// Creates a new [MediaCoordinates] instance
   MediaCoordinates({

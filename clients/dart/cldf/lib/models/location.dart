@@ -7,7 +7,7 @@ import 'media/media.dart';
 part 'location.g.dart';
 
 /// A climbing location (crag, gym, etc.)
-@JsonSerializable()
+@JsonSerializable(includeIfNull: false)
 class Location {
   /// Creates a new [Location] instance
   Location({
@@ -90,7 +90,7 @@ class Location {
 }
 
 /// GPS coordinates
-@JsonSerializable()
+@JsonSerializable(includeIfNull: false)
 class Coordinates {
   /// Creates a new [Coordinates] instance
   Coordinates({

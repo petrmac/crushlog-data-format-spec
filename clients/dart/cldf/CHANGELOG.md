@@ -1,5 +1,23 @@
 # Changelog
 
+## 1.4.2
+
+### Fixed
+- **Optional Field Serialization** - Fixed all models to properly exclude null optional fields from JSON output
+  - Added `includeIfNull: false` to all `@JsonSerializable` annotations across all models
+  - Fixed Location model: optional fields (`country`, `state`, `city`, `address`, `accessInfo`, `rockType`, `terrainType`, `media`, `customFields`) now excluded when null
+  - Fixed Route model: optional fields (`sectorId`, `grades`, `height`, `bolts`, `color`, `firstAscent`, `protection`, `media`, `customFields`, etc.) now excluded when null
+  - Fixed Sector model: optional fields (`description`, `approach`, `coordinates`, `media`, `customFields`, etc.) now excluded when null
+  - Fixed Climb model: optional fields properly excluded when null
+  - Fixed Session model: optional fields (weather, partners, notes, etc.) now excluded when null
+  - Fixed Media models: optional fields now excluded when null
+  - Fixed Tag and Grades models: optional fields now excluded when null
+  - Resolves schema validation issues where null fields were incorrectly serialized as explicit null values
+
+### Changed
+- All JSON serialization now omits null optional fields instead of including them as `null` values
+- Cleaner JSON output with smaller file sizes for archives with minimal data
+
 ## 1.4.1
 
 ### Fixed

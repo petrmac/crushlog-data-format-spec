@@ -18,7 +18,7 @@ String? _dateToJson(String? date) =>
     const FlexibleLocalDateConverter().toJson(date);
 
 /// A single climbing attempt or completion
-@JsonSerializable()
+@JsonSerializable(includeIfNull: false)
 class Climb {
   /// Creates a new [Climb] instance
   Climb({
@@ -149,7 +149,7 @@ class Climb {
 }
 
 /// Grade information
-@JsonSerializable()
+@JsonSerializable(includeIfNull: false)
 class GradeInfo {
   /// Creates a new [GradeInfo] instance
   GradeInfo({required this.system, required this.grade, this.conversions});

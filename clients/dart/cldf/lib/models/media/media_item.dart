@@ -8,7 +8,7 @@ part 'media_item.g.dart';
 
 /// Media item for inline use within climbs
 /// Matches the CLDF media.schema.json structure
-@JsonSerializable()
+@JsonSerializable(includeIfNull: false)
 class MediaItem {
   /// Creates a new [MediaItem] instance
   MediaItem({

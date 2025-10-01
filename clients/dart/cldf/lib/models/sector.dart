@@ -6,7 +6,7 @@ import 'media/media.dart';
 part 'sector.g.dart';
 
 /// A sector within a climbing location
-@JsonSerializable()
+@JsonSerializable(includeIfNull: false)
 class Sector {
   /// Creates a new [Sector] instance
   Sector({

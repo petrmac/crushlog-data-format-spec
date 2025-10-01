@@ -3,7 +3,7 @@ import 'package:json_annotation/json_annotation.dart';
 part 'tag.g.dart';
 
 /// A tag for categorization
-@JsonSerializable()
+@JsonSerializable(includeIfNull: false)
 class Tag {
   /// Creates a new [Tag] instance
   Tag({

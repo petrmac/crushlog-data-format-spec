@@ -8,7 +8,7 @@ import 'media/media.dart';
 part 'route.g.dart';
 
 /// A climbing route or boulder problem
-@JsonSerializable()
+@JsonSerializable(includeIfNull: false)
 class Route {
   /// Creates a new [Route] instance
   Route({
@@ -102,7 +102,7 @@ class Route {
 }
 
 /// First ascent information
-@JsonSerializable()
+@JsonSerializable(includeIfNull: false)
 class FirstAscent {
   /// Creates a new [FirstAscent] instance
   FirstAscent({this.climberName, this.date, this.notes});

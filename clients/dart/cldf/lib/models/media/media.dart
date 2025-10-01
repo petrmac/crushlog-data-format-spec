@@ -5,7 +5,7 @@ import 'media_item.dart';
 part 'media.g.dart';
 
 /// Media references for climbs
-@JsonSerializable()
+@JsonSerializable(includeIfNull: false)
 class Media {
   /// Creates a new [Media] instance
   Media({this.items, this.count});

@@ -3,7 +3,7 @@ import 'package:json_annotation/json_annotation.dart';
 part 'grades.g.dart';
 
 /// Strongly typed grades with enum keys
-@JsonSerializable()
+@JsonSerializable(includeIfNull: false)
 class Grades {
   /// V-Scale grade (bouldering)
   @JsonKey(name: 'vScale')

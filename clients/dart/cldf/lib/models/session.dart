@@ -15,7 +15,7 @@ String? _dateToJson(String? date) =>
     const FlexibleLocalDateConverter().toJson(date);
 
 /// A climbing session
-@JsonSerializable()
+@JsonSerializable(includeIfNull: false)
 class Session {
   /// Creates a new [Session] instance
   Session({
@@ -111,7 +111,7 @@ class Session {
 }
 
 /// Weather information
-@JsonSerializable()
+@JsonSerializable(includeIfNull: false)
 class Weather {
   /// Creates a new [Weather] instance
   Weather({this.conditions, this.temperature, this.humidity, this.wind});
