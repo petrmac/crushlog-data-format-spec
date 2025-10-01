@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.4.5
+
+### Fixed
+- **Java Client Compatibility** - Fixed boolean field serialization in Java models
+  - Added `@JsonProperty("isRepeat")` annotation to Java Climb model to prevent Jackson from auto-stripping `is` prefix
+  - Added `@JsonProperty("isIndoor")` annotation to Java Climb and Session models
+  - Java models now correctly serialize as `isRepeat` and `isIndoor` instead of `repeat` and `indoor`
+  - Resolves "Unrecognized field 'isRepeat'" and "Unrecognized field 'isIndoor'" errors when importing Dart-generated CLDF archives
+
+### Changed
+- No code changes in Dart client - Dart models were already correct
+- Java Climb and Session models updated to match schema and Dart implementation
+
 ## 1.4.4
 
 ### Fixed

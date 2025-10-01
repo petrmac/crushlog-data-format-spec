@@ -57,7 +57,7 @@ tasks.named("sonar") {
 
 allprojects {
     group = "app.crushlog"
-    version = "1.0.0"
+    version = "1.0.4"
 }
 
 // Centralized version catalog for all modules

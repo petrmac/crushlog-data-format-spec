@@ -62,7 +62,9 @@ public class Climb {
 
   @Builder.Default private int repeats = 0;
 
-  @Builder.Default private boolean isRepeat = false;
+  @JsonProperty("isRepeat")
+  @Builder.Default
+  private boolean isRepeat = false;
 
   private BelayType belayType;
 
@@ -88,6 +90,7 @@ public class Climb {
 
   private TerrainType terrainType;
 
+  @JsonProperty("isIndoor")
   private Boolean isIndoor;
 
   private List<String> partners;

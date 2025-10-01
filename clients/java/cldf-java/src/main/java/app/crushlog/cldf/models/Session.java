@@ -45,6 +45,7 @@ public class Session {
 
   private Integer locationId;
 
+  @JsonProperty("isIndoor")
   private Boolean isIndoor;
 
   private ClimbType climbType;
