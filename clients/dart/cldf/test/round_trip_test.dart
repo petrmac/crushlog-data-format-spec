@@ -237,8 +237,7 @@ void main() {
               weather: null,
             ),
           ],
-          tags: [
-          ],
+          tags: [],
           mediaItems: [
             MediaMetadataItem(
               id: 1,
