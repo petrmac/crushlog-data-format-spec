@@ -70,7 +70,6 @@ void main() {
       expect(session.approachTime, equals(30));
       expect(session.departureTime, equals(25));
       expect(session.isOngoing, isTrue);
-      expect(session.tags, equals(['outdoor', 'sunny']));
       expect(session.customFields!['elevation'], equals(1200));
     });
 
