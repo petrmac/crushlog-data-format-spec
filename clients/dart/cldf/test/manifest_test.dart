@@ -17,7 +17,6 @@ void main() {
       expect(manifest.creationDate, equals(now));
       expect(manifest.platform, equals(Platform.iOS));
       expect(manifest.appVersion, equals('2.3.4'));
-      expect(manifest.description, isNull);
       expect(manifest.author, isNull);
       expect(manifest.exportConfig, isNull);
     });
@@ -42,12 +41,10 @@ void main() {
         creationDate: now,
         platform: Platform.iOS,
         appVersion: '3.0.0',
-        description: 'Test export',
         author: author,
         exportConfig: exportConfig,
       );
 
-      expect(manifest.description, equals('Test export'));
       expect(manifest.author, isNotNull);
       expect(manifest.author!.name, equals('John Doe'));
       expect(manifest.exportConfig, isNotNull);
@@ -61,7 +58,6 @@ void main() {
         creationDate: now,
         platform: Platform.iOS,
         appVersion: '2.3.4',
-        description: 'Test manifest',
       );
 
       final json = manifest.toJson();
@@ -70,12 +66,11 @@ void main() {
       expect(deserialized.version, equals(manifest.version));
       expect(deserialized.format, equals(manifest.format));
       expect(
-        deserialized.creationDate.toIso8601String(),
-        equals(manifest.creationDate.toIso8601String()),
+        deserialized.creationDate.toUtc().toIso8601String(),
+        equals(manifest.creationDate.toUtc().toIso8601String()),
       );
       expect(deserialized.platform, equals(manifest.platform));
       expect(deserialized.appVersion, equals(manifest.appVersion));
-      expect(deserialized.description, equals(manifest.description));
     });
   });
 

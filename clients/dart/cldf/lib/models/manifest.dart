@@ -1,12 +1,11 @@
 import 'package:json_annotation/json_annotation.dart';
 
-import '../utils/date_time_converter.dart';
 import 'enums/platform.dart';
 
 part 'manifest.g.dart';
 
 /// Metadata about the CLDF archive
-@JsonSerializable()
+@JsonSerializable(includeIfNull: false)
 class Manifest {
   /// Creates a new [Manifest] instance
   Manifest({
@@ -15,7 +14,6 @@ class Manifest {
     required this.creationDate,
     required this.platform,
     required this.appVersion,
-    this.description,
     this.author,
     this.source,
     this.stats,
@@ -33,7 +31,7 @@ class Manifest {
   final String format;
 
   /// When the archive was created
-  @FlexibleDateTimeConverter()
+  @JsonKey(toJson: _dateTimeToJson, fromJson: _dateTimeFromJson)
   final DateTime creationDate;
 
   /// Platform that created the archive
@@ -41,9 +39,6 @@ class Manifest {
 
   /// Version of the app that created the archive
   final String appVersion;
-
-  /// Optional description
-  final String? description;
 
   /// Author information
   final Author? author;
@@ -63,7 +58,7 @@ class Manifest {
 }
 
 /// Author information
-@JsonSerializable()
+@JsonSerializable(includeIfNull: false)
 class Author {
   /// Creates a new [Author] instance
   Author({this.name, this.email, this.website});
@@ -85,7 +80,7 @@ class Author {
 }
 
 /// Export configuration
-@JsonSerializable()
+@JsonSerializable(includeIfNull: false)
 class ExportConfig {
   /// Creates a new [ExportConfig] instance
   ExportConfig({
@@ -140,7 +135,7 @@ class DateRange {
 }
 
 /// Statistics about exported data
-@JsonSerializable()
+@JsonSerializable(includeIfNull: false)
 class Stats {
   /// Creates a new [Stats] instance
   Stats({
@@ -180,3 +175,7 @@ class Stats {
   /// Converts this [Stats] to JSON
   Map<String, dynamic> toJson() => _$StatsToJson(this);
 }
+
+// Helper functions for DateTime serialization
+String _dateTimeToJson(DateTime dateTime) => dateTime.toUtc().toIso8601String();
+DateTime _dateTimeFromJson(String json) => DateTime.parse(json);

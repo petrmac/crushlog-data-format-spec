@@ -1,6 +1,6 @@
 name: cldf
 description: A Dart implementation of the Crushlog Data Format (CLDF) for climbing data exchange.
-version: 1.4.0
+version: 1.4.1
 homepage: https://github.com/petrmac/crushlog-data-format-spec
 repository: https://github.com/petrmac/crushlog-data-format-spec/tree/main/clients/dart/cldf
 issue_tracker: https://github.com/petrmac/crushlog-data-format-spec/issues

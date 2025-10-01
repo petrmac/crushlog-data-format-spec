@@ -178,7 +178,6 @@ void main() {
           creationDate: DateTime.utc(2024, 1, 15, 10, 30),
           platform: Platform.android,
           appVersion: '2.5.0',
-          description: 'Test export',
           author: Author(name: 'Test User', email: 'test@example.com'),
         );
 

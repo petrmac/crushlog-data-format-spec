@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.4.1
+
+### Fixed
+- **Java Schema Compatibility** - Fixed manifest serialization to comply with Java schema validation
+  - `creationDate` now includes timezone suffix (RFC 3339 format) - converts to UTC with 'Z' suffix
+  - Removed `description` field from manifest (not defined in schema)
+  - Null fields (`author`, `exportOptions`, etc.) are now omitted from JSON instead of being included as `null`
+  - Added `includeIfNull: false` to all `@JsonSerializable` annotations in manifest models
+
+### Changed
+- Manifest `creationDate` field now always serializes to UTC timezone format
+- Test expectations updated to compare UTC timestamps for consistency
+
 ## 1.4.0
 
 ### Changed

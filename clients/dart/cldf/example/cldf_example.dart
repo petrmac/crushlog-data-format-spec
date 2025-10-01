@@ -8,7 +8,6 @@ void main() async {
       creationDate: DateTime.now(),
       platform: Platform.iOS,
       appVersion: '1.0.0',
-      description: 'Sample climbing data export',
       author: Author(name: 'John Climber', email: 'john@example.com'),
     ),
     locations: [
