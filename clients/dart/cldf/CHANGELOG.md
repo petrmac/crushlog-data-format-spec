@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.4.3
+
+### Fixed
+- **RFC 3339 DateTime Serialization** - Fixed DateTime fields to comply with RFC 3339 format
+  - Location `createdAt` field now serializes to UTC with ISO 8601 format (RFC 3339 compliant)
+  - Sector `createdAt` field now serializes to UTC with ISO 8601 format (RFC 3339 compliant)
+  - All DateTime values now include timezone suffix (Z for UTC)
+  - MediaMetadataItem `createdAt` already used FlexibleDateTimeConverter which is RFC 3339 compliant
+
+### Changed
+- All DateTime fields now serialize to RFC 3339 format with UTC timezone
+
 ## 1.4.2
 
 ### Fixed

@@ -55,6 +55,7 @@ class Sector {
   final Media? media;
 
   /// Creation timestamp
+  @JsonKey(toJson: _dateTimeToJson, fromJson: _dateTimeFromJson)
   final DateTime? createdAt;
 
   /// Associated tags
@@ -66,3 +67,9 @@ class Sector {
   /// Converts this [Sector] to JSON
   Map<String, dynamic> toJson() => _$SectorToJson(this);
 }
+
+// Helper functions for DateTime serialization
+String? _dateTimeToJson(DateTime? dateTime) =>
+    dateTime?.toUtc().toIso8601String();
+DateTime? _dateTimeFromJson(String? json) =>
+    json == null ? null : DateTime.parse(json);
