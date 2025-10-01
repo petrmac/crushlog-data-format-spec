@@ -20,7 +20,6 @@ class Sector {
     this.coordinates,
     this.media,
     this.createdAt,
-    this.tags,
     this.customFields,
   });
 
@@ -57,9 +56,6 @@ class Sector {
   /// Creation timestamp
   @JsonKey(toJson: _dateTimeToJson, fromJson: _dateTimeFromJson)
   final DateTime? createdAt;
-
-  /// Associated tags
-  final List<String>? tags;
 
   /// Custom fields
   final Map<String, dynamic>? customFields;

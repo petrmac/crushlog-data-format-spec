@@ -138,7 +138,6 @@ void main() {
               rockType: RockType.granite,
               terrainType: TerrainType.artificial,
               accessInfo: 'Open 24/7',
-              tags: ['gym', 'bouldering'],
             ),
             Location(
               id: 2,
@@ -239,14 +238,6 @@ void main() {
             ),
           ],
           tags: [
-            Tag(
-              id: 1,
-              name: 'crimpy',
-              isPredefined: true,
-              category: 'style',
-              color: '#FF0000',
-            ),
-            Tag(id: 2, name: 'technical', isPredefined: false),
           ],
           mediaItems: [
             MediaMetadataItem(

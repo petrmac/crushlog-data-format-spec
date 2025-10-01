@@ -37,7 +37,6 @@ class Session {
     this.approachTime,
     this.departureTime,
     this.isOngoing = false,
-    this.tags,
     this.customFields,
   });
 
@@ -99,9 +98,6 @@ class Session {
 
   /// Whether the session is currently ongoing
   final bool isOngoing;
-
-  /// Associated tags
-  final List<String>? tags;
 
   /// Custom fields
   final Map<String, dynamic>? customFields;

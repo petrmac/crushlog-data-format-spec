@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.4.4
+
+### Fixed
+- **Schema Alignment** - Removed `tags` field from models where not defined in CLDF schema
+    - Removed `tags` from Location model (not in schema)
+    - Removed `tags` from Sector model (not in schema)
+    - Removed `tags` from Session model (not in schema)
+    - Route and Climb models correctly retain `tags` field (present in schema)
+    - Fixes Java client interoperability issues with "Unrecognized field" errors
+
 ## 1.4.3
 
 ### Fixed

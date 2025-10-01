@@ -23,7 +23,6 @@ void main() {
       expect(session.terrainType, isNull);
       expect(session.approachTime, isNull);
       expect(session.departureTime, isNull);
-      expect(session.tags, isNull);
       expect(session.customFields, isNull);
     });
 
@@ -53,7 +52,6 @@ void main() {
         approachTime: 30,
         departureTime: 25,
         isOngoing: true,
-        tags: ['outdoor', 'sunny'],
         customFields: {'elevation': 1200},
       );
 
@@ -88,7 +86,6 @@ void main() {
         partners: ['John', 'Jane'],
         notes: 'Competition day',
         isOngoing: false,
-        tags: ['comp', 'indoor'],
       );
 
       final json = session.toJson();
@@ -104,7 +101,6 @@ void main() {
       expect(deserialized.partners, equals(session.partners));
       expect(deserialized.notes, equals(session.notes));
       expect(deserialized.isOngoing, equals(session.isOngoing));
-      expect(deserialized.tags, equals(session.tags));
     });
 
     test('should handle date conversion properly', () {
