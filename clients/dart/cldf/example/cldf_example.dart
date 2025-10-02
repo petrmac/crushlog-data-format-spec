@@ -74,18 +74,8 @@ void main() async {
       ),
     ],
     tags: [
-      Tag(
-        id: 1,
-        category: 'style',
-        isPredefined: false,
-        name: 'crimpy',
-      ),
-      Tag(
-        id: 2,
-        category: 'style',
-        isPredefined: false,
-        name: 'overhang',
-      ),
+      Tag(id: 1, category: 'style', isPredefined: false, name: 'crimpy'),
+      Tag(id: 2, category: 'style', isPredefined: false, name: 'overhang'),
     ],
   );
 
