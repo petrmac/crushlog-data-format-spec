@@ -99,7 +99,6 @@ class Coordinates {
   Coordinates({
     required this.latitude,
     required this.longitude,
-    this.elevation,
   });
 
   /// Creates a [Coordinates] from JSON
@@ -111,9 +110,6 @@ class Coordinates {
 
   /// Longitude coordinate
   final double longitude;
-
-  /// Elevation in meters
-  final double? elevation;
 
   /// Converts this [Coordinates] to JSON
   Map<String, dynamic> toJson() => _$CoordinatesToJson(this);

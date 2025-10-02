@@ -18,7 +18,7 @@ void main() {
       expect(manifest.platform, equals(Platform.iOS));
       expect(manifest.appVersion, equals('2.3.4'));
       expect(manifest.author, isNull);
-      expect(manifest.exportConfig, isNull);
+      expect(manifest.exportOptions, isNull);
     });
 
     test('should create Manifest with all fields', () {
@@ -28,11 +28,9 @@ void main() {
         email: 'john@example.com',
         website: 'https://example.com',
       );
-      final exportConfig = ExportConfig(
+      final exportOptions = ExportConfig(
         includeMedia: true,
         mediaStrategy: 'embedded',
-        mediaQuality: 80,
-        anonymized: false,
       );
 
       final manifest = Manifest(
@@ -42,13 +40,13 @@ void main() {
         platform: Platform.iOS,
         appVersion: '3.0.0',
         author: author,
-        exportConfig: exportConfig,
+        exportOptions: exportOptions,
       );
 
       expect(manifest.author, isNotNull);
       expect(manifest.author!.name, equals('John Doe'));
-      expect(manifest.exportConfig, isNotNull);
-      expect(manifest.exportConfig!.includeMedia, isTrue);
+      expect(manifest.exportOptions, isNotNull);
+      expect(manifest.exportOptions!.includeMedia, isTrue);
     });
 
     test('should serialize and deserialize Manifest', () {
@@ -117,30 +115,22 @@ void main() {
 
       expect(config.includeMedia, isFalse);
       expect(config.mediaStrategy, isNull);
-      expect(config.mediaQuality, isNull);
-      expect(config.anonymized, isNull);
     });
 
     test('should create ExportConfig with all fields', () {
       final config = ExportConfig(
         includeMedia: true,
         mediaStrategy: 'reference',
-        mediaQuality: 90,
-        anonymized: true,
       );
 
       expect(config.includeMedia, isTrue);
       expect(config.mediaStrategy, equals('reference'));
-      expect(config.mediaQuality, equals(90));
-      expect(config.anonymized, isTrue);
     });
 
     test('should serialize and deserialize ExportConfig', () {
       final config = ExportConfig(
         includeMedia: true,
         mediaStrategy: 'embedded',
-        mediaQuality: 85,
-        anonymized: false,
       );
 
       final json = config.toJson();
@@ -148,8 +138,6 @@ void main() {
 
       expect(deserialized.includeMedia, equals(config.includeMedia));
       expect(deserialized.mediaStrategy, equals(config.mediaStrategy));
-      expect(deserialized.mediaQuality, equals(config.mediaQuality));
-      expect(deserialized.anonymized, equals(config.anonymized));
     });
   });
 }

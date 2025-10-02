@@ -12,7 +12,6 @@ class Tag {
     required this.isPredefined,
     this.predefinedTagKey,
     this.category,
-    this.description,
     this.color,
   });
 
@@ -33,9 +32,6 @@ class Tag {
 
   /// Tag category
   final String? category;
-
-  /// Description
-  final String? description;
 
   /// Associated color (hex format)
   final String? color;

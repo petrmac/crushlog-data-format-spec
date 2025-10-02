@@ -26,7 +26,6 @@ void main() {
           id: 1,
           name: 'custom tag',
           isPredefined: false,
-          description: 'A custom tag',
           color: '#FF0000',
         );
 
@@ -35,7 +34,6 @@ void main() {
         expect(json['name'], equals('custom tag'));
         expect(json['isPredefined'], isFalse);
         expect(json['predefinedTagKey'], isNull);
-        expect(json['description'], equals('A custom tag'));
         expect(json['color'], equals('#FF0000'));
       });
 
@@ -287,7 +285,6 @@ void main() {
           routeCharacteristics: RouteCharacteristics.bolted,
           gearNotes: '12 quickdraws',
           height: 25.5,
-          bolts: 12,
         );
 
         final json = route.toJson();
@@ -298,7 +295,6 @@ void main() {
         expect(json['routeCharacteristics'], equals('bolted'));
         expect(json['gearNotes'], equals('12 quickdraws'));
         expect(json['height'], equals(25.5));
-        expect(json['bolts'], equals(12));
       });
 
       test('should deserialize route from JSON', () {
@@ -309,7 +305,7 @@ void main() {
           'routeType': 'route',
           'routeCharacteristics': 'trad',
           'gearNotes': 'Doubles from #0.5 to #3',
-          'protection': 'adequate',
+          'protectionRating': 'adequate',
           'qualityRating': 4,
         };
 
@@ -320,7 +316,7 @@ void main() {
         expect(route.routeType, equals(RouteType.route));
         expect(route.routeCharacteristics, equals(RouteCharacteristics.trad));
         expect(route.gearNotes, equals('Doubles from #0.5 to #3'));
-        expect(route.protection, equals(ProtectionRating.adequate));
+        expect(route.protectionRating, equals(ProtectionRating.adequate));
         expect(route.qualityRating, equals(4));
       });
 

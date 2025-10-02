@@ -40,7 +40,6 @@ public class Session {
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm:ss")
   private LocalTime endTime;
 
-  @JsonProperty(required = true)
   private String location;
 
   private Integer locationId;
@@ -67,6 +66,8 @@ public class Session {
   @JsonProperty("isOngoing")
   @Builder.Default
   private boolean isOngoing = false;
+
+  private java.util.Map<String, Object> customFields;
 
   @Data
   @Builder

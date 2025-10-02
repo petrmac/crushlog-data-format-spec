@@ -31,7 +31,6 @@ void main() async {
         routeType: RouteType.route,
         grades: {'french': '6a', 'yds': '5.10a'},
         height: 20,
-        bolts: 8,
         qualityRating: 4,
         tags: ['classic', 'well-protected'],
       ),
@@ -80,14 +79,12 @@ void main() async {
         category: 'style',
         isPredefined: false,
         name: 'crimpy',
-        description: 'Routes with small crimpy holds',
       ),
       Tag(
         id: 2,
         category: 'style',
         isPredefined: false,
         name: 'overhang',
-        description: 'Overhanging routes',
       ),
     ],
   );

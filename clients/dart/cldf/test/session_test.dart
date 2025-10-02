@@ -22,7 +22,6 @@ void main() {
       expect(session.rockType, isNull);
       expect(session.terrainType, isNull);
       expect(session.approachTime, isNull);
-      expect(session.departureTime, isNull);
       expect(session.customFields, isNull);
     });
 
@@ -50,7 +49,6 @@ void main() {
         rockType: RockType.granite,
         terrainType: TerrainType.natural,
         approachTime: 30,
-        departureTime: 25,
         isOngoing: true,
         customFields: {'elevation': 1200},
       );
@@ -68,7 +66,6 @@ void main() {
       expect(session.rockType, equals(RockType.granite));
       expect(session.terrainType, equals(TerrainType.natural));
       expect(session.approachTime, equals(30));
-      expect(session.departureTime, equals(25));
       expect(session.isOngoing, isTrue);
       expect(session.customFields!['elevation'], equals(1200));
     });

@@ -63,16 +63,12 @@ void main() {
         final config = ExportConfig(
           includeMedia: true,
           mediaStrategy: 'thumbnails',
-          mediaQuality: 80,
-          anonymized: false,
           dateRange: DateRange(start: '2024-01-01', end: '2024-12-31'),
         );
 
         final json = config.toJson();
         expect(json['includeMedia'], isTrue);
         expect(json['mediaStrategy'], equals('thumbnails'));
-        expect(json['mediaQuality'], equals(80));
-        expect(json['anonymized'], isFalse);
         expect(json['dateRange'], isNotNull);
         expect(json['dateRange']['start'], equals('2024-01-01'));
         expect(json['dateRange']['end'], equals('2024-12-31'));
@@ -104,7 +100,7 @@ void main() {
               tagsCount: 15,
               mediaCount: 25,
             ),
-            exportConfig: ExportConfig(
+            exportOptions: ExportConfig(
               includeMedia: true,
               dateRange: DateRange(start: '2024-01-01', end: '2024-12-31'),
             ),
@@ -121,8 +117,8 @@ void main() {
           expect(deserialized.source, equals('CrushLog'));
           expect(deserialized.stats, isNotNull);
           expect(deserialized.stats!.climbsCount, equals(100));
-          expect(deserialized.exportConfig, isNotNull);
-          expect(deserialized.exportConfig!.dateRange, isNotNull);
+          expect(deserialized.exportOptions, isNotNull);
+          expect(deserialized.exportOptions!.dateRange, isNotNull);
         },
       );
 

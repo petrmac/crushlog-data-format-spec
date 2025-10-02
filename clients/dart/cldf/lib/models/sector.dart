@@ -20,7 +20,6 @@ class Sector {
     this.coordinates,
     this.media,
     this.createdAt,
-    this.customFields,
   });
 
   /// Creates a [Sector] from JSON
@@ -56,9 +55,6 @@ class Sector {
   /// Creation timestamp
   @JsonKey(toJson: _dateTimeToJson, fromJson: _dateTimeFromJson)
   final DateTime? createdAt;
-
-  /// Custom fields
-  final Map<String, dynamic>? customFields;
 
   /// Converts this [Sector] to JSON
   Map<String, dynamic> toJson() => _$SectorToJson(this);

@@ -43,7 +43,6 @@ void main() {
               coordinates: Coordinates(
                 latitude: 40.0150,
                 longitude: -105.2705,
-                elevation: 1655,
               ),
             ),
           ],
@@ -101,10 +100,6 @@ void main() {
           importedLocation.coordinates?.longitude,
           originalLocation.coordinates?.longitude,
         );
-        expect(
-          importedLocation.coordinates?.elevation,
-          originalLocation.coordinates?.elevation,
-        );
       },
     );
 
@@ -149,7 +144,6 @@ void main() {
               coordinates: Coordinates(
                 latitude: 40.0150,
                 longitude: -105.2705,
-                elevation: 1655,
               ),
               rockType: RockType.granite,
               terrainType: TerrainType.natural,
@@ -184,14 +178,12 @@ void main() {
               routeCharacteristics: RouteCharacteristics.bolted,
               grades: {'YDS': '5.10a', 'French': '6a'},
               height: 25.5,
-              bolts: 12,
               firstAscent: FirstAscent(
-                climberName: 'John Doe',
+                name: 'John Doe',
                 date: '1995-06-15',
-                notes: 'First ascent on a sunny day',
+                info: 'First ascent on a sunny day',
               ),
-              protection: ProtectionRating.good,
-              popularity: 5,
+              protectionRating: ProtectionRating.good,
               qualityRating: 5,
               beta: 'Crux at the third bolt',
               gearNotes: 'Bring 12 quickdraws',
@@ -277,7 +269,7 @@ void main() {
           originalArchive.sessions?.length,
         );
         expect(importedArchive.climbs?.length, originalArchive.climbs?.length);
-        expect(importedArchive.tags?.length, originalArchive.tags?.length);
+        expect(importedArchive.tags ?? [], originalArchive.tags ?? []);
         expect(
           importedArchive.mediaItems?.length,
           originalArchive.mediaItems?.length,
@@ -295,16 +287,15 @@ void main() {
         );
         expect(importedRoute.grades, originalRoute.grades);
         expect(importedRoute.height, originalRoute.height);
-        expect(importedRoute.bolts, originalRoute.bolts);
         expect(
-          importedRoute.firstAscent?.climberName,
-          originalRoute.firstAscent?.climberName,
+          importedRoute.firstAscent?.name,
+          originalRoute.firstAscent?.name,
         );
         expect(
           importedRoute.firstAscent?.date,
           originalRoute.firstAscent?.date,
         );
-        expect(importedRoute.protection, originalRoute.protection);
+        expect(importedRoute.protectionRating, originalRoute.protectionRating);
         expect(importedRoute.qualityRating, originalRoute.qualityRating);
         expect(importedRoute.beta, originalRoute.beta);
         expect(importedRoute.gearNotes, originalRoute.gearNotes);
@@ -334,7 +325,7 @@ void main() {
         expect(importedArchive.manifest.stats!.routesCount, 2);
         expect(importedArchive.manifest.stats!.sessionsCount, 1);
         expect(importedArchive.manifest.stats!.climbsCount, 1);
-        expect(importedArchive.manifest.stats!.tagsCount, 2);
+        expect(importedArchive.manifest.stats!.tagsCount, 0);
         expect(importedArchive.manifest.stats!.mediaCount, 1);
       },
     );

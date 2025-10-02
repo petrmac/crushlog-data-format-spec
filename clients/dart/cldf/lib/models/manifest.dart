@@ -17,7 +17,7 @@ class Manifest {
     this.author,
     this.source,
     this.stats,
-    this.exportConfig,
+    this.exportOptions,
   });
 
   /// Creates a [Manifest] from JSON
@@ -51,7 +51,7 @@ class Manifest {
 
   /// Export configuration
   @JsonKey(name: 'exportOptions')
-  final ExportConfig? exportConfig;
+  final ExportConfig? exportOptions;
 
   /// Converts this [Manifest] to JSON
   Map<String, dynamic> toJson() => _$ManifestToJson(this);
@@ -86,8 +86,6 @@ class ExportConfig {
   ExportConfig({
     this.includeMedia = false,
     this.mediaStrategy,
-    this.mediaQuality,
-    this.anonymized,
     this.dateRange,
   });
 
@@ -100,12 +98,6 @@ class ExportConfig {
 
   /// Media export strategy
   final String? mediaStrategy;
-
-  /// Media quality (0-100)
-  final int? mediaQuality;
-
-  /// Whether data is anonymized
-  final bool? anonymized;
 
   /// Date range for filtered exports
   final DateRange? dateRange;

@@ -21,11 +21,9 @@ class Route {
     this.routeCharacteristics,
     this.grades,
     this.height,
-    this.bolts,
     this.color,
     this.firstAscent,
-    this.protection,
-    this.popularity,
+    this.protectionRating,
     this.qualityRating,
     this.beta,
     this.gearNotes,
@@ -64,9 +62,6 @@ class Route {
   /// Height in meters
   final double? height;
 
-  /// Number of bolts
-  final int? bolts;
-
   /// Hold color
   final String? color;
 
@@ -74,10 +69,7 @@ class Route {
   final FirstAscent? firstAscent;
 
   /// Protection rating
-  final ProtectionRating? protection;
-
-  /// Popularity rating
-  final int? popularity;
+  final ProtectionRating? protectionRating;
 
   /// Quality rating (0-5)
   final int? qualityRating;
@@ -105,20 +97,20 @@ class Route {
 @JsonSerializable(includeIfNull: false)
 class FirstAscent {
   /// Creates a new [FirstAscent] instance
-  FirstAscent({this.climberName, this.date, this.notes});
+  FirstAscent({this.name, this.date, this.info});
 
   /// Creates a [FirstAscent] from JSON
   factory FirstAscent.fromJson(Map<String, dynamic> json) =>
       _$FirstAscentFromJson(json);
 
   /// Name of the first ascensionist
-  final String? climberName;
+  final String? name;
 
   /// Date of first ascent
   final String? date;
 
   /// Additional notes
-  final String? notes;
+  final String? info;
 
   /// Converts this [FirstAscent] to JSON
   Map<String, dynamic> toJson() => _$FirstAscentToJson(this);

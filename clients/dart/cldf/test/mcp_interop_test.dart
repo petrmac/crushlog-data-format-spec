@@ -121,7 +121,7 @@ void main() {
           );
           if (routeWithFA.isNotEmpty) {
             final route = routeWithFA.first;
-            expect(route.firstAscent?.climberName, isNotNull);
+            expect(route.firstAscent?.name, isNotNull);
             expect(
               route.firstAscent?.date,
               matches(RegExp(r'^\d{4}-\d{2}-\d{2}$')),

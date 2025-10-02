@@ -1,5 +1,46 @@
 # Changelog
 
+## 1.4.6
+
+### Fixed
+- **Schema Alignment** - Fixed field names and removed extra fields to match CLDF schema specification
+  - **Route Model**:
+    - Removed `bolts` field (not in schema)
+    - Removed `popularity` field (not in schema)
+    - Renamed `protection` → `protectionRating` to match schema
+  - **FirstAscent Model**:
+    - Renamed `climberName` → `name` to match schema
+    - Renamed `notes` → `info` to match schema
+  - **Location.Coordinates Model**:
+    - Removed `elevation` field (not in schema)
+  - **Session Model**:
+    - Removed `departureTime` field (not in schema)
+  - **Tag Model**:
+    - Removed `description` field (not in schema)
+  - **Manifest Model**:
+    - Renamed `exportConfig` → `exportOptions` (internal field name, JSON key was already correct)
+  - **ExportConfig Model**:
+    - Removed `mediaQuality` field (not in schema)
+    - Removed `anonymized` field (not in schema)
+  - **Sector Model**:
+    - Removed `customFields` field (not in schema)
+
+### Changed
+- All model changes maintain backward compatibility for JSON deserialization where possible
+- Test suite updated to reflect schema-compliant field names
+- Improves Java-Dart interoperability by ensuring both implementations match the schema
+
+### Breaking Changes
+- **Route**: `protection` field renamed to `protectionRating` - update code using `route.protection`
+- **Route**: `bolts` and `popularity` fields removed - use `customFields` if needed
+- **FirstAscent**: `climberName` field renamed to `name` - update code using `firstAscent.climberName`
+- **FirstAscent**: `notes` field renamed to `info` - update code using `firstAscent.notes`
+- **Location.Coordinates**: `elevation` field removed - use Location's `customFields` if needed
+- **Session**: `departureTime` field removed - use `customFields` if needed
+- **Tag**: `description` field removed - use `customFields` if needed
+- **Manifest**: `exportConfig` internal field renamed to `exportOptions` (JSON key unchanged)
+- **ExportConfig**: `mediaQuality` and `anonymized` fields removed
+
 ## 1.4.5
 
 ### Fixed

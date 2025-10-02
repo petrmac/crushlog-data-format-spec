@@ -19,11 +19,9 @@ void main() {
       expect(route.routeCharacteristics, isNull);
       expect(route.grades, isNull);
       expect(route.height, isNull);
-      expect(route.bolts, isNull);
       expect(route.color, isNull);
       expect(route.firstAscent, isNull);
-      expect(route.protection, isNull);
-      expect(route.popularity, isNull);
+      expect(route.protectionRating, isNull);
       expect(route.qualityRating, isNull);
       expect(route.beta, isNull);
       expect(route.gearNotes, isNull);
@@ -33,9 +31,9 @@ void main() {
 
     test('should create Route with all fields', () {
       final firstAscent = FirstAscent(
-        climberName: 'Lynn Hill',
+        name: 'Lynn Hill',
         date: '1993-09-19',
-        notes: 'First free ascent',
+        info: 'First free ascent',
       );
 
       final route = Route(
@@ -47,11 +45,9 @@ void main() {
         routeCharacteristics: RouteCharacteristics.trad,
         grades: {'vScale': 'V8', 'font': '7B+'},
         height: 4.5,
-        bolts: 0,
         color: 'black',
         firstAscent: firstAscent,
-        protection: ProtectionRating.good,
-        popularity: 5,
+        protectionRating: ProtectionRating.good,
         qualityRating: 5,
         beta: 'Start with the lightning bolt hold',
         gearNotes: 'Crash pads recommended',
@@ -64,11 +60,9 @@ void main() {
       expect(route.grades, isNotNull);
       expect(route.grades!['vScale'], equals('V8'));
       expect(route.height, equals(4.5));
-      expect(route.bolts, equals(0));
       expect(route.color, equals('black'));
       expect(route.firstAscent, isNotNull);
-      expect(route.protection, equals(ProtectionRating.good));
-      expect(route.popularity, equals(5));
+      expect(route.protectionRating, equals(ProtectionRating.good));
       expect(route.qualityRating, equals(5));
       expect(route.beta, equals('Start with the lightning bolt hold'));
       expect(route.gearNotes, equals('Crash pads recommended'));
@@ -86,7 +80,6 @@ void main() {
         routeCharacteristics: RouteCharacteristics.bolted,
         grades: {'yds': '5.10a', 'french': '6a'},
         height: 25.0,
-        bolts: 8,
         beta: 'Crux at the third bolt',
         tags: ['overhang', 'technical'],
       );
@@ -105,7 +98,6 @@ void main() {
       );
       expect(deserialized.grades, equals(route.grades));
       expect(deserialized.height, equals(route.height));
-      expect(deserialized.bolts, equals(route.bolts));
       expect(deserialized.beta, equals(route.beta));
       expect(deserialized.tags, equals(route.tags));
     });
@@ -114,37 +106,37 @@ void main() {
   group('FirstAscent Model Tests', () {
     test('should create FirstAscent with all fields', () {
       final fa = FirstAscent(
-        climberName: 'Alex Honnold',
+        name: 'Alex Honnold',
         date: '2017-06-03',
-        notes: 'Free solo ascent',
+        info: 'Free solo ascent',
       );
 
-      expect(fa.climberName, equals('Alex Honnold'));
+      expect(fa.name, equals('Alex Honnold'));
       expect(fa.date, equals('2017-06-03'));
-      expect(fa.notes, equals('Free solo ascent'));
+      expect(fa.info, equals('Free solo ascent'));
     });
 
     test('should create FirstAscent with optional fields', () {
-      final fa = FirstAscent(climberName: 'Unknown');
+      final fa = FirstAscent(name: 'Unknown');
 
-      expect(fa.climberName, equals('Unknown'));
+      expect(fa.name, equals('Unknown'));
       expect(fa.date, isNull);
-      expect(fa.notes, isNull);
+      expect(fa.info, isNull);
     });
 
     test('should serialize and deserialize FirstAscent', () {
       final fa = FirstAscent(
-        climberName: 'Tommy Caldwell',
+        name: 'Tommy Caldwell',
         date: '2015-01-14',
-        notes: 'Dawn Wall first free ascent',
+        info: 'Dawn Wall first free ascent',
       );
 
       final json = fa.toJson();
       final deserialized = FirstAscent.fromJson(json);
 
-      expect(deserialized.climberName, equals(fa.climberName));
+      expect(deserialized.name, equals(fa.name));
       expect(deserialized.date, equals(fa.date));
-      expect(deserialized.notes, equals(fa.notes));
+      expect(deserialized.info, equals(fa.info));
     });
   });
 }

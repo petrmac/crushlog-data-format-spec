@@ -35,7 +35,6 @@ class Session {
     this.rockType,
     this.terrainType,
     this.approachTime,
-    this.departureTime,
     this.isOngoing = false,
     this.customFields,
   });
@@ -92,9 +91,6 @@ class Session {
 
   /// Approach time in minutes
   final int? approachTime;
-
-  /// Departure time in minutes
-  final int? departureTime;
 
   /// Whether the session is currently ongoing
   final bool isOngoing;
