@@ -96,10 +96,7 @@ DateTime? _dateTimeFromJson(String? json) =>
 @JsonSerializable(includeIfNull: false)
 class Coordinates {
   /// Creates a new [Coordinates] instance
-  Coordinates({
-    required this.latitude,
-    required this.longitude,
-  });
+  Coordinates({required this.latitude, required this.longitude});
 
   /// Creates a [Coordinates] from JSON
   factory Coordinates.fromJson(Map<String, dynamic> json) =>

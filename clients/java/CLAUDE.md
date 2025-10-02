@@ -23,7 +23,31 @@ This project uses the Micronaut framework with constructor-based dependency inje
 
 2. **Services should be final fields** - This ensures immutability and thread safety
 
-3. **Provide no-arg constructors for CLI commands** - PicoCLI requires no-arg constructors for command instantiation. When needed, provide both:
+3. **Use interfaces for service contracts** - Define interfaces for services to improve testability and maintainability
+   ```java
+   // Interface
+   public interface MyService {
+       void doSomething();
+   }
+   
+   // Implementation
+   @Singleton
+   public class DefaultMyService implements MyService {
+       @Override
+       public void doSomething() { ... }
+   }
+   
+   // Factory (when needed for external dependencies)
+   @Factory
+   public class MyServiceFactory {
+       @Singleton
+       public MyService myService() {
+           return new DefaultMyService();
+       }
+   }
+   ```
+
+4. **Provide no-arg constructors for CLI commands** - PicoCLI requires no-arg constructors for command instantiation. When needed, provide both:
    ```java
    @Inject
    public MyCommand(MyService myService) {
@@ -35,6 +59,8 @@ This project uses the Micronaut framework with constructor-based dependency inje
        this.myService = null;
    }
    ```
+
+5. **No reflection-based instantiation** - Avoid using reflection (Class.forName) for creating instances. Use proper DI configuration instead.
 
 ### Testing
 
@@ -65,3 +91,4 @@ The project supports GraalVM native image compilation. Native reflection configu
 
 1. Some CreateCommandSpec tests are temporarily disabled due to mock validation service interaction issues
 2. When updating models or schemas, ensure both are synchronized to avoid validation failures
+3. CLIDGeneratorSpec tests have pre-existing failures unrelated to DI refactoring

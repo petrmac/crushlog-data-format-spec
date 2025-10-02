@@ -83,11 +83,7 @@ class Author {
 @JsonSerializable(includeIfNull: false)
 class ExportConfig {
   /// Creates a new [ExportConfig] instance
-  ExportConfig({
-    this.includeMedia = false,
-    this.mediaStrategy,
-    this.dateRange,
-  });
+  ExportConfig({this.includeMedia = false, this.mediaStrategy, this.dateRange});
 
   /// Creates a [ExportConfig] from JSON
   factory ExportConfig.fromJson(Map<String, dynamic> json) =>

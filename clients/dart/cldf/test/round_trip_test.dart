@@ -40,10 +40,7 @@ void main() {
               country: 'USA',
               state: 'Colorado',
               city: 'Boulder',
-              coordinates: Coordinates(
-                latitude: 40.0150,
-                longitude: -105.2705,
-              ),
+              coordinates: Coordinates(latitude: 40.0150, longitude: -105.2705),
             ),
           ],
         );
@@ -141,10 +138,7 @@ void main() {
               country: 'USA',
               state: 'Colorado',
               city: 'Boulder',
-              coordinates: Coordinates(
-                latitude: 40.0150,
-                longitude: -105.2705,
-              ),
+              coordinates: Coordinates(latitude: 40.0150, longitude: -105.2705),
               rockType: RockType.granite,
               terrainType: TerrainType.natural,
             ),
