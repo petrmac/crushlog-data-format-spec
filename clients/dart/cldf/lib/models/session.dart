@@ -26,6 +26,7 @@ class Session {
     this.endTime,
     this.location,
     this.locationId,
+    this.locationClid,
     this.isIndoor,
     this.climbType,
     this.sessionType,
@@ -62,8 +63,11 @@ class Session {
   /// Location name (when location is not in database)
   final String? location;
 
-  /// Reference to location ID
+  /// Reference to location ID (local file reference)
   final int? locationId;
+
+  /// Location CLID - globally unique location identifier for cross-device sync
+  final String? locationClid;
 
   /// Whether this is an indoor session
   final bool? isIndoor;

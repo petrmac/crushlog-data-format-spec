@@ -42,7 +42,11 @@ public class Session {
 
   private String location;
 
+  /** Reference to location ID (local file reference) */
   private Integer locationId;
+
+  /** Location CLID - globally unique location identifier for cross-device sync */
+  private String locationClid;
 
   @JsonProperty("isIndoor")
   private Boolean isIndoor;

@@ -49,7 +49,12 @@
         },
         "locationId": {
           "type": "integer",
-          "description": "Reference to location ID"
+          "description": "Reference to location ID (local file reference)"
+        },
+        "locationClid": {
+          "type": "string",
+          "pattern": "^clid:v\\d+:location:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "description": "Location CLID - globally unique location identifier for cross-device sync"
         },
         "isIndoor": {
           "type": "boolean",
