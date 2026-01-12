@@ -1,5 +1,26 @@
 # Changelog
 
+## 1.4.8
+
+### Added
+- **Location CLID in Session** - Session model now includes `locationClid` field for referencing the location where the session took place
+
+### Fixed
+- **Boolean Field Marshalling** - Fixed boolean field serialization to ensure consistent output format
+- **Schema Adherence** - Improved marshalling to strictly follow CLDF schema specification
+- **Date Format** - Fixed date serialization format in Dart models for cross-platform compatibility
+- **Extra Tags Handling** - Fixed handling of extra/unexpected tags during deserialization
+
+### Changed
+- Code formatting improvements across all models
+- General cleanup and consistency improvements
+
+## 1.4.7
+
+### Fixed
+- Minor format and code style improvements
+- Internal refactoring for better maintainability
+
 ## 1.4.6
 
 ### Fixed
