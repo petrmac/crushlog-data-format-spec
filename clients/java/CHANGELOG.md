@@ -5,7 +5,21 @@ All notable changes to the CLDF Java client library and CLI tool will be documen
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.2.3] - 2025-01-11
+## [1.0.5] - 2026-01-12
+
+### Added
+- **Location CLID in Session** - Session model now includes `locationClid` field for referencing the location where the session took place
+- **GitHub Sources & Javadoc** - Added automated publishing of sources and Javadoc to GitHub
+
+### Fixed
+- **Boolean Field Marshalling** - Fixed boolean field serialization (`isRepeat`, `isIndoor`) for consistent JSON output
+- **Schema Adherence** - Improved marshalling to strictly follow CLDF schema specification
+- **CLID Generation** - Removed route type from CLID generation for simplified route identification
+
+### Changed
+- Code formatting improvements across all models
+
+## [1.0.4] - 2025-01-11
 
 ### Added
 - **Unified Media Model** - Complete overhaul of media support across all entities
