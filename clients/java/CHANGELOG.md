@@ -5,6 +5,17 @@ All notable changes to the CLDF Java client library and CLI tool will be documen
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.6] - 2026-01-18
+
+### Added
+- **Route CLID in Climb** - Climb model now includes `routeClid` field for globally unique route identification during server synchronization
+- **QR Code Support for Routes** - Route model now includes nested `QrCode` class for physical route marking with fields:
+  - `data` - Generated QR code data string
+  - `url` - Public URL for the route
+  - `ipfsHash` - IPFS hash for CLDF archive reference
+  - `blockchainTx` - Blockchain transaction hash for permanent record
+  - `generatedAt` - Timestamp when the QR code was generated
+
 ## [1.0.5] - 2026-01-12
 
 ### Added
