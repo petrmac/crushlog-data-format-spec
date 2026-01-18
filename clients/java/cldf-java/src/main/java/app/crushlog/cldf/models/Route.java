@@ -63,6 +63,9 @@ public class Route {
   /** Media associated with this route (topos, beta videos, etc.) */
   private Media media;
 
+  /** QR code data for physical route marking (v1.3.0+) */
+  private QrCode qrCode;
+
   @JsonDeserialize(using = FlexibleDateTimeDeserializer.class)
   private OffsetDateTime createdAt;
 
@@ -96,5 +99,28 @@ public class Route {
     private LocalDate date;
 
     private String info;
+  }
+
+  /** QR code data for physical route marking (v1.3.0+). */
+  @Data
+  @Builder
+  @NoArgsConstructor
+  @AllArgsConstructor
+  public static class QrCode {
+    /** Generated QR code data string. */
+    private String data;
+
+    /** Public URL for the route. */
+    private String url;
+
+    /** IPFS hash for CLDF archive reference. */
+    private String ipfsHash;
+
+    /** Blockchain transaction hash for permanent record. */
+    private String blockchainTx;
+
+    /** When the QR code was generated. */
+    @JsonDeserialize(using = FlexibleDateTimeDeserializer.class)
+    private OffsetDateTime generatedAt;
   }
 }

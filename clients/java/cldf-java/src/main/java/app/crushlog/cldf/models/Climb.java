@@ -41,6 +41,9 @@ public class Climb {
 
   private Integer routeId;
 
+  /** CrushLog ID of the route - globally unique identifier for server matching (v1.4.0+) */
+  private String routeClid;
+
   @JsonProperty(required = true)
   @JsonDeserialize(using = FlexibleLocalDateDeserializer.class)
   private LocalDate date;

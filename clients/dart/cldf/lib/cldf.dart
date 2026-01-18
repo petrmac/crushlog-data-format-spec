@@ -22,6 +22,7 @@ export 'models/manifest.dart';
 export 'models/location.dart';
 export 'models/sector.dart';
 export 'models/route.dart';
+export 'models/qr_code.dart';
 export 'models/climb.dart';
 export 'models/session.dart';
 export 'models/tag.dart';

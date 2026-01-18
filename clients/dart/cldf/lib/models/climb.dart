@@ -26,6 +26,7 @@ class Climb {
     this.clid,
     this.sessionId,
     this.routeId,
+    this.routeClid,
     required this.date,
     this.time,
     this.routeName,
@@ -65,8 +66,11 @@ class Climb {
   /// Reference to session
   final int? sessionId;
 
-  /// Reference to route by ID
+  /// Reference to route by ID (internal file reference)
   final int? routeId;
+
+  /// CrushLog ID of the route - globally unique identifier for server matching (v1.4.0+)
+  final String? routeClid;
 
   /// Date of the climb (YYYY-MM-DD)
   @JsonKey(fromJson: _dateFromJson, toJson: _dateToJson)

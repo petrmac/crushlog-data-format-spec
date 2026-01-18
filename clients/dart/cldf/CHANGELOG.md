@@ -1,5 +1,20 @@
 # Changelog
 
+## 1.4.9
+
+### Added
+- **Route CLID in Climb** - Climb model now includes `routeClid` field for globally unique route identification
+  - Enables server-side route matching across different CLDF archives
+  - Uses CLID v1 format: `clid:v1:route:<uuid>`
+- **QR Code Support for Routes** - New `QrCode` model for physical route marking
+  - Supports QR code data, public URLs, IPFS hashes, and blockchain transaction references
+  - Route model now includes optional `qrCode` field
+- **Route Timestamps** - Route model now includes `createdAt` and `updatedAt` fields for tracking route history
+- **Session Custom Fields** - Schema now supports `customFields` on Session model for extensibility
+
+### Changed
+- `routeId` field documentation clarified as "internal file reference" to distinguish from `routeClid`
+
 ## 1.4.8
 
 ### Added

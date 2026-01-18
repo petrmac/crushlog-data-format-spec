@@ -4,6 +4,7 @@ import 'enums/protection_rating.dart';
 import 'enums/route_type.dart';
 import 'enums/route_characteristics.dart';
 import 'media/media.dart';
+import 'qr_code.dart';
 
 part 'route.g.dart';
 
@@ -29,6 +30,9 @@ class Route {
     this.gearNotes,
     this.tags,
     this.media,
+    this.qrCode,
+    this.createdAt,
+    this.updatedAt,
     this.customFields,
   });
 
@@ -85,6 +89,15 @@ class Route {
 
   /// Media associated with this route (topos, beta videos, etc.)
   final Media? media;
+
+  /// QR code data for physical route marking (v1.3.0+)
+  final QrCode? qrCode;
+
+  /// When the route was created
+  final DateTime? createdAt;
+
+  /// When the route was last updated
+  final DateTime? updatedAt;
 
   /// Custom fields
   final Map<String, dynamic>? customFields;

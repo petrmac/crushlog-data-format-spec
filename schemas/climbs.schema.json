@@ -63,7 +63,12 @@
         },
         "routeId": {
           "type": "integer",
-          "description": "Reference to the route definition"
+          "description": "Reference to the route definition (internal file reference)"
+        },
+        "routeClid": {
+          "type": "string",
+          "pattern": "^clid:v\\d+:route:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "description": "CrushLog ID of the route - globally unique identifier for server matching (v1.4.0+)"
         },
         "date": {
           "type": "string",

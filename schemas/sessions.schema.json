@@ -115,6 +115,11 @@
           "type": "boolean",
           "default": false,
           "description": "Whether the session is currently ongoing"
+        },
+        "customFields": {
+          "type": "object",
+          "description": "Additional custom fields for session-specific data",
+          "additionalProperties": true
         }
       }
     },
