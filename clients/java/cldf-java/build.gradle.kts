@@ -56,6 +56,9 @@ dependencies {
     testImplementation("org.spockframework:spock-core:${libVersions["spock"]}")
     testImplementation("org.apache.groovy:groovy:${libVersions["groovy"]}")
     testImplementation("org.mockito:mockito-core:${libVersions["mockito"]}")
+
+    // JUnit Platform Launcher required for Gradle 9.x
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     
     // ===== TEST COMPILE-ONLY DEPENDENCIES =====
     // Lombok for tests

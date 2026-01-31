@@ -244,8 +244,93 @@ class ClimbSpec extends Specification {
 		!climb.isRepeat
 		climb.sessionId == null
 		climb.routeId == null
+		climb.routeClid == null
 		climb.time == null
 		climb.belayType == null
+	}
+
+	def "should serialize and deserialize routeClid field"() {
+		given: "a climb with routeClid"
+		def routeClid = "clid:v1:route:12345678-1234-1234-1234-123456789abc"
+		def climb = Climb.builder()
+				.id(1)
+				.date(LocalDate.of(2024, 1, 15))
+				.routeName("Test Route")
+				.routeId(123)
+				.routeClid(routeClid)
+				.type(ClimbType.BOULDER)
+				.finishType(FinishType.FLASH)
+				.build()
+
+		when: "serializing to JSON"
+		def json = objectMapper.writeValueAsString(climb)
+
+		then: "JSON contains routeClid"
+		json.contains('"routeClid":"clid:v1:route:12345678-1234-1234-1234-123456789abc"')
+	}
+
+	def "should deserialize climb with routeClid from JSON"() {
+		given: "JSON with routeClid field"
+		def json = '''
+            {
+                "id": 1,
+                "sessionId": 1,
+                "routeId": 123,
+                "routeClid": "clid:v1:route:12345678-1234-1234-1234-123456789abc",
+                "date": "2024-01-15",
+                "routeName": "Test Boulder",
+                "type": "boulder",
+                "finishType": "flash",
+                "attempts": 1
+            }
+        '''
+
+		when: "deserializing from JSON"
+		def climb = objectMapper.readValue(json, Climb)
+
+		then: "routeClid is correctly deserialized"
+		climb.id == 1
+		climb.routeId == 123
+		climb.routeClid == "clid:v1:route:12345678-1234-1234-1234-123456789abc"
+		climb.routeName == "Test Boulder"
+	}
+
+	def "should deserialize ClimbsFile with routeClid"() {
+		given: "ClimbsFile JSON with routeClid in climbs"
+		def json = '''
+            {
+                "climbs": [
+                    {
+                        "id": 1,
+                        "routeId": 100,
+                        "routeClid": "clid:v1:route:aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+                        "date": "2024-01-15",
+                        "routeName": "Route One",
+                        "type": "route",
+                        "finishType": "redpoint",
+                        "attempts": 1
+                    },
+                    {
+                        "id": 2,
+                        "routeId": 200,
+                        "routeClid": "clid:v1:route:11111111-2222-3333-4444-555555555555",
+                        "date": "2024-01-16",
+                        "routeName": "Route Two",
+                        "type": "boulder",
+                        "finishType": "flash",
+                        "attempts": 2
+                    }
+                ]
+            }
+        '''
+
+		when: "deserializing ClimbsFile"
+		def climbsFile = objectMapper.readValue(json, ClimbsFile)
+
+		then: "routeClid is preserved for all climbs"
+		climbsFile.climbs.size() == 2
+		climbsFile.climbs[0].routeClid == "clid:v1:route:aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
+		climbsFile.climbs[1].routeClid == "clid:v1:route:11111111-2222-3333-4444-555555555555"
 	}
 
 	def "should create ClimbsFile with climbs"() {

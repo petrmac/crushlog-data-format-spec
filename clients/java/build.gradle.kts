@@ -12,7 +12,7 @@ plugins {
 // Configure IDEA plugin for root project
 idea {
     project {
-        setLanguageLevel("JDK_21")
+        setLanguageLevel("JDK_25")
         vcs = "Git"
     }
     module {
@@ -29,8 +29,8 @@ sonar {
         property("sonar.projectName", "CrushLog Data Format - Java")
         property("sonar.projectVersion", version.toString())
         property("sonar.sourceEncoding", "UTF-8")
-        property("sonar.java.source", "21")
-        property("sonar.java.target", "21")
+        property("sonar.java.source", "25")
+        property("sonar.java.target", "25")
         property("sonar.coverage.jacoco.xmlReportPaths", "**/build/reports/jacoco/test/jacocoTestReport.xml")
         property("sonar.junit.reportPaths", "**/build/test-results/test")
     }
@@ -57,7 +57,8 @@ tasks.named("sonar") {
 
 allprojects {
     group = "app.crushlog"
-    version = "1.0.6"
+    // Version 1.1.0: Upgrade to json-schema-validator 2.0.0 for MCP SDK compatibility
+    version = "1.1.0"
 }
 
 // Centralized version catalog for all modules
@@ -73,13 +74,14 @@ val libVersions by extra {
         "neo4jCypherDsl" to "2024.0.0",
         
         // Validation and utilities
-        "jsonSchemaValidator" to "1.3.3",
+        // Version 2.0.0+ required for MCP SDK compatibility (uses Dialects class)
+        "jsonSchemaValidator" to "2.0.0",
         "commonsCompress" to "1.26.1",
         "zxing" to "3.5.2",
         
-        // Testing
-        "spock" to "2.4-M1-groovy-4.0",
-        "groovy" to "4.0.21",
+        // Testing (Groovy 4.0.27+ required for Java 25 support)
+        "spock" to "2.4-M4-groovy-4.0",
+        "groovy" to "4.0.29",
         "mockito" to "5.11.0",
         "assertj" to "3.25.1",
         "jmh" to "1.37"
@@ -94,8 +96,8 @@ subprojects {
     apply(plugin = "org.sonarqube")
     
     configure<JavaPluginExtension> {
-        sourceCompatibility = JavaVersion.VERSION_21
-        targetCompatibility = JavaVersion.VERSION_21
+        sourceCompatibility = JavaVersion.VERSION_25
+        targetCompatibility = JavaVersion.VERSION_25
     }
     
     repositories {
@@ -115,9 +117,9 @@ subprojects {
         }
     }
     
-    // Ensure Lombok version consistency
+    // Ensure Lombok version consistency (1.18.40+ required for Java 25)
     configure<io.freefair.gradle.plugins.lombok.LombokExtension> {
-        version.set("1.18.32")
+        version.set("1.18.40")
     }
     
     // Configure annotation processing

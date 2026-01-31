@@ -6,15 +6,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.networknt.schema.JsonSchema;
-import com.networknt.schema.JsonSchemaFactory;
-import com.networknt.schema.SchemaValidatorsConfig;
-import com.networknt.schema.SpecVersion;
-import com.networknt.schema.ValidationMessage;
+import com.networknt.schema.Error;
+import com.networknt.schema.InputFormat;
+import com.networknt.schema.Schema;
+import com.networknt.schema.SchemaRegistry;
+import com.networknt.schema.dialect.BasicDialectRegistry;
+import com.networknt.schema.dialect.Dialects;
 import lombok.extern.slf4j.Slf4j;
 
 /** Validates JSON data against CLDF schemas using the NetworkNT JSON Schema Validator. */
@@ -22,7 +22,23 @@ import lombok.extern.slf4j.Slf4j;
 public class SchemaValidator {
 
   private static final String DEFAULT_SCHEMAS_BASE_PATH = "/schemas/";
+  private static final String SCHEMA_URL_PREFIX = "https://cldf.io/schemas/";
   private static final Map<String, String> FILE_TO_SCHEMA_MAPPING = new HashMap<>();
+
+  // Schema files that may be referenced via $ref
+  private static final String[] ALL_SCHEMA_FILES = {
+      "manifest.schema.json",
+      "locations.schema.json",
+      "climbs.schema.json",
+      "sessions.schema.json",
+      "routes.schema.json",
+      "sectors.schema.json",
+      "tags.schema.json",
+      "media-metadata.schema.json",
+      "media.schema.json",
+      "checksums.schema.json",
+      "definitions.schema.json" // Common definitions referenced by other schemas
+  };
 
   private final String schemasBasePath;
 
@@ -39,8 +55,8 @@ public class SchemaValidator {
   }
 
   private final ObjectMapper objectMapper;
-  private final JsonSchemaFactory schemaFactory;
-  private final Map<String, JsonSchema> schemaCache;
+  private final SchemaRegistry schemaRegistry;
+  private final Map<String, Schema> schemaCache;
 
   public SchemaValidator() {
     this(DEFAULT_SCHEMAS_BASE_PATH);
@@ -57,18 +73,42 @@ public class SchemaValidator {
     // Configure to write dates as strings, not arrays
     this.objectMapper.disable(
         com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-    // Create schema factory with custom config to disable network fetching
-    SchemaValidatorsConfig config = new SchemaValidatorsConfig();
-    config.setHandleNullableField(true);
-    this.schemaFactory =
-        JsonSchemaFactory.getInstance(
-            SpecVersion.VersionFlag.V7,
-            builder ->
-                builder.schemaMappers(
-                    schemaMappers ->
-                        schemaMappers.mapPrefix(
-                            "https://cldf.io/schemas/", "classpath:/schemas/")));
+
+    // Pre-load all schemas to map URLs to classpath resources
+    Map<String, String> schemaResources = loadAllSchemas(schemasBasePath);
+
+    // Create schema registry with Draft 7 dialect and URL mapping (json-schema-validator 2.0.0+)
+    this.schemaRegistry = SchemaRegistry.builder()
+        .defaultDialectId("http://json-schema.org/draft-07/schema#")
+        .dialectRegistry(new BasicDialectRegistry(Dialects.getDraft7()))
+        .schemaLoader(loader -> loader
+            .resourceLoaders(resources -> resources
+                .resources(schemaResources)))
+        .build();
     this.schemaCache = new HashMap<>();
+  }
+
+  /**
+   * Load all schema files from classpath and map them to their URL identifiers.
+   */
+  private Map<String, String> loadAllSchemas(String basePath) {
+    Map<String, String> schemas = new HashMap<>();
+    for (String schemaFile : ALL_SCHEMA_FILES) {
+      String resourcePath = basePath + schemaFile;
+      try (InputStream is = getClass().getResourceAsStream(resourcePath)) {
+        if (is != null) {
+          String content = new String(is.readAllBytes());
+          // Map both the full URL and just the filename
+          schemas.put(SCHEMA_URL_PREFIX + schemaFile, content);
+          log.debug("Loaded schema: {} -> {}", SCHEMA_URL_PREFIX + schemaFile, schemaFile);
+        } else {
+          log.debug("Schema not found in classpath: {}", resourcePath);
+        }
+      } catch (IOException e) {
+        log.warn("Failed to load schema: {}", resourcePath, e);
+      }
+    }
+    return schemas;
   }
 
   /**
@@ -87,20 +127,20 @@ public class SchemaValidator {
         return ValidationResult.success(filename); // Allow unknown files
       }
 
-      JsonSchema schema = loadSchema(schemaFile);
+      Schema schema = loadSchema(schemaFile);
       JsonNode jsonNode = objectMapper.readTree(jsonContent);
 
-      Set<ValidationMessage> errors = schema.validate(jsonNode);
+      List<Error> errors = schema.validate(jsonNode);
 
       if (errors.isEmpty()) {
         return ValidationResult.success(filename);
       }
 
       List<ValidationResult.ValidationError> validationErrors = new ArrayList<>();
-      for (ValidationMessage error : errors) {
+      for (Error error : errors) {
         validationErrors.add(
             new ValidationResult.ValidationError(
-                error.getInstanceLocation().toString(), error.getMessage(), error.getType()));
+                error.getInstanceLocation().toString(), error.getMessage(), error.getKeyword()));
       }
 
       return ValidationResult.failure(filename, validationErrors);
@@ -137,7 +177,7 @@ public class SchemaValidator {
     }
   }
 
-  private JsonSchema loadSchema(String schemaFile) throws IOException {
+  private Schema loadSchema(String schemaFile) throws IOException {
     if (schemaCache.containsKey(schemaFile)) {
       return schemaCache.get(schemaFile);
     }
@@ -148,17 +188,10 @@ public class SchemaValidator {
       if (is == null) {
         throw new IOException("Schema not found: " + resourcePath);
       }
-      JsonNode schemaNode = objectMapper.readTree(is);
+      String schemaContent = new String(is.readAllBytes());
 
-      // Create config that maps the schema ID URLs to classpath resources
-      SchemaValidatorsConfig config = new SchemaValidatorsConfig();
-      config.setHandleNullableField(true);
-      config.setTypeLoose(false);
-      // Don't fail on fields that have default values
-      config.setReadOnly(false);
-      config.setWriteOnly(false);
-
-      JsonSchema schema = schemaFactory.getSchema(schemaNode, config);
+      // Create schema from content (json-schema-validator 2.0.0+)
+      Schema schema = schemaRegistry.getSchema(schemaContent, InputFormat.JSON);
       schemaCache.put(schemaFile, schema);
       return schema;
     }

@@ -5,6 +5,24 @@ All notable changes to the CLDF Java client library and CLI tool will be documen
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-01-31
+
+### Changed
+- **BREAKING: json-schema-validator 2.0.0** - Upgraded from 1.3.3 to 2.0.0 for compatibility with MCP SDK 0.17.0+
+  - `SchemaValidator` class rewritten to use new API (`SchemaRegistry` instead of `JsonSchemaFactory`)
+  - Schema `$ref` URLs are now pre-loaded and mapped to classpath resources
+  - This is a transitive dependency change - consumers should not be affected unless directly using json-schema-validator APIs
+- **Java 25 Support** - Upgraded toolchain to support Java 25
+- **Gradle 9.3.0** - Upgraded from Gradle 8.14.2 for Java 25 compatibility
+- **Lombok 1.18.40** - Upgraded from 1.18.32 for Java 25 compatibility
+- **Groovy 4.0.29** - Upgraded from 4.0.21 for Java 25 class file version support
+- **Spock 2.4-M4** - Upgraded from 2.4-M1 for compatibility with updated Groovy
+
+### Technical Notes
+- MCP SDK 0.17.0 requires `com.networknt.schema.dialect.Dialects` class which was introduced in json-schema-validator 2.0.0
+- The previous json-schema-validator 1.x API used `JsonSchemaFactory` and `JsonSchema` classes
+- The new 2.0.0 API uses `SchemaRegistry` and `Schema` classes with a builder pattern
+
 ## [1.0.6] - 2026-01-18
 
 ### Added
@@ -137,9 +155,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Version History
 
+- `1.1.0` - json-schema-validator 2.0.0 upgrade for MCP SDK compatibility, Java 25 support
+- `1.0.6` - Route CLID in Climb, QR Code support
+- `1.0.5` - Location CLID in Session, boolean field marshalling fixes
+- `1.0.4` - Unified Media Model
 - `1.0.0` - Initial stable release (planned)
-- `0.9.0` - Beta release (planned)
-- `0.1.0` - Alpha release (planned)
 
-[Unreleased]: https://github.com/cldf/cldf-java/compare/v1.0.0...HEAD
-[1.0.0]: https://github.com/cldf/cldf-java/releases/tag/v1.0.0
+[Unreleased]: https://github.com/petrmac/crushlog-data-format-spec/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/petrmac/crushlog-data-format-spec/releases/tag/v1.1.0
+[1.0.6]: https://github.com/petrmac/crushlog-data-format-spec/releases/tag/v1.0.6
+[1.0.5]: https://github.com/petrmac/crushlog-data-format-spec/releases/tag/v1.0.5
+[1.0.4]: https://github.com/petrmac/crushlog-data-format-spec/releases/tag/v1.0.4
+[1.0.0]: https://github.com/petrmac/crushlog-data-format-spec/releases/tag/v1.0.0

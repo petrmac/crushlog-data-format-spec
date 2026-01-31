@@ -1,7 +1,6 @@
 plugins {
     id("io.micronaut.application") version "4.3.5"
     id("io.micronaut.graalvm") version "4.3.5"
-    id("com.diffplug.spotless") version "6.25.0"
     groovy
     id("io.freefair.lombok") version "8.6"
     id("idea")
@@ -195,16 +194,6 @@ tasks.withType<JavaCompile> {
     ))
 }
 
-spotless {
-    java {
-        target("src/*/java/**/*.java")
-        googleJavaFormat("1.22.0")
-        removeUnusedImports()
-        trimTrailingWhitespace()
-        endWithNewline()
-        importOrder("java", "javax", "jakarta", "", "\\#")
-    }
-}
 
 // Configure IDEA plugin for better Lombok support
 idea {
@@ -215,9 +204,9 @@ idea {
     }
 }
 
-// Configure Lombok for better IDE support
+// Configure Lombok for better IDE support (1.18.40+ required for Java 25)
 configure<io.freefair.gradle.plugins.lombok.LombokExtension> {
-    version.set("1.18.32")
+    version.set("1.18.40")
 }
 
 // Configure the application plugin's built-in tasks
