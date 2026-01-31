@@ -27,17 +27,17 @@ public class SchemaValidator {
 
   // Schema files that may be referenced via $ref
   private static final String[] ALL_SCHEMA_FILES = {
-      "manifest.schema.json",
-      "locations.schema.json",
-      "climbs.schema.json",
-      "sessions.schema.json",
-      "routes.schema.json",
-      "sectors.schema.json",
-      "tags.schema.json",
-      "media-metadata.schema.json",
-      "media.schema.json",
-      "checksums.schema.json",
-      "definitions.schema.json" // Common definitions referenced by other schemas
+    "manifest.schema.json",
+    "locations.schema.json",
+    "climbs.schema.json",
+    "sessions.schema.json",
+    "routes.schema.json",
+    "sectors.schema.json",
+    "tags.schema.json",
+    "media-metadata.schema.json",
+    "media.schema.json",
+    "checksums.schema.json",
+    "definitions.schema.json" // Common definitions referenced by other schemas
   };
 
   private final String schemasBasePath;
@@ -78,13 +78,13 @@ public class SchemaValidator {
     Map<String, String> schemaResources = loadAllSchemas(schemasBasePath);
 
     // Create schema registry with Draft 7 dialect and URL mapping (json-schema-validator 2.0.0+)
-    this.schemaRegistry = SchemaRegistry.builder()
-        .defaultDialectId("http://json-schema.org/draft-07/schema#")
-        .dialectRegistry(new BasicDialectRegistry(Dialects.getDraft7()))
-        .schemaLoader(loader -> loader
-            .resourceLoaders(resources -> resources
-                .resources(schemaResources)))
-        .build();
+    this.schemaRegistry =
+        SchemaRegistry.builder()
+            .defaultDialectId("http://json-schema.org/draft-07/schema#")
+            .dialectRegistry(new BasicDialectRegistry(Dialects.getDraft7()))
+            .schemaLoader(
+                loader -> loader.resourceLoaders(resources -> resources.resources(schemaResources)))
+            .build();
     this.schemaCache = new HashMap<>();
   }
 
