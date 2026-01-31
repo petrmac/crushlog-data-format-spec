@@ -3,7 +3,6 @@ plugins {
     groovy
     `maven-publish`
     signing
-    id("com.diffplug.spotless") version "6.25.0"
     id("io.freefair.lombok") version "8.6"
     id("idea")
 }
@@ -170,23 +169,6 @@ tasks.withType<Sign> {
         (gradle.taskGraph.hasTask(":publishToSonatype") || 
          gradle.taskGraph.hasTask(":cldf-java:publishMavenPublicationToSonatypeRepository") ||
          gradle.taskGraph.hasTask(":cldf-java:publishAllPublicationsToSonatypeRepository"))
-    }
-}
-
-spotless {
-    java {
-        target("src/*/java/**/*.java")
-        googleJavaFormat("1.22.0")
-        removeUnusedImports()
-        trimTrailingWhitespace()
-        endWithNewline()
-        importOrder("java", "javax", "", "\\#")
-    }
-    groovy {
-        target("src/*/groovy/**/*.groovy")
-        greclipse()
-        trimTrailingWhitespace()
-        endWithNewline()
     }
 }
 
