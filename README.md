@@ -861,7 +861,7 @@ The Java client library provides full support for reading and writing CLDF archi
 
 **Installation (Gradle):**
 ```gradle
-implementation 'io.cldf:cldf-java:1.3.0'
+implementation 'io.cldf:cldf-java:1.2.0'
 ```
 
 **Quick Example:**

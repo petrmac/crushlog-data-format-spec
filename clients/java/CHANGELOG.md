@@ -5,6 +5,23 @@ All notable changes to the CLDF Java client library and CLI tool will be documen
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2026-04-05
+
+### Added
+- **`SchemaValidator.shared()`** — process-wide lazily-initialized shared validator instance. Each `SchemaValidator` constructor is expensive (Jackson `findAndRegisterModules()` classpath scan + full NetworkNT `SchemaRegistry` build), so repeated instantiation accumulates class metadata in JVM Metaspace. The shared instance is thread-safe and should be preferred in long-running applications.
+- **`CLDFWriter(boolean, boolean, SchemaValidator)`** constructor — allows injecting a custom `SchemaValidator` (e.g. for tests or custom schema base paths).
+- **`CLDFReader(boolean, boolean, SchemaValidator)`** constructor — same injection support for readers.
+
+### Changed
+- `CLDFWriter(boolean, boolean)` and `CLDFReader(boolean, boolean)` now delegate to `SchemaValidator.shared()` when schema validation is enabled (previously each constructor called `new SchemaValidator()`). This fixes JVM Metaspace pressure observed in consumers that create many writers/readers per request (e.g. sync export services). **No behavior change** for single-use or one-per-JVM usage.
+- `SchemaValidator.schemaCache` is now a `ConcurrentHashMap` to support safe concurrent access from the shared instance. Prior to 1.2.0 the cache was a plain `HashMap`, which was safe only for single-threaded use.
+
+### Fixed
+- Repeated `new CLDFWriter()` / `new CLDFReader()` calls no longer cause Metaspace growth. Each validator previously loaded Jackson modules via `ServiceLoader` and built a fresh `SchemaRegistry`, accumulating class metadata that contributed to `OutOfMemoryError: Metaspace` in long-running processes performing frequent CLDF I/O.
+
+### Migration Guide
+No migration needed — this release is fully backwards compatible. However, application code that constructs many `CLDFWriter`/`CLDFReader` instances (e.g. per-request export handlers) will automatically benefit from the shared validator. For maximum benefit in high-throughput scenarios, construct `CLDFWriter`/`CLDFReader` as singletons/beans in your DI container.
+
 ## [1.1.0] - 2026-01-31
 
 ### Changed

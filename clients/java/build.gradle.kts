@@ -58,7 +58,7 @@ tasks.named("sonar") {
 allprojects {
     group = "app.crushlog"
     // Version 1.1.0: Upgrade to json-schema-validator 2.0.0 for MCP SDK compatibility
-    version = "1.1.0"
+    version = "1.2.0"
 }
 
 // Centralized version catalog for all modules

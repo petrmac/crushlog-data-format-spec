@@ -44,13 +44,36 @@ public class CLDFReader {
   /**
    * Creates a CLDFReader with specified validation settings.
    *
+   * <p>When {@code validateSchemas} is {@code true}, uses the shared
+   * {@link SchemaValidator#shared()} instance to avoid repeated classpath scanning and
+   * schema registry construction. Callers needing an isolated validator (e.g. for tests
+   * or custom schema paths) should use {@link #CLDFReader(boolean, boolean, SchemaValidator)}.
+   *
    * @param validateChecksums whether to validate file checksums
    * @param validateSchemas whether to validate JSON schemas
    */
   public CLDFReader(boolean validateChecksums, boolean validateSchemas) {
+    this(validateChecksums, validateSchemas, validateSchemas ? SchemaValidator.shared() : null);
+  }
+
+  /**
+   * Creates a CLDFReader with an explicit {@link SchemaValidator}.
+   *
+   * <p>Use this constructor to inject a custom validator — for example, a validator with
+   * a custom schema base path, or an isolated instance in tests. In normal application
+   * code, prefer {@link #CLDFReader(boolean, boolean)} which uses the shared validator.
+   *
+   * @param validateChecksums whether to validate file checksums
+   * @param validateSchemas whether to validate JSON schemas; when {@code false},
+   *     {@code schemaValidator} is ignored and may be {@code null}
+   * @param schemaValidator the validator to use when {@code validateSchemas} is true;
+   *     may be {@code null} only if {@code validateSchemas} is {@code false}
+   */
+  public CLDFReader(
+      boolean validateChecksums, boolean validateSchemas, SchemaValidator schemaValidator) {
     this.validateChecksums = validateChecksums;
     this.validateSchemas = validateSchemas;
-    this.schemaValidator = validateSchemas ? new SchemaValidator() : null;
+    this.schemaValidator = validateSchemas ? schemaValidator : null;
     this.objectMapper = new ObjectMapper();
     this.objectMapper.registerModule(new JavaTimeModule());
   }

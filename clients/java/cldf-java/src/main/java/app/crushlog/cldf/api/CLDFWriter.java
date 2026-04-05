@@ -63,12 +63,34 @@ public class CLDFWriter {
   /**
    * Creates a CLDFWriter with specified formatting and validation settings.
    *
+   * <p>When {@code validateSchemas} is {@code true}, uses the shared
+   * {@link SchemaValidator#shared()} instance to avoid repeated classpath scanning and
+   * schema registry construction. Callers needing an isolated validator (e.g. for tests
+   * or custom schema paths) should use {@link #CLDFWriter(boolean, boolean, SchemaValidator)}.
+   *
    * @param prettyPrint whether to enable pretty printing for JSON files
    * @param validateSchemas whether to validate JSON schemas before writing
    */
   public CLDFWriter(boolean prettyPrint, boolean validateSchemas) {
+    this(prettyPrint, validateSchemas, validateSchemas ? SchemaValidator.shared() : null);
+  }
+
+  /**
+   * Creates a CLDFWriter with an explicit {@link SchemaValidator}.
+   *
+   * <p>Use this constructor to inject a custom validator — for example, a validator with
+   * a custom schema base path, or an isolated instance in tests. In normal application
+   * code, prefer {@link #CLDFWriter(boolean, boolean)} which uses the shared validator.
+   *
+   * @param prettyPrint whether to enable pretty printing for JSON files
+   * @param validateSchemas whether to validate JSON schemas before writing; when
+   *     {@code false}, {@code schemaValidator} is ignored and may be {@code null}
+   * @param schemaValidator the validator to use when {@code validateSchemas} is true;
+   *     may be {@code null} only if {@code validateSchemas} is {@code false}
+   */
+  public CLDFWriter(boolean prettyPrint, boolean validateSchemas, SchemaValidator schemaValidator) {
     this.validateSchemas = validateSchemas;
-    this.schemaValidator = validateSchemas ? new SchemaValidator() : null;
+    this.schemaValidator = validateSchemas ? schemaValidator : null;
     this.clidService = new CLIDService();
     this.objectMapper = new ObjectMapper();
     this.objectMapper.registerModule(new JavaTimeModule());

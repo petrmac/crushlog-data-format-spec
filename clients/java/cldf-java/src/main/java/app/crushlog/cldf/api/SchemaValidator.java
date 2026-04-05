@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -58,6 +59,36 @@ public class SchemaValidator {
   private final SchemaRegistry schemaRegistry;
   private final Map<String, Schema> schemaCache;
 
+  /**
+   * Lazily-initialized shared instance, holder-idiom for thread-safe initialization.
+   *
+   * <p>{@code SchemaValidator} is expensive to construct: its constructor performs a
+   * Jackson module {@code findAndRegisterModules()} classpath scan and builds a full
+   * NetworkNT {@code SchemaRegistry}. Each fresh instance adds class metadata to
+   * {@code Metaspace}, so callers that create many writers/readers (e.g. per-request
+   * export services) should prefer {@link #shared()} over {@code new SchemaValidator()}.
+   */
+  private static final class SharedHolder {
+    static final SchemaValidator INSTANCE = new SchemaValidator();
+  }
+
+  /**
+   * Returns a lazily-initialized, thread-safe shared {@code SchemaValidator} instance.
+   *
+   * <p>Prefer this over {@code new SchemaValidator()} in application code — constructing
+   * a validator is expensive (Jackson classpath scan, JSON-Schema registry build) and
+   * repeated construction contributes to JVM {@code Metaspace} pressure.
+   *
+   * <p>The shared instance is safe to call concurrently from multiple threads. Its
+   * internal state (Jackson {@code ObjectMapper}, NetworkNT {@code SchemaRegistry},
+   * and {@code schemaCache}) is read-mostly and guarded where needed.
+   *
+   * @return the process-wide shared validator using the default classpath schemas
+   */
+  public static SchemaValidator shared() {
+    return SharedHolder.INSTANCE;
+  }
+
   public SchemaValidator() {
     this(DEFAULT_SCHEMAS_BASE_PATH);
   }
@@ -85,7 +116,10 @@ public class SchemaValidator {
             .schemaLoader(
                 loader -> loader.resourceLoaders(resources -> resources.resources(schemaResources)))
             .build();
-    this.schemaCache = new HashMap<>();
+    // ConcurrentHashMap so the shared instance can be hit safely from multiple threads.
+    // The get-then-put race in loadSchema() is benign: two threads may redundantly parse
+    // the same schema; the second put replaces the first with an equivalent Schema.
+    this.schemaCache = new ConcurrentHashMap<>();
   }
 
   /**
