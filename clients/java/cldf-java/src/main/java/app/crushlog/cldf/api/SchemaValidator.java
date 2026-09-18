@@ -2,13 +2,13 @@ package app.crushlog.cldf.api;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.networknt.schema.Error;
 import com.networknt.schema.InputFormat;
@@ -17,6 +17,7 @@ import com.networknt.schema.SchemaRegistry;
 import com.networknt.schema.dialect.BasicDialectRegistry;
 import com.networknt.schema.dialect.Dialects;
 import lombok.extern.slf4j.Slf4j;
+import tools.jackson.core.JacksonException;
 
 /** Validates JSON data against CLDF schemas using the NetworkNT JSON Schema Validator. */
 @Slf4j
@@ -162,9 +163,10 @@ public class SchemaValidator {
       }
 
       Schema schema = loadSchema(schemaFile);
-      JsonNode jsonNode = objectMapper.readTree(jsonContent);
-
-      List<Error> errors = schema.validate(jsonNode);
+      // json-schema-validator 3.x validates Jackson 3 trees only; hand it the raw JSON text so this
+      // class keeps its Jackson 2 ObjectMapper for the model side and stays off the Jackson 3 API.
+      List<Error> errors =
+          schema.validate(new String(jsonContent, StandardCharsets.UTF_8), InputFormat.JSON);
 
       if (errors.isEmpty()) {
         return ValidationResult.success(filename);
@@ -178,8 +180,8 @@ public class SchemaValidator {
       }
 
       return ValidationResult.failure(filename, validationErrors);
-    } catch (IOException e) {
-      // If we can't parse the JSON or load the schema, return a failure
+    } catch (IOException | JacksonException e) {
+      // IOException: the schema resource is missing; JacksonException: the content is not valid JSON
       return ValidationResult.failure(
           filename,
           List.of(
