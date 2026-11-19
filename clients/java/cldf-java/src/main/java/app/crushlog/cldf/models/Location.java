@@ -1,6 +1,7 @@
 package app.crushlog.cldf.models;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.Map;
 
 import app.crushlog.cldf.models.enums.RockType;
@@ -58,6 +59,9 @@ public class Location {
   private OffsetDateTime createdAt;
 
   private Map<String, Object> customFields;
+
+  /** Grading scales used at this location, such as a gym's numbered or coloured levels. */
+  private List<GradeScale> gradeScales;
 
   /** Geographic coordinates for a location. */
   @Data

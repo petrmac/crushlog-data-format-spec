@@ -1,5 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 
+import '../utils/grade_axis.dart';
 import '../utils/local_date_converter.dart';
 import 'enums/belay_type.dart';
 import 'enums/climb_type.dart';
@@ -7,6 +8,7 @@ import 'enums/finish_type.dart';
 import 'enums/grade_system.dart';
 import 'enums/rock_type.dart';
 import 'enums/terrain_type.dart';
+import 'grade_scale.dart';
 import 'media/media.dart';
 
 part 'climb.g.dart';
@@ -156,7 +158,14 @@ class Climb {
 @JsonSerializable(includeIfNull: false)
 class GradeInfo {
   /// Creates a new [GradeInfo] instance
-  GradeInfo({required this.system, required this.grade, this.conversions});
+  GradeInfo({
+    required this.system,
+    required this.grade,
+    this.conversions,
+    this.numeric,
+    this.estimated,
+    this.scale,
+  });
 
   /// Creates a [GradeInfo] from JSON
   factory GradeInfo.fromJson(Map<String, dynamic> json) =>
@@ -170,6 +179,23 @@ class GradeInfo {
 
   /// Grade conversions to other systems
   final Map<String, String>? conversions;
+
+  /// The grade's value on the difficulty axis, when the archive carries it.
+  /// Use [effectiveNumeric] to also cover archives that do not.
+  final int? numeric;
+
+  /// True when the grade was derived from a level of a grading scale and
+  /// not read off the climb.
+  final bool? estimated;
+
+  /// The level of a grading scale this climb was logged on.
+  final GradeScaleRef? scale;
+
+  /// The grade's value on the difficulty axis: [numeric] when present,
+  /// otherwise computed from [system] and [grade]. Null when the grade is
+  /// not on its system's ladder.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  int? get effectiveNumeric => numeric ?? GradeAxis.numericFor(system, grade);
 
   /// Converts this [GradeInfo] to JSON
   Map<String, dynamic> toJson() => _$GradeInfoToJson(this);

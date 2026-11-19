@@ -5,6 +5,20 @@ All notable changes to the CLDF Java client library and CLI tool will be documen
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0] - Unreleased
+
+### Added
+- **`GradeAxis`** — gives every grade of the five grading systems its integer value on the format's difficulty axis (`numericFor`), and the nearest grade for a value (`gradeFor`). The tables are those of the CLDF 1.4.0 specification (`grades.md`).
+- **`Climb.GradeInfo`** — optional fields `numeric`, `estimated` and `scale` (`Climb.ScaleRef`). `effectiveNumeric()` returns `numeric` when the archive carries it and computes it from the grade otherwise.
+- **`Location.gradeScales`** — a location's grading scales (`GradeScale`, `GradeScale.Level`, `GradeScaleSpread`), such as a gym's numbered or coloured levels.
+
+### Changed
+- **`CLDFReader` ignores unknown JSON fields.** Up to 1.3.0 a field the models did not know made the whole archive unreadable (`UnrecognizedPropertyException`), so any optional field added to the format broke older readers. Schema validation, when enabled, still applies.
+
+### Compatibility
+- All new fields are optional; archives written by earlier versions read unchanged.
+- Versions up to 1.3.0 cannot read an archive that carries `numeric`, `estimated`, `scale` or `gradeScales`. Upgrade readers to 1.4.0 before any writer emits these fields.
+
 ## [1.2.0] - 2026-04-05
 
 ### Added

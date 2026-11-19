@@ -94,6 +94,73 @@
         "customFields": {
           "type": "object",
           "description": "Additional custom fields"
+        },
+        "gradeScales": {
+          "type": "array",
+          "description": "Grading scales used at this location, such as a gym's numbered or coloured levels (see grades.md)",
+          "items": {
+            "$ref": "#/definitions/gradeScale"
+          }
+        }
+      }
+    },
+    "gradeScale": {
+      "type": "object",
+      "description": "A ladder of levels, each starting at a grade on the difficulty axis",
+      "required": ["id", "levels", "updatedAt"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Globally unique id of the scale. Climbs refer to it in grades.scale.id."
+        },
+        "climbType": {
+          "type": "string",
+          "enum": ["boulder", "route"],
+          "description": "The kind of climb the scale grades. Boulder when absent."
+        },
+        "spread": {
+          "type": "string",
+          "enum": ["even", "widerTop"],
+          "description": "How the levels were laid out when the scale was created. Informational."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the scale last changed. Of two copies of a scale, the newer one wins."
+        },
+        "deletedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Set when the scale was removed. A removed scale stays listed so that climbs logged on it still resolve."
+        },
+        "levels": {
+          "type": "array",
+          "minItems": 1,
+          "description": "The levels, easiest first, with strictly increasing startNumeric",
+          "items": {
+            "type": "object",
+            "required": ["level", "startGrade", "startNumeric"],
+            "properties": {
+              "level": {
+                "type": "integer",
+                "minimum": 1,
+                "description": "Level number, from 1 (easiest)"
+              },
+              "startGrade": {
+                "type": "string",
+                "description": "The grade where the level starts: a Font grade for a boulder scale, a French grade for a route scale"
+              },
+              "startNumeric": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "The value of startGrade on the difficulty axis"
+              },
+              "color": {
+                "type": "string",
+                "description": "Optional colour of the level, as a name or a hex value"
+              }
+            }
+          }
         }
       }
     },

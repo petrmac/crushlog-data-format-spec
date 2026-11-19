@@ -100,6 +100,31 @@
               "additionalProperties": {
                 "type": "string"
               }
+            },
+            "numeric": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "The grade's value on the difficulty axis (see grades.md). When absent, readers compute it from system and grade."
+            },
+            "estimated": {
+              "type": "boolean",
+              "description": "True when the grade was derived from a level of a grading scale and not read off the climb"
+            },
+            "scale": {
+              "type": "object",
+              "description": "The level of a grading scale this climb was logged on. The scale is listed in gradeScales of the session's location.",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "The grading scale's id"
+                },
+                "level": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "description": "The level number within the scale, from 1 (easiest)"
+                }
+              },
+              "required": ["id", "level"]
             }
           },
           "required": ["system", "grade"]

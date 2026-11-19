@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.5.0
+
+### Added
+- **Difficulty axis** - `GradeAxis` gives every grade of the five grading systems its integer value on the format's difficulty axis (`numericFor`), and the nearest grade for a value (`gradeFor`). The tables are those of the CLDF 1.4.0 specification (`grades.md`).
+- **Grade value on a climb** - `GradeInfo` has the optional fields `numeric`, `estimated` and `scale`. `effectiveNumeric` returns `numeric` when the archive carries it and computes it from the grade otherwise.
+- **Grading scales** - `Location.gradeScales` lists a location's scales (`GradeScale`, `GradeScaleLevel`), such as a gym's numbered or coloured levels. `GradeScaleRef` on a climb's grades names the level the climb was logged on.
+
+### Compatibility
+- All new fields are optional. Archives written by earlier versions read unchanged, and an archive without the new fields is written exactly as before.
+- Archives that carry the new fields need Java client 1.4.0 or later on the reading side.
+
 ## 1.4.9
 
 ### Added

@@ -159,6 +159,14 @@ Strategy for exporting media.
 - `thumbnails` - Include thumbnails
 - `full` - Include full media files
 
+## Grading Scales
+
+### GradeScaleSpread
+How the levels of a grading scale were laid out when it was created (v1.4.0+). See [Grades](grades.md).
+
+- `even` - Every level covers the same number of grades
+- `widerTop` - The upper levels cover more grades than the lower ones
+
 ## Platform
 
 ### Platform

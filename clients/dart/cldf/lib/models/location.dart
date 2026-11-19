@@ -2,6 +2,7 @@ import 'package:json_annotation/json_annotation.dart';
 
 import 'enums/rock_type.dart';
 import 'enums/terrain_type.dart';
+import 'grade_scale.dart';
 import 'media/media.dart';
 
 part 'location.g.dart';
@@ -27,6 +28,7 @@ class Location {
     this.media,
     this.createdAt,
     this.customFields,
+    this.gradeScales,
   });
 
   /// Creates a [Location] from JSON
@@ -81,6 +83,10 @@ class Location {
 
   /// Custom fields
   final Map<String, dynamic>? customFields;
+
+  /// Grading scales used at this location, such as a gym's numbered or
+  /// coloured levels.
+  final List<GradeScale>? gradeScales;
 
   /// Converts this [Location] to JSON
   Map<String, dynamic> toJson() => _$LocationToJson(this);

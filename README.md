@@ -2,7 +2,7 @@
 
 # CrushLog Data Format (CLDF) Specification
 
-Version 1.3.0
+Version 1.4.0
 
 ## Overview
 
@@ -111,6 +111,7 @@ Defines climbing locations with geographical and characteristic information.
 - `starred` (boolean): Favorite indicator
 - `rockType` (string): Type of rock (enum)
 - `terrainType` (string): Terrain classification (enum)
+- `gradeScales` (array): Grading scales used at the location, such as a gym's levels (v1.4.0+, see [Grades](grades.md))
 
 [Full schema →](schemas/locations.schema.json)
 
@@ -185,7 +186,7 @@ Records individual climb attempts and completions.
 **Optional fields:**
 - `sessionId` (integer): Reference to session
 - `routeId` (integer): Reference to route
-- `grades` (object): Grade information
+- `grades` (object): Grade information. Besides `system` and `grade` it may carry `numeric`, `estimated` and `scale` (v1.4.0+, see [Grades](grades.md))
 - `attempts` (integer): Number of attempts
 - `rating` (integer): Quality rating (0-5)
 - `notes` (string): Personal notes
@@ -666,6 +667,10 @@ All `id` fields in CLDF use integer format for compatibility with SQLite databas
 - **YDS**: `5.0`-`5.15d`
 - **UIAA**: `I`-`XII`
 
+#### Difficulty axis and grading scales (v1.4.0+)
+
+Every grade has an integer value on a shared difficulty axis, and a location can describe a gym's own levels as a grading scale. The tables and rules are in [Grades, the Difficulty Axis and Grading Scales](grades.md).
+
 ### Enumerations
 
 See [Enumerations Reference](enums.md) for complete enum definitions.
@@ -855,13 +860,13 @@ The Java client library provides full support for reading and writing CLDF archi
 <dependency>
     <groupId>io.cldf</groupId>
     <artifactId>cldf-java</artifactId>
-    <version>1.3.0</version>
+    <version>1.4.0</version>
 </dependency>
 ```
 
 **Installation (Gradle):**
 ```gradle
-implementation 'io.cldf:cldf-java:1.2.0'
+implementation 'io.cldf:cldf-java:1.4.0'
 ```
 
 **Quick Example:**
@@ -886,7 +891,7 @@ The Dart client library provides type-safe models and full CLDF support for Dart
 **Installation:**
 ```yaml
 dependencies:
-  cldf: ^1.3.0
+  cldf: ^1.5.0
 ```
 
 **Quick Example:**
