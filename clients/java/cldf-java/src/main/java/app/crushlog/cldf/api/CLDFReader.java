@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import app.crushlog.cldf.models.*;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.extern.slf4j.Slf4j;
@@ -76,6 +77,8 @@ public class CLDFReader {
     this.schemaValidator = validateSchemas ? schemaValidator : null;
     this.objectMapper = new ObjectMapper();
     this.objectMapper.registerModule(new JavaTimeModule());
+    // A field added by a later version of the format must not make an archive unreadable.
+    this.objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
   }
 
   /**

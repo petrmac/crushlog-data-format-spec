@@ -16,6 +16,7 @@ export 'clid/models/validation_result.dart';
 // Utility exports
 export 'utils/date_time_converter.dart';
 export 'utils/local_date_converter.dart';
+export 'utils/grade_axis.dart';
 
 // Model exports
 export 'models/manifest.dart';
@@ -24,6 +25,7 @@ export 'models/sector.dart';
 export 'models/route.dart';
 export 'models/qr_code.dart';
 export 'models/climb.dart';
+export 'models/grade_scale.dart';
 export 'models/session.dart';
 export 'models/tag.dart';
 export 'models/media_metadata_item.dart';
